@@ -1,60 +1,270 @@
-# 貘nsters AI 開發規格包
+# 貘nsters（Monsters）
 
-本資料夾提供 Codex、Cursor Agent、GitHub Copilot Agent 或其他 AI Coding Agent 使用的專案規格文件。
+> 一套提供使用者抒發情緒、記錄日記、管理煩惱、社群互動、怪獸蒐集與心理紓壓功能的跨平台系統。
+
+本專案採用 **Flutter + Spring Boot + MySQL** 架構，並以 **AI Assisted Development（AI 輔助開發）** 為核心開發流程。
+
+支援平台：
+
+* Android
+* iOS
+* Web
 
 ---
 
-## 一、建議使用方式
+# 專案特色
 
-1. 開啟 Codex、Cursor Agent、GitHub Copilot Agent 或其他 AI Coding Agent。
-2. 將整個專案資料夾加入 AI 的工作區。
-3. 先要求 AI 閱讀根目錄的 `AGENTS.md`。
-4. 再要求 AI 依序閱讀 `docs/` 資料夾中的規格文件。
-5. 最後要求 AI 從 `docs/TASKS.md` 的 Phase 0 開始執行，不得跳過步驟。
+* Flutter 跨平台開發
+* Spring Boot REST API
+* MySQL 資料庫
+* Riverpod 狀態管理
+* Clean Architecture
+* AI Agent 協助開發（Codex / Cursor / GitHub Copilot Agent）
+* 完整需求、API、資料庫與 UI 規格文件
 
-建議指令：
+---
+
+# 技術架構
 
 ```text
-請先閱讀 AGENTS.md，並依序閱讀 docs/PROJECT_SPEC.md、docs/DATABASE_SPEC.md、docs/API_SPEC.md、docs/UI_SPEC.md、docs/CODING_STANDARD.md、docs/TASKS.md，然後執行 docs/TASKS.md 的 Phase 0。不要跳過任何步驟。每次完成任務後，必須更新 CHANGE_LOG.md 與 CHANGE_HISTORY.csv（或 CHANGE_HISTORY.xlsx），並依照 AGENTS.md 的 AI 回覆格式回報。
+Flutter
+(Android / iOS / Web)
+
+        │
+
+ REST API
+
+        │
+
+Spring Boot
+
+        │
+
+ MySQL
 ```
 
 ---
 
-## 二、文件結構
+# Repository 結構
 
 ```text
 monsters/
-├── AGENTS.md                 # AI 工作規範，最高優先權
-├── README.md                 # 專案說明與使用方式
-├── CHANGE_LOG.md             # 文字版專案異動紀錄
-├── CHANGE_HISTORY.csv        # CSV 版專案異動歷程
-├── CHANGE_HISTORY.xlsx       # Excel 版專案異動歷程
+│
+├── AGENTS.md
+├── README.md
+├── .gitignore
+├── CHANGE_LOG.md
+├── CHANGE_HISTORY.csv
+├── CHANGE_HISTORY.xlsx
+│
 ├── docs/
-│   ├── PROJECT_SPEC.md       # 專案需求規格
-│   ├── DATABASE_SPEC.md      # 資料庫設計規格
-│   ├── API_SPEC.md           # REST API 規格
-│   ├── UI_SPEC.md            # Flutter UI 規格
-│   ├── CODING_STANDARD.md    # 程式撰寫規範
-│   └── TASKS.md              # AI 開發任務清單
-├── icon/                     # 專案圖示與視覺素材
-└── system data/              # 原始系統手冊與系統簡介
+│   ├── PROJECT_SPEC.md
+│   ├── DATABASE_SPEC.md
+│   ├── API_SPEC.md
+│   ├── UI_SPEC.md
+│   ├── CODING_STANDARD.md
+│   └── TASKS.md
+│
+├── frontend/
+│
+├── backend/
+│
+├── database/
+│
+├── icon/
+│
+└── system data/
 ```
 
 ---
 
-## 三、AI 工作規則摘要
+# AI 開發流程
 
-AI 開發時必須遵守：
+所有 AI Agent（Codex、Cursor、GitHub Copilot Agent…）開始工作前，**必須先閱讀文件**。
 
-- 不得自行增加未定義需求。
-- 不得跳過 `docs/TASKS.md` 中的開發順序。
-- 不得直接修改資料表或 API 命名，除非文件明確要求或使用者確認。
-- 每次完成任務後，必須更新 `CHANGE_LOG.md`。
-- 每次完成任務後，必須同步更新 `CHANGE_HISTORY.csv` 或 `CHANGE_HISTORY.xlsx`。
-- 若修改 API、資料庫、UI 或開發流程，必須同步更新對應規格文件。
+閱讀順序：
+
+```text
+AGENTS.md
+
+↓
+
+docs/PROJECT_SPEC.md
+
+↓
+
+docs/DATABASE_SPEC.md
+
+↓
+
+docs/API_SPEC.md
+
+↓
+
+docs/UI_SPEC.md
+
+↓
+
+docs/CODING_STANDARD.md
+
+↓
+
+docs/TASKS.md
+```
+
+不得跳過任何步驟。
 
 ---
 
-## 四、重要提醒
+# 建議 Prompt
 
-若 AI 發現規格不足、文件互相衝突，或現有程式碼與文件不一致，必須先提出問題並等待確認，不得自行推測或直接實作。
+第一次開始開發時，請對 AI 使用以下指令：
+
+```text
+請先閱讀 AGENTS.md。
+
+接著依序閱讀：
+
+docs/PROJECT_SPEC.md
+docs/DATABASE_SPEC.md
+docs/API_SPEC.md
+docs/UI_SPEC.md
+docs/CODING_STANDARD.md
+docs/TASKS.md
+
+閱讀完成後，確認目前應執行的 Task。
+
+依照 AGENTS.md 規範開始實作。
+
+不得跳過任何 Phase。
+
+每完成一項 Task 必須：
+
+1. 更新 CHANGE_LOG.md
+2. 更新 CHANGE_HISTORY.csv（或 CHANGE_HISTORY.xlsx）
+3. 更新相關文件
+4. 依照 AGENTS.md 回覆格式產生工作報告
+```
+
+---
+
+# Git Flow
+
+Branch：
+
+```text
+main
+
+develop
+
+feature/<module>
+
+fix/<module>
+
+refactor/<module>
+
+docs/<module>
+```
+
+Commit：
+
+```text
+feat:
+
+fix:
+
+refactor:
+
+docs:
+
+test:
+
+style:
+
+chore:
+```
+
+---
+
+# 文件說明
+
+| 文件                        | 用途             |
+| ------------------------- | -------------- |
+| AGENTS.md                 | AI 開發規範（最高優先權） |
+| PROJECT_SPEC.md           | 專案需求規格         |
+| DATABASE_SPEC.md          | 資料庫設計          |
+| API_SPEC.md               | REST API 規格    |
+| UI_SPEC.md                | Flutter UI 規格  |
+| CODING_STANDARD.md        | Coding Style   |
+| TASKS.md                  | AI 開發任務        |
+| CHANGE_LOG.md             | 專案異動紀錄         |
+| CHANGE_HISTORY.csv / xlsx | 專案異動歷程         |
+
+---
+
+# 開發規則
+
+所有 AI Agent 必須遵守：
+
+* 不得自行新增需求。
+* 不得修改資料表。
+* 不得修改 API。
+* 不得修改需求文件。
+* 不得跳過 TASKS。
+* 每次完成任務必須同步更新文件。
+* 每次完成任務必須更新 Change Log。
+* 若需求衝突，必須停止並詢問使用者。
+
+---
+
+# 如何開始開發
+
+第一次：
+
+```bash
+git clone <repository-url>
+
+cd monsters
+```
+
+開始開發：
+
+```bash
+git checkout develop
+```
+
+建立功能分支：
+
+```bash
+git checkout -b feature/auth
+```
+
+完成後：
+
+```bash
+git add .
+
+git commit -m "feat(auth): 完成登入功能"
+
+git push origin feature/auth
+```
+
+---
+
+# License
+
+本專案僅供學術研究、專題開發及授權用途。
+
+未經授權，不得商業使用。
+
+---
+
+# 維護者
+
+Developer
+
+WeiChun Lin
+
+AI Development
+
+OpenAI Codex
