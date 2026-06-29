@@ -1,0 +1,6 @@
+日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
+2026-06-29,17:10,DOC-001,Documentation,CHANGE_LOG.md,新增,建立文字版專案異動紀錄,ChatGPT,否,否,否,否,
+2026-06-29,17:10,DOC-001,Documentation,CHANGE_HISTORY.csv,新增,建立 CSV 版專案異動歷程,ChatGPT,否,否,否,否,
+2026-06-29,17:10,DOC-001,Documentation,CHANGE_HISTORY.xlsx,新增,建立 Excel 版專案異動歷程,ChatGPT,否,否,否,否,
+2026-06-29,17:10,DOC-001,Documentation,README.md,修改,更新 AI Coding Agent 使用指令與文件閱讀順序,ChatGPT,否,否,否,否,
+2026-06-29,17:10,DOC-001,Documentation,AGENTS.md,修改,套用使用者提供的最新 AGENTS.md,ChatGPT,否,否,否,否,
