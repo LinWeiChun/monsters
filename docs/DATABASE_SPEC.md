@@ -6,6 +6,28 @@
 
 資料庫使用 MySQL。
 
+預設資料庫名稱：
+
+```text
+monsters
+```
+
+後端連線使用環境變數設定：
+
+| 環境變數 | 預設值 | 說明 |
+|---|---|---|
+| DB_URL | jdbc:mysql://localhost:3306/monsters?useSSL=false&serverTimezone=Asia/Taipei&allowPublicKeyRetrieval=true | MySQL JDBC URL |
+| DB_USERNAME | monsters | MySQL 帳號 |
+| DB_PASSWORD | monsters | MySQL 密碼 |
+
+Spring Boot Profile 設定：
+
+| Profile | 設定檔 | 說明 |
+|---|---|---|
+| 共用 | application.yml | App 名稱、預設 profile、JPA 共用設定 |
+| dev | application-dev.yml | 本機開發 MySQL 預設連線 |
+| prod | application-prod.yml | 正式環境連線，必須由環境變數提供 |
+
 所有資料表命名使用 `snake_case`。
 
 每個資料表預設包含：
