@@ -2,992 +2,442 @@
 
 # 貘nsters AI 開發規範
 
-本專案使用 Codex、Cursor Agent、GitHub Copilot Agent 或其他 AI Coding Agent 作為輔助開發工具。
-
-AI 在產生、修改、刪除任何程式碼或文件以前，必須先閱讀並遵守本文件。
-
----
-
-## 一、專案資訊
-
-### 1.1 專案名稱
-
-貘nsters
-
-### 1.2 專案目的
-
-建立一套提供使用者抒發情緒、記錄日記、管理煩惱、社群互動、怪獸蒐集與心理紓壓功能的跨平台系統。
-
-支援平台：
-
-- Android App
-- iOS App
-- Web 瀏覽器
-
-### 1.3 文件說明
-
-本專案所有需求、設計與開發規範皆依本專案文件管理。
-
-詳細閱讀順序請參考：
-「十六、需求來源」。
-
-不得自行增加未定義需求。
+> Version：v3.0
+>
+> 本文件為貘nsters Repository 的最高層級 AI 開發規範。
+>
+> 所有 AI Coding Agent（Codex、Cursor Agent、GitHub Copilot Agent、Claude Code、Gemini CLI…）皆必須遵守本文件。
 
 ---
 
-## 二、系統架構
+# 一、文件目的
 
-本專案採用前後端分離架構。
+本文件規範 AI Agent 在本專案中的工作方式。
 
-```text
-Flutter / Dart
-(Android / iOS / Web)
-        ↓
-REST API
-        ↓
-Java / Spring Boot
-        ↓
-MySQL
-```
+內容包含：
 
-### 2.1 架構限制
+- AI 工作流程
+- Task 管理
+- 文件同步
+- 工作完成條件
+- AI 回報格式
+- AI 決策規範
 
-- Flutter 不得直接存取 MySQL。
-- 所有資料存取必須透過 REST API。
-- 後端不得直接回傳 Entity 給前端。
-- 前端不得將商業邏輯寫在 Widget 內。
-- 後端 Controller 不得包含商業邏輯。
+本文件**不描述程式設計細節**。
 
----
+程式撰寫方式請參閱：
 
-## 三、專案資料夾建議
+- docs/CODING_STANDARD.md
 
-### 3.1 Flutter
+Git 規範請參閱：
 
-```text
-frontend/
-└── lib/
-    ├── app/
-    ├── core/
-    │   ├── constants/
-    │   ├── errors/
-    │   ├── network/
-    │   ├── router/
-    │   └── utils/
-    ├── features/
-    │   ├── auth/
-    │   ├── user/
-    │   ├── annoyance/
-    │   ├── diary/
-    │   ├── history/
-    │   ├── monster/
-    │   ├── community/
-    │   └── interactive/
-    └── main.dart
-```
-
-每個 `features/<module>/` 建議包含：
-
-```text
-data/
-  models/
-  repositories/
-domain/
-  entities/
-  repositories/
-  usecases/
-presentation/
-  providers/
-  screens/
-  widgets/
-```
-
-### 3.2 Spring Boot
-
-```text
-backend/
-└── src/main/java/com/monsters/
-    ├── config/
-    ├── controller/
-    ├── dto/
-    ├── entity/
-    ├── exception/
-    ├── repository/
-    ├── service/
-    └── util/
-```
+- docs/GIT_RULE.md
 
 ---
 
-## 四、程式撰寫原則
+# 二、文件優先順序
 
-### 4.1 後端分層
+AI 在開始任何工作前，必須依照以下順序閱讀文件。
 
-```text
-Controller → Service → Repository → Database
-```
+1. AGENTS.md
+2. docs/GIT_RULE.md
+3. system_data/系統手冊
+4. system_data/系統簡介
+5. docs/PROJECT_SPEC.md
+6. docs/DATABASE_SPEC.md
+7. docs/API_SPEC.md
+8. docs/UI_SPEC.md
+9. docs/CODING_STANDARD.md
+10. docs/TASKS.md
+11. 使用者最新明確指示
 
-Controller 只負責：
+若文件內容互相衝突：
 
-- 接收 Request
-- 驗證基本 Request 格式
-- 呼叫 Service
-- 回傳 Response
+AI 必須：
 
-Service 只負責：
+1. 停止開發
+2. 說明衝突
+3. 提出方案
+4. 等待使用者確認
 
-- 商業邏輯
-- 權限檢查
-- 資料狀態檢查
-- Transaction 控制
-
-Repository 只負責：
-
-- 資料查詢
-- 資料新增
-- 資料修改
-- 資料刪除
-
-### 4.2 前端分層
-
-```text
-Screen / Widget → Provider → UseCase / Repository → API Service
-```
-
-Widget 不得直接呼叫 API。
+不得自行推測。
 
 ---
 
-## 五、Flutter 開發規範
+# 三、AI 工作原則
 
-使用下列套件與設計方式：
+AI 必須：
 
-- State Management：Riverpod
-- HTTP Client：Dio
-- Router：go_router
-- Local Storage：SharedPreferences
-- JSON Serialization：json_serializable
-
-### 5.1 跨平台規範
-
-Flutter 程式必須同時考慮：
-
-- Android
-- iOS
-- Web
-
-不得使用只支援單一平台的 API，除非已建立平台判斷與替代方案。
-
-### 5.2 UI 規範
-
-- 畫面應符合《系統手冊》與 `UI_SPEC.md`。
-- 手機版優先，但 Web 必須有基本可用版面。
-- Web 版最大內容寬度建議限制，避免元件過度拉伸。
-- 共用元件應抽出為 Widget，不得重複撰寫。
-
----
-
-## 六、資料庫規範
-
-資料庫使用 MySQL。
-
-所有 Table 必須包含：
-
-- `id`
-- `created_at`
-- `updated_at`
-
-若業務情境需要刪除資料，優先使用 soft delete：
-
-- `deleted_at`
-- `is_deleted`
-
-所有 Foreign Key 必須建立合理關聯。
-
-資料表與欄位命名全部使用 `snake_case`。
-
-不得在未確認需求前修改資料表結構。
-
----
-
-## 七、API 規範
-
-所有 API 使用 RESTful 設計。
-
-| Method | 用途 |
-|---|---|
-| GET | 查詢 |
-| POST | 新增 |
-| PUT | 修改 |
-| PATCH | 局部修改狀態 |
-| DELETE | 刪除或軟刪除 |
-
-### 7.1 統一 Response 格式
-
-```json
-{
-  "success": true,
-  "message": "",
-  "data": {}
-}
-```
-
-### 7.2 錯誤 Response 格式
-
-```json
-{
-  "success": false,
-  "message": "錯誤訊息",
-  "data": null
-}
-```
-
-### 7.3 API 限制
-
-- 不得直接回傳 Entity。
-- 必須使用 DTO。
-- 必須驗證輸入資料。
-- 必須處理例外。
-- 需要登入的 API 必須驗證 Token。
-
----
-
-## 八、命名規則
-
-| 類型 | 規則 | 範例 |
-|---|---|---|
-| Java Class | UpperCamelCase | `UserController` |
-| Dart Class | UpperCamelCase | `MonsterRepository` |
-| Variable | lowerCamelCase | `userName` |
-| Constant | UPPER_SNAKE_CASE | `DEFAULT_PAGE_SIZE` |
-| Flutter 檔名 | snake_case.dart | `monster_detail_screen.dart` |
-| API Path | kebab 或 snake_case，需全專案一致 | `/api/annoyances` |
-| Database | snake_case | `personal_info` |
-
----
-
-## 九、Git Commit 規範
-
-使用 Conventional Commits。
-
-```text
-feat: 新增功能
-fix: 修正錯誤
-refactor: 重構
-docs: 文件更新
-test: 測試
-chore: 建置或設定調整
-style: 格式調整
-```
-
-Branch 命名：
-
-```text
-feature/<module>
-fix/<module>
-refactor/<module>
-docs/<module>
-```
-
----
-
-## 十、開發順序
-
-依照 `TASKS.md` 執行。
-
-不得跳過尚未完成的功能。
-
-每完成一項功能後，必須完成：
-
-1.API
-2.Entity
-3.DTO
-4.Repository
-5.Service
-6.Controller
-7.Database Migration（若有）
-8.Flutter Model
-9.Flutter Repository
-10.Provider
-11.UI
-12.Error Handling
-13.Test
-14.Document
-15.Change Log
-
----
-
-## 十一、程式品質
-
-AI 產出的程式必須符合：
-
-- 可編譯
-- 可執行
-- 不留下 TODO、FIXME 或空實作
-- 加入必要註解
-- 完整錯誤處理
-- 驗證輸入資料
-- 遵守 SOLID
-- 避免重複程式碼
-- 避免硬編碼設定值
-- 避免把密碼、Token、金鑰寫死在程式碼中
-
----
-
-## 十二、測試規範
-
-每個模組至少包含：
-
-### 後端
-
-- Unit Test
-- Service Test
-- Controller Test
-- Repository Test（需要時）
-
-### 前端
-
-- Unit Test
-- Widget Test
-- Provider Test
-
-### API
-
-- 正常流程
-- 欄位缺漏
-- 權限不足
-- 找不到資料
-- 資料狀態不合法
-
----
-
-## 十三、安全規範
-
-- 密碼必須雜湊，不得明文儲存。
-- Token 必須有期限。
-- 個人資料、日記、煩惱內容不得在未授權情況下被其他使用者讀取。
-- 社群分享內容必須依分享狀態控制公開與否。
-- 密碼鎖不得明文儲存。
-- 上傳檔案必須檢查副檔名、大小與 MIME Type。
-
----
-
-## 十四、禁止事項
+- 優先閱讀文件
+- 優先重用既有程式
+- 保持一致 Coding Style
+- 同步更新文件
+- 提供完整工作報告
+- 遵守 Git 規範
+- 遵守 Coding Standard
 
 AI 不得：
 
-- 自行增加功能
-- 自行刪除需求
+- 自行增加需求
+- 自行修改需求
+- 自行推測需求
+- 自行修改 Architecture
+- 自行修改 Database
 - 自行修改 API
-- 自行修改資料表
-- 自行覆蓋使用者修改
-- 在文件未定義時自行推測
-
-若文件未定義，必須先提出問題。
 
 ---
 
-## 十五、文件位置
+# 四、專案架構
 
-所有專案規格文件皆放置於 `docs/` 資料夾。
+本專案採：
 
-```
-docs/
-├── PROJECT_SPEC.md         # 專案需求規格
-├── DATABASE_SPEC.md        # 資料庫設計規格
-├── API_SPEC.md             # REST API 規格
-├── UI_SPEC.md              # Flutter UI 規格
-├── CODING_STANDARD.md      # 程式撰寫規範
-└── TASKS.md                # AI 開發任務清單
-```
+Flutter
 
-其他重要文件：
+↓
 
-```
-AGENTS.md                   # AI 工作規範（最高優先權）
-README.md                   # 專案說明
-CHANGE_LOG.md               # 專案異動紀錄
-CHANGE_HISTORY.xlsx         # 專案異動歷程（Excel）
-CHANGE_HISTORY.csv          # 專案異動歷程（CSV，可選）
-```
+REST API
 
----
+↓
 
-## 十六、需求來源
+Spring Boot
 
-AI 在開發任何功能時，必須依照下列優先順序閱讀文件：
+↓
 
-1. AGENTS.md
-2. docs/PROJECT_SPEC.md
-3. docs/DATABASE_SPEC.md
-4. docs/API_SPEC.md
-5. docs/UI_SPEC.md
-6. docs/CODING_STANDARD.md
-7. docs/TASKS.md
-8. 《系統手冊》
-9. 《系統簡介》
-10. 使用者最新指示
+MySQL
 
-若多份文件內容互相衝突：
+Flutter：
 
-* 不得自行推測。
-* 必須停止實作並回報衝突內容。
-* 必須提出建議方案，等待使用者確認後才能繼續。
+不得直接存取 Database。
 
----
+所有資料：
 
-## 十七、文件同步規範
+必須透過 REST API。
 
-若本次修改涉及以下內容，AI 必須同步更新對應文件。
+詳細架構：
 
-| 修改內容            | 必須同步更新                                                  |
-| --------------- | ------------------------------------------------------- |
-| 新增功能            | docs/PROJECT_SPEC.md、docs/TASKS.md                      |
-| API 修改          | docs/API_SPEC.md                                        |
-| 資料表修改           | docs/DATABASE_SPEC.md                                   |
-| UI 修改           | docs/UI_SPEC.md                                         |
-| Coding Style 修改 | docs/CODING_STANDARD.md                                 |
-| 開發流程修改          | AGENTS.md                                               |
-| 完成任務            | CHANGE_LOG.md、CHANGE_HISTORY.xlsx（或 CHANGE_HISTORY.csv） |
-
-不得只修改程式碼而未同步更新文件。
-
----
-
-## 十八、AI 啟動流程
-
-AI 每次開始工作時，必須依序執行：
-
-1. 閱讀 AGENTS.md。
-2. 閱讀 docs/PROJECT_SPEC.md。
-3. 閱讀 docs/DATABASE_SPEC.md。
-4. 閱讀 docs/API_SPEC.md。
-5. 閱讀 docs/UI_SPEC.md。
-6. 閱讀 docs/CODING_STANDARD.md。
-7. 閱讀 docs/TASKS.md。
-8. 確認目前要執行的 Task。
-9. 開始實作。
-10. 完成後更新 CHANGE_LOG.md 與 CHANGE_HISTORY.xlsx（或 CHANGE_HISTORY.csv）。
-11. 回報本次修改內容。
-
----
-
-## 十九、版本管理
-
-版本號採用 Semantic Version。
-
-MAJOR.MINOR.PATCH
-
-例如
-
-1.0.0
-
-1.0.1
-
-1.1.0
-
-2.0.0
-
-每次完成一個 Phase
-
-更新
-
-RELEASE_NOTE.md
-
----
-
-# 二十、AI 回覆格式
-
-AI 每完成一項 Task 或回應使用者需求時，必須依照下列格式回覆。
-
-## 20.1 工作完成報告
-
-每次回覆至少包含：
-
-### 一、本次完成內容
-
-說明本次完成的功能、修正或文件更新。
-
-### 二、目前 Git 狀態
-
-必須列出：
-
-- 目前 Branch
-- 本次 Task 編號
-- 是否已 Commit
-- 是否已 Push
-- Pull Request 目標分支（若有）
-
-### 三、修改檔案
-
-列出所有修改的檔案。
-
-例如：
-
-```text
-backend/controller/AuthController.java
-backend/service/AuthService.java
-frontend/lib/features/auth/login_screen.dart
-docs/API_SPEC.md
-```
-
-### 四、新增檔案
-
-列出所有新增的檔案。
-
-### 五、刪除檔案
-
-若有刪除檔案，必須列出原因。
-
-### 六、Migration
-
-若涉及資料庫：
-
-* 是否新增 Migration
-* Migration 名稱
-* Migration 說明
-
-若沒有：
-
-```text
-無
-```
-
-### 七、API
-
-列出：
-
-* 新增 API
-* 修改 API
-* 移除 API
-
-### 八、Database
-
-說明：
-
-* Table
-* Column
-* Index
-* Constraint
-
-是否異動。
-
-### 九、文件更新
-
-說明同步更新了哪些文件。
-
-例如：
-
-```text
-docs/API_SPEC.md
+請參閱：
 
 docs/PROJECT_SPEC.md
 
+---
+
+# 五、Project Initialization
+
+若 Repository 尚未建立：
+
+frontend/
+
+backend/
+
+database/
+
+docs/
+
+.github/
+
+AI 必須先完成：
+
+- 專案初始化
+- README
+- log/CHANGE_LOG
+- log/CHANGE_HISTORY
+
+完成後：
+
+才能開始第一個 Feature。
+
+---
+
+# 六、AI 工作流程
+
+每次收到任務：
+
+AI 必須：
+
+1. 閱讀 AGENTS.md
+2. 閱讀 GIT_RULE.md
+3. 閱讀 docs/
+4. 確認 TASKS
+5. 分析需求
+6. 提出疑問（若需要）
+7. 開始實作
+8. 更新文件
+9. 更新 log/CHANGE_LOG
+10. 更新 log/CHANGE_HISTORY
+11. 完成工作報告
+
+Git 操作：
+
+依照：
+
+GIT_RULE.md
+
+---
+
+# 七、Task 管理
+
+所有 Task：
+
+必須依：
+
+TASKS.md
+
+執行。
+
+Task 狀態：
+
+TODO
+
+↓
+
+IN PROGRESS
+
+↓
+
+REVIEW
+
+↓
+
+DONE
+
+不得：
+
+TODO
+
+↓
+
+DONE
+
+---
+
+# 八、文件同步
+
+若修改：
+
+功能
+
+↓
+
+PROJECT_SPEC.md
+
+API
+
+↓
+
+API_SPEC.md
+
+Database
+
+↓
+
+DATABASE_SPEC.md
+
+UI
+
+↓
+
+UI_SPEC.md
+
+Coding Style
+
+↓
+
+CODING_STANDARD.md
+
+完成 Task
+
+↓
+
 CHANGE_LOG.md
-```
 
-### 十、測試方式
+↓
 
-說明：
+CHANGE_HISTORY.xlsx
 
-* 如何執行
-* 如何驗證
-* 如何測試
-
-### 十一、Commit 建議
-
-例如：
-
-```text
-feat(auth): 完成會員登入功能
-```
-
-### 十二、待確認事項
-
-若有未定義需求，必須列出。
-
-不得自行猜測。
+不得只修改程式。
 
 ---
 
-# 二十一、禁止產生未完成程式碼
+# 九、AI 決策規範
 
-AI 不得產生：
+若存在：
 
-* TODO
-* FIXME
-* HACK
-* XXX
-* throw UnsupportedOperationException
-* return null（非必要情況）
-* 空 Method
-* 空 Class
-* Dead Code
-* 未使用 Import
-* 未使用 Variable
-* 未完成的 Interface
+多種方案。
 
-若功能尚未完成，
+AI：
 
-必須先詢問使用者，
+應提出：
 
-不得留下未完成程式。
+至少兩種方案。
 
----
+並說明：
 
-# 二十二、Logging 規範
+- 優點
+- 缺點
+- 風險
 
-## 後端
+等待使用者決定。
 
-統一使用：
-
-SLF4J
-
-不得使用：
-
-```java
-System.out.println()
-```
-
-所有例外必須記錄 Log。
-
-重要事件必須記錄：
-
-* Login
-* Logout
-* Register
-* Error
-* Permission Denied
-* API Exception
-
-不得記錄：
-
-* Password
-* Token
-* 個人隱私資料
+不得自行決策。
 
 ---
 
-## Flutter
+# 十、Definition of Ready（DoR）
 
-統一使用 Logger。
+開始 Task 前：
 
-不得大量使用：
+必須確認：
 
-```dart
-print()
-```
+- 文件完成
+- Task 已確認
+- API 已確認
+- Database 已確認
+- UI 已確認
+- 前置 Task 完成
 
-Release Mode 不得輸出 Debug Log。
+否則：
 
----
-
-# 二十三、Exception 規範
-
-不得使用：
-
-```java
-catch (Exception e)
-```
-
-應建立：
-
-* Global Exception Handler
-* Custom Exception
-* Business Exception
-* Validation Exception
-
-所有 Exception 必須回傳統一格式：
-
-```json
-{
-  "success": false,
-  "message": "錯誤訊息",
-  "data": null
-}
-```
-
-不得將 Stack Trace 回傳給前端。
-
-Exception 必須記錄 Log。
+不得開始。
 
 ---
 
-# 二十四、SQL 與相依套件規範
+# 十一、Definition of Done（DoD）
 
-## SQL 規範
+Task 完成：
 
-禁止：
+必須符合：
 
-```sql
-SELECT *
-```
+- 功能完成
+- Compile 通過
+- Test 通過
+- 文件完成
+- CHANGE_LOG 更新
+- CHANGE_HISTORY 更新
+- 工作報告完成
 
-禁止：
+Git 流程：
 
-大量 Native SQL。
+依照：
 
-優先使用：
-
-* Spring Data JPA
-* JpaRepository
-* Specification
-
-若未來導入 QueryDSL，
-
-優先使用 QueryDSL。
-
-所有 SQL 必須：
-
-* 使用 Index
-* 避免 N+1 Query
-* 避免重複查詢
-* 避免 Full Table Scan
+GIT_RULE.md
 
 ---
 
-## 第三方套件
+# 十二、AI 工作報告
 
-AI 不得自行新增第三方套件。
+每次完成：
 
-若需新增，
+必須回報：
 
-必須先說明：
-
-1. 套件用途
-2. 是否有官方替代方案
-3. 是否已有現有套件可完成
-4. 對專案影響
-5. 是否需修改授權(License)
-
-取得使用者同意後，
-
-方可新增。
-
+1. 完成內容
+2. 修改檔案
+3. 新增檔案
+4. 刪除檔案
+5. API 異動
+6. Database 異動
+7. 文件更新
+8. 測試方式
+9. 待確認事項
 
 ---
 
-# 二十五、Git 操作與分支維護規範
+# 十三、禁止事項
 
-本專案採用簡化版 Git Flow。AI 可以協助執行日常 Git 操作，但不得執行高風險 Git 指令。
+AI 不得：
 
-## 25.1 分支角色
+- 自行增加需求
+- 自行刪除需求
+- 自行修改需求
+- 自行修改 API
+- 自行修改 Database
+- 自行新增第三方套件
+- 自行覆蓋使用者程式
+- 自行推測需求
+- 跳過文件同步
+- 跳過測試
 
-| 分支 | 用途 | 規則 |
-|---|---|---|
-| `main` | 正式版本 | 永遠保持可發布狀態，不得直接開發 |
-| `develop` | 開發整合分支 | 所有功能完成後先合併到此分支 |
-| `feature/<module>` | 新功能開發 | 從 `develop` 建立，完成後合併回 `develop` |
-| `fix/<module>` | Bug 修正 | 從 `develop` 建立，完成後合併回 `develop` |
-| `refactor/<module>` | 重構 | 不得改變既有功能行為 |
-| `docs/<module>` | 文件修改 | 僅用於文件與規格調整 |
-| `release/<version>` | 發布前整理（可選） | 從 `develop` 建立，測試完成後合併到 `main` |
-| `hotfix/<issue>` | 正式版緊急修正（可選） | 從 `main` 建立，完成後合併回 `main` 與 `develop` |
+若文件不足：
 
----
-
-## 25.2 Branch 命名規則
-
-必須使用下列格式：
-
-```text
-feature/auth
-feature/diary
-feature/annoyance
-fix/login-error
-refactor/auth-service
-docs/api-spec
-release/1.0.0
-hotfix/security-token
-```
-
-不得使用不明確名稱，例如：
-
-```text
-test
-new
-update
-abc
-final
-my-branch
-```
+必須詢問。
 
 ---
 
-## 25.3 AI 可執行的 Git 操作
+# 十四、外部規範引用
 
-AI 可以執行下列低風險 Git 指令：
+程式設計：
 
-```bash
-git status
-git diff
-git log
-git branch
-git fetch
-git pull
-git checkout <branch>
-git switch <branch>
-git checkout -b <branch>
-git switch -c <branch>
-git add .
-git commit -m "<message>"
-git push origin <branch>
-git merge <feature-branch>
-```
+請依：
 
-限制：
+docs/CODING_STANDARD.md
 
-- `git merge` 僅允許用於 `feature/*`、`fix/*`、`refactor/*`、`docs/*` 合併至 `develop`。
-- AI 執行 `git commit` 前必須先檢查 `git status`。
-- AI 執行 `git push` 前必須確認目前分支不是 `main`。
-- AI 每次 Commit 後必須更新 `CHANGE_LOG.md` 與 `CHANGE_HISTORY.xlsx`（或 `CHANGE_HISTORY.csv`）。
+Git：
 
----
+請依：
 
-## 25.4 AI 不得執行的 Git 操作
+GIT_RULE.md
 
-AI 未經使用者明確確認，不得執行下列指令：
+需求：
 
-```bash
-git push --force
-git push -f
-git reset --hard
-git clean -fd
-git clean -fdx
-git rebase
-git branch -D <branch>
-git tag
-git revert <commit>
-git cherry-pick <commit>
-git merge develop
-git merge main
-```
+請依：
 
-AI 永遠不得自行執行：
+PROJECT_SPEC.md
 
-- 將任何分支直接合併到 `main`。
-- 對 `main` 直接 Push。
-- 強制推送。
-- 清除未追蹤檔案。
-- 重設使用者尚未確認的修改。
+Database：
+
+請依：
+
+DATABASE_SPEC.md
+
+API：
+
+請依：
+
+API_SPEC.md
+
+UI：
+
+請依：
+
+UI_SPEC.md
 
 ---
 
-## 25.5 標準開發流程
+# 十五、附錄
 
-每一個 Task 建議對應一個 Branch。
+## AI 標準 Prompt
 
-### 建立功能分支
+使用者可直接輸入：
 
-```bash
-git checkout develop
-git pull origin develop
-git checkout -b feature/<module>
-```
+開始下一個 Task
 
-### 完成功能後提交
+AI 應自動：
 
-```bash
-git status
-git add .
-git commit -m "feat(<module>): <summary>"
-git push origin feature/<module>
-```
-
-### 建立 Pull Request
-
-Pull Request 方向：
-
-```text
-feature/<module> → develop
-```
-
-正式發布方向：
-
-```text
-develop → main
-```
-
-`develop → main` 必須由使用者確認後才能執行。
+- 閱讀文件
+- 確認 Task
+- 開始工作
+- 更新文件
+- 回報成果
 
 ---
 
-## 25.6 Commit Message 規範
+## 文件版本
 
-Commit 必須符合 Conventional Commits。
-
-格式：
-
-```text
-<type>(<scope>): <summary>
-```
-
-範例：
-
-```text
-feat(auth): 完成會員登入功能
-fix(api): 修正登入錯誤回應格式
-docs(readme): 更新 Git 使用說明
-refactor(service): 重構使用者服務邏輯
-test(auth): 新增登入 API 測試
-chore(git): 新增 .gitignore
-```
+| 項目 | 內容 |
+|------|------|
+| 文件 | AGENTS.md |
+| 版本 | v3.0 |
+| 專案 | 貘nsters |
+| 維護者 | WeiChun Lin |
+| 適用 | 所有 AI Coding Agent |
 
 ---
 
-## 25.7 Pull Request 規範
+本文件為 Repository 最高層級 AI 工作規範。
 
-AI 完成任務後，必須提供 Pull Request Summary。
+Git 規範：
 
-格式：
+請依 GIT_RULE.md。
 
-```markdown
-## 修改內容
+Coding 規範：
 
-- 說明本次新增、修改或修正的內容
-
-## 修改檔案
-
-- path/to/file
-
-## 測試項目
-
-- 測試方式與結果
-
-## 文件更新
-
-- CHANGE_LOG.md
-- CHANGE_HISTORY.xlsx
-- docs/API_SPEC.md（若有）
-
-## 注意事項
-
-- 尚未完成事項或需要使用者確認事項
-```
-
----
-
-## 25.8 GitHub Repository 保護規範
-
-建議在 GitHub 設定：
-
-- 保護 `main` 分支。
-- 禁止直接 Push 到 `main`。
-- 所有合併到 `main` 的變更必須透過 Pull Request。
-- 合併前必須確認測試通過。
-- 若未來加入 GitHub Actions，必須通過 CI 後才能合併。
-
----
-
-## 25.9 Git 操作回報規則
-
-AI 每次執行 Git 操作後，必須回報：
-
-1. 目前 Branch
-2. 執行過的 Git 指令
-3. Commit Hash（若有）
-4. Push 目標分支（若有）
-5. 是否需要建立 Pull Request
-6. 是否有衝突或未提交變更
-
-若 Git 操作失敗，必須完整回報錯誤訊息，不得自行猜測或強制修復。
+請依 docs/CODING_STANDARD.md。

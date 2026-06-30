@@ -125,6 +125,7 @@ docs/TASKS.md
 
 接著依序閱讀：
 
+docs/GIT_RULE.md
 docs/PROJECT_SPEC.md
 docs/DATABASE_SPEC.md
 docs/API_SPEC.md
