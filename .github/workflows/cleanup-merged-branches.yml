@@ -1,0 +1,78 @@
+name: Cleanup merged branches
+
+on:
+  schedule:
+    # Every Monday 09:00 Asia/Taipei.
+    - cron: '0 1 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    name: Delete branches already merged into main
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch all branches
+        run: git fetch --prune origin '+refs/heads/*:refs/remotes/origin/*'
+
+      - name: Delete branches merged into main
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          protected_branches=("main" "develop")
+          deleted_branches=()
+          kept_branches=()
+
+          is_protected_branch() {
+            local branch="$1"
+            for protected_branch in "${protected_branches[@]}"; do
+              if [[ "$branch" == "$protected_branch" ]]; then
+                return 0
+              fi
+            done
+            return 1
+          }
+
+          while read -r remote_ref; do
+            branch="${remote_ref#origin/}"
+
+            if [[ "$branch" == "HEAD" ]] || is_protected_branch "$branch"; then
+              kept_branches+=("$branch: protected")
+              continue
+            fi
+
+            if git merge-base --is-ancestor "origin/$branch" "origin/main"; then
+              git push origin --delete "$branch"
+              deleted_branches+=("$branch: merged into main")
+            elif git merge-base --is-ancestor "origin/$branch" "origin/develop"; then
+              kept_branches+=("$branch: merged into develop only")
+            else
+              kept_branches+=("$branch: not merged into develop")
+            fi
+          done < <(git for-each-ref --format='%(refname:short)' refs/remotes/origin)
+
+          {
+            echo "## Deleted branches"
+            if [[ "${#deleted_branches[@]}" -eq 0 ]]; then
+              echo "- None"
+            else
+              printf -- "- %s\n" "${deleted_branches[@]}"
+            fi
+
+            echo
+            echo "## Kept branches"
+            if [[ "${#kept_branches[@]}" -eq 0 ]]; then
+              echo "- None"
+            else
+              printf -- "- %s\n" "${kept_branches[@]}"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

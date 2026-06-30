@@ -54,3 +54,8 @@
 2026-06-30,10:47,TASK-004,Documentation,docs/DATABASE_SPEC.md,修改,補充 Profile 與 MySQL 連線設定說明,Codex,否,是,否,否,
 2026-06-30,10:47,TASK-004,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-004 profile 調整紀錄,Codex,否,否,否,否,
 2026-06-30,10:47,TASK-004,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-004 profile 調整紀錄,Codex,否,否,否,否,
+2026-06-30,11:07,DOC-004,CI,.github/workflows/cleanup-merged-branches.yml,新增,建立每週清理已進 main 分支的 GitHub Actions workflow,Codex,否,否,否,否,
+2026-06-30,11:07,DOC-004,CI,.github/.gitkeep,刪除,移除 GitHub 目錄保留檔,Codex,否,否,否,否,
+2026-06-30,11:07,DOC-004,Documentation,docs/GIT_RULE.md,修改,補充分支清理自動化規則,Codex,否,否,否,否,
+2026-06-30,11:07,DOC-004,Documentation,log/CHANGE_LOG.md,修改,新增 DOC-004 異動紀錄,Codex,否,否,否,否,
+2026-06-30,11:07,DOC-004,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-004 表格異動紀錄,Codex,否,否,否,否,
