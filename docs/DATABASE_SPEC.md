@@ -6,6 +6,20 @@
 
 資料庫使用 MySQL。
 
+預設資料庫名稱：
+
+```text
+monsters
+```
+
+後端連線使用環境變數設定：
+
+| 環境變數 | 預設值 | 說明 |
+|---|---|---|
+| DB_URL | jdbc:mysql://localhost:3306/monsters?useSSL=false&serverTimezone=Asia/Taipei&allowPublicKeyRetrieval=true | MySQL JDBC URL |
+| DB_USERNAME | monsters | MySQL 帳號 |
+| DB_PASSWORD | monsters | MySQL 密碼 |
+
 所有資料表命名使用 `snake_case`。
 
 每個資料表預設包含：
