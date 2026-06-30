@@ -37,6 +37,8 @@ dev
 | `DB_USERNAME` | `monsters` |
 | `DB_PASSWORD` | `monsters` |
 
+Docker Compose 會使用 `mysql` 作為 MySQL service hostname。
+
 ## 專案規範
 
 後端開發需遵守：

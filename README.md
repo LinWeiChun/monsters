@@ -237,6 +237,19 @@ cd monsters
 git checkout develop
 ```
 
+啟動 Docker Compose：
+
+```bash
+docker compose up --build
+```
+
+服務：
+
+```text
+Backend: http://localhost:8080
+MySQL: localhost:3306
+```
+
 建立功能分支：
 
 ```bash

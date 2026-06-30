@@ -28,6 +28,24 @@ Spring Boot Profile 設定：
 | dev | application-dev.yml | 本機開發 MySQL 預設連線 |
 | prod | application-prod.yml | 正式環境連線，必須由環境變數提供 |
 
+Docker Compose 服務：
+
+| Service | 說明 |
+|---|---|
+| mysql | MySQL 8.4 |
+| backend | Spring Boot 後端 |
+
+Docker Compose 環境變數：
+
+| 環境變數 | 預設值 | 說明 |
+|---|---|---|
+| MYSQL_DATABASE | monsters | MySQL database |
+| MYSQL_USER | monsters | MySQL 使用者 |
+| MYSQL_PASSWORD | monsters | MySQL 密碼 |
+| MYSQL_ROOT_PASSWORD | root | MySQL root 密碼 |
+| MYSQL_PORT | 3306 | Host 對外 MySQL port |
+| BACKEND_PORT | 8080 | Host 對外 Backend port |
+
 所有資料表命名使用 `snake_case`。
 
 每個資料表預設包含：
