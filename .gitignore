@@ -100,7 +100,6 @@ logs/
 .env
 .env.*
 application-local.yml
-application-dev.yml
 
 #################################################
 # JWT
