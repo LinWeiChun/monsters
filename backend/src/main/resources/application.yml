@@ -1,19 +1,13 @@
 spring:
   application:
     name: monsters
-  datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/monsters?useSSL=false&serverTimezone=Asia/Taipei&allowPublicKeyRetrieval=true}
-    username: ${DB_USERNAME:monsters}
-    password: ${DB_PASSWORD:monsters}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   jpa:
-    hibernate:
-      ddl-auto: validate
     open-in-view: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
-        format_sql: true
 
 server:
   port: 8080

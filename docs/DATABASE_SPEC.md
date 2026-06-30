@@ -20,6 +20,14 @@ monsters
 | DB_USERNAME | monsters | MySQL 帳號 |
 | DB_PASSWORD | monsters | MySQL 密碼 |
 
+Spring Boot Profile 設定：
+
+| Profile | 設定檔 | 說明 |
+|---|---|---|
+| 共用 | application.yml | App 名稱、預設 profile、JPA 共用設定 |
+| dev | application-dev.yml | 本機開發 MySQL 預設連線 |
+| prod | application-prod.yml | 正式環境連線，必須由環境變數提供 |
+
 所有資料表命名使用 `snake_case`。
 
 每個資料表預設包含：

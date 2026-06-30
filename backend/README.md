@@ -9,6 +9,24 @@
 - Gradle
 - MySQL
 
+## Profile 設定
+
+後端使用 Spring Boot Profile：
+
+| Profile | 設定檔 | 用途 |
+|---------|--------|------|
+| 共用 | `src/main/resources/application.yml` | App 名稱、預設 profile、JPA 共用設定 |
+| dev | `src/main/resources/application-dev.yml` | 本機開發 MySQL 預設連線 |
+| prod | `src/main/resources/application-prod.yml` | 正式環境，必須由環境變數提供連線資訊 |
+
+預設 profile：
+
+```text
+dev
+```
+
+可用 `SPRING_PROFILES_ACTIVE` 切換。
+
 ## MySQL 連線設定
 
 後端透過環境變數讀取 MySQL 連線資訊：
@@ -18,10 +36,6 @@
 | `DB_URL` | `jdbc:mysql://localhost:3306/monsters?useSSL=false&serverTimezone=Asia/Taipei&allowPublicKeyRetrieval=true` |
 | `DB_USERNAME` | `monsters` |
 | `DB_PASSWORD` | `monsters` |
-
-範例請參閱：
-
-- `src/main/resources/application-example.yml`
 
 ## 專案規範
 

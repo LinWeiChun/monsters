@@ -62,6 +62,70 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-06-30 10:47
+
+Task
+TASK-004 調整 MySQL Profile 設定
+
+修改人
+Codex
+
+### 本次完成
+
+- 將後端 Spring Boot 設定拆分為共用、dev、prod 三份。
+- `application.yml` 保留共用設定與預設 `dev` profile。
+- 新增 `application-dev.yml` 作為本機開發 MySQL 連線設定。
+- 新增 `application-prod.yml` 作為正式環境 MySQL 連線設定，必須使用環境變數。
+- 移除重複用途的 `application-example.yml`。
+- 調整 `.gitignore`，允許追蹤 `application-dev.yml`。
+- 更新 `backend/README.md` 與 `docs/DATABASE_SPEC.md`。
+
+### 新增
+
+- `backend/src/main/resources/application-dev.yml`
+- `backend/src/main/resources/application-prod.yml`
+
+### 修改
+
+- `.gitignore`
+- `backend/README.md`
+- `backend/src/main/resources/application.yml`
+- `docs/DATABASE_SPEC.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- `backend/src/main/resources/application-example.yml`
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 文件補充 Spring Boot Profile 與 MySQL 連線設定，未建立資料表或 Migration。
+
+### 測試
+
+- 使用 JDK 18 執行 `.\gradlew.bat test`
+
+### Commit 建議
+
+```text
+chore(database): 拆分 spring profile 設定
+```
+
+### 備註 / 待確認事項
+
+- `prod` profile 不提供預設帳密，正式環境需設定 `DB_URL`、`DB_USERNAME`、`DB_PASSWORD`。
+
+---
+
 ## 2026-06-30 10:41
 
 Task
