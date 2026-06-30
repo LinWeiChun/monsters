@@ -62,6 +62,79 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-06-30 09:54
+
+Task
+TASK-002 建立 Flutter 專案
+
+修改人
+Codex
+
+### 本次完成
+
+- 使用 Flutter CLI 在 `frontend/` 建立 `monsters` 前端專案。
+- 建立 Android、iOS、Web 平台骨架。
+- 移除 Flutter template 預設 hosted 直接依賴，保留 SDK 依賴。
+- 調整根目錄 `.gitignore`，允許追蹤 Flutter app 必要檔案 `frontend/pubspec.lock` 與 `frontend/.metadata`。
+- 更新 `frontend/README.md` 為貘nsters 前端說明。
+- 更新 `docs/TASKS.md` 標示本 Task 完成。
+
+### 新增
+
+- `frontend/.gitignore`
+- `frontend/.metadata`
+- `frontend/README.md`
+- `frontend/analysis_options.yaml`
+- `frontend/android/`
+- `frontend/ios/`
+- `frontend/lib/`
+- `frontend/pubspec.lock`
+- `frontend/pubspec.yaml`
+- `frontend/test/`
+- `frontend/web/`
+
+### 修改
+
+- `.gitignore`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- `frontend/.gitkeep`
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- `flutter pub get`
+- `flutter analyze`
+- `flutter test`
+
+### Commit 建議
+
+```text
+feat(frontend): 建立 flutter 專案
+```
+
+### 備註 / 待確認事項
+
+- `flutter_test` 仍會帶入 SDK 測試所需傳遞套件，未新增非必要直接 hosted 依賴。
+- 目前功能仍為 Flutter template smoke test，後續 Phase 1 再建立 Router、Theme 與共用元件。
+
+---
+
 ## 2026-06-30 09:36
 
 Task
