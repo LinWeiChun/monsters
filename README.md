@@ -53,9 +53,7 @@ monsters/
 ├── AGENTS.md
 ├── README.md
 ├── .gitignore
-├── CHANGE_LOG.md
-├── CHANGE_HISTORY.csv
-├── CHANGE_HISTORY.xlsx
+├── .github/
 │
 ├── docs/
 │   ├── PROJECT_SPEC.md
@@ -73,7 +71,12 @@ monsters/
 │
 ├── icon/
 │
-└── system data/
+├── log/
+│   ├── CHANGE_LOG.md
+│   ├── CHANGE_HISTORY.csv
+│   └── CHANGE_HISTORY.xlsx
+│
+└── system_data/
 ```
 
 ---
