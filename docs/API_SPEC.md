@@ -208,6 +208,21 @@ Request：
 
 ## 八、Community API
 
+社群文章為煩惱與日記分享內容的聚合顯示。
+
+`postId` 格式：
+
+```text
+{type}:{id}
+```
+
+範例：
+
+```text
+annoyance:1
+diary:1
+```
+
 ### 8.1 查詢社群文章
 
 `GET /api/community/posts`
@@ -268,7 +283,6 @@ Request：
 
 ## 十一、待確認事項
 
-- 是否完全沿用舊資料庫欄位名稱。
-- 檔案上傳採本機儲存、雲端儲存或資料庫儲存。
-- Google 登入在 Web 與 App 是否使用同一組 Client ID。
-- Web 版是否需要管理後台。
+跨文件決策與待確認事項集中於：
+
+- docs/DECISIONS.md

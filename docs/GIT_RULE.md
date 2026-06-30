@@ -566,4 +566,4 @@ AI 不得自行決定。
 | 專案 | 貘nsters |
 | 維護者 | WeiChun Lin |
 | 適用 | Repository 所有開發者與 AI Coding Agent |
-| 最後更新 | YYYY-MM-DD |
+| 最後更新 | 2026-06-30 |
