@@ -62,6 +62,77 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-06-30 10:17
+
+Task
+TASK-003 建立 Spring Boot 專案
+
+修改人
+Codex
+
+### 本次完成
+
+- 依使用者確認改用 Gradle 建立後端 Spring Boot 專案。
+- 將 `docs/CODING_STANDARD.md` 後端 Build Tool 由 `Maven` 調整為 `Gradle`。
+- 建立 `backend/` Gradle 專案、Spring Boot 入口類別、基本 `application.yml` 與 context load 測試。
+- 產生 Gradle wrapper，後續後端可用 `backend/gradlew.bat` 執行建置與測試。
+- 移除 `backend/.gitkeep`。
+- 更新 `docs/TASKS.md` 標示本 Task 完成。
+
+### 新增
+
+- `backend/README.md`
+- `backend/build.gradle`
+- `backend/settings.gradle`
+- `backend/gradlew`
+- `backend/gradlew.bat`
+- `backend/gradle/wrapper/gradle-wrapper.jar`
+- `backend/gradle/wrapper/gradle-wrapper.properties`
+- `backend/src/main/java/com/monsters/MonstersApplication.java`
+- `backend/src/main/resources/application.yml`
+- `backend/src/test/java/com/monsters/MonstersApplicationTests.java`
+
+### 修改
+
+- `docs/CODING_STANDARD.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- `backend/.gitkeep`
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- 使用 JDK 18 執行 `gradle wrapper --gradle-version 8.7`
+- 使用 JDK 18 執行 `.\gradlew.bat test`
+
+### Commit 建議
+
+```text
+feat(backend): 建立 spring boot 專案
+```
+
+### 備註 / 待確認事項
+
+- 本 Task 未加入 MySQL / JPA 設定，避免提前實作下一個 Task。
+- 建立後端時以暫時環境變數指定 `JAVA_HOME=C:\Program Files\Java\jdk-18.0.2`。
+
+---
+
 ## 2026-06-30 09:54
 
 Task
