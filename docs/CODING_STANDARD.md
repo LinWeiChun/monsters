@@ -1055,7 +1055,7 @@ AI 應：
 | Framework | Spring Boot |
 | ORM | Spring Data JPA |
 | Database | MySQL |
-| Build Tool | Maven |
+| Build Tool | Gradle |
 | Validation | Jakarta Validation |
 | Security | Spring Security + JWT |
 
