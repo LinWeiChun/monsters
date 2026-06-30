@@ -62,6 +62,65 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-06-30 11:07
+
+Task
+DOC-004 建立 GitHub Actions 分支清理自動化
+
+修改人
+Codex
+
+### 本次完成
+
+- 新增 GitHub Actions workflow，每週一自動檢查遠端分支。
+- 僅刪除已合併到 `origin/main` 的工作分支。
+- 保留 `main`、`develop`、只合併到 `develop` 的分支，以及尚未合併到 `develop` 的分支。
+- 支援手動觸發 `workflow_dispatch`。
+- 更新 `docs/GIT_RULE.md` 補充分支清理自動化規則。
+
+### 新增
+
+- `.github/workflows/cleanup-merged-branches.yml`
+
+### 修改
+
+- `docs/GIT_RULE.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- `.github/.gitkeep`
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- 檢查 workflow YAML 內容與 Git 分支判斷規則。
+- 執行 `git diff --check` 檢查格式。
+
+### Commit 建議
+
+```text
+ci(github): 建立分支清理 workflow
+```
+
+### 備註 / 待確認事項
+
+- GitHub Actions 需 workflow 被合併到 GitHub 預設分支後才會按排程執行。
+
+---
+
 ## 2026-06-30 10:47
 
 Task
