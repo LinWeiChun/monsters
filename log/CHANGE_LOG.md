@@ -62,6 +62,62 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-06-30 09:44
+
+Task
+DOC-002 調整後端 Java 版本規範
+
+修改人
+Codex
+
+### 本次完成
+
+- 將後端 Java 版本規範由 `Java 21 LTS（建議）` 調整為 `JDK 18`。
+- 後續 Spring Boot 專案建立與 Java 指令應以本機可用的 `C:\Program Files\Java\jdk-18.0.2` 為準。
+
+### 新增
+
+- 無
+
+### 修改
+
+- `docs/CODING_STANDARD.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- 確認 `docs/CODING_STANDARD.md` 已改為 `JDK 18`。
+- 已於前次環境檢查確認 `C:\Program Files\Java\jdk-18.0.2\bin\java.exe` 與 `javac.exe` 可執行。
+
+### Commit 建議
+
+```text
+docs(java): 調整後端 java 版本規範
+```
+
+### 備註 / 待確認事項
+
+- 目前系統 PATH 仍優先使用 Java 8，建立 Spring Boot 專案時需暫時設定 `JAVA_HOME` 與 PATH 指向 JDK 18，或由使用者永久調整系統環境變數。
+
+---
+
 ## 2026-06-30 09:36
 
 Task

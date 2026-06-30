@@ -1051,7 +1051,7 @@ AI 應：
 
 | 項目 | 技術 |
 |------|------|
-| Language | Java 21 LTS（建議） |
+| Language | JDK 18 |
 | Framework | Spring Boot |
 | ORM | Spring Data JPA |
 | Database | MySQL |
