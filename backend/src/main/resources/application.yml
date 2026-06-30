@@ -2,7 +2,7 @@ spring:
   application:
     name: monsters
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:dev}
+    active: ${SPRING_PROFILES_ACTIVE:prod}
   jpa:
     open-in-view: false
     properties:
