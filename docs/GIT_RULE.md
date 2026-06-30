@@ -416,6 +416,18 @@ develop
 
 建議至少一位 Reviewer。AI 不得自行略過 Review。
 
+### 11.4 Branch Cleanup Automation
+
+Repository 使用 GitHub Actions 每週一檢查分支。
+
+規則：
+
+- 永遠保留 `main` 與 `develop`。
+- 已合併到 `main` 的工作分支可自動刪除。
+- 只合併到 `develop`、尚未合併到 `main` 的分支不得刪除。
+- 尚未合併到 `develop` 的分支不得刪除。
+- 自動化不得使用 force push、reset、clean 或 rebase。
+
 ---
 
 ## 十二、Release Flow
