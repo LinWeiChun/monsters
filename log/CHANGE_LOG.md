@@ -62,6 +62,71 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-06-30 10:27
+
+Task
+DOC-003 文件一致性與精簡
+
+修改人
+Codex
+
+### 本次完成
+
+- 新增 `docs/DECISIONS.md`，集中管理已定案技術選型與待確認事項。
+- 統一 `CODING_STANDARD.md` 版本資訊與 Gradle 說明。
+- 更新 `GIT_RULE.md` 最後更新日期。
+- 補齊 `DATABASE_SPEC.md` 中日記社群愛心與留言資料表欄位。
+- 明確定義 `API_SPEC.md` 社群 `postId` 格式。
+- 將 `API_SPEC.md` 待確認事項集中引用至 `DECISIONS.md`。
+- 將 `TASKS.md` 中 Docker Compose 任務由可選調整為必做，避免與不得跳過 Phase 衝突。
+
+### 新增
+
+- `docs/DECISIONS.md`
+
+### 修改
+
+- `docs/API_SPEC.md`
+- `docs/CODING_STANDARD.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/GIT_RULE.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 文件補充：定義社群 `postId` 格式為 `{type}:{id}`。
+
+### Database
+
+- 文件補充：補齊 `diary_social_like` 與 `diary_social_comment` 欄位規格。
+
+### 測試
+
+- 使用 `rg` 掃描 Maven、Java 21、YYYY-MM-DD、待確認事項與欄位缺漏。
+- 使用 `git diff --check` 檢查文件格式。
+
+### Commit 建議
+
+```text
+docs(spec): 整理文件一致性與決策紀錄
+```
+
+### 備註 / 待確認事項
+
+- `docs/DECISIONS.md` 中仍保留需使用者後續決策的項目。
+
+---
+
 ## 2026-06-30 10:17
 
 Task

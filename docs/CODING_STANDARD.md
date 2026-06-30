@@ -669,6 +669,10 @@ CODING_STANDARD.md
 
 新增第三方套件必須取得使用者確認。
 
+已核准套件與工具請參閱：
+
+- docs/DECISIONS.md
+
 ---
 
 ## 4.2 專案目錄結構
@@ -2790,7 +2794,7 @@ http
 統一：
 
 ```text
-pom.xml
+build.gradle
 ```
 
 不得：
@@ -3151,7 +3155,7 @@ AGENTS.md
 | 項目 | 內容 |
 |------|------|
 | 文件名稱 | CODING_STANDARD.md |
-| 版本 | v1.0 |
+| 版本 | v3.0 |
 | 專案 | 貘nsters |
 | 維護者 | WeiChun Lin |
 | 適用 | 所有 AI Coding Agent 與 Repository 開發者 |
@@ -3178,6 +3182,7 @@ AGENTS.md
 | API_SPEC.md | API 規格 |
 | UI_SPEC.md | UI 規格 |
 | TASKS.md | 開發任務 |
+| DECISIONS.md | 技術決策與待確認事項 |
 
 ---
 
