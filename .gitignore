@@ -40,8 +40,6 @@ frontend/.packages
 frontend/.pub/
 frontend/build/
 
-frontend/.metadata
-
 frontend/ios/Flutter/Flutter.framework
 frontend/ios/Flutter/App.framework
 
@@ -137,6 +135,7 @@ htmlcov/
 #################################################
 
 *.lock
+!frontend/pubspec.lock
 
 #################################################
 # AI
