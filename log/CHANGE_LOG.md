@@ -62,6 +62,73 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-06-30 11:16
+
+Task
+TASK-005 建立 Docker Compose（MySQL + Backend）
+
+修改人
+Codex
+
+### 本次完成
+
+- 新增 Docker Compose，包含 MySQL 與 Backend service。
+- 新增後端 Dockerfile，使用 JDK 18 建置與執行 Spring Boot jar。
+- 新增 `database/init/` 初始化 SQL 目錄說明。
+- 更新 README 的 Docker Compose 啟動方式。
+- 更新 `DATABASE_SPEC.md` 與 `DECISIONS.md` 的容器環境說明。
+- 更新 `docs/TASKS.md` 標示本 Task 完成。
+
+### 新增
+
+- `docker-compose.yml`
+- `backend/Dockerfile`
+- `database/init/README.md`
+
+### 修改
+
+- `README.md`
+- `backend/README.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 新增 MySQL Docker Compose service，未建立資料表或 Migration。
+
+### 測試
+
+- `docker compose config`
+- 使用 JDK 18 執行 `.\gradlew.bat test`
+
+### Commit 建議
+
+```text
+chore(docker): 建立 mysql 與 backend compose
+```
+
+### 備註 / 待確認事項
+
+- 尚未建立實際資料表 migration。
+- Docker image 需在有 Docker 與網路環境時下載。
+
+---
+
 ## 2026-06-30 11:07
 
 Task

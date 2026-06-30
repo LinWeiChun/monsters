@@ -14,6 +14,7 @@
 | 後端 Build Tool | Gradle |
 | Database | MySQL |
 | API 架構 | REST API |
+| 本機容器環境 | Docker Compose |
 
 ## 二、已核准套件與工具
 
