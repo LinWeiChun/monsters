@@ -73,3 +73,6 @@
 2026-07-01,10:02,TASK-006,Documentation,docs/TASKS.md,修改,更新 README 執行說明 Task 狀態,Codex,否,否,否,否,
 2026-07-01,10:02,TASK-006,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-006 異動紀錄,Codex,否,否,否,否,
 2026-07-01,10:02,TASK-006,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-006 表格異動紀錄,Codex,否,否,否,否,
+2026-07-01,11:02,DOC-005,Documentation,AGENTS.md,修改,新增 Log 保存期限與新增前檢查規範,Codex,否,否,否,否,現有 Log 未超過一個月，未刪除
+2026-07-01,11:02,DOC-005,Documentation,log/CHANGE_LOG.md,修改,新增 DOC-005 異動紀錄與 Log 保存政策,Codex,否,否,否,否,現有 Log 未超過一個月，未刪除
+2026-07-01,11:02,DOC-005,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-005 表格異動紀錄,Codex,否,否,否,否,現有 Log 未超過一個月，未刪除
