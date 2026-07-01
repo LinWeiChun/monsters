@@ -64,6 +64,75 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-07-01 14:29
+
+Task
+TASK-008 建立全域 Exception Handler
+
+修改人
+Codex
+
+### 本次完成
+
+- 新增後端共用 Exception 類別，集中定義 400、401、403、404、409 錯誤。
+- 新增 `GlobalExceptionHandler`，以 `RestControllerAdvice` 統一處理 Business、Validation 與未預期 Exception。
+- 新增 `GlobalExceptionHandlerTest`，驗證 HTTP Status 與 `ApiResponse<Void>` 錯誤格式。
+- 更新 `docs/API_SPEC.md` 補充全域 Exception Handler 與 Exception 對應 Status。
+- 更新 `docs/TASKS.md` 標示本 Task 完成。
+- 新增 Log 前已檢查保存期限，現有 Log 未超過一個月，無需刪除。
+
+### 新增
+
+- `backend/src/main/java/com/monsters/common/exception/BusinessException.java`
+- `backend/src/main/java/com/monsters/common/exception/ValidationException.java`
+- `backend/src/main/java/com/monsters/common/exception/ResourceNotFoundException.java`
+- `backend/src/main/java/com/monsters/common/exception/ConflictException.java`
+- `backend/src/main/java/com/monsters/common/exception/UnauthorizedException.java`
+- `backend/src/main/java/com/monsters/common/exception/ForbiddenException.java`
+- `backend/src/main/java/com/monsters/common/exception/GlobalExceptionHandler.java`
+- `backend/src/test/java/com/monsters/common/exception/GlobalExceptionHandlerTest.java`
+
+### 修改
+
+- `docs/API_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 補充後端全域 Exception Handler 與錯誤 Response 規範，未新增業務 API endpoint。
+
+### Database
+
+- 無
+
+### 測試
+
+- `.\gradlew.bat test`
+- `.\gradlew.bat build`
+- `git diff --check`
+
+### Commit 建議
+
+```text
+feat(api): 建立全域 exception handler
+```
+
+### 備註 / 待確認事項
+
+- 無
+
+---
+
 ## 2026-07-01 11:02
 
 Task

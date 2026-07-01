@@ -82,3 +82,15 @@
 2026-07-01,11:02,DOC-005,Documentation,AGENTS.md,修改,新增 Log 保存期限與新增前檢查規範,Codex,否,否,否,否,現有 Log 未超過一個月，未刪除
 2026-07-01,11:02,DOC-005,Documentation,log/CHANGE_LOG.md,修改,新增 DOC-005 異動紀錄與 Log 保存政策,Codex,否,否,否,否,現有 Log 未超過一個月，未刪除
 2026-07-01,11:02,DOC-005,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-005 表格異動紀錄,Codex,否,否,否,否,現有 Log 未超過一個月，未刪除
+2026-07-01,14:29,TASK-008,Backend,backend/src/main/java/com/monsters/common/exception/BusinessException.java,新增,建立商業邏輯例外基底,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Backend,backend/src/main/java/com/monsters/common/exception/ValidationException.java,新增,建立請求驗證例外,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Backend,backend/src/main/java/com/monsters/common/exception/ResourceNotFoundException.java,新增,建立查無資料例外,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Backend,backend/src/main/java/com/monsters/common/exception/ConflictException.java,新增,建立資料衝突例外,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Backend,backend/src/main/java/com/monsters/common/exception/UnauthorizedException.java,新增,建立未授權例外,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Backend,backend/src/main/java/com/monsters/common/exception/ForbiddenException.java,新增,建立權限不足例外,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Backend,backend/src/main/java/com/monsters/common/exception/GlobalExceptionHandler.java,新增,建立全域 Exception Handler,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Test,backend/src/test/java/com/monsters/common/exception/GlobalExceptionHandlerTest.java,新增,新增全域 Exception Handler 測試,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Documentation,docs/API_SPEC.md,修改,補充全域 Exception Handler 規範,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Documentation,docs/TASKS.md,修改,更新全域 Exception Handler Task 狀態,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-008 異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-008 表格異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除

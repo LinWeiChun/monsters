@@ -50,6 +50,34 @@ Controller 回傳資料時必須使用 `ApiResponse<T>` 包裝，欄位固定為
 操作成功
 ```
 
+全域 Exception Handler：
+
+```text
+com.monsters.common.exception.GlobalExceptionHandler
+```
+
+Exception 回傳格式固定使用 `ApiResponse<Void>`：
+
+```json
+{
+  "success": false,
+  "message": "錯誤訊息",
+  "data": null
+}
+```
+
+後端共用 Exception 與 HTTP Status：
+
+| Exception | HTTP Status | 用途 |
+|---|---:|---|
+| BusinessException | 400 | 一般商業邏輯錯誤 |
+| ValidationException | 400 | 請求資料驗證錯誤 |
+| UnauthorizedException | 401 | 尚未登入或 Token 無效 |
+| ForbiddenException | 403 | 權限不足 |
+| ResourceNotFoundException | 404 | 查無資料 |
+| ConflictException | 409 | 資料衝突或重複 |
+| Exception | 500 | 未預期系統錯誤 |
+
 需要登入的 API 必須帶入：
 
 ```text
