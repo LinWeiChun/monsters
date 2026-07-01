@@ -54,6 +54,20 @@ Docker Compose 環境變數：
 - `created_at` DATETIME NOT NULL
 - `updated_at` DATETIME NOT NULL
 
+後端 Entity 必須繼承共用 Base Entity：
+
+```text
+com.monsters.common.entity.BaseEntity
+```
+
+Base Entity 統一提供：
+
+| 欄位 | Java 型別 | Database 欄位 | 說明 |
+|---|---|---|---|
+| id | Long | id | Primary Key，使用 AUTO_INCREMENT |
+| createdAt | LocalDateTime | created_at | 建立時間，新增時自動寫入 |
+| updatedAt | LocalDateTime | updated_at | 更新時間，新增與更新時自動寫入 |
+
 若需要軟刪除，加入：
 
 - `is_deleted` BOOLEAN DEFAULT FALSE

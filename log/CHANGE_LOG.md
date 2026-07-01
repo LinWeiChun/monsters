@@ -64,6 +64,68 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-07-01 14:40
+
+Task
+TASK-009 建立 Base Entity
+
+修改人
+Codex
+
+### 本次完成
+
+- 新增後端共用 `BaseEntity`，統一 `id`、`createdAt`、`updatedAt` 欄位與 JPA lifecycle callback。
+- 新增 `BaseEntityTest`，驗證 JPA annotation、欄位命名與時間戳更新行為。
+- 更新 `docs/DATABASE_SPEC.md` 補充 Base Entity 對應規範。
+- 更新 `docs/TASKS.md` 標示本 Task 完成。
+- 新增 Log 前已檢查保存期限，現有 Log 未超過一個月，無需刪除。
+
+### 新增
+
+- `backend/src/main/java/com/monsters/common/entity/BaseEntity.java`
+- `backend/src/test/java/com/monsters/common/entity/BaseEntityTest.java`
+
+### 修改
+
+- `docs/DATABASE_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 新增後端 Entity 共用欄位規範，未新增資料表或 Migration。
+
+### 測試
+
+- `.\gradlew.bat test`
+- `.\gradlew.bat build`
+- `git diff --check`
+
+### Commit 建議
+
+```text
+feat(database): 建立 base entity
+```
+
+### 備註 / 待確認事項
+
+- 無
+
+---
+
 ## 2026-07-01 14:29
 
 Task

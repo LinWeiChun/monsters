@@ -94,3 +94,9 @@
 2026-07-01,14:29,TASK-008,Documentation,docs/TASKS.md,修改,更新全域 Exception Handler Task 狀態,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
 2026-07-01,14:29,TASK-008,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-008 異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
 2026-07-01,14:29,TASK-008,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-008 表格異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:40,TASK-009,Backend,backend/src/main/java/com/monsters/common/entity/BaseEntity.java,新增,建立共用 Base Entity,Codex,否,是,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:40,TASK-009,Test,backend/src/test/java/com/monsters/common/entity/BaseEntityTest.java,新增,新增 Base Entity 單元測試,Codex,否,是,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:40,TASK-009,Documentation,docs/DATABASE_SPEC.md,修改,補充 Base Entity 欄位對應規範,Codex,否,是,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:40,TASK-009,Documentation,docs/TASKS.md,修改,更新 Base Entity Task 狀態,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:40,TASK-009,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-009 異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:40,TASK-009,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-009 表格異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
