@@ -30,6 +30,26 @@ Base URL：
 }
 ```
 
+後端共用 Response DTO：
+
+```text
+com.monsters.common.dto.ApiResponse<T>
+```
+
+Controller 回傳資料時必須使用 `ApiResponse<T>` 包裝，欄位固定為：
+
+| 欄位 | 型別 | 說明 |
+|---|---|---|
+| success | boolean | 是否成功 |
+| message | string | 成功或錯誤訊息 |
+| data | object / array / null | 回傳資料，失敗時為 null |
+
+成功預設訊息：
+
+```text
+操作成功
+```
+
 需要登入的 API 必須帶入：
 
 ```text

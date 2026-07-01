@@ -62,6 +62,67 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-07-01 10:54
+
+Task
+TASK-007 建立統一 API Response
+
+修改人
+Codex
+
+### 本次完成
+
+- 新增後端共用 `ApiResponse<T>` DTO，統一 API 回傳格式。
+- 新增 `ApiResponseTest`，驗證成功、失敗與 JSON 序列化欄位。
+- 更新 `docs/API_SPEC.md` 補充後端共用 Response DTO 規範。
+- 更新 `docs/TASKS.md` 標示本 Task 完成。
+- 更新 `CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv`。
+
+### 新增
+
+- `backend/src/main/java/com/monsters/common/dto/ApiResponse.java`
+- `backend/src/test/java/com/monsters/common/dto/ApiResponseTest.java`
+
+### 修改
+
+- `docs/API_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 補充後端 API Response 共用 DTO 規範，未新增業務 API endpoint。
+
+### Database
+
+- 無
+
+### 測試
+
+- `.\gradlew.bat test`
+- `git diff --check`
+
+### Commit 建議
+
+```text
+feat(api): 建立統一 response dto
+```
+
+### 備註 / 待確認事項
+
+- 無
+
+---
+
 ## 2026-07-01 10:02
 
 Task
