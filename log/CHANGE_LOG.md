@@ -62,6 +62,63 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-07-01 10:02
+
+Task
+TASK-006 建立 README 執行說明
+
+修改人
+Codex
+
+### 本次完成
+
+- 補充根目錄 README 的必要環境、前端執行、後端執行、Docker Compose、環境變數、測試與提交流程。
+- 更新 `docs/TASKS.md` 標示 README 執行說明 Task 完成。
+- 更新 `CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv`。
+
+### 新增
+
+- 無
+
+### 修改
+
+- `README.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- `git diff --check`
+
+### Commit 建議
+
+```text
+docs(readme): 補充專案執行說明
+```
+
+### 備註 / 待確認事項
+
+- `docs/DECISIONS.md` 既有未提交修改非本次 Task 內容，未納入提交。
+
+---
+
 ## 2026-06-30 11:16
 
 Task

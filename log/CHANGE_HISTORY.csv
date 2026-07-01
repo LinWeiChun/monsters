@@ -69,3 +69,7 @@
 2026-06-30,11:16,TASK-005,Documentation,docs/TASKS.md,修改,更新 Docker Compose Task 狀態,Codex,否,否,否,否,
 2026-06-30,11:16,TASK-005,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-005 異動紀錄,Codex,否,否,否,否,
 2026-06-30,11:16,TASK-005,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-005 表格異動紀錄,Codex,否,否,否,否,
+2026-07-01,10:02,TASK-006,Documentation,README.md,修改,補充專案必要環境與前後端執行說明,Codex,否,否,否,否,
+2026-07-01,10:02,TASK-006,Documentation,docs/TASKS.md,修改,更新 README 執行說明 Task 狀態,Codex,否,否,否,否,
+2026-07-01,10:02,TASK-006,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-006 異動紀錄,Codex,否,否,否,否,
+2026-07-01,10:02,TASK-006,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-006 表格異動紀錄,Codex,否,否,否,否,
