@@ -84,6 +84,29 @@ Exception 回傳格式固定使用 `ApiResponse<Void>`：
 Authorization: Bearer <token>
 ```
 
+CORS 設定：
+
+```text
+com.monsters.common.config.CorsConfig
+```
+
+CORS 僅套用於：
+
+```text
+/api/**
+```
+
+允許來源不得使用 `*`，需透過環境變數或設定檔指定可信任來源。
+
+| 設定 | 環境變數 | 預設值 |
+|---|---|---|
+| app.cors.allowed-origin-patterns | CORS_ALLOWED_ORIGIN_PATTERNS | http://localhost:*,http://127.0.0.1:* |
+| app.cors.allowed-methods | CORS_ALLOWED_METHODS | GET,POST,PUT,PATCH,DELETE,OPTIONS |
+| app.cors.allowed-headers | CORS_ALLOWED_HEADERS | Authorization,Content-Type |
+| app.cors.exposed-headers | CORS_EXPOSED_HEADERS | Authorization |
+| app.cors.allow-credentials | CORS_ALLOW_CREDENTIALS | true |
+| app.cors.max-age | CORS_MAX_AGE | 3600 |
+
 ---
 
 ## 二、Auth API

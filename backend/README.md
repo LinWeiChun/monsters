@@ -39,6 +39,21 @@ dev
 
 Docker Compose 會使用 `mysql` 作為 MySQL service hostname。
 
+## CORS 設定
+
+後端 CORS 僅套用於 `/api/**`。
+
+| 環境變數 | 預設值 |
+|----------|--------|
+| `CORS_ALLOWED_ORIGIN_PATTERNS` | `http://localhost:*,http://127.0.0.1:*` |
+| `CORS_ALLOWED_METHODS` | `GET,POST,PUT,PATCH,DELETE,OPTIONS` |
+| `CORS_ALLOWED_HEADERS` | `Authorization,Content-Type` |
+| `CORS_EXPOSED_HEADERS` | `Authorization` |
+| `CORS_ALLOW_CREDENTIALS` | `true` |
+| `CORS_MAX_AGE` | `3600` |
+
+正式環境必須將 `CORS_ALLOWED_ORIGIN_PATTERNS` 設為可信任前端網域，不得使用 `*`。
+
 ## 專案規範
 
 後端開發需遵守：

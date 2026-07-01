@@ -64,6 +64,74 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-07-01 14:48
+
+Task
+TASK-010 建立 CORS 設定
+
+修改人
+Codex
+
+### 本次完成
+
+- 新增後端 `CorsConfig`，將 CORS 設定套用於 `/api/**`。
+- 新增 `CorsProperties`，由 `app.cors.*` 與環境變數集中管理允許來源、methods、headers、credentials 與 max age。
+- 新增 `CorsConfigTest`，驗證設定綁定、允許本機來源與拒絕未授權來源。
+- 更新 `application.yml` 加入 CORS 預設設定。
+- 更新 README、Backend README 與 `docs/API_SPEC.md` 補充 CORS 設定方式。
+- 更新 `docs/TASKS.md` 標示本 Task 完成。
+- 新增 Log 前已檢查保存期限，現有 Log 未超過一個月，無需刪除。
+
+### 新增
+
+- `backend/src/main/java/com/monsters/common/config/CorsConfig.java`
+- `backend/src/main/java/com/monsters/common/config/CorsProperties.java`
+- `backend/src/test/java/com/monsters/common/config/CorsConfigTest.java`
+
+### 修改
+
+- `README.md`
+- `backend/README.md`
+- `backend/src/main/resources/application.yml`
+- `docs/API_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 新增 `/api/**` CORS 設定，未新增業務 API endpoint。
+
+### Database
+
+- 無
+
+### 測試
+
+- `.\gradlew.bat test`
+- `.\gradlew.bat build`
+- `git diff --check`
+
+### Commit 建議
+
+```text
+feat(api): 建立 cors 設定
+```
+
+### 備註 / 待確認事項
+
+- 正式環境需設定 `CORS_ALLOWED_ORIGIN_PATTERNS` 為可信任前端網域。
+
+---
+
 ## 2026-07-01 14:40
 
 Task
