@@ -64,6 +64,63 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-07-01 15:03
+
+Task
+DOC-006 停止追蹤本機 dev 設定檔
+
+修改人
+Codex
+
+### 本次完成
+
+- 將 `backend/src/main/resources/application-dev.yml` 加入 `.gitignore`。
+- 使用 `git rm --cached` 將 `application-dev.yml` 從 Git index 移除，保留本機檔案。
+- 新增 Log 前已檢查保存期限，現有 Log 未超過一個月，無需刪除。
+
+### 新增
+
+- 無
+
+### 修改
+
+- `.gitignore`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- `backend/src/main/resources/application-dev.yml`（僅停止 Git 追蹤，本機檔案保留）
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- `git status --short --ignored -- backend/src/main/resources/application-dev.yml`
+- `git diff --check`
+
+### Commit 建議
+
+```text
+chore(config): 停止追蹤 dev application 設定
+```
+
+### 備註 / 待確認事項
+
+- 本機 `application-dev.yml` 已被 `.gitignore` 忽略，可保留本機資料庫帳密。
+
+---
+
 ## 2026-07-01 14:48
 
 Task

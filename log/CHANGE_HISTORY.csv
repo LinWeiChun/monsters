@@ -110,3 +110,7 @@
 2026-07-01,14:48,TASK-010,Documentation,docs/TASKS.md,修改,更新 CORS Task 狀態,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
 2026-07-01,14:48,TASK-010,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-010 異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
 2026-07-01,14:48,TASK-010,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-010 表格異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,15:03,DOC-006,Config,.gitignore,修改,忽略 backend application-dev.yml,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,15:03,DOC-006,Config,backend/src/main/resources/application-dev.yml,刪除,停止 Git 追蹤但保留本機檔案,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,15:03,DOC-006,Documentation,log/CHANGE_LOG.md,修改,新增 DOC-006 異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,15:03,DOC-006,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-006 表格異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
