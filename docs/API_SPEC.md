@@ -107,6 +107,40 @@ CORS 僅套用於：
 | app.cors.allow-credentials | CORS_ALLOW_CREDENTIALS | true |
 | app.cors.max-age | CORS_MAX_AGE | 3600 |
 
+Security / JWT 基礎設定：
+
+```text
+com.monsters.common.security.SecurityConfig
+```
+
+安全規則：
+
+| Path | Method | 規則 |
+|---|---|---|
+| /api/auth/register | POST | 允許匿名 |
+| /api/auth/login | POST | 允許匿名 |
+| /api/auth/google-login | POST | 允許匿名 |
+| /api/auth/forgot-password | POST | 允許匿名 |
+| /api/auth/reset-password | POST | 允許匿名 |
+| /api/** | ALL | 需驗證 |
+| 其他路徑 | ALL | 拒絕 |
+
+Security 錯誤回應固定使用 `ApiResponse<Void>`：
+
+| 狀態 | message |
+|---:|---|
+| 401 | 尚未登入或 Token 無效 |
+| 403 | 權限不足 |
+
+JWT 基礎設定：
+
+| 設定 | 環境變數 | 預設值 |
+|---|---|---|
+| app.security.jwt.issuer | JWT_ISSUER | monsters |
+| app.security.jwt.secret | JWT_SECRET | 空字串，正式環境必須提供 |
+| app.security.jwt.access-token-expiration-seconds | JWT_ACCESS_TOKEN_EXPIRATION_SECONDS | 3600 |
+| app.security.jwt.refresh-token-expiration-seconds | JWT_REFRESH_TOKEN_EXPIRATION_SECONDS | 1209600 |
+
 ---
 
 ## 二、Auth API

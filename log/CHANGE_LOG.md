@@ -64,6 +64,79 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-07-01 15:14
+
+Task
+TASK-011 建立 Security / JWT 基礎設定
+
+修改人
+Codex
+
+### 本次完成
+
+- 新增 Spring Security starter。
+- 新增 `SecurityConfig`，設定 Stateless session、停用 CSRF、啟用 CORS、開放 Auth API 並保護 `/api/**`。
+- 新增 `SecurityExceptionHandler`，統一輸出 401 / 403 `ApiResponse<Void>`。
+- 新增 `JwtProperties`，集中管理 JWT issuer、secret 與 token 有效時間設定。
+- 新增 `BCryptPasswordEncoder` Bean。
+- 新增 `SecurityConfigTest`，驗證 JWT 設定綁定、BCrypt、Auth API 匿名存取與受保護 API 401 回應。
+- 更新 README、Backend README、`docs/API_SPEC.md` 與 `docs/TASKS.md`。
+- 新增 Log 前已檢查保存期限，現有 Log 未超過一個月，無需刪除。
+
+### 新增
+
+- `backend/src/main/java/com/monsters/common/security/JwtProperties.java`
+- `backend/src/main/java/com/monsters/common/security/SecurityConfig.java`
+- `backend/src/main/java/com/monsters/common/security/SecurityExceptionHandler.java`
+- `backend/src/test/java/com/monsters/common/security/SecurityConfigTest.java`
+
+### 修改
+
+- `README.md`
+- `backend/README.md`
+- `backend/build.gradle`
+- `backend/src/main/resources/application.yml`
+- `docs/API_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 新增 Security 基礎規則：Auth API 允許匿名，其餘 `/api/**` 需驗證。
+- 未新增業務 API endpoint。
+
+### Database
+
+- 無
+
+### 測試
+
+- `.\gradlew.bat test`
+- `.\gradlew.bat build`
+- `git diff --check`
+
+### Commit 建議
+
+```text
+feat(security): 建立 security jwt 基礎設定
+```
+
+### 備註 / 待確認事項
+
+- 正式環境必須設定 `JWT_SECRET`。
+- 本 Task 未導入額外 JWT 第三方套件，token 產生與驗證會在 Auth API Task 實作。
+
+---
+
 ## 2026-07-01 15:03
 
 Task

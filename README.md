@@ -354,6 +354,10 @@ docker compose down
 | `CORS_EXPOSED_HEADERS` | 後端回傳可被前端讀取的 header | `Authorization` |
 | `CORS_ALLOW_CREDENTIALS` | 是否允許 credentials | `true` |
 | `CORS_MAX_AGE` | preflight cache 秒數 | `3600` |
+| `JWT_ISSUER` | JWT issuer | `monsters` |
+| `JWT_SECRET` | JWT 簽章密鑰 | 空字串，正式環境必須提供 |
+| `JWT_ACCESS_TOKEN_EXPIRATION_SECONDS` | Access token 有效秒數 | `3600` |
+| `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` | Refresh token 有效秒數 | `1209600` |
 
 ## 測試與建置
 

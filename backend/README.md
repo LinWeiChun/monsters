@@ -54,6 +54,27 @@ Docker Compose 會使用 `mysql` 作為 MySQL service hostname。
 
 正式環境必須將 `CORS_ALLOWED_ORIGIN_PATTERNS` 設為可信任前端網域，不得使用 `*`。
 
+## Security / JWT 設定
+
+後端使用 Spring Security，預設規則：
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/google-login`
+- `POST /api/auth/forgot-password`
+- `POST /api/auth/reset-password`
+
+上述 API 允許匿名，其餘 `/api/**` 需驗證。
+
+JWT 基礎環境變數：
+
+| 環境變數 | 預設值 |
+|----------|--------|
+| `JWT_ISSUER` | `monsters` |
+| `JWT_SECRET` | 空字串，正式環境必須提供 |
+| `JWT_ACCESS_TOKEN_EXPIRATION_SECONDS` | `3600` |
+| `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` | `1209600` |
+
 ## 專案規範
 
 後端開發需遵守：
