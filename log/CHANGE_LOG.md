@@ -4,6 +4,8 @@
 
 AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HISTORY.csv` 或 `CHANGE_HISTORY.xlsx`。
 
+新增 Log 紀錄前，必須先檢查既有 Log 日期；若存在超過一個月的紀錄，需先刪除過期紀錄，再新增本次紀錄。
+
 ---
 
 ## 紀錄格式
@@ -59,6 +61,64 @@ feat(scope): 說明本次異動
 
 - 無
 ```
+
+---
+
+## 2026-07-01 11:02
+
+Task
+DOC-005 建立 Log 保存期限規範
+
+修改人
+Codex
+
+### 本次完成
+
+- 新增 Log 保存政策：Log 僅保存一個月。
+- 規範新增 Log 前必須先檢查 `CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv` 是否有超過一個月的紀錄。
+- 將 Log 保存政策記錄於 `AGENTS.md` 文件資訊。
+- 本次檢查現有 Log 最早日期為 `2026-06-29`，未超過一個月，無需刪除。
+
+### 新增
+
+- 無
+
+### 修改
+
+- `AGENTS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- `git diff --check`
+- 確認現有 Log 日期皆未超過一個月。
+
+### Commit 建議
+
+```text
+docs(log): 新增 log 保存期限規範
+```
+
+### 備註 / 待確認事項
+
+- 無
 
 ---
 

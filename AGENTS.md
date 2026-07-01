@@ -212,6 +212,29 @@ DONE
 
 # 八、文件同步
 
+新增任何 Log 紀錄前：
+
+AI 必須先檢查：
+
+- log/CHANGE_LOG.md
+- log/CHANGE_HISTORY.csv
+- log/CHANGE_HISTORY.xlsx（若本次使用）
+
+Log 僅保存一個月。
+
+若存在超過一個月的紀錄：
+
+AI 必須先刪除過期 Log 紀錄。
+
+刪除後：
+
+才能新增本次 Log 紀錄。
+
+本次工作報告必須說明：
+
+- 是否檢查 Log 保存期限
+- 是否刪除過期 Log
+
 若修改：
 
 功能
@@ -429,6 +452,7 @@ AI 應自動：
 | 專案 | 貘nsters |
 | 維護者 | WeiChun Lin |
 | 適用 | 所有 AI Coding Agent |
+| Log 保存政策 | 新增 Log 前需檢查並刪除超過一個月的紀錄 |
 
 ---
 
