@@ -1,0 +1,52 @@
+project:
+  root: com.example.demo
+  name: monsters
+database:
+  name: 111- monsters
+  driver: com.mysql.cj.jdbc.Driver
+file:
+  path: D:/monsters/back-end/file
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  datasource:
+    url: jdbc:mysql://140.131.114.242:3306/111- monsters?useSSL=false&serverTimezone=Asia/Taipei
+    username: monsters
+    password: MONsters@ntub108
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    open-in-view: true
+    show-sql: false
+    generate-ddl: false
+    format-sql: false
+    hibernate:
+      dialect: org.hibernate.dialect.MySQLDialect
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: ${spring.jpa.database-platform}
+        hbm2ddl:
+          auto: ${spring.jpa.hibernate.ddl-auto}
+        show_sql: ${spring.jpa.show-sql}
+        format_sql: ${spring.jpa.show-sql}
+    http:
+      multipart:
+        maxFileSize: 100Mb
+        maxRequestSize: 100Mb
+server:
+  servlet:
+    encoding:
+      charset: UTF-8
+  cores:
+    http-methods:
+      - 'GET'
+      - 'POST'
+      - 'PUT'
+      - 'PATCH'
+      - 'DELETE'
+      - 'OPTIONS'
+    http-headers:
+      - '*'
+    export-http-headers:
+      - 'X-Auth-Token'

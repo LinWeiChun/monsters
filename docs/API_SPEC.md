@@ -10,6 +10,50 @@ Base URL：
 /api
 ```
 
+Flutter API Client：
+
+```text
+frontend/lib/core/network/ApiClient
+```
+
+前端 API Base URL 預設值：
+
+```text
+http://localhost:8080/api
+```
+
+前端可透過 dart-define 覆寫：
+
+```text
+API_BASE_URL
+```
+
+Flutter UI 不得直接呼叫 Dio。API 存取必須經由 Provider / Repository 使用 `ApiClient`。
+Flutter API 錯誤處理：
+
+```text
+frontend/lib/core/network/ApiErrorHandler
+frontend/lib/core/network/ApiException
+frontend/lib/core/network/ApiErrorType
+```
+
+`ApiClient` 必須將 `DioException`、逾時、網路錯誤、非標準 Response 轉換為 `ApiException`。UI / Repository 不直接處理 `DioException`，應依 `ApiErrorType` 判斷錯誤類型。
+
+錯誤類型對應：
+
+| HTTP / 狀態 | ApiErrorType |
+|---|---|
+| network error | network |
+| timeout | timeout |
+| 400 | validation |
+| 401 | unauthorized |
+| 403 | forbidden |
+| 404 | notFound |
+| 409 | conflict |
+| 500+ | server |
+| cancelled | cancelled |
+| other | unknown |
+
 成功 Response：
 
 ```json
@@ -30,11 +74,116 @@ Base URL：
 }
 ```
 
+後端共用 Response DTO：
+
+```text
+com.monsters.common.dto.ApiResponse<T>
+```
+
+Controller 回傳資料時必須使用 `ApiResponse<T>` 包裝，欄位固定為：
+
+| 欄位 | 型別 | 說明 |
+|---|---|---|
+| success | boolean | 是否成功 |
+| message | string | 成功或錯誤訊息 |
+| data | object / array / null | 回傳資料，失敗時為 null |
+
+成功預設訊息：
+
+```text
+操作成功
+```
+
+全域 Exception Handler：
+
+```text
+com.monsters.common.exception.GlobalExceptionHandler
+```
+
+Exception 回傳格式固定使用 `ApiResponse<Void>`：
+
+```json
+{
+  "success": false,
+  "message": "錯誤訊息",
+  "data": null
+}
+```
+
+後端共用 Exception 與 HTTP Status：
+
+| Exception | HTTP Status | 用途 |
+|---|---:|---|
+| BusinessException | 400 | 一般商業邏輯錯誤 |
+| ValidationException | 400 | 請求資料驗證錯誤 |
+| UnauthorizedException | 401 | 尚未登入或 Token 無效 |
+| ForbiddenException | 403 | 權限不足 |
+| ResourceNotFoundException | 404 | 查無資料 |
+| ConflictException | 409 | 資料衝突或重複 |
+| Exception | 500 | 未預期系統錯誤 |
+
 需要登入的 API 必須帶入：
 
 ```text
 Authorization: Bearer <token>
 ```
+
+CORS 設定：
+
+```text
+com.monsters.common.config.CorsConfig
+```
+
+CORS 僅套用於：
+
+```text
+/api/**
+```
+
+允許來源不得使用 `*`，需透過環境變數或設定檔指定可信任來源。
+
+| 設定 | 環境變數 | 預設值 |
+|---|---|---|
+| app.cors.allowed-origin-patterns | CORS_ALLOWED_ORIGIN_PATTERNS | http://localhost:*,http://127.0.0.1:* |
+| app.cors.allowed-methods | CORS_ALLOWED_METHODS | GET,POST,PUT,PATCH,DELETE,OPTIONS |
+| app.cors.allowed-headers | CORS_ALLOWED_HEADERS | Authorization,Content-Type |
+| app.cors.exposed-headers | CORS_EXPOSED_HEADERS | Authorization |
+| app.cors.allow-credentials | CORS_ALLOW_CREDENTIALS | true |
+| app.cors.max-age | CORS_MAX_AGE | 3600 |
+
+Security / JWT 基礎設定：
+
+```text
+com.monsters.common.security.SecurityConfig
+```
+
+安全規則：
+
+| Path | Method | 規則 |
+|---|---|---|
+| /api/auth/register | POST | 允許匿名 |
+| /api/auth/login | POST | 允許匿名 |
+| /api/auth/google-login | POST | 允許匿名 |
+| /api/auth/forgot-password | POST | 允許匿名 |
+| /api/auth/reset-password | POST | 允許匿名 |
+| /api/** | ALL | 需驗證 |
+| 其他路徑 | ALL | 拒絕 |
+
+Security 錯誤回應固定使用 `ApiResponse<Void>`：
+
+| 狀態 | message |
+|---:|---|
+| 401 | 尚未登入或 Token 無效 |
+| 403 | 權限不足 |
+
+JWT 基礎設定：
+
+| 設定 | 環境變數 | 預設值 |
+|---|---|---|
+| app.security.jwt.issuer | JWT_ISSUER | monsters |
+| app.security.jwt.secret | JWT_SECRET | 空字串，正式環境必須提供 |
+| app.security.jwt.access-token-expiration-seconds | JWT_ACCESS_TOKEN_EXPIRATION_SECONDS | 3600 |
+| app.security.jwt.refresh-token-expiration-seconds | JWT_REFRESH_TOKEN_EXPIRATION_SECONDS | 1209600 |
 
 ---
 

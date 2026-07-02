@@ -59,3 +59,112 @@
 2026-06-30,11:07,DOC-004,Documentation,docs/GIT_RULE.md,修改,補充分支清理自動化規則,Codex,否,否,否,否,
 2026-06-30,11:07,DOC-004,Documentation,log/CHANGE_LOG.md,修改,新增 DOC-004 異動紀錄,Codex,否,否,否,否,
 2026-06-30,11:07,DOC-004,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-004 表格異動紀錄,Codex,否,否,否,否,
+2026-06-30,11:16,TASK-005,Docker,docker-compose.yml,新增,建立 MySQL 與 Backend Compose 設定,Codex,否,是,否,否,
+2026-06-30,11:16,TASK-005,Docker,backend/Dockerfile,新增,建立後端 Docker image 建置設定,Codex,否,否,否,否,
+2026-06-30,11:16,TASK-005,Database,database/init/README.md,新增,新增 MySQL 初始化目錄說明,Codex,否,是,否,否,
+2026-06-30,11:16,TASK-005,Documentation,README.md,修改,補充 Docker Compose 啟動方式,Codex,否,否,否,否,
+2026-06-30,11:16,TASK-005,Documentation,backend/README.md,修改,補充 Docker Compose MySQL hostname 說明,Codex,否,否,否,否,
+2026-06-30,11:16,TASK-005,Documentation,docs/DATABASE_SPEC.md,修改,補充 Docker Compose 服務與環境變數,Codex,否,是,否,否,
+2026-06-30,11:16,TASK-005,Documentation,docs/DECISIONS.md,修改,新增 Docker Compose 技術決策,Codex,否,否,否,否,
+2026-06-30,11:16,TASK-005,Documentation,docs/TASKS.md,修改,更新 Docker Compose Task 狀態,Codex,否,否,否,否,
+2026-06-30,11:16,TASK-005,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-005 異動紀錄,Codex,否,否,否,否,
+2026-06-30,11:16,TASK-005,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-005 表格異動紀錄,Codex,否,否,否,否,
+2026-07-01,10:02,TASK-006,Documentation,README.md,修改,補充專案必要環境與前後端執行說明,Codex,否,否,否,否,
+2026-07-01,10:02,TASK-006,Documentation,docs/TASKS.md,修改,更新 README 執行說明 Task 狀態,Codex,否,否,否,否,
+2026-07-01,10:02,TASK-006,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-006 異動紀錄,Codex,否,否,否,否,
+2026-07-01,10:02,TASK-006,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-006 表格異動紀錄,Codex,否,否,否,否,
+2026-07-01,10:54,TASK-007,Backend,backend/src/main/java/com/monsters/common/dto/ApiResponse.java,新增,建立統一 API Response DTO,Codex,是,否,否,否,
+2026-07-01,10:54,TASK-007,Test,backend/src/test/java/com/monsters/common/dto/ApiResponseTest.java,新增,新增 ApiResponse 單元測試,Codex,是,否,否,否,
+2026-07-01,10:54,TASK-007,Documentation,docs/API_SPEC.md,修改,補充後端共用 Response DTO 規範,Codex,是,否,否,否,
+2026-07-01,10:54,TASK-007,Documentation,docs/TASKS.md,修改,更新統一 API Response Task 狀態,Codex,否,否,否,否,
+2026-07-01,10:54,TASK-007,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-007 異動紀錄,Codex,否,否,否,否,
+2026-07-01,10:54,TASK-007,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-007 表格異動紀錄,Codex,否,否,否,否,
+2026-07-01,11:02,DOC-005,Documentation,AGENTS.md,修改,新增 Log 保存期限與新增前檢查規範,Codex,否,否,否,否,現有 Log 未超過一個月，未刪除
+2026-07-01,11:02,DOC-005,Documentation,log/CHANGE_LOG.md,修改,新增 DOC-005 異動紀錄與 Log 保存政策,Codex,否,否,否,否,現有 Log 未超過一個月，未刪除
+2026-07-01,11:02,DOC-005,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-005 表格異動紀錄,Codex,否,否,否,否,現有 Log 未超過一個月，未刪除
+2026-07-01,14:29,TASK-008,Backend,backend/src/main/java/com/monsters/common/exception/BusinessException.java,新增,建立商業邏輯例外基底,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Backend,backend/src/main/java/com/monsters/common/exception/ValidationException.java,新增,建立請求驗證例外,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Backend,backend/src/main/java/com/monsters/common/exception/ResourceNotFoundException.java,新增,建立查無資料例外,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Backend,backend/src/main/java/com/monsters/common/exception/ConflictException.java,新增,建立資料衝突例外,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Backend,backend/src/main/java/com/monsters/common/exception/UnauthorizedException.java,新增,建立未授權例外,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Backend,backend/src/main/java/com/monsters/common/exception/ForbiddenException.java,新增,建立權限不足例外,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Backend,backend/src/main/java/com/monsters/common/exception/GlobalExceptionHandler.java,新增,建立全域 Exception Handler,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Test,backend/src/test/java/com/monsters/common/exception/GlobalExceptionHandlerTest.java,新增,新增全域 Exception Handler 測試,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Documentation,docs/API_SPEC.md,修改,補充全域 Exception Handler 規範,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Documentation,docs/TASKS.md,修改,更新全域 Exception Handler Task 狀態,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-008 異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:29,TASK-008,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-008 表格異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:40,TASK-009,Backend,backend/src/main/java/com/monsters/common/entity/BaseEntity.java,新增,建立共用 Base Entity,Codex,否,是,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:40,TASK-009,Test,backend/src/test/java/com/monsters/common/entity/BaseEntityTest.java,新增,新增 Base Entity 單元測試,Codex,否,是,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:40,TASK-009,Documentation,docs/DATABASE_SPEC.md,修改,補充 Base Entity 欄位對應規範,Codex,否,是,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:40,TASK-009,Documentation,docs/TASKS.md,修改,更新 Base Entity Task 狀態,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:40,TASK-009,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-009 異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:40,TASK-009,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-009 表格異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:48,TASK-010,Backend,backend/src/main/java/com/monsters/common/config/CorsConfig.java,新增,建立後端 CORS WebMvc 設定,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:48,TASK-010,Backend,backend/src/main/java/com/monsters/common/config/CorsProperties.java,新增,建立 CORS 設定屬性,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:48,TASK-010,Test,backend/src/test/java/com/monsters/common/config/CorsConfigTest.java,新增,新增 CORS 設定測試,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:48,TASK-010,Backend,backend/src/main/resources/application.yml,修改,新增 CORS 預設設定,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:48,TASK-010,Documentation,README.md,修改,補充 CORS 環境變數,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:48,TASK-010,Documentation,backend/README.md,修改,補充 CORS 後端設定說明,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:48,TASK-010,Documentation,docs/API_SPEC.md,修改,補充 CORS API 設定規範,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:48,TASK-010,Documentation,docs/TASKS.md,修改,更新 CORS Task 狀態,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:48,TASK-010,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-010 異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,14:48,TASK-010,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-010 表格異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,15:03,DOC-006,Config,.gitignore,修改,忽略 backend application-dev.yml,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,15:03,DOC-006,Config,backend/src/main/resources/application-dev.yml,刪除,停止 Git 追蹤但保留本機檔案,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,15:03,DOC-006,Documentation,log/CHANGE_LOG.md,修改,新增 DOC-006 異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,15:03,DOC-006,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-006 表格異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,15:14,TASK-011,Backend,backend/build.gradle,修改,新增 Spring Security starter,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,15:14,TASK-011,Backend,backend/src/main/java/com/monsters/common/security/JwtProperties.java,新增,建立 JWT 設定屬性,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,15:14,TASK-011,Backend,backend/src/main/java/com/monsters/common/security/SecurityConfig.java,新增,建立 SecurityFilterChain 與 BCrypt 設定,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,15:14,TASK-011,Backend,backend/src/main/java/com/monsters/common/security/SecurityExceptionHandler.java,新增,建立 Security 錯誤回應處理器,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,15:14,TASK-011,Backend,backend/src/main/resources/application.yml,修改,新增 JWT 基礎設定,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,15:14,TASK-011,Test,backend/src/test/java/com/monsters/common/security/SecurityConfigTest.java,新增,新增 Security 基礎設定測試,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,15:14,TASK-011,Documentation,README.md,修改,補充 JWT 環境變數,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,15:14,TASK-011,Documentation,backend/README.md,修改,補充 Security / JWT 設定說明,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,15:14,TASK-011,Documentation,docs/API_SPEC.md,修改,補充 Security / JWT API 規範,Codex,是,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,15:14,TASK-011,Documentation,docs/TASKS.md,修改,更新 Security / JWT Task 狀態,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,15:14,TASK-011,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-011 異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-01,15:14,TASK-011,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-011 表格異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-02,09:02,DOC-007,Documentation,.gitignore,修改,新增 system_data/ 忽略規則,Codex,否,否,否,否,新增 Log 前已檢查保存期限且無過期紀錄
+2026-07-02,09:02,DOC-007,Documentation,README.md,修改,補充 system_data 僅供本機參考且不追蹤,Codex,否,否,否,否,新增 Log 前已檢查保存期限且無過期紀錄
+2026-07-02,09:02,DOC-007,Documentation,docs/DATABASE_SPEC.md,修改,補充舊系統資料庫參考與新版調整原則,Codex,否,是,否,否,文件異動未修改實體資料庫
+2026-07-02,09:02,DOC-007,Documentation,docs/UI_SPEC.md,修改,補充舊系統 UI 參考與新版調整原則,Codex,否,否,是,否,文件異動未修改前端程式
+2026-07-02,09:02,DOC-007,Documentation,log/CHANGE_LOG.md,修改,新增 DOC-007 文件維護紀錄,Codex,否,否,否,否,新增 Log 前已檢查保存期限且無過期紀錄
+2026-07-02,09:02,DOC-007,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-007 文件維護紀錄,Codex,否,否,否,否,新增 Log 前已檢查保存期限且無過期紀錄
+2026-07-02,09:02,DOC-007,Documentation,system_data/,刪除,自 Git 索引移除 system_data 已追蹤 PDF 並保留本機檔案,Codex,否,否,否,否,system_data 僅供本機參考
+2026-07-02,09:10,DOC-008,Documentation,.gitignore,修改,調整 system_data 為程式與圖片白名單追蹤規則,Codex,否,否,否,否,新增 Log 前已檢查保存期限且無過期紀錄
+2026-07-02,09:10,DOC-008,Documentation,README.md,修改,更新 system_data 使用規範為可追蹤程式與圖片資料,Codex,否,否,否,否,新增 Log 前已檢查保存期限且無過期紀錄
+2026-07-02,09:10,DOC-008,Documentation,docs/UI_SPEC.md,修改,調整舊系統圖片素材參考規則,Codex,否,否,是,否,新增 Log 前已檢查保存期限且無過期紀錄
+2026-07-02,09:10,DOC-008,Reference,system_data/,新增,重新納入舊系統程式檔案專案設定檔與圖片素材,Codex,否,否,否,否,僅供舊系統參考
+2026-07-02,09:10,DOC-008,Reference,system_data/,刪除,刪除非程式與非圖片資料共 15 個檔案,Codex,否,否,否,否,已排除 PDF docx mp4 txt jks jar metadata 等資料
+2026-07-02,09:10,DOC-008,Documentation,log/CHANGE_LOG.md,修改,新增 DOC-008 異動紀錄,Codex,否,否,否,否,新增 Log 前已檢查保存期限且無過期紀錄
+2026-07-02,09:10,DOC-008,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-008 表格異動紀錄,Codex,否,否,否,否,新增 Log 前已檢查保存期限且無過期紀錄
+2026-07-02,09:37,DOC-009,Git,develop,靽格,merge docs/system-data-reference into local develop,Codex,否,否,否,否,Log 保存期限已檢查，未刪除過期紀錄
+2026-07-02,09:37,DOC-009,Reference,system_data/,靽格,清理舊參考程式 trailing whitespace 與 EOF 空白,Codex,否,否,否,否,僅格式清理
+2026-07-02,09:37,DOC-009,Documentation,log/CHANGE_LOG.md,靽格,新增 DOC-009 merge 紀錄,Codex,否,否,否,否,Log 保存期限已檢查
+2026-07-02,09:37,DOC-009,Documentation,log/CHANGE_HISTORY.csv,靽格,新增 DOC-009 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查
+2026-07-02,09:49,TASK-012,Frontend,frontend/lib/config/app_config.dart,新增,建立 API Base URL 與 timeout 設定,Codex,否,否,否,否,Log 保存期限已檢查，未刪除過期紀錄
+2026-07-02,09:49,TASK-012,Frontend,frontend/lib/core/network/api_client.dart,新增,建立 Dio Client 與 Bearer token 設定,Codex,否,否,否,否,後續 API Error Handler Task 可擴充 interceptor
+2026-07-02,09:49,TASK-012,Frontend,frontend/lib/core/network/api_response.dart,新增,建立標準 API Response parsing model,Codex,否,否,否,否,符合 API_SPEC.md response 格式
+2026-07-02,09:49,TASK-012,Frontend,frontend/lib/providers/api_client_provider.dart,新增,建立 Riverpod ApiClient Provider,Codex,否,否,否,否,供後續 Repository 注入使用
+2026-07-02,09:49,TASK-012,Test,frontend/test/core/network/api_client_test.dart,新增,新增 Dio Client 單元測試,Codex,否,否,否,否,已執行 flutter test
+2026-07-02,09:49,TASK-012,Frontend,frontend/pubspec.yaml,修改,新增 dio 與 flutter_riverpod dependency,Codex,否,否,否,否,已執行 flutter pub get
+2026-07-02,09:49,TASK-012,Frontend,frontend/pubspec.lock,修改,更新 Flutter dependency lockfile,Codex,否,否,否,否,已執行 flutter pub get
+2026-07-02,09:49,TASK-012,Documentation,frontend/README.md,修改,新增 API Client 使用說明,Codex,否,否,否,否,文件同步
+2026-07-02,09:49,TASK-012,Documentation,docs/API_SPEC.md,修改,新增 Flutter API Client 與 API_BASE_URL 說明,Codex,是,否,否,否,僅文件補充前端 client 設定
+2026-07-02,09:49,TASK-012,Documentation,docs/TASKS.md,修改,標記 Dio Client Task 為 DONE,Codex,否,否,否,否,依 Task 流程完成
+2026-07-02,09:49,TASK-012,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-012 變更紀錄,Codex,否,否,否,否,Log 保存期限已檢查
+2026-07-02,09:49,TASK-012,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-012 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查
+2026-07-02,14:33,TASK-013,Frontend,frontend/lib/core/network/api_error_handler.dart,新增,建立 DioException 與 HTTP status 至 ApiException 的統一轉換器,Codex,是,否,否,否,Log 保存期限已檢查且未刪除
+2026-07-02,14:33,TASK-013,Frontend,frontend/lib/core/network/api_error_type.dart,新增,建立前端 API 錯誤分類 enum,Codex,是,否,否,否,Repository UI 依錯誤類型判斷
+2026-07-02,14:33,TASK-013,Frontend,frontend/lib/core/network/api_exception.dart,新增,建立前端 API 例外型別,Codex,是,否,否,否,不暴露 stack trace 或敏感資訊
+2026-07-02,14:33,TASK-013,Frontend,frontend/lib/core/network/api_client.dart,修改,統一將 DioException 與格式錯誤轉為 ApiException,Codex,是,否,否,否,不直接向上拋出 DioException
+2026-07-02,14:33,TASK-013,Frontend,frontend/lib/providers/api_client_provider.dart,修改,新增 ApiErrorHandler Provider 並注入 ApiClient,Codex,否,否,否,否,維持 Riverpod DI
+2026-07-02,14:33,TASK-013,Test,frontend/test/core/network/api_error_handler_test.dart,新增,新增 API Error Handler 單元測試,Codex,否,否,否,否,涵蓋 401 timeout network format
+2026-07-02,14:33,TASK-013,Test,frontend/test/core/network/api_client_test.dart,修改,新增 ApiClient 錯誤轉換測試,Codex,否,否,否,否,涵蓋非標準 response 與 backend error
+2026-07-02,14:33,TASK-013,Documentation,frontend/README.md,修改,補充前端 API Error Handler 使用說明,Codex,否,否,否,否,文件同步完成
+2026-07-02,14:33,TASK-013,Documentation,docs/API_SPEC.md,修改,補充前端 API 錯誤處理合約與類型對應,Codex,是,否,否,否,未新增後端 endpoint
+2026-07-02,14:33,TASK-013,Documentation,docs/TASKS.md,修改,修正前端任務清單斷行並標記 API Error Handler DONE,Codex,否,否,否,否,已依 TODO IN PROGRESS REVIEW DONE 推進
+2026-07-02,14:33,TASK-013,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-013 變更紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除
+2026-07-02,14:33,TASK-013,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-013 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除
