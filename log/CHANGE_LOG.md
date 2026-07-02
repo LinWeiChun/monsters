@@ -64,6 +64,130 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-07-02 09:10
+
+Task
+DOC-008 system_data 選擇性追蹤程式與圖片
+
+變更者
+Codex
+
+### 本次完成
+
+- 依使用者要求重新將 `system_data/` 納入 Git，但只追蹤程式檔案、專案設定檔與圖片素材。
+- 調整 `.gitignore` 為白名單規則，預設忽略 `system_data/**`，再放行 source、Flutter/Android/iOS/Windows 專案設定與圖片格式。
+- 刪除 `system_data/` 內不需推上 Git 的 PDF、docx、mp4、txt 雜檔、jks、jar、metadata、README 等非程式或非圖片資料，共 15 個檔案。
+- 更新 README 與 UI 規格，使文件與「保留程式檔案及圖片資料」規則一致。
+- 新增 Log 前已檢查 `log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv` 保存期限；目前無超過一個月紀錄，未刪除過期 Log。
+
+### 新增
+
+- `system_data/` 內程式檔案、專案設定檔與圖片素材
+
+### 修改
+
+- `.gitignore`
+- `README.md`
+- `docs/UI_SPEC.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- `system_data/` 內非程式與非圖片資料 15 個檔案
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- `git diff --check`
+- 檢查 `system_data/` 剩餘檔案副檔名
+- 檢查 `git status --ignored -- system_data`
+
+### Commit 建議
+
+```text
+docs(system-data): 追蹤舊系統程式與圖片資料
+```
+
+### 備註 / 待確認事項
+
+- `system_data/` 僅供舊系統參考；正式新版程式仍以 `frontend/`、`backend/`、`database/` 為準。
+
+---
+
+## 2026-07-02 09:02
+
+Task
+DOC-007 system_data 舊系統參考文件化
+
+靽格鈭?
+Codex
+
+### ?祆活摰?
+
+- 參考 `system_data` 舊後端 Entity，整理新版資料庫可採用與需調整的欄位、關聯與命名原則。
+- 參考 `system_data` 舊 Flutter 程式，整理新版 UI 可採用的畫面流程、互動方式與不得沿用的實作方式。
+- 將 `system_data/` 設定為 Git 不追蹤，並保留其本機參考用途說明。
+- 新增 Log 前已檢查 `log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv` 保存期限；目前無超過一個月紀錄，未刪除過期 Log。
+
+### ?啣?
+
+- 無
+
+### 靽格
+
+- `.gitignore`
+- `README.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/UI_SPEC.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### ?芷
+
+- `system_data/四技第111405組-貘nsters APP-系統手冊.pdf`（僅自 Git 索引移除，保留本機檔案）
+- `system_data/四技第111405組-貘nsters APP-系統簡介.pdf`（僅自 Git 索引移除，保留本機檔案）
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 文件補充舊系統資料庫參考與新版調整原則，未修改實體資料庫。
+
+### 皜祈岫
+
+- `git diff --check`
+- `git status --short --ignored -- system_data`
+
+### Commit 撱箄降
+
+```text
+docs(system-data): 補充舊系統參考規範
+```
+
+### ?酉 / 敺Ⅱ隤???
+
+- `system_data/` 只作為本機參考資料，不再納入 Git 追蹤。
+
+---
+
 ## 2026-07-01 15:14
 
 Task
