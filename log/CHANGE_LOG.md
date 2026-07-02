@@ -64,6 +64,68 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-07-02 09:02
+
+Task
+DOC-007 system_data 舊系統參考文件化
+
+靽格鈭?
+Codex
+
+### ?祆活摰?
+
+- 參考 `system_data` 舊後端 Entity，整理新版資料庫可採用與需調整的欄位、關聯與命名原則。
+- 參考 `system_data` 舊 Flutter 程式，整理新版 UI 可採用的畫面流程、互動方式與不得沿用的實作方式。
+- 將 `system_data/` 設定為 Git 不追蹤，並保留其本機參考用途說明。
+- 新增 Log 前已檢查 `log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv` 保存期限；目前無超過一個月紀錄，未刪除過期 Log。
+
+### ?啣?
+
+- 無
+
+### 靽格
+
+- `.gitignore`
+- `README.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/UI_SPEC.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### ?芷
+
+- `system_data/四技第111405組-貘nsters APP-系統手冊.pdf`（僅自 Git 索引移除，保留本機檔案）
+- `system_data/四技第111405組-貘nsters APP-系統簡介.pdf`（僅自 Git 索引移除，保留本機檔案）
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 文件補充舊系統資料庫參考與新版調整原則，未修改實體資料庫。
+
+### 皜祈岫
+
+- `git diff --check`
+- `git status --short --ignored -- system_data`
+
+### Commit 撱箄降
+
+```text
+docs(system-data): 補充舊系統參考規範
+```
+
+### ?酉 / 敺Ⅱ隤???
+
+- `system_data/` 只作為本機參考資料，不再納入 Git 追蹤。
+
+---
+
 ## 2026-07-01 15:14
 
 Task

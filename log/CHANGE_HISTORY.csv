@@ -126,3 +126,10 @@
 2026-07-01,15:14,TASK-011,Documentation,docs/TASKS.md,修改,更新 Security / JWT Task 狀態,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
 2026-07-01,15:14,TASK-011,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-011 異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
 2026-07-01,15:14,TASK-011,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-011 表格異動紀錄,Codex,否,否,否,否,新增前已檢查 Log 保存期限，未刪除
+2026-07-02,09:02,DOC-007,Documentation,.gitignore,修改,新增 system_data/ 忽略規則,Codex,否,否,否,否,新增 Log 前已檢查保存期限且無過期紀錄
+2026-07-02,09:02,DOC-007,Documentation,README.md,修改,補充 system_data 僅供本機參考且不追蹤,Codex,否,否,否,否,新增 Log 前已檢查保存期限且無過期紀錄
+2026-07-02,09:02,DOC-007,Documentation,docs/DATABASE_SPEC.md,修改,補充舊系統資料庫參考與新版調整原則,Codex,否,是,否,否,文件異動未修改實體資料庫
+2026-07-02,09:02,DOC-007,Documentation,docs/UI_SPEC.md,修改,補充舊系統 UI 參考與新版調整原則,Codex,否,否,是,否,文件異動未修改前端程式
+2026-07-02,09:02,DOC-007,Documentation,log/CHANGE_LOG.md,修改,新增 DOC-007 文件維護紀錄,Codex,否,否,否,否,新增 Log 前已檢查保存期限且無過期紀錄
+2026-07-02,09:02,DOC-007,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-007 文件維護紀錄,Codex,否,否,否,否,新增 Log 前已檢查保存期限且無過期紀錄
+2026-07-02,09:02,DOC-007,Documentation,system_data/,刪除,自 Git 索引移除 system_data 已追蹤 PDF 並保留本機檔案,Codex,否,否,否,否,system_data 僅供本機參考

@@ -274,3 +274,30 @@ Base Entity 統一提供：
 
 - 原手冊中表名 `diary_socila_like` 與 `dialy_test` 疑似拼字錯誤。除非要完全相容舊資料庫，建議新系統統一為 `diary_social_like` 與 `daily_test`。
 - 若需要相容舊資料，需在開發前確認是否保留原表名。
+## 舊系統資料庫參考與調整原則
+
+`system_data/` 內的舊後端程式僅作為資料模型與功能範圍參考，不直接沿用舊 Entity、DAO 或欄位命名。新版資料庫仍以本文件前述規範為準，所有資料表使用 `snake_case`、以 `id` 作為主鍵，並套用 `created_at`、`updated_at` 與必要的外鍵欄位。
+
+舊系統可參考的資料範圍：
+
+| 舊系統資料 | 新版規格對應 | 調整方式 |
+|---|---|---|
+| `personal_info.account` | `personal_info.id`、`account`、`email` | 舊系統以帳號作主鍵；新版改用數值 `id` 主鍵，帳號與 Email 以唯一欄位處理。 |
+| `personal_info.nick_name`、`mail`、`photo`、`lock` | `user_name`、`email`、`avatar_url`、`lock_password` | 保留會員暱稱、信箱、頭像與鎖定密碼概念，欄位名稱調整為新版語意。 |
+| `all_monster` | `all_monster` | 保留怪獸名稱、圖片、頭像與左右動畫素材概念；新版需補足 `description`、`default_skin_url` 與時間欄位。 |
+| `personal_monster`、`personal_monster_use` | `personal_monster` | 舊系統以帳號與怪獸組別描述持有與使用狀態；新版以 `user_id`、`monster_id`、`current_skin_url`、`obtained_at` 整理。 |
+| `annoyance` | `annoyance` | 保留文字、圖片、音訊、分類、怪獸、心情、時間、解決狀態與分享狀態；新版以 `user_id`、`annoyance_type_id`、`media_url`、`mood_drawing_url`、`mood_score`、`is_solved`、`is_shared` 命名。 |
+| `diary` | `diary` | 保留文字、圖片、音訊、怪獸、心情、時間與分享狀態；新版以 `user_id`、`media_url`、`mood_drawing_url`、`mood_score`、`is_shared` 命名。 |
+| `annoyance_social`、`diary_social` | `annoyance_social_like`、`diary_social_like` | 舊系統社群表代表分享或按讚關聯不夠明確；新版拆成明確的按讚與留言資料表。 |
+| `annoyance_social_comment`、`diary_social_comment` | `annoyance_social_comment`、`diary_social_comment` | 保留留言使用者、目標貼文、內容與時間概念；新版使用 `user_id` 與目標資料 ID 關聯。 |
+| `daily_test` | `daily_test` | 保留題目、四個選項、答案、解析與外部連結概念；新版欄位採 `option_a` 至 `option_d`、`correct_option`、`explanation`。 |
+| `answer_book` | `answer_book` | 保留答案文字；新版使用 `answer_text` 並補足時間欄位。 |
+| `mind_game` | `mind_game` | 保留名稱與連結；新版補足 `title`、`url`、`description` 與時間欄位。 |
+
+不得沿用的舊設計：
+
+- 不以 `account` 作為跨表關聯主鍵，統一改用 `user_id`。
+- 不使用保留字或含混欄位，例如 `index`、`type`、`share`、`solve`、`lock`，需改為語意明確欄位。
+- 不使用 `monster_Id` 這類大小寫不一致欄位。
+- 不以多張用途不清楚的社群表混合分享、按讚與留言行為。
+- 不把舊系統檔案路徑、圖片或音訊儲存方式視為新版資料庫結構；新版僅保存可由後端管理的媒體 URL 或檔案識別。
