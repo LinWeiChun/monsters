@@ -156,3 +156,15 @@
 2026-07-02,09:49,TASK-012,Documentation,docs/TASKS.md,修改,標記 Dio Client Task 為 DONE,Codex,否,否,否,否,依 Task 流程完成
 2026-07-02,09:49,TASK-012,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-012 變更紀錄,Codex,否,否,否,否,Log 保存期限已檢查
 2026-07-02,09:49,TASK-012,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-012 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查
+2026-07-02,14:33,TASK-013,Frontend,frontend/lib/core/network/api_error_handler.dart,新增,建立 DioException 與 HTTP status 至 ApiException 的統一轉換器,Codex,是,否,否,否,Log 保存期限已檢查且未刪除
+2026-07-02,14:33,TASK-013,Frontend,frontend/lib/core/network/api_error_type.dart,新增,建立前端 API 錯誤分類 enum,Codex,是,否,否,否,Repository UI 依錯誤類型判斷
+2026-07-02,14:33,TASK-013,Frontend,frontend/lib/core/network/api_exception.dart,新增,建立前端 API 例外型別,Codex,是,否,否,否,不暴露 stack trace 或敏感資訊
+2026-07-02,14:33,TASK-013,Frontend,frontend/lib/core/network/api_client.dart,修改,統一將 DioException 與格式錯誤轉為 ApiException,Codex,是,否,否,否,不直接向上拋出 DioException
+2026-07-02,14:33,TASK-013,Frontend,frontend/lib/providers/api_client_provider.dart,修改,新增 ApiErrorHandler Provider 並注入 ApiClient,Codex,否,否,否,否,維持 Riverpod DI
+2026-07-02,14:33,TASK-013,Test,frontend/test/core/network/api_error_handler_test.dart,新增,新增 API Error Handler 單元測試,Codex,否,否,否,否,涵蓋 401 timeout network format
+2026-07-02,14:33,TASK-013,Test,frontend/test/core/network/api_client_test.dart,修改,新增 ApiClient 錯誤轉換測試,Codex,否,否,否,否,涵蓋非標準 response 與 backend error
+2026-07-02,14:33,TASK-013,Documentation,frontend/README.md,修改,補充前端 API Error Handler 使用說明,Codex,否,否,否,否,文件同步完成
+2026-07-02,14:33,TASK-013,Documentation,docs/API_SPEC.md,修改,補充前端 API 錯誤處理合約與類型對應,Codex,是,否,否,否,未新增後端 endpoint
+2026-07-02,14:33,TASK-013,Documentation,docs/TASKS.md,修改,修正前端任務清單斷行並標記 API Error Handler DONE,Codex,否,否,否,否,已依 TODO IN PROGRESS REVIEW DONE 推進
+2026-07-02,14:33,TASK-013,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-013 變更紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除
+2026-07-02,14:33,TASK-013,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-013 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除

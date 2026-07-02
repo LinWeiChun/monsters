@@ -64,6 +64,76 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-07-02 14:33
+
+Task
+TASK-013 建立 API Error Handler
+
+修改來源
+Codex
+
+### 本次完成
+
+- 新增 Flutter API Error Handler，將 DioException、timeout、network、cancel、HTTP error 與非標準 response 統一轉換為 ApiException。
+- 新增 ApiErrorType，供 Repository / UI 依錯誤類型判斷 unauthorized、forbidden、notFound、conflict、validation、server 等狀態。
+- 更新 ApiClient，所有 request 統一透過 ApiErrorHandler 處理例外，不再直接向上拋出 DioException 或 FormatException。
+- 新增 API Error Handler 與 ApiClient 錯誤處理測試。
+- 修正 docs/TASKS.md 前端 Dio Client 與 API Error Handler 清單斷行問題，並依序推進 IN PROGRESS、REVIEW、DONE。
+- 更新 API 文件與 frontend README，記錄前端錯誤處理合約。
+- 新增 Log 前已檢查 log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv 保存期限，未發現超過一個月紀錄，未刪除紀錄。
+
+### 新增
+
+- `frontend/lib/core/network/api_error_handler.dart`
+- `frontend/lib/core/network/api_error_type.dart`
+- `frontend/lib/core/network/api_exception.dart`
+- `frontend/test/core/network/api_error_handler_test.dart`
+
+### 修改
+
+- `frontend/lib/core/network/api_client.dart`
+- `frontend/lib/providers/api_client_provider.dart`
+- `frontend/test/core/network/api_client_test.dart`
+- `frontend/README.md`
+- `docs/API_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 未新增或修改後端 API endpoint。
+- 前端新增 API 錯誤處理合約：ApiClient 統一拋出 ApiException。
+
+### Database
+
+- 無
+
+### 測試
+
+- `flutter analyze`
+- `flutter test`
+- `flutter build web`
+
+### Commit 建議
+
+```text
+feat(frontend): 建立 api error handler
+```
+
+### 備註 / 待確認事項
+
+- 本分支 `feature/dio-client` 目前包含 TASK-012 Dio Client 與 TASK-013 API Error Handler，尚待合併至 develop。
+---
+
 ## 2026-07-02 09:49
 
 Task

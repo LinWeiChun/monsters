@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../config/app_config.dart';
+import 'api_error_handler.dart';
 import 'api_response.dart';
 
 const _authorizationHeader = 'Authorization';
@@ -9,7 +10,9 @@ class ApiClient {
   ApiClient({
     required AppConfig config,
     Dio? dio,
-  }) : _dio = dio ?? Dio() {
+    ApiErrorHandler? errorHandler,
+  }) : _dio = dio ?? Dio(),
+       _errorHandler = errorHandler ?? const ApiErrorHandler() {
     _dio.options = BaseOptions(
       baseUrl: config.apiBaseUrl,
       connectTimeout: config.connectTimeout,
@@ -24,6 +27,7 @@ class ApiClient {
   }
 
   final Dio _dio;
+  final ApiErrorHandler _errorHandler;
 
   Dio get dio => _dio;
 
@@ -128,13 +132,19 @@ class ApiClient {
     Future<Response<Object?>> Function() request,
     T Function(Object? json)? fromJsonT,
   ) async {
-    final response = await request();
-    final body = response.data;
+    try {
+      final response = await request();
+      final body = response.data;
 
-    if (body is! Map<String, dynamic>) {
-      throw const FormatException('Invalid API response format.');
+      if (body is! Map<String, dynamic>) {
+        throw const FormatException('Invalid API response format.');
+      }
+
+      return ApiResponse<T>.fromJson(body, fromJsonT);
+    } on DioException catch (error) {
+      throw _errorHandler.fromDioException(error);
+    } on Object catch (error) {
+      throw _errorHandler.handle(error);
     }
-
-    return ApiResponse<T>.fromJson(body, fromJsonT);
   }
 }

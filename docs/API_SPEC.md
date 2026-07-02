@@ -29,6 +29,30 @@ API_BASE_URL
 ```
 
 Flutter UI 不得直接呼叫 Dio。API 存取必須經由 Provider / Repository 使用 `ApiClient`。
+Flutter API 錯誤處理：
+
+```text
+frontend/lib/core/network/ApiErrorHandler
+frontend/lib/core/network/ApiException
+frontend/lib/core/network/ApiErrorType
+```
+
+`ApiClient` 必須將 `DioException`、逾時、網路錯誤、非標準 Response 轉換為 `ApiException`。UI / Repository 不直接處理 `DioException`，應依 `ApiErrorType` 判斷錯誤類型。
+
+錯誤類型對應：
+
+| HTTP / 狀態 | ApiErrorType |
+|---|---|
+| network error | network |
+| timeout | timeout |
+| 400 | validation |
+| 401 | unauthorized |
+| 403 | forbidden |
+| 404 | notFound |
+| 409 | conflict |
+| 500+ | server |
+| cancelled | cancelled |
+| other | unknown |
 
 成功 Response：
 

@@ -27,6 +27,9 @@
 
 - `lib/config/app_config.dart`
 - `lib/core/network/api_client.dart`
+- `lib/core/network/api_error_handler.dart`
+- `lib/core/network/api_error_type.dart`
+- `lib/core/network/api_exception.dart`
 - `lib/core/network/api_response.dart`
 - `lib/providers/api_client_provider.dart`
 
