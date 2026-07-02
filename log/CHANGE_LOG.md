@@ -64,6 +64,68 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-07-02 09:10
+
+Task
+DOC-008 system_data 選擇性追蹤程式與圖片
+
+變更者
+Codex
+
+### 本次完成
+
+- 依使用者要求重新將 `system_data/` 納入 Git，但只追蹤程式檔案、專案設定檔與圖片素材。
+- 調整 `.gitignore` 為白名單規則，預設忽略 `system_data/**`，再放行 source、Flutter/Android/iOS/Windows 專案設定與圖片格式。
+- 刪除 `system_data/` 內不需推上 Git 的 PDF、docx、mp4、txt 雜檔、jks、jar、metadata、README 等非程式或非圖片資料，共 15 個檔案。
+- 更新 README 與 UI 規格，使文件與「保留程式檔案及圖片資料」規則一致。
+- 新增 Log 前已檢查 `log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv` 保存期限；目前無超過一個月紀錄，未刪除過期 Log。
+
+### 新增
+
+- `system_data/` 內程式檔案、專案設定檔與圖片素材
+
+### 修改
+
+- `.gitignore`
+- `README.md`
+- `docs/UI_SPEC.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- `system_data/` 內非程式與非圖片資料 15 個檔案
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- `git diff --check`
+- 檢查 `system_data/` 剩餘檔案副檔名
+- 檢查 `git status --ignored -- system_data`
+
+### Commit 建議
+
+```text
+docs(system-data): 追蹤舊系統程式與圖片資料
+```
+
+### 備註 / 待確認事項
+
+- `system_data/` 僅供舊系統參考；正式新版程式仍以 `frontend/`、`backend/`、`database/` 為準。
+
+---
+
 ## 2026-07-02 09:02
 
 Task

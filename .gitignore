@@ -148,7 +148,50 @@ htmlcov/
 # Local reference data
 #################################################
 
-system_data/
+system_data/**
+!system_data/**/
+
+# Source / project files kept for old-system reference
+!system_data/**/*.java
+!system_data/**/*.dart
+!system_data/**/*.kt
+!system_data/**/*.swift
+!system_data/**/*.h
+!system_data/**/*.cpp
+!system_data/**/*.cc
+!system_data/**/*.c
+!system_data/**/*.m
+!system_data/**/*.gradle
+!system_data/**/*.properties
+!system_data/**/*.yml
+!system_data/**/*.yaml
+!system_data/**/*.xml
+!system_data/**/*.json
+!system_data/**/*.html
+!system_data/**/*.plist
+!system_data/**/*.storyboard
+!system_data/**/*.xcconfig
+!system_data/**/*.xcworkspacedata
+!system_data/**/*.xcsettings
+!system_data/**/*.xcscheme
+!system_data/**/*.pbxproj
+!system_data/**/*.cmake
+!system_data/**/*.bat
+!system_data/**/*.manifest
+!system_data/**/*.rc
+!system_data/**/*.gitignore
+!system_data/**/*.lock
+!system_data/**/gradlew
+!system_data/**/Procfile
+!system_data/**/CMakeLists.txt
+
+# Image assets kept for old-system reference
+!system_data/**/*.png
+!system_data/**/*.jpg
+!system_data/**/*.jpeg
+!system_data/**/*.gif
+!system_data/**/*.ico
+!system_data/**/*.webp
 
 #################################################
 # Secrets
