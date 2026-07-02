@@ -9,4 +9,3 @@ abstract class DiaryApiDataSource{
   
   Future<String> modifyDiary(int id, Diary diary);
 }
-

@@ -140,3 +140,7 @@
 2026-07-02,09:10,DOC-008,Reference,system_data/,刪除,刪除非程式與非圖片資料共 15 個檔案,Codex,否,否,否,否,已排除 PDF docx mp4 txt jks jar metadata 等資料
 2026-07-02,09:10,DOC-008,Documentation,log/CHANGE_LOG.md,修改,新增 DOC-008 異動紀錄,Codex,否,否,否,否,新增 Log 前已檢查保存期限且無過期紀錄
 2026-07-02,09:10,DOC-008,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-008 表格異動紀錄,Codex,否,否,否,否,新增 Log 前已檢查保存期限且無過期紀錄
+2026-07-02,09:37,DOC-009,Git,develop,靽格,merge docs/system-data-reference into local develop,Codex,否,否,否,否,Log 保存期限已檢查，未刪除過期紀錄
+2026-07-02,09:37,DOC-009,Reference,system_data/,靽格,清理舊參考程式 trailing whitespace 與 EOF 空白,Codex,否,否,否,否,僅格式清理
+2026-07-02,09:37,DOC-009,Documentation,log/CHANGE_LOG.md,靽格,新增 DOC-009 merge 紀錄,Codex,否,否,否,否,Log 保存期限已檢查
+2026-07-02,09:37,DOC-009,Documentation,log/CHANGE_HISTORY.csv,靽格,新增 DOC-009 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查

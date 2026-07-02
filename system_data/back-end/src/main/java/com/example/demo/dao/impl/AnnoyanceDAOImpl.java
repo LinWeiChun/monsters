@@ -50,5 +50,3 @@ public class AnnoyanceDAOImpl extends BaseDAOImplement<Annoyance> implements Ann
         return getOne(detachedCriteria);
     }
 }
-
-

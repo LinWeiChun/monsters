@@ -64,6 +64,64 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-07-02 09:37
+
+Task
+DOC-009 merge system_data reference to develop
+
+靽格鈭?
+Codex
+
+### ?祆活摰?
+
+- 撠? `docs/system-data-reference` merge ??`develop`嚗? merge commit 靽?????
+- 靘蝙?刻????蔥??`develop` ?? local branch嚗??芾 merge `main`嚗?蝚血? GIT_RULE.md??
+- 靽格?頂蝯梁?撘?獢??空白問題，清理 trailing whitespace 與 EOF 空白。
+- 新增 Log 前已檢查 `log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv` 保存期限，未發現超過一個月紀錄。
+
+### ?啣?
+
+- ??
+
+### 靽格
+
+- `system_data/` 部分舊參考程式檔
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### ?芷
+
+- ??
+
+### Migration
+
+- ??
+
+### API
+
+- ??
+
+### Database
+
+- ??
+
+### 皜祈岫
+
+- `git branch --no-merged develop`
+- `git diff --check HEAD^ HEAD`
+- `git status --short --branch`
+
+### Commit 撱箄降
+
+```text
+chore(git): 合併 system_data 參考資料
+```
+
+### ?酉 / 敺Ⅱ隤???
+
+- `main` 仍顯示為未合併至 `develop`，但依 GIT_RULE.md 禁止執行 `git merge main`，本次未處理。
+
+---
 ## 2026-07-02 09:10
 
 Task
