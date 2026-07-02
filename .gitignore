@@ -192,6 +192,7 @@ system_data/**
 !system_data/**/*.gif
 !system_data/**/*.ico
 !system_data/**/*.webp
+!system_data/*.pdf
 
 #################################################
 # Secrets
