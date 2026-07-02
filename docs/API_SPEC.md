@@ -10,6 +10,26 @@ Base URL：
 /api
 ```
 
+Flutter API Client：
+
+```text
+frontend/lib/core/network/ApiClient
+```
+
+前端 API Base URL 預設值：
+
+```text
+http://localhost:8080/api
+```
+
+前端可透過 dart-define 覆寫：
+
+```text
+API_BASE_URL
+```
+
+Flutter UI 不得直接呼叫 Dio。API 存取必須經由 Provider / Repository 使用 `ApiClient`。
+
 成功 Response：
 
 ```json

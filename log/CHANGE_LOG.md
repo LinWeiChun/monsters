@@ -64,6 +64,76 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-07-02 09:49
+
+Task
+TASK-012 建立 Dio Client
+
+修改來源
+Codex
+
+### 本次完成
+
+- 新增 Flutter Dio Client 基礎層，統一設定 API Base URL、timeout、JSON header 與標準 API response parsing。
+- 新增 `AppConfig`，支援 `API_BASE_URL` dart-define 覆寫，預設為 `http://localhost:8080/api`。
+- 新增 Riverpod Provider，後續 Repository 可透過 `apiClientProvider` 注入 `ApiClient`。
+- 新增 Dio Client 單元測試，涵蓋 base options、Bearer token 設定與標準 API response parsing。
+- 更新 `docs/TASKS.md`，依流程將 Dio Client Task 完成為 DONE。
+- 新增 Log 前已檢查 `log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv` 保存期限，未發現超過一個月紀錄。
+
+### 新增
+
+- `frontend/lib/config/app_config.dart`
+- `frontend/lib/core/network/api_client.dart`
+- `frontend/lib/core/network/api_response.dart`
+- `frontend/lib/providers/api_client_provider.dart`
+- `frontend/test/core/network/api_client_test.dart`
+
+### 修改
+
+- `frontend/pubspec.yaml`
+- `frontend/pubspec.lock`
+- `frontend/README.md`
+- `docs/API_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無新增後端 API endpoint。
+- 前端新增 API Client 設定與呼叫入口。
+
+### Database
+
+- 無
+
+### 測試
+
+- `flutter pub get`
+- `flutter analyze`
+- `flutter test`
+
+### Commit 建議
+
+```text
+feat(frontend): 建立 dio client
+```
+
+### 備註 / 待確認事項
+
+- 下一個 Task 為 `建立 API Error Handler`，可接續擴充 Dio interceptor 與錯誤轉換。
+
+---
+
 ## 2026-07-02 09:37
 
 Task

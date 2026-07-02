@@ -144,3 +144,15 @@
 2026-07-02,09:37,DOC-009,Reference,system_data/,靽格,清理舊參考程式 trailing whitespace 與 EOF 空白,Codex,否,否,否,否,僅格式清理
 2026-07-02,09:37,DOC-009,Documentation,log/CHANGE_LOG.md,靽格,新增 DOC-009 merge 紀錄,Codex,否,否,否,否,Log 保存期限已檢查
 2026-07-02,09:37,DOC-009,Documentation,log/CHANGE_HISTORY.csv,靽格,新增 DOC-009 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查
+2026-07-02,09:49,TASK-012,Frontend,frontend/lib/config/app_config.dart,新增,建立 API Base URL 與 timeout 設定,Codex,否,否,否,否,Log 保存期限已檢查，未刪除過期紀錄
+2026-07-02,09:49,TASK-012,Frontend,frontend/lib/core/network/api_client.dart,新增,建立 Dio Client 與 Bearer token 設定,Codex,否,否,否,否,後續 API Error Handler Task 可擴充 interceptor
+2026-07-02,09:49,TASK-012,Frontend,frontend/lib/core/network/api_response.dart,新增,建立標準 API Response parsing model,Codex,否,否,否,否,符合 API_SPEC.md response 格式
+2026-07-02,09:49,TASK-012,Frontend,frontend/lib/providers/api_client_provider.dart,新增,建立 Riverpod ApiClient Provider,Codex,否,否,否,否,供後續 Repository 注入使用
+2026-07-02,09:49,TASK-012,Test,frontend/test/core/network/api_client_test.dart,新增,新增 Dio Client 單元測試,Codex,否,否,否,否,已執行 flutter test
+2026-07-02,09:49,TASK-012,Frontend,frontend/pubspec.yaml,修改,新增 dio 與 flutter_riverpod dependency,Codex,否,否,否,否,已執行 flutter pub get
+2026-07-02,09:49,TASK-012,Frontend,frontend/pubspec.lock,修改,更新 Flutter dependency lockfile,Codex,否,否,否,否,已執行 flutter pub get
+2026-07-02,09:49,TASK-012,Documentation,frontend/README.md,修改,新增 API Client 使用說明,Codex,否,否,否,否,文件同步
+2026-07-02,09:49,TASK-012,Documentation,docs/API_SPEC.md,修改,新增 Flutter API Client 與 API_BASE_URL 說明,Codex,是,否,否,否,僅文件補充前端 client 設定
+2026-07-02,09:49,TASK-012,Documentation,docs/TASKS.md,修改,標記 Dio Client Task 為 DONE,Codex,否,否,否,否,依 Task 流程完成
+2026-07-02,09:49,TASK-012,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-012 變更紀錄,Codex,否,否,否,否,Log 保存期限已檢查
+2026-07-02,09:49,TASK-012,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-012 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查
