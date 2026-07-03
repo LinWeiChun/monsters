@@ -2,7 +2,7 @@
 
 # 貘nsters AI 開發規範
 
-> Version：v3.2  
+> Version：v3.3  
 > 本文件為貘nsters Repository 的最高層級 AI 開發規範，適用於 Codex、Cursor Agent、GitHub Copilot Agent、Claude Code、Gemini CLI 等所有 AI Coding Agent。
 
 ---
@@ -21,16 +21,17 @@ AI 開始任何任務前，必須依序閱讀：
 
 1. `AGENTS.md`
 2. `docs/GIT_RULE.md`
-3. `system_data/系統手冊`
-4. `system_data/系統簡介`
-5. `system_data/參考程式` 或 `system_data/` 內既有程式
-6. `docs/PROJECT_SPEC.md`
-7. `docs/DATABASE_SPEC.md`
-8. `docs/API_SPEC.md`
-9. `docs/UI_SPEC.md`
-10. `docs/CODING_STANDARD.md`
-11. `docs/TASKS.md`
-12. 使用者最新明確指示
+3. `docs/PROJECT_SPEC.md`
+4. `docs/DATABASE_SPEC.md`
+5. `docs/API_SPEC.md`
+6. `docs/UI_SPEC.md`
+7. `docs/CODING_STANDARD.md`
+8. `docs/DECISIONS.md`
+9. `docs/TASKS.md`
+10. `system_data/系統手冊`
+11. `system_data/系統簡介`
+12. `system_data/參考程式` 或 `system_data/` 內既有程式
+13. 使用者最新明確指示
 
 若內容互相衝突，AI 必須停止實作，說明衝突、提出方案，並等待使用者確認；不得自行推測。
 
@@ -69,16 +70,17 @@ system_data/
 
 ## 五、參考程式 `system_data/` 使用原則
 
-`system_data/` 為 AI 的參考資料來源，用於理解既有寫法、命名、分層、錯誤處理、API 流程、資料模型、UI 元件與測試風格。
+`system_data/` 為 AI 的參考資料來源，用於理解舊系統的既有寫法、命名、分層、錯誤處理、API 流程、資料模型、UI 元件、素材與測試風格。
 
-實作前，AI 必須先檢查 `system_data/` 是否存在相似功能、流程或程式片段，並優先沿用其架構與 Coding Style；若無可參考內容，須在工作報告中說明。
+實作前，AI 必須先檢查 `system_data/` 是否存在相似功能、流程或程式片段，並萃取可用的業務邏輯、流程與設計意圖；不得將舊程式直接視為新版規格。若無可參考內容，須在工作報告中說明。
 
 AI 使用參考程式時必須遵守：
 
 - 只能參考與延伸，不得盲目複製不相干或過期程式
-- 不得因參考程式而違反 `docs/PROJECT_SPEC.md`、`docs/API_SPEC.md`、`docs/DATABASE_SPEC.md` 或 `docs/CODING_STANDARD.md`
+- 不得因參考程式而違反 `docs/PROJECT_SPEC.md`、`docs/API_SPEC.md`、`docs/DATABASE_SPEC.md`、`docs/UI_SPEC.md` 或 `docs/CODING_STANDARD.md`
 - 若參考程式與正式文件衝突，以正式文件為準，並回報衝突
-- 若發現可重用的既有模式，應優先採用，避免建立新的不一致寫法
+- 若發現可重用的舊流程或模式，應重構為新版架構可接受的實作
+- 不得沿用舊系統中的金鑰、帳密、Token、硬編碼環境設定或不安全作法
 - 除非使用者明確要求，不得修改、搬移、刪除或格式化 `system_data/` 內容
 
 ---
@@ -89,14 +91,15 @@ AI 使用參考程式時必須遵守：
 
 1. 閱讀必要文件與最新任務
 2. 確認 `docs/TASKS.md` 狀態與前置條件
-3. 檢查 `system_data/` 是否有可參考的既有寫法
-4. 檢查 DoR
-5. 分析需求並提出必要問題
-6. 依既有架構、參考程式與 `docs/CODING_STANDARD.md` 實作
-7. 執行 Compile / Test / 必要檢查
-8. 更新相關文件與 Log
-9. 依 `docs/GIT_RULE.md` 執行 Git / PR 流程
-10. 回報成果
+3. 檢查 `system_data/` 是否有可參考的既有寫法、流程、素材或資料結構
+4. 比對舊系統與正式文件是否衝突
+5. 檢查 DoR
+6. 分析需求並提出必要問題
+7. 依既有架構、正式文件與 `docs/CODING_STANDARD.md` 實作
+8. 執行 Compile / Test / 必要檢查
+9. 更新相關文件與 Log
+10. 依 `docs/GIT_RULE.md` 執行 Git / PR 流程
+11. 回報成果
 
 AI 必須優先重用既有程式與架構，保持 Coding Style 一致，不得只改程式而不更新文件。
 
@@ -202,7 +205,7 @@ AI 必須自動閱讀文件、確認 Task、實作、更新文件、執行 Git �
 | 項目 | 內容 |
 |---|---|
 | 文件 | `AGENTS.md` |
-| 版本 | v3.2 |
+| 版本 | v3.3 |
 | 專案 | 貘nsters |
 | 維護者 | WeiChun Lin |
 | 適用 | 所有 AI Coding Agent |

@@ -56,11 +56,13 @@ monsters/
 ├── .github/
 │
 ├── docs/
+│   ├── GIT_RULE.md
 │   ├── PROJECT_SPEC.md
 │   ├── DATABASE_SPEC.md
 │   ├── API_SPEC.md
 │   ├── UI_SPEC.md
 │   ├── CODING_STANDARD.md
+│   ├── DECISIONS.md
 │   └── TASKS.md
 │
 ├── frontend/
@@ -76,7 +78,7 @@ monsters/
 │   ├── CHANGE_HISTORY.csv
 │   └── CHANGE_HISTORY.xlsx
 │
-└── system_data/
+└── system_data/              # 舊系統參考程式、素材與資料結構，僅供新版開發參考
 ```
 
 ---
@@ -89,6 +91,10 @@ monsters/
 
 ```text
 AGENTS.md
+
+↓
+
+docs/GIT_RULE.md
 
 ↓
 
@@ -112,7 +118,15 @@ docs/CODING_STANDARD.md
 
 ↓
 
+docs/DECISIONS.md
+
+↓
+
 docs/TASKS.md
+
+↓
+
+system_data/ 系統手冊、系統簡介與參考程式
 ```
 
 不得跳過任何步驟。
@@ -134,7 +148,11 @@ docs/DATABASE_SPEC.md
 docs/API_SPEC.md
 docs/UI_SPEC.md
 docs/CODING_STANDARD.md
+docs/DECISIONS.md
 docs/TASKS.md
+system_data/系統手冊
+system_data/系統簡介
+system_data/參考程式 或 system_data/ 內既有程式
 
 閱讀完成後，確認目前應執行的 Task。
 
@@ -144,10 +162,12 @@ docs/TASKS.md
 
 每完成一項 Task 必須：
 
-1. 更新 CHANGE_LOG.md
-2. 更新 CHANGE_HISTORY.csv（或 CHANGE_HISTORY.xlsx）
-3. 更新相關文件
-4. 依照 AGENTS.md 回覆格式產生工作報告
+1. 檢查 `system_data/` 是否有可參考的舊系統流程、程式或素材。
+2. 將舊系統參考內容轉換為新版架構可接受的設計，不得直接照搬。
+3. 更新 CHANGE_LOG.md。
+4. 更新 CHANGE_HISTORY.csv（或 CHANGE_HISTORY.xlsx）。
+5. 更新相關文件。
+6. 依照 AGENTS.md 回覆格式產生工作報告，並說明本次 `system_data/` 參考結果。
 ```
 
 ---
@@ -405,11 +425,27 @@ git push origin <branch>
 
 # system_data 使用規範
 
-`system_data/` 僅供放置舊系統參考資料。此目錄可追蹤舊系統程式檔案、專案設定檔與圖片素材，供新版規格與實作參考。
+`system_data/` 用於存放舊系統參考程式、專案設定、圖片素材與資料結構參考。
 
-不需推上 Git 的舊文件、影片、文字雜檔、金鑰、jar、metadata 與其他非程式或非圖片資料，應從 `system_data/` 移除或維持忽略狀態。
+此目錄的用途是協助 AI 與開發者理解舊系統的：
 
-引用 `system_data/` 內容時，僅能整理成新版規格或設計參考，不得直接照搬舊程式到正式專案架構。
+- 功能流程
+- 畫面互動
+- 資料欄位
+- API 行為
+- 商業邏輯
+- 命名習慣
+- 可重用素材
+
+使用限制：
+
+- 不得直接複製舊程式到正式專案架構。
+- 不得直接沿用舊系統中不符合新版規範的命名、架構或錯誤設計。
+- 不得任意修改、刪除、搬移或格式化 `system_data/` 內容。
+- 不得將金鑰、密碼、憑證、jar、metadata、build artifact 或非必要雜檔納入版本控制。
+- 若需正式使用舊素材，必須重新整理命名、路徑、授權與資產規格。
+
+當 `system_data/` 與正式文件衝突時，以正式文件為準。
 
 ---
 
