@@ -2,7 +2,7 @@
 
 # 貘nsters 程式設計規範（Coding Standard）
 
-> Version：v3.0
+> Version：v3.1
 >
 > 本文件規範 **貘nsters** 專案所有程式碼撰寫標準。
 >
@@ -78,6 +78,9 @@
 4. API_SPEC.md
 5. UI_SPEC.md
 6. CODING_STANDARD.md
+7. DECISIONS.md
+8. TASKS.md
+9. system_data/
 
 若仍有衝突：
 
@@ -311,6 +314,29 @@ calc()
 - 相同 API 回傳格式
 
 不得因個人習慣改變 Coding Style。
+
+---
+
+## 2.11 `system_data/` 參考程式轉換原則
+
+`system_data/` 內的舊系統程式僅作為參考，不得直接複製到新版正式程式中。
+
+參考舊程式時，應遵守以下原則：
+
+1. 先理解舊程式的業務目的，而不是直接搬移實作。
+2. 將舊邏輯轉換為新版 Clean Architecture、Repository Pattern、Service Layer 或 Riverpod 架構。
+3. 不沿用舊系統中不清楚、不一致或拼字錯誤的命名。
+4. 不沿用過度耦合、全域狀態濫用、重複程式碼或缺乏錯誤處理的寫法。
+5. 不沿用舊系統中的硬編碼路徑、帳密、URL、Token 或環境設定。
+6. 若舊程式行為與新版規格衝突，必須以新版規格為準。
+7. 若舊程式提供有效邏輯，應重構為符合新版架構的實作。
+
+AI 在產生程式碼時，若有參考 `system_data/`，應於回報中說明：
+
+- 參考的舊功能或檔案
+- 採用的邏輯
+- 已重新設計的部分
+- 未沿用的舊寫法與原因
 
 ---
 
@@ -668,6 +694,8 @@ CODING_STANDARD.md
 不得自行更換框架。
 
 新增第三方套件必須取得使用者確認。
+
+舊 Flutter 程式僅可作為流程與 UI 行為參考，不得直接沿用舊版路由、全域狀態、Widget 結構或資料存取方式。
 
 已核准套件與工具請參閱：
 
@@ -1064,6 +1092,8 @@ AI 應：
 | Security | Spring Security + JWT |
 
 不得自行修改。
+
+舊 Java 或後端程式僅可作為業務邏輯與資料流程參考，不得直接沿用不符合新版 Controller、Service、Repository、DTO、Entity 分層的寫法。
 
 ---
 

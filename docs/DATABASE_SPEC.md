@@ -445,6 +445,30 @@ Unique：`user_id, answered_date`
 
 ## 五、舊系統對應
 
+本章僅用於說明舊系統資料結構與新版資料表的對應關係。
+
+`system_data/` 中的舊資料表、欄位名稱與關聯設計僅供參考，不代表新版資料庫必須完全沿用。
+
+若舊系統存在以下情況，新版應重新設計：
+
+- 表名拼字錯誤
+- 欄位語意不明
+- 欄位型別不合理
+- 重複資料過多
+- 關聯未正規化
+- 使用字串儲存可正規化資料
+- 缺少 foreign key、index 或 constraint
+
+### `system_data/` Database 參考紀錄格式
+
+| 項目 | 說明 |
+|---|---|
+| 舊系統參考位置 | `system_data/...` |
+| 可參考內容 | 舊表、舊欄位、資料語意、資料關聯 |
+| 不可沿用內容 | 拼字錯誤表名、未正規化欄位、明文密碼、不合理型別 |
+| 新版調整方式 | 依新版 schema、constraint、index 與 migration mapping 重新設計 |
+| 是否需更新正式規格 | 是 / 否 |
+
 | system_data 舊表 / 欄位 | 新表 / 欄位 | 說明 |
 |---|---|---|
 | `personal_info.account` | `users.account` | 僅保留舊系統匯入與相容用途，不作為主要關聯鍵 |
@@ -507,6 +531,20 @@ database/init/01_schema.sql
 - `database/init/*.sql` 只會在 MySQL Docker volume 第一次建立時執行。
 - 若本機已有 `mysql_data` volume，修改 init SQL 後不會自動套用到既有資料庫。
 - 正式進入資料保存階段後，資料庫結構異動應改用正式 migration 工具或手動 migration script，不得直接依賴 Docker init SQL。
+
+若需從 `system_data/` 舊資料庫匯入資料，應建立明確的 migration mapping，不得直接將舊表結構搬入新版資料庫。
+
+Migration 應包含：
+
+- 舊表名稱
+- 舊欄位名稱
+- 新表名稱
+- 新欄位名稱
+- 資料轉換規則
+- 是否允許 NULL
+- 是否需要預設值
+- 是否需要清洗資料
+- 是否保留舊 ID 對照
 
 ## 八、後續 Entity 實作規範
 

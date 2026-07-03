@@ -1,8 +1,15 @@
-﻿# TASKS.md
+# TASKS.md
 
 # 貘nsters AI 開發任務清單
 
 AI 必須依照本清單順序開發。每完成一項任務，需確認可編譯、可執行、可測試。
+
+每個任務完成時，AI 需回報：
+
+- 是否參考 `system_data/`
+- 參考了哪些功能、流程或檔案
+- 哪些舊寫法未沿用
+- 是否有發現需要更新的正式文件
 
 ---
 
@@ -14,10 +21,17 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] 建立 MySQL 連線設定（DONE）
 - [x] 建立 Docker Compose（MySQL + Backend）（DONE）
 - [x] 建立 README 執行說明（DONE）
+- [ ] 建立並確認 `system_data/` 目錄
+- [ ] 整理舊系統參考程式與素材
+- [ ] 確認 `system_data/` 不包含金鑰、憑證、build artifact 或不必要雜檔
+- [ ] 建立舊系統功能與新版模組的初步對照
 
 ---
 
 ## Phase 1：共用基礎建設
+
+- [ ] 檢查 `system_data/` 中舊共用元件、API Client、錯誤處理與基礎設定寫法
+- [ ] 整理可參考的共用模式並轉換為新版架構
 
 ### 後端
 
@@ -39,6 +53,10 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ## Phase 2：會員與個人資料
 
+- [ ] 檢查 `system_data/` 中舊會員、登入、個人資料與密碼鎖相關寫法
+- [ ] 整理可參考的流程與欄位
+- [ ] 依新版 API、Database、Coding Standard 重新實作
+
 - [x] 註冊 API（DONE）
 - [x] 登入 API（DONE）
 - [ ] Google 登入 API
@@ -58,6 +76,10 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ## Phase 3：煩惱功能
 
+- [ ] 檢查 `system_data/` 中舊煩惱、聊天室、心情繪圖、分數與分享流程
+- [ ] 整理可參考的業務邏輯與 UI 互動
+- [ ] 依新版 Entry 架構與 API 規格重新實作
+
 - [ ] 建立 annoyance_type
 - [ ] 建立 annoyance Entity / DTO / Repository / Service / Controller
 - [ ] 新增煩惱 API
@@ -74,6 +96,10 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ## Phase 4：日記功能
 
+- [ ] 檢查 `system_data/` 中舊日記、聊天室、心情分數與分享流程
+- [ ] 整理可參考的欄位與 UI 流程
+- [ ] 依新版 Entry 架構與 API 規格重新實作
+
 - [ ] 建立 diary Entity / DTO / Repository / Service / Controller
 - [ ] 新增日記 API
 - [ ] 查詢日記 API
@@ -87,6 +113,10 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ## Phase 5：歷史記錄與心的軌跡
 
+- [ ] 檢查 `system_data/` 中舊歷史記錄、心情分數與圖表呈現邏輯
+- [ ] 整理可參考的查詢條件與圖表資料格式
+- [ ] 依新版 API 與 UI 狀態處理重新實作
+
 - [ ] 歷史記錄 API
 - [ ] 心的軌跡 API
 - [ ] 最近七次情緒分數查詢
@@ -97,6 +127,10 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 ---
 
 ## Phase 6：怪獸圖鑑
+
+- [ ] 檢查 `system_data/` 中舊怪獸、怪獸群組、素材與換裝邏輯
+- [ ] 整理可參考的資料欄位與素材路徑
+- [ ] 依新版 Monster schema、API 與資產規格重新實作
 
 - [ ] all_monster Entity / DTO / Repository / Service / Controller
 - [ ] personal_monster Entity / DTO / Repository / Service / Controller
@@ -112,6 +146,10 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ## Phase 7：社群功能
 
+- [ ] 檢查 `system_data/` 中舊社群、按愛心與留言流程
+- [ ] 整理可參考的資料關聯與互動狀態
+- [ ] 依新版共用 Entry 社群模型重新實作
+
 - [ ] 社群文章查詢 API
 - [ ] 煩惱社群按愛心 API
 - [ ] 煩惱社群留言 API
@@ -125,6 +163,10 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 ---
 
 ## Phase 8：互動區
+
+- [ ] 檢查 `system_data/` 中舊解答之書、每日測驗、心理測驗、心理遊戲與紓壓方法
+- [ ] 整理可參考的題目、選項、獎勵與外部連結邏輯
+- [ ] 依新版 Interactive API 與 UI 規格重新實作
 
 - [ ] 解答之書 API
 - [ ] 每日測驗 API
@@ -145,6 +187,10 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ## Phase 9：使用說明、回饋與分享
 
+- [ ] 檢查 `system_data/` 中舊使用說明、回饋與分享流程
+- [ ] 整理可參考的文案、入口與資料欄位
+- [ ] 依新版 UI 與 API 規格重新實作
+
 - [ ] 使用說明頁
 - [ ] 使用回饋 API
 - [ ] 使用回饋頁
@@ -154,6 +200,10 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 ---
 
 ## Phase 10：跨平台與部署
+
+- [ ] 檢查 `system_data/` 中舊環境設定、平台差異與部署相關參考
+- [ ] 排除舊系統金鑰、憑證、jar、metadata 與 build artifact
+- [ ] 依新版環境變數、部署與 Git 規範重新整理
 
 - [ ] Android 測試
 - [ ] iOS 測試

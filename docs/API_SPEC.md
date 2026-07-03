@@ -187,6 +187,44 @@ JWT 基礎設定：
 
 ---
 
+## 一之一、舊系統 API 參考原則
+
+`system_data/` 內的舊 API、Controller、Service 或前端呼叫方式，僅作為新版 API 設計參考。
+
+可參考項目：
+
+- 舊功能流程
+- Request 欄位意義
+- Response 資料需求
+- 錯誤情境
+- 使用者操作順序
+- 舊資料表與 API 的關聯
+
+不得直接沿用項目：
+
+- 舊 API path
+- 不一致的 HTTP method
+- 拼字錯誤的欄位名稱
+- 不符合 RESTful 原則的設計
+- 混合中文、英文或縮寫不一致的參數
+- 舊系統未標準化的 Response 格式
+- 舊系統缺少錯誤處理或驗證的行為
+
+新版 API 應以本文件為準。  
+若舊系統行為與本文件不同，應記錄差異，並依新版 API 規格實作。
+
+### `system_data/` API 參考紀錄格式
+
+| 項目 | 說明 |
+|---|---|
+| 舊系統參考位置 | `system_data/...` |
+| 可參考內容 | 功能流程 / 欄位 / Response 需求 / 錯誤情境 |
+| 不可沿用內容 | 舊 API path / 舊 DTO / 未標準化 Response / 硬編碼 |
+| 新版調整方式 | 依新版 REST API、DTO、Exception 與 `ApiResponse<T>` 規範重新設計 |
+| 是否需更新正式規格 | 是 / 否 |
+
+---
+
 ## 二、Auth API
 
 ### 2.1 註冊

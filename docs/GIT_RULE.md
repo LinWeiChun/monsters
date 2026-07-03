@@ -225,6 +225,33 @@ AI 永遠不得自行執行：
 - 重設使用者尚未確認的修改
 - 嘗試繞過 GitHub Branch Protection
 
+### system_data Git 規範
+
+`system_data/` 可納入版本控制的內容：
+
+- 舊系統參考程式
+- 舊系統設定範例
+- 舊 UI 素材
+- 可公開的圖片、動畫或靜態資源
+- 可協助理解舊系統的結構性資料
+
+`system_data/` 不得納入版本控制的內容：
+
+- 金鑰
+- 密碼
+- Token
+- 憑證
+- `.env`
+- build artifact
+- jar / war
+- node_modules
+- metadata
+- IDE 暫存檔
+- 私人資料
+- 不必要的大型檔案
+
+AI 不得在未被明確要求的情況下修改、刪除、搬移或格式化 `system_data/` 內容。
+
 ---
 
 ## 七、標準開發流程
@@ -539,6 +566,7 @@ Repository 至少應包含：
 - CHANGE_LOG.md
 - CHANGE_HISTORY.xlsx（或 csv）
 - docs/
+- system_data/
 - .gitignore
 
 建議包含：
