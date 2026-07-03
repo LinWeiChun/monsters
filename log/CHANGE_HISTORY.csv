@@ -185,3 +185,10 @@
 2026-07-03,09:08,TASK-014,Documentation,docs/TASKS.md,修改,標記 go_router Task DONE,Codex,否,否,否,否,已依 TODO IN PROGRESS REVIEW DONE 推進
 2026-07-03,09:08,TASK-014,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-014 變更紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除
 2026-07-03,09:08,TASK-014,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-014 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除
+2026-07-03,09:31,DOC-010,Database,docs/DATABASE_SPEC.md,修改,依 system_data 舊資料與現有 API 重構並正規化資料庫架構,Codex,否,是,否,是,新增 Log 前已檢查保存期限，未刪除過期 Log
+2026-07-03,09:31,DOC-010,Database,database/init/01_schema.sql,新增,新增 MySQL 初始正規化 schema,Codex,否,是,否,是,只會在 Docker volume 首次建立時執行
+
+2026-07-03,09:31,DOC-010,Documentation,database/init/README.md,修改,補充 init SQL 執行時機與限制,Codex,否,是,否,否,既有 volume 不會自動套用
+2026-07-03,09:31,DOC-010,Documentation,log/CHANGE_LOG.md,修改,新增 DOC-010 工作紀錄,Codex,否,是,否,否,Log 保存期限已檢查
+
+2026-07-03,09:31,DOC-010,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-010 歷史紀錄,Codex,否,是,否,否,Log 保存期限已檢查
