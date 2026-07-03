@@ -185,6 +185,12 @@ JWT 基礎設定：
 | app.security.jwt.access-token-expiration-seconds | JWT_ACCESS_TOKEN_EXPIRATION_SECONDS | 3600 |
 | app.security.jwt.refresh-token-expiration-seconds | JWT_REFRESH_TOKEN_EXPIRATION_SECONDS | 1209600 |
 
+Google 登入設定：
+
+| 設定 | 環境變數 | 預設值 |
+|---|---|---|
+| app.security.google.client-ids | GOOGLE_CLIENT_IDS | 空字串，啟用 Google 登入前必須提供 |
+
 ---
 
 ## 一之一、舊系統 API 參考原則
@@ -294,6 +300,40 @@ Request：
   "idToken": "google_id_token"
 }
 ```
+
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Google login success",
+  "data": {
+    "accessToken": "jwt_access_token",
+    "refreshToken": "jwt_refresh_token",
+    "tokenType": "Bearer",
+    "expiresIn": 3600,
+    "user": {
+      "userId": 1,
+      "email": "user@example.com",
+      "userName": "Wei",
+      "avatarUrl": null
+    }
+  }
+}
+```
+
+規則：
+
+- 後端必須驗證 Google ID Token，不接受前端自行驗證後傳入的使用者資料。
+- `idToken` 必填。
+- Google ID Token 必須符合 RS256 簽章、有效 `kid`、Google issuer、未過期、`email_verified = true`。
+- `aud` 必須存在於 `GOOGLE_CLIENT_IDS` 設定，可用逗號設定多組 Web / App Client ID。
+- 驗證成功後，以 Google `sub` 對應 `user_oauth_accounts.provider_user_id`。
+- 若 OAuth 帳號已存在，使用既有使用者產生 JWT。
+- 若 OAuth 帳號不存在但 email 已有未刪除使用者，建立 OAuth 連結後產生 JWT。
+- 若 OAuth 帳號不存在且 email 尚未註冊，建立 `users` 與 `user_oauth_accounts` 後產生 JWT。
+- ID Token 無效、email 未驗證、對應使用者已刪除或 `GOOGLE_CLIENT_IDS` 未設定時，回傳 401。
+- 不得將 Google ID Token、JWT、Google 公鑰 response 或敏感驗證細節寫入 log。
 
 ### 2.4 忘記密碼
 

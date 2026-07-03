@@ -1,19 +1,25 @@
 package com.monsters.auth.service;
 
 import com.monsters.auth.dto.AuthUserResponse;
+import com.monsters.auth.dto.GoogleLoginRequest;
 import com.monsters.auth.dto.LoginRequest;
 import com.monsters.auth.dto.LoginResponse;
 import com.monsters.auth.dto.RegisterRequest;
 import com.monsters.auth.dto.RegisterResponse;
 import com.monsters.common.exception.ConflictException;
 import com.monsters.common.exception.UnauthorizedException;
+import com.monsters.common.security.GoogleIdTokenVerifier;
+import com.monsters.common.security.GoogleUserInfo;
 import com.monsters.common.security.JwtProperties;
 import com.monsters.common.security.JwtTokenService;
 import com.monsters.user.entity.User;
 import com.monsters.user.entity.UserCredential;
+import com.monsters.user.entity.UserOAuthAccount;
 import com.monsters.user.repository.UserCredentialRepository;
+import com.monsters.user.repository.UserOAuthAccountRepository;
 import com.monsters.user.repository.UserRepository;
 import java.util.Locale;
+import java.util.Optional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,22 +29,28 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final UserCredentialRepository userCredentialRepository;
+    private final UserOAuthAccountRepository userOAuthAccountRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenService jwtTokenService;
     private final JwtProperties jwtProperties;
+    private final GoogleIdTokenVerifier googleIdTokenVerifier;
 
     public AuthService(
             UserRepository userRepository,
             UserCredentialRepository userCredentialRepository,
+            UserOAuthAccountRepository userOAuthAccountRepository,
             PasswordEncoder passwordEncoder,
             JwtTokenService jwtTokenService,
-            JwtProperties jwtProperties
+            JwtProperties jwtProperties,
+            GoogleIdTokenVerifier googleIdTokenVerifier
     ) {
         this.userRepository = userRepository;
         this.userCredentialRepository = userCredentialRepository;
+        this.userOAuthAccountRepository = userOAuthAccountRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenService = jwtTokenService;
         this.jwtProperties = jwtProperties;
+        this.googleIdTokenVerifier = googleIdTokenVerifier;
     }
 
     @Transactional
@@ -69,6 +81,40 @@ public class AuthService {
             throw new UnauthorizedException("Invalid email or password");
         }
 
+        return createLoginResponse(user);
+    }
+
+    @Transactional
+    public LoginResponse googleLogin(GoogleLoginRequest request) {
+        GoogleUserInfo googleUser = googleIdTokenVerifier.verify(request.idToken());
+        Optional<UserOAuthAccount> oauthAccount = userOAuthAccountRepository
+                .findByProviderAndProviderUserId(UserOAuthAccount.PROVIDER_GOOGLE, googleUser.providerUserId());
+        if (oauthAccount.isPresent() && oauthAccount.get().getUser().isDeleted()) {
+            throw new UnauthorizedException("Invalid Google ID token");
+        }
+
+        User user = oauthAccount
+                .map(UserOAuthAccount::getUser)
+                .orElseGet(() -> findOrCreateGoogleUser(googleUser));
+
+        return createLoginResponse(user);
+    }
+
+    private User findOrCreateGoogleUser(GoogleUserInfo googleUser) {
+        String email = normalizeEmail(googleUser.email());
+        User user = userRepository.findByEmailAndDeletedFalse(email)
+                .orElseGet(() -> userRepository.save(new User(email, displayName(googleUser))));
+
+        userOAuthAccountRepository.save(new UserOAuthAccount(
+                user,
+                UserOAuthAccount.PROVIDER_GOOGLE,
+                googleUser.providerUserId()
+        ));
+
+        return user;
+    }
+
+    private LoginResponse createLoginResponse(User user) {
         AuthUserResponse authUser = new AuthUserResponse(
                 user.getId(),
                 user.getEmail(),
@@ -82,6 +128,13 @@ public class AuthService {
                 jwtProperties.accessTokenExpirationSeconds(),
                 authUser
         );
+    }
+
+    private String displayName(GoogleUserInfo googleUser) {
+        if (googleUser.name() != null && !googleUser.name().isBlank()) {
+            return googleUser.name().trim();
+        }
+        return googleUser.email().split("@")[0];
     }
 
     private String normalizeEmail(String email) {

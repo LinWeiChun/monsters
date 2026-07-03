@@ -75,6 +75,14 @@ JWT 基礎環境變數：
 | `JWT_ACCESS_TOKEN_EXPIRATION_SECONDS` | `3600` |
 | `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` | `1209600` |
 
+Google 登入環境變數：
+
+| 環境變數 | 預設值 |
+|----------|--------|
+| `GOOGLE_CLIENT_IDS` | 空字串，啟用 Google 登入前必須提供 |
+
+`GOOGLE_CLIENT_IDS` 可用逗號設定多組 Web / Android / iOS Client ID。後端會以此檢查 Google ID Token 的 `aud`。
+
 ## 專案規範
 
 後端開發需遵守：
@@ -151,3 +159,38 @@ Response:
 ```
 
 Login normalizes email before lookup, verifies the stored BCrypt password hash, and returns JWT access and refresh tokens. `JWT_SECRET` must be configured before login can issue tokens.
+
+### Google Login
+
+`POST /api/auth/google-login`
+
+Request:
+
+```json
+{
+  "idToken": "google_id_token"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Google login success",
+  "data": {
+    "accessToken": "jwt_access_token",
+    "refreshToken": "jwt_refresh_token",
+    "tokenType": "Bearer",
+    "expiresIn": 3600,
+    "user": {
+      "userId": 1,
+      "email": "user@example.com",
+      "userName": "Wei",
+      "avatarUrl": null
+    }
+  }
+}
+```
+
+Google login verifies the ID token on the backend with Google's signing keys, checks issuer, audience, expiration, and verified email, then links or creates a local user through `user_oauth_accounts`. `JWT_SECRET` and `GOOGLE_CLIENT_IDS` must be configured before Google login can issue tokens.

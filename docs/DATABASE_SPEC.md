@@ -114,6 +114,15 @@ Email / Password 登入憑證。
 
 Unique：`provider, provider_user_id`
 
+Google 登入規則：
+
+- Google provider 固定使用 `google`。
+- `provider_user_id` 必須保存 Google ID Token 的 `sub`，不得保存 ID Token 本體。
+- 首次 Google 登入時，若 email 尚未存在於未刪除的 `users`，需建立 `users` 與 `user_oauth_accounts`。
+- 首次 Google 登入時，若 email 已存在於未刪除的 `users`，需建立 `user_oauth_accounts` 並連結既有使用者。
+- 已連結的 Google 帳號登入時，需透過 `provider + provider_user_id` 查詢使用者。
+- 已刪除使用者不得透過既有 OAuth 帳號登入。
+
 ### 3.4 user_password_locks
 
 使用者隱私鎖設定。

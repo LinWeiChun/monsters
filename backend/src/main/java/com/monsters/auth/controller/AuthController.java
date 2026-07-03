@@ -1,5 +1,6 @@
 package com.monsters.auth.controller;
 
+import com.monsters.auth.dto.GoogleLoginRequest;
 import com.monsters.auth.dto.LoginRequest;
 import com.monsters.auth.dto.LoginResponse;
 import com.monsters.auth.dto.RegisterRequest;
@@ -40,5 +41,13 @@ public class AuthController {
     ) {
         LoginResponse response = authService.login(request);
         return ResponseEntity.ok(ApiResponse.success("Login success", response));
+    }
+
+    @PostMapping("/google-login")
+    public ResponseEntity<ApiResponse<LoginResponse>> googleLogin(
+            @Valid @RequestBody GoogleLoginRequest request
+    ) {
+        LoginResponse response = authService.googleLogin(request);
+        return ResponseEntity.ok(ApiResponse.success("Google login success", response));
     }
 }

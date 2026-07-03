@@ -59,7 +59,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 - [x] 註冊 API（DONE）
 - [x] 登入 API（DONE）
-- [ ] Google 登入 API
+- [ ] Google 登入 API（REVIEW：本地實作、測試與 commit 完成；待 GitHub 憑證完成 push）
 - [ ] 忘記密碼 API
 - [ ] 登出 API
 - [ ] 查詢個人資料 API

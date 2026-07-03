@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monsters.auth.dto.AuthUserResponse;
+import com.monsters.auth.dto.GoogleLoginRequest;
 import com.monsters.auth.dto.LoginRequest;
 import com.monsters.auth.dto.LoginResponse;
 import com.monsters.auth.dto.RegisterRequest;
@@ -107,6 +108,40 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(Map.of(
                                 "email", "invalid",
                                 "password", "short"
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    void googleLoginShouldReturnOkResponse() throws Exception {
+        when(authService.googleLogin(any(GoogleLoginRequest.class)))
+                .thenReturn(new LoginResponse(
+                        "access-token",
+                        "refresh-token",
+                        "Bearer",
+                        3600,
+                        new AuthUserResponse(1L, "user@example.com", "Wei", null)
+                ));
+
+        mockMvc.perform(post("/api/auth/google-login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "idToken", "google-id-token"
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Google login success"))
+                .andExpect(jsonPath("$.data.accessToken").value("access-token"))
+                .andExpect(jsonPath("$.data.user.email").value("user@example.com"));
+    }
+
+    @Test
+    void googleLoginShouldValidateRequestBody() throws Exception {
+        mockMvc.perform(post("/api/auth/google-login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "idToken", ""
                         ))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false));

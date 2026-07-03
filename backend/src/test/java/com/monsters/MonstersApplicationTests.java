@@ -1,6 +1,7 @@
 package com.monsters;
 
 import com.monsters.user.repository.UserCredentialRepository;
+import com.monsters.user.repository.UserOAuthAccountRepository;
 import com.monsters.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +19,9 @@ class MonstersApplicationTests {
 
     @MockBean
     private UserCredentialRepository userCredentialRepository;
+
+    @MockBean
+    private UserOAuthAccountRepository userOAuthAccountRepository;
 
     @Test
     void contextLoads() {

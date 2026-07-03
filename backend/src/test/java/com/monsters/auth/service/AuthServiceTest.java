@@ -8,15 +8,20 @@ import static org.mockito.Mockito.when;
 
 import com.monsters.auth.dto.LoginRequest;
 import com.monsters.auth.dto.LoginResponse;
+import com.monsters.auth.dto.GoogleLoginRequest;
 import com.monsters.auth.dto.RegisterRequest;
 import com.monsters.auth.dto.RegisterResponse;
 import com.monsters.common.exception.ConflictException;
 import com.monsters.common.exception.UnauthorizedException;
+import com.monsters.common.security.GoogleIdTokenVerifier;
+import com.monsters.common.security.GoogleUserInfo;
 import com.monsters.common.security.JwtProperties;
 import com.monsters.common.security.JwtTokenService;
 import com.monsters.user.entity.User;
 import com.monsters.user.entity.UserCredential;
+import com.monsters.user.entity.UserOAuthAccount;
 import com.monsters.user.repository.UserCredentialRepository;
+import com.monsters.user.repository.UserOAuthAccountRepository;
 import com.monsters.user.repository.UserRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -38,6 +43,9 @@ class AuthServiceTest {
     private UserCredentialRepository userCredentialRepository;
 
     @Mock
+    private UserOAuthAccountRepository userOAuthAccountRepository;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
@@ -45,6 +53,9 @@ class AuthServiceTest {
 
     @Mock
     private JwtProperties jwtProperties;
+
+    @Mock
+    private GoogleIdTokenVerifier googleIdTokenVerifier;
 
     @InjectMocks
     private AuthService authService;
@@ -129,5 +140,80 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.login(request))
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessage("Invalid email or password");
+    }
+
+    @Test
+    void googleLoginShouldCreateUserAndOAuthAccount() {
+        GoogleLoginRequest request = new GoogleLoginRequest("google-id-token");
+        GoogleUserInfo googleUser = new GoogleUserInfo(
+                "google-sub",
+                " USER@example.COM ",
+                " Wei ",
+                "https://example.com/avatar.png"
+        );
+        User savedUser = new User("user@example.com", "Wei");
+        ReflectionTestUtils.setField(savedUser, "id", 1L);
+
+        when(googleIdTokenVerifier.verify("google-id-token")).thenReturn(googleUser);
+        when(userOAuthAccountRepository.findByProviderAndProviderUserId("google", "google-sub"))
+                .thenReturn(Optional.empty());
+        when(userRepository.findByEmailAndDeletedFalse("user@example.com")).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(jwtTokenService.createAccessToken(savedUser)).thenReturn("access-token");
+        when(jwtTokenService.createRefreshToken(savedUser)).thenReturn("refresh-token");
+        when(jwtProperties.accessTokenExpirationSeconds()).thenReturn(3600L);
+
+        LoginResponse response = authService.googleLogin(request);
+
+        assertThat(response.accessToken()).isEqualTo("access-token");
+        assertThat(response.user().email()).isEqualTo("user@example.com");
+
+        ArgumentCaptor<UserOAuthAccount> oauthCaptor = ArgumentCaptor.forClass(UserOAuthAccount.class);
+        verify(userOAuthAccountRepository).save(oauthCaptor.capture());
+        assertThat(oauthCaptor.getValue().getProvider()).isEqualTo("google");
+        assertThat(oauthCaptor.getValue().getProviderUserId()).isEqualTo("google-sub");
+        assertThat(oauthCaptor.getValue().getUser()).isEqualTo(savedUser);
+    }
+
+    @Test
+    void googleLoginShouldUseExistingOAuthAccount() {
+        GoogleLoginRequest request = new GoogleLoginRequest("google-id-token");
+        GoogleUserInfo googleUser = new GoogleUserInfo("google-sub", "user@example.com", "Wei", null);
+        User user = new User("user@example.com", "Wei");
+        ReflectionTestUtils.setField(user, "id", 1L);
+        UserOAuthAccount oauthAccount = new UserOAuthAccount(user, "google", "google-sub");
+
+        when(googleIdTokenVerifier.verify("google-id-token")).thenReturn(googleUser);
+        when(userOAuthAccountRepository.findByProviderAndProviderUserId("google", "google-sub"))
+                .thenReturn(Optional.of(oauthAccount));
+        when(jwtTokenService.createAccessToken(user)).thenReturn("access-token");
+        when(jwtTokenService.createRefreshToken(user)).thenReturn("refresh-token");
+        when(jwtProperties.accessTokenExpirationSeconds()).thenReturn(3600L);
+
+        LoginResponse response = authService.googleLogin(request);
+
+        assertThat(response.accessToken()).isEqualTo("access-token");
+        assertThat(response.user().userId()).isEqualTo(1);
+    }
+
+    @Test
+    void googleLoginShouldLinkExistingEmailUser() {
+        GoogleLoginRequest request = new GoogleLoginRequest("google-id-token");
+        GoogleUserInfo googleUser = new GoogleUserInfo("google-sub", "user@example.com", "Wei", null);
+        User user = new User("user@example.com", "Wei");
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        when(googleIdTokenVerifier.verify("google-id-token")).thenReturn(googleUser);
+        when(userOAuthAccountRepository.findByProviderAndProviderUserId("google", "google-sub"))
+                .thenReturn(Optional.empty());
+        when(userRepository.findByEmailAndDeletedFalse("user@example.com")).thenReturn(Optional.of(user));
+        when(jwtTokenService.createAccessToken(user)).thenReturn("access-token");
+        when(jwtTokenService.createRefreshToken(user)).thenReturn("refresh-token");
+        when(jwtProperties.accessTokenExpirationSeconds()).thenReturn(3600L);
+
+        LoginResponse response = authService.googleLogin(request);
+
+        assertThat(response.user().email()).isEqualTo("user@example.com");
+        verify(userOAuthAccountRepository).save(any(UserOAuthAccount.class));
     }
 }

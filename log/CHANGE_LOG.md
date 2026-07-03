@@ -8,6 +8,91 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-04 06:42
+
+Task
+TASK-021 Google 登入 API（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Added backend Google login endpoint implementation for `POST /api/auth/google-login`.
+- Added backend Google ID Token verification with Google's JWKS, RS256 signature validation, issuer validation, audience validation, expiration validation, and verified-email validation.
+- Added `GOOGLE_CLIENT_IDS` configuration to allow one or more Web / App Google Client IDs.
+- Added `user_oauth_accounts` JPA entity and repository for Google account linking.
+- Added Google login service flow to reuse an existing OAuth account, link an existing email user, or create a new user.
+- Added controller, service, and token verifier tests.
+- Updated API, database, backend README, decision, task, and log documents.
+- Completed full backend test and build verification after fixing Spring constructor injection selection.
+- Completed local commit. Remote push remains blocked because GitHub credentials are not configured in this environment.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/auth/dto/GoogleLoginRequest.java`
+- `backend/src/main/java/com/monsters/common/security/GoogleIdTokenVerifier.java`
+- `backend/src/main/java/com/monsters/common/security/GoogleJwkProvider.java`
+- `backend/src/main/java/com/monsters/common/security/GoogleJwkProviderImpl.java`
+- `backend/src/main/java/com/monsters/common/security/GoogleProperties.java`
+- `backend/src/main/java/com/monsters/common/security/GoogleUserInfo.java`
+- `backend/src/main/java/com/monsters/user/entity/UserOAuthAccount.java`
+- `backend/src/main/java/com/monsters/user/repository/UserOAuthAccountRepository.java`
+- `backend/src/test/java/com/monsters/common/security/GoogleIdTokenVerifierTest.java`
+
+### Modified
+
+- `backend/README.md`
+- `backend/src/main/java/com/monsters/auth/controller/AuthController.java`
+- `backend/src/main/java/com/monsters/auth/service/AuthService.java`
+- `backend/src/main/java/com/monsters/common/security/SecurityConfig.java`
+- `backend/src/main/resources/application.yml`
+- `backend/src/test/java/com/monsters/MonstersApplicationTests.java`
+- `backend/src/test/java/com/monsters/auth/controller/AuthControllerTest.java`
+- `backend/src/test/java/com/monsters/auth/service/AuthServiceTest.java`
+- `docs/API_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- Added `POST /api/auth/google-login`.
+
+### Database
+
+- Added JPA mapping for existing spec table `user_oauth_accounts`.
+- Google login reads and writes `users` and `user_oauth_accounts`.
+
+### Tests
+
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew test`
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew build`
+- `git diff --check`
+- First rerun found Spring constructor injection selection issues in `GoogleIdTokenVerifier` and `GoogleJwkProviderImpl`; both were fixed with explicit `@Autowired` constructors.
+
+### Commit Message
+
+```text
+feat(auth): 建立 Google 登入 API
+```
+
+### Notes
+
+- Task remains in REVIEW until remote push completes.
+- `GOOGLE_CLIENT_IDS` and `JWT_SECRET` must be configured before Google login can issue JWT tokens.
+
 ## 2026-07-03 20:58
 
 Task
