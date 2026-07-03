@@ -21,17 +21,17 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] 建立 MySQL 連線設定（DONE）
 - [x] 建立 Docker Compose（MySQL + Backend）（DONE）
 - [x] 建立 README 執行說明（DONE）
-- [ ] 建立並確認 `system_data/` 目錄
-- [ ] 整理舊系統參考程式與素材
-- [ ] 確認 `system_data/` 不包含金鑰、憑證、build artifact 或不必要雜檔
-- [ ] 建立舊系統功能與新版模組的初步對照
+- [x] 建立並確認 `system_data/` 目錄（DONE）
+- [x] 整理舊系統參考程式與素材（DONE）
+- [ ] 確認 `system_data/` 不包含金鑰、憑證、build artifact 或不必要雜檔（REVIEW；已發現疑似敏感資訊，待使用者確認清理方案）
+- [x] 建立舊系統功能與新版模組的初步對照（DONE）
 
 ---
 
 ## Phase 1：共用基礎建設
 
-- [ ] 檢查 `system_data/` 中舊共用元件、API Client、錯誤處理與基礎設定寫法
-- [ ] 整理可參考的共用模式並轉換為新版架構
+- [x] 檢查 `system_data/` 中舊共用元件、API Client、錯誤處理與基礎設定寫法（DONE）
+- [x] 整理可參考的共用模式並轉換為新版架構（DONE）
 
 ### 後端
 
@@ -53,8 +53,8 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ## Phase 2：會員與個人資料
 
-- [ ] 檢查 `system_data/` 中舊會員、登入、個人資料與密碼鎖相關寫法
-- [ ] 整理可參考的流程與欄位
+- [x] 檢查 `system_data/` 中舊會員、登入、個人資料與密碼鎖相關寫法（DONE）
+- [x] 整理可參考的流程與欄位（DONE）
 - [ ] 依新版 API、Database、Coding Standard 重新實作
 
 - [x] 註冊 API（DONE）

@@ -251,3 +251,7 @@
 2026-07-03,20:36,TASK-018,Documentation,docs/TASKS.md,修改,登入 API Task DONE,Codex,否,否,否,否,完成 TODO 到 IN PROGRESS 到 REVIEW 到 DONE
 2026-07-03,20:36,TASK-018,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-018 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-03,20:36,TASK-018,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-018 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-03,20:51,TASK-019,Documentation,docs/SYSTEM_DATA_REFERENCE.md,新增,新增 system_data 盤點 舊功能對照 共用模式與會員參考整理,Codex,否,否,否,否,system_data 未修改；Log 保存期限已檢查
+2026-07-03,20:51,TASK-019,Documentation,docs/TASKS.md,修改,補齊 Phase 0 Phase 1 與 Phase 2 system_data 參考任務狀態,Codex,否,否,否,否,敏感資訊清理任務維持 REVIEW 待使用者確認
+2026-07-03,20:51,TASK-019,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-019 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-03,20:51,TASK-019,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-019 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log

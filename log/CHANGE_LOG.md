@@ -8,6 +8,68 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-03 20:51
+
+Task
+TASK-019 補齊 system_data 參考任務
+
+Agent
+Codex
+
+### Completed
+
+- Added `docs/SYSTEM_DATA_REFERENCE.md` to record the `system_data/` inventory, PDF summary, old code/material organization, feature mapping, shared pattern conversion, and member/auth reference notes.
+- Confirmed `system_data/` contains old manuals, old backend code, old Flutter code, and assets.
+- Confirmed no obvious build artifact file or directory was found in the checked patterns.
+- Updated `docs/TASKS.md` for completed Phase 0, Phase 1, and Phase 2 reference-check tasks.
+- Kept the Phase 0 sensitive-data cleanup task in REVIEW because old database credentials, Android signing password strings, and hardcoded accessToken strings were found.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `docs/SYSTEM_DATA_REFERENCE.md`
+
+### Modified
+
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- None
+
+### Database
+
+- None
+
+### Tests
+
+- Checked `system_data/` file and directory counts.
+- Checked common build artifact and credential file extensions.
+- Scanned text files for sensitive keyword patterns.
+- Reviewed old backend common layers, member controller, member service, and old Flutter member repository/API.
+- `git diff --check`
+
+### Commit Message
+
+```text
+docs(system-data): 補齊舊系統參考任務
+```
+
+### Notes
+
+- `system_data/` was not modified.
+- The remaining Phase 0 sensitive-data task requires user confirmation before masking, removing, or relocating old reference files.
+
 ## 2026-07-03 20:36
 
 Task
