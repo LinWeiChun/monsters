@@ -255,3 +255,14 @@
 2026-07-03,20:51,TASK-019,Documentation,docs/TASKS.md,修改,補齊 Phase 0 Phase 1 與 Phase 2 system_data 參考任務狀態,Codex,否,否,否,否,敏感資訊清理任務維持 REVIEW 待使用者確認
 2026-07-03,20:51,TASK-019,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-019 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-03,20:51,TASK-019,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-019 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-03,20:58,TASK-020,Reference,system_data/back-end/src/main/resources/application.yml,修改,遮罩舊 DB host name username password,Codex,否,否,否,否,保留參考檔案
+2026-07-03,20:58,TASK-020,Reference,system_data/back-end/src/main/java/com/example/demo/config/DatabaseConfig.java,修改,遮罩舊 DB name 常數,Codex,否,否,否,否,保留參考檔案
+2026-07-03,20:58,TASK-020,Reference,system_data/front-end/monsters_front_end/android/app/build.gradle,修改,遮罩 Android signing password 字串,Codex,否,否,否,否,保留參考檔案
+2026-07-03,20:58,TASK-020,Reference,system_data/front-end/monsters_front_end/lib/pages/account/forgetPassword/forget_psw_auth.dart,修改,遮罩 hardcoded accessToken,Codex,否,否,否,否,保留參考檔案
+2026-07-03,20:58,TASK-020,Reference,system_data/front-end/monsters_front_end/lib/pages/account/lock/forget_lock_auth.dart,修改,遮罩 hardcoded accessToken,Codex,否,否,否,否,保留參考檔案
+2026-07-03,20:58,TASK-020,Reference,system_data/front-end/monsters_front_end/lib/pages/drawer/user_Feedback.dart,修改,遮罩 hardcoded accessToken,Codex,否,否,否,否,保留參考檔案
+2026-07-03,20:58,TASK-020,Reference,system_data/front-end/monsters_front_end/lib/pages/social.dart,修改,遮罩 hardcoded accessToken,Codex,否,否,否,否,保留參考檔案
+2026-07-03,20:58,TASK-020,Documentation,docs/SYSTEM_DATA_REFERENCE.md,修改,更新 system_data 安全檢查結果為已遮罩完成,Codex,否,否,否,否,Log 保存期限已檢查
+2026-07-03,20:58,TASK-020,Documentation,docs/TASKS.md,修改,標記 system_data 敏感資訊與 artifact 檢查 Task DONE,Codex,否,否,否,否,完成 TODO 到 IN PROGRESS 到 REVIEW 到 DONE
+2026-07-03,20:58,TASK-020,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-020 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-03,20:58,TASK-020,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-020 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log

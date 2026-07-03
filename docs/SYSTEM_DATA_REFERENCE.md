@@ -139,30 +139,24 @@
 - `target/`
 - keystore / pem / key / p12 / crt 檔案
 
-已發現需處理或確認的敏感資訊風險：
+已發現並完成遮罩的敏感資訊風險：
 
 | 類型 | 位置 | 說明 |
 |---|---|---|
-| 舊資料庫連線設定 | `system_data/back-end/src/main/resources/application.yml` | 含舊 MySQL URL 與密碼 |
-| Android 簽章密碼字串 | `system_data/front-end/monsters_front_end/android/app/build.gradle` | 含 `keyPassword`、`storePassword` |
-| 硬編碼 accessToken | `system_data/front-end/monsters_front_end/lib/pages/drawer/user_Feedback.dart` | 含舊外部服務 token 字串 |
-| 硬編碼 accessToken | `system_data/front-end/monsters_front_end/lib/pages/account/lock/forget_lock_auth.dart` | 含舊外部服務 token 字串 |
-| 硬編碼 accessToken | `system_data/front-end/monsters_front_end/lib/pages/account/forgetPassword/forget_psw_auth.dart` | 含舊外部服務 token 字串 |
-| 硬編碼 accessToken | `system_data/front-end/monsters_front_end/lib/pages/social.dart` | 含舊外部服務 token 字串 |
+| 舊資料庫連線設定 | `system_data/back-end/src/main/resources/application.yml` | 已將舊 DB host、DB name、username、password 改為 placeholder |
+| 舊資料庫名稱常數 | `system_data/back-end/src/main/java/com/example/demo/config/DatabaseConfig.java` | 已將舊 DB name 改為 placeholder |
+| Android 簽章密碼字串 | `system_data/front-end/monsters_front_end/android/app/build.gradle` | 已將 `keyPassword`、`storePassword` 改為 placeholder |
+| 硬編碼 accessToken | `system_data/front-end/monsters_front_end/lib/pages/drawer/user_Feedback.dart` | 已改為 placeholder |
+| 硬編碼 accessToken | `system_data/front-end/monsters_front_end/lib/pages/account/lock/forget_lock_auth.dart` | 已改為 placeholder |
+| 硬編碼 accessToken | `system_data/front-end/monsters_front_end/lib/pages/account/forgetPassword/forget_psw_auth.dart` | 已改為 placeholder |
+| 硬編碼 accessToken | `system_data/front-end/monsters_front_end/lib/pages/social.dart` | 已改為 placeholder |
 
 結論：
 
 - `system_data/` 目前未發現明顯 build artifact。
-- `system_data/` 目前仍包含疑似密碼與 token 字串，因此 `docs/TASKS.md` 中「確認 `system_data/` 不包含金鑰、憑證、build artifact 或不必要雜檔」不可標記 DONE。
-- 後續需要使用者確認要如何處理舊參考程式中的敏感字串。
-
-建議處理方案：
-
-| 方案 | 優點 | 缺點 / 風險 |
-|---|---|---|
-| 方案 A：保留 `system_data/` 原始內容，將風險記錄於文件與工作報告 | 不破壞舊系統參考完整性 | Repository 仍保留疑似敏感字串，不符合清理任務完成條件 |
-| 方案 B：在使用者明確同意後遮罩或移除敏感字串，保留檔案結構與流程 | 可完成安全清理任務 | 會修改舊參考程式，需要確認不影響後續參考 |
-| 方案 C：將含敏感字串的舊設定與舊頁面移出版本控制，另以文件描述用途 | 最大幅度降低風險 | 會減少舊系統可追溯性，且需 Git 歷史與追蹤策略配合 |
+- 已依使用者指定方案遮罩敏感字串，保留舊系統參考檔案與流程脈絡。
+- 重新掃描後，未再找到原始舊 DB host、舊 DB name、舊 DB password、Android signing password 或 hardcoded accessToken。
+- `docs/TASKS.md` 中「確認 `system_data/` 不包含金鑰、憑證、build artifact 或不必要雜檔」可標記 DONE。
 
 ---
 
@@ -274,8 +268,8 @@
 - Phase 2：檢查 `system_data/` 中舊會員、登入、個人資料與密碼鎖相關寫法
 - Phase 2：整理可參考的流程與欄位
 
-本文件也確認以下任務尚不可完成：
+本文件也支持完成：
 
 - Phase 0：確認 `system_data/` 不包含金鑰、憑證、build artifact 或不必要雜檔
 
-原因：目前已發現疑似舊資料庫密碼、Android 簽章密碼與 hardcoded accessToken。需使用者確認清理方案後才能完成。
+處理方式：已依使用者指定的「遮罩敏感字串」方案完成清理，並重新掃描確認原始敏感值未殘留。

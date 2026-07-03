@@ -23,7 +23,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] 建立 README 執行說明（DONE）
 - [x] 建立並確認 `system_data/` 目錄（DONE）
 - [x] 整理舊系統參考程式與素材（DONE）
-- [ ] 確認 `system_data/` 不包含金鑰、憑證、build artifact 或不必要雜檔（REVIEW；已發現疑似敏感資訊，待使用者確認清理方案）
+- [x] 確認 `system_data/` 不包含金鑰、憑證、build artifact 或不必要雜檔（DONE）
 - [x] 建立舊系統功能與新版模組的初步對照（DONE）
 
 ---

@@ -8,6 +8,76 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-03 20:58
+
+Task
+TASK-020 遮罩 system_data 敏感字串
+
+Agent
+Codex
+
+### Completed
+
+- Masked old database host, database name, username, and password in `system_data/back-end/src/main/resources/application.yml`.
+- Masked old database name constant in `system_data/back-end/src/main/java/com/example/demo/config/DatabaseConfig.java`.
+- Masked Android debug signing passwords in `system_data/front-end/monsters_front_end/android/app/build.gradle`.
+- Masked hardcoded accessToken strings in four old Flutter reference pages.
+- Re-scanned `system_data/` and confirmed the original sensitive values were no longer present.
+- Confirmed no checked build artifact or credential file extension was found.
+- Updated `docs/SYSTEM_DATA_REFERENCE.md`, `docs/TASKS.md`, and logs.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `docs/SYSTEM_DATA_REFERENCE.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+- `system_data/back-end/src/main/java/com/example/demo/config/DatabaseConfig.java`
+- `system_data/back-end/src/main/resources/application.yml`
+- `system_data/front-end/monsters_front_end/android/app/build.gradle`
+- `system_data/front-end/monsters_front_end/lib/pages/account/forgetPassword/forget_psw_auth.dart`
+- `system_data/front-end/monsters_front_end/lib/pages/account/lock/forget_lock_auth.dart`
+- `system_data/front-end/monsters_front_end/lib/pages/drawer/user_Feedback.dart`
+- `system_data/front-end/monsters_front_end/lib/pages/social.dart`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- None
+
+### Database
+
+- None
+
+### Tests
+
+- Searched for original sensitive values in `system_data/`.
+- Checked common build artifact and credential file extensions.
+- Checked common generated dependency/build directories.
+- `git diff --check`
+
+### Commit Message
+
+```text
+docs(system-data): 遮罩舊系統敏感字串
+```
+
+### Notes
+
+- `system_data/` reference files were preserved; only sensitive literal values were replaced with placeholders.
+
 ## 2026-07-03 20:51
 
 Task

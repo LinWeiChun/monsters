@@ -24,7 +24,7 @@ import java.util.Properties;
 @EnableTransactionManagement
 @EnableJpaRepositories
 public class DatabaseConfig {
-    public static final String DATA_BASE_NAME = "111- monsters";
+    public static final String DATA_BASE_NAME = "<OLD_DB_NAME>";
 
     @Value("${project.root}")
     private String root;
