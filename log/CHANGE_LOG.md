@@ -64,6 +64,72 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-07-03 09:19
+
+Task
+TASK-015 建立 Theme
+
+修改來源
+Codex
+
+### 本次完成
+
+- 新增 Flutter Theme 基礎層，集中建立 light / dark ThemeData。
+- 新增 AppColors、AppSpacing、AppRadius 作為共用設計 token。
+- App 入口套用 AppTheme.light()、AppTheme.dark() 與 ThemeMode.system。
+- 新增 Theme 單元測試，驗證 light / dark theme、Material 3、背景色與共用元件 theme 設定。
+- 更新 frontend README 與 UI_SPEC，記錄 Theme 檔案位置與禁止頁面 hard code 共用樣式。
+- 新增 Log 前已檢查 log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv 保存期限，未發現超過一個月紀錄，未刪除紀錄。
+
+### 新增
+
+- `frontend/lib/theme/app_theme.dart`
+- `frontend/lib/theme/app_colors.dart`
+- `frontend/lib/theme/app_spacing.dart`
+- `frontend/test/theme/app_theme_test.dart`
+
+### 修改
+
+- `frontend/lib/app.dart`
+- `frontend/README.md`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- `flutter analyze`
+- `flutter test`
+- `flutter build web`
+
+### Commit 建議
+
+```text
+feat(frontend): 建立 theme
+```
+
+### 備註 / 待確認事項
+
+- Theme 為基礎視覺設定，後續共用元件 Task 應優先使用 ThemeData 與 theme token。
+---
+
 ## 2026-07-03 09:08
 
 Task

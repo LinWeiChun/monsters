@@ -66,3 +66,14 @@ App 入口使用 `MaterialApp.router`，路由由 `appRouterProvider` 提供。
 | `/register` | `register` | `RegisterPage` |
 
 UI 不得直接使用 `Navigator.push`，頁面切換應透過 `context.goNamed()` 或集中路由設定。
+## Theme
+
+前端 Theme 統一由下列檔案管理：
+
+- `lib/theme/app_theme.dart`
+- `lib/theme/app_colors.dart`
+- `lib/theme/app_spacing.dart`
+
+App 入口在 `lib/app.dart` 套用 `AppTheme.light()`、`AppTheme.dark()` 與 `ThemeMode.system`。
+
+頁面不得自行 hard code 共用顏色、圓角與間距；應優先使用 `Theme.of(context)`、`AppColors`、`AppSpacing`、`AppRadius`。
