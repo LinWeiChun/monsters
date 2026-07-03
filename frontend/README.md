@@ -46,3 +46,23 @@ flutter run --dart-define=API_BASE_URL=http://localhost:8080/api
 ```
 
 UI 不得直接呼叫 Dio，後續功能需透過 Provider / Repository 使用 `ApiClient`。
+## Routing
+
+前端路由統一使用 go_router：
+
+- `lib/app.dart`
+- `lib/routes/app_router.dart`
+- `lib/routes/app_routes.dart`
+
+App 入口使用 `MaterialApp.router`，路由由 `appRouterProvider` 提供。
+
+目前基礎路由：
+
+| Path | Name | Page |
+|---|---|---|
+| `/` | `splash` | `SplashPage` |
+| `/home` | `home` | `HomePage` |
+| `/login` | `login` | `LoginPage` |
+| `/register` | `register` | `RegisterPage` |
+
+UI 不得直接使用 `Navigator.push`，頁面切換應透過 `context.goNamed()` 或集中路由設定。

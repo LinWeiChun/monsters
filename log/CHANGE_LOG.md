@@ -64,6 +64,81 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-07-03 09:08
+
+Task
+TASK-014 建立 go_router
+
+修改來源
+Codex
+
+### 本次完成
+
+- 新增 Flutter go_router 依賴並更新 pubspec.lock。
+- 將 App 入口改為 Riverpod ProviderScope + MaterialApp.router。
+- 新增集中式路由設定 appRouterProvider、AppRoute、AppPath。
+- 新增基礎路由頁面 SplashPage、HomePage、LoginPage、RegisterPage。
+- 移除 Flutter template counter app 與 counter widget test。
+- 新增 route widget tests，驗證初始路由、登入路由與註冊轉登入流程。
+- 更新 frontend README 與 UI_SPEC，記錄 go_router 基礎路由與 Navigator 使用限制。
+- 新增 Log 前已檢查 log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv 保存期限，未發現超過一個月紀錄，未刪除紀錄。
+
+### 新增
+
+- `frontend/lib/app.dart`
+- `frontend/lib/routes/app_router.dart`
+- `frontend/lib/routes/app_routes.dart`
+- `frontend/lib/pages/splash_page.dart`
+- `frontend/lib/pages/home_page.dart`
+- `frontend/lib/pages/login_page.dart`
+- `frontend/lib/pages/register_page.dart`
+- `frontend/test/routes/app_router_test.dart`
+
+### 修改
+
+- `frontend/lib/main.dart`
+- `frontend/test/widget_test.dart`
+- `frontend/pubspec.yaml`
+- `frontend/pubspec.lock`
+- `frontend/README.md`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- `flutter analyze`
+- `flutter test`
+- `flutter build web`
+
+### Commit 建議
+
+```text
+feat(frontend): 建立 go_router
+```
+
+### 備註 / 待確認事項
+
+- 目前頁面為路由容器骨架，實際登入、註冊與首頁功能將依後續 Task 補齊。
+---
+
 ## 2026-07-02 14:33
 
 Task

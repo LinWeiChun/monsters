@@ -240,3 +240,22 @@ Web 版規則：
 - 不在每個頁面硬編碼顏色、字級、圓角與間距；需集中於 Theme 與共用樣式。
 - 不保留過長 Page Widget；聊天、卡片、表單、抽屜項目與狀態畫面需拆成可測試共用元件。
 - `system_data` 可保留舊系統圖片與動畫素材作為參考；若要正式納入新版資產，仍需另行整理授權、命名與資產規格。
+## Flutter Router 基礎規範
+
+前端路由統一使用 go_router，入口必須使用 `MaterialApp.router`。
+
+路由設定位置：
+
+- `frontend/lib/routes/app_router.dart`
+- `frontend/lib/routes/app_routes.dart`
+
+目前基礎路由：
+
+| Path | Name | Page | 用途 |
+|---|---|---|---|
+| `/` | `splash` | `SplashPage` | App 初始頁 |
+| `/home` | `home` | `HomePage` | 首頁容器 |
+| `/login` | `login` | `LoginPage` | 登入頁容器 |
+| `/register` | `register` | `RegisterPage` | 註冊頁容器 |
+
+頁面不得直接使用 `Navigator.push`。頁面切換應使用 go_router 的 `context.goNamed()` 或集中路由設定。

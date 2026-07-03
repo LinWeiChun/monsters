@@ -168,3 +168,20 @@
 2026-07-02,14:33,TASK-013,Documentation,docs/TASKS.md,修改,修正前端任務清單斷行並標記 API Error Handler DONE,Codex,否,否,否,否,已依 TODO IN PROGRESS REVIEW DONE 推進
 2026-07-02,14:33,TASK-013,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-013 變更紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除
 2026-07-02,14:33,TASK-013,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-013 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除
+2026-07-03,09:08,TASK-014,Frontend,frontend/pubspec.yaml,修改,新增 go_router dependency,Codex,否,否,是,否,Log 保存期限已檢查且未刪除
+2026-07-03,09:08,TASK-014,Frontend,frontend/pubspec.lock,修改,更新 Flutter dependency lockfile,Codex,否,否,是,否,flutter pub add go_router 已完成
+2026-07-03,09:08,TASK-014,Frontend,frontend/lib/main.dart,修改,改為 ProviderScope 啟動 MonstersApp,Codex,否,否,是,否,入口使用 MaterialApp.router
+2026-07-03,09:08,TASK-014,Frontend,frontend/lib/app.dart,新增,建立 App 根元件並使用 MaterialApp.router,Codex,否,否,是,否,透過 appRouterProvider 注入 router
+2026-07-03,09:08,TASK-014,Frontend,frontend/lib/routes/app_router.dart,新增,建立 go_router 集中路由設定,Codex,否,否,是,否,包含 splash home login register
+2026-07-03,09:08,TASK-014,Frontend,frontend/lib/routes/app_routes.dart,新增,建立路由名稱與 path 常數,Codex,否,否,是,否,避免 hard code route 字串
+2026-07-03,09:08,TASK-014,Frontend,frontend/lib/pages/splash_page.dart,新增,建立初始頁路由容器,Codex,否,否,是,否,提供登入與註冊路由入口
+2026-07-03,09:08,TASK-014,Frontend,frontend/lib/pages/home_page.dart,新增,建立首頁路由容器,Codex,否,否,是,否,後續 Task 擴充實際首頁
+2026-07-03,09:08,TASK-014,Frontend,frontend/lib/pages/login_page.dart,新增,建立登入頁路由容器,Codex,否,否,是,否,後續 Task 擴充登入流程
+2026-07-03,09:08,TASK-014,Frontend,frontend/lib/pages/register_page.dart,新增,建立註冊頁路由容器,Codex,否,否,是,否,後續 Task 擴充註冊流程
+2026-07-03,09:08,TASK-014,Test,frontend/test/widget_test.dart,修改,改為 App 路由 smoke test,Codex,否,否,是,否,取代 counter template test
+2026-07-03,09:08,TASK-014,Test,frontend/test/routes/app_router_test.dart,新增,新增 route navigation 測試,Codex,否,否,是,否,涵蓋 home initial route 與 register to login
+2026-07-03,09:08,TASK-014,Documentation,frontend/README.md,修改,新增 Routing 說明,Codex,否,否,是,否,文件同步完成
+2026-07-03,09:08,TASK-014,Documentation,docs/UI_SPEC.md,修改,新增 Flutter Router 基礎規範,Codex,否,否,是,否,記錄 Navigator 限制
+2026-07-03,09:08,TASK-014,Documentation,docs/TASKS.md,修改,標記 go_router Task DONE,Codex,否,否,否,否,已依 TODO IN PROGRESS REVIEW DONE 推進
+2026-07-03,09:08,TASK-014,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-014 變更紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除
+2026-07-03,09:08,TASK-014,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-014 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除
