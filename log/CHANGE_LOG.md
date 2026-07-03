@@ -64,6 +64,70 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-07-03 09:31
+
+Task
+DOC-010 資料庫架構正規化重構
+
+變更者
+Codex
+
+### 本次完成
+
+- 依照 `system_data` 舊後端 Entity 與現有 API 規格重構資料庫架構。
+- 將使用者關聯統一改用 `users.id`，不再以 `account` 作為跨表關聯鍵。
+- 拆分使用者認證、OAuth、隱私鎖、怪物資產、紀錄媒體、每日測驗選項。
+- 將 diary / annoyance 正規化為共用 `entries`，並以 `entry_type` 區分。
+- 將 diary / annoyance 社群按讚與留言整合為 `entry_likes`、`entry_comments`。
+- 新增 MySQL 初始化 schema `database/init/01_schema.sql`。
+- 新增 Log 前已檢查 `log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv` 保存期限，未發現超過一個月的紀錄，未刪除過期 Log。
+
+### 新增
+
+- `database/init/01_schema.sql`
+
+### 修改
+
+- `docs/DATABASE_SPEC.md`
+- `database/init/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 新增 Docker MySQL 首次初始化用 schema。
+- 既有資料庫 volume 不會自動套用，若已有資料需另行撰寫資料搬遷 script。
+
+### API
+
+- 無 endpoint 異動。
+- Community API 的資料底層將由共用 `entries` / `entry_likes` / `entry_comments` 支援。
+
+### Database
+
+- 重構為正規化 schema，新增 users、credentials、OAuth、monster asset、entries、entry media、daily test options 等資料表。
+
+### 測試
+
+- `git diff --check`
+- `docker compose config`
+
+### Commit 撱箄降
+
+```text
+refactor(database): 正規化資料庫架構
+```
+
+### 註記 / 待確認事項
+
+- 後續實作 Auth / Diary / Annoyance / Community Entity 時需依此 schema 建立 JPA Entity 與 DTO。
+
+---
+
 ## 2026-07-03 09:08
 
 Task
