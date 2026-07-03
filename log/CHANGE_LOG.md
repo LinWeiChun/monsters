@@ -64,6 +64,67 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-07-03 14:17
+
+Task
+DOC-011 merge feature/theme into develop
+
+變更者
+Codex
+
+### 本次完成
+
+- 將 `feature/theme` 合併至 `develop`。
+- 解決 `log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv` 的 merge conflict，保留 DOC-010 與 TASK-015 紀錄。
+- 修正 `frontend/lib/theme/app_theme.dart` 使用 deprecated `ColorScheme.background` 導致 `flutter analyze` 失敗的問題。
+- 新增 Log 前已檢查 `log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv` 保存期限，未發現超過一個月的紀錄，未刪除過期 Log。
+
+### 新增
+
+- 無
+
+### 修改
+
+- `frontend/lib/theme/app_theme.dart`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- `flutter analyze`
+- `flutter test`
+- `flutter build web`
+- `git diff --check`
+
+### Commit 撱箄降
+
+```text
+merge: feature theme into develop
+docs(log): 補充 theme merge 紀錄
+```
+
+### 註記 / 待確認事項
+
+- `feature/theme` commit 已包含於 `develop`。
+
+---
+
 ## 2026-07-03 09:31
 
 Task

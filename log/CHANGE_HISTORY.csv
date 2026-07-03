@@ -197,8 +197,11 @@
 2026-07-03,09:19,TASK-015,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-015 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除
 2026-07-03,09:31,DOC-010,Database,docs/DATABASE_SPEC.md,修改,依 system_data 舊資料與現有 API 重構並正規化資料庫架構,Codex,否,是,否,是,新增 Log 前已檢查保存期限，未刪除過期 Log
 2026-07-03,09:31,DOC-010,Database,database/init/01_schema.sql,新增,新增 MySQL 初始正規化 schema,Codex,否,是,否,是,只會在 Docker volume 首次建立時執行
-
 2026-07-03,09:31,DOC-010,Documentation,database/init/README.md,修改,補充 init SQL 執行時機與限制,Codex,否,是,否,否,既有 volume 不會自動套用
 2026-07-03,09:31,DOC-010,Documentation,log/CHANGE_LOG.md,修改,新增 DOC-010 工作紀錄,Codex,否,是,否,否,Log 保存期限已檢查
-
 2026-07-03,09:31,DOC-010,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-010 歷史紀錄,Codex,否,是,否,否,Log 保存期限已檢查
+2026-07-03,14:17,DOC-011,Git,develop,修改,將 feature/theme merge 至 develop 並推送,Codex,否,否,是,否,新增 Log 前已檢查保存期限，未刪除過期 Log
+2026-07-03,14:17,DOC-011,Frontend,frontend/lib/theme/app_theme.dart,修改,移除 deprecated ColorScheme.background 使用並改由 scaffoldBackgroundColor 傳入,Codex,否,否,是,否,修正 flutter analyze 失敗
+2026-07-03,14:17,DOC-011,Documentation,log/CHANGE_LOG.md,修改,新增 DOC-011 merge 與修正紀錄,Codex,否,否,否,否,Log 保存期限已檢查
+
+2026-07-03,14:17,DOC-011,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-011 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查
