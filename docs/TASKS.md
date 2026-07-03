@@ -1,4 +1,4 @@
-# TASKS.md
+﻿# TASKS.md
 
 # 貘nsters AI 開發任務清單
 
@@ -31,15 +31,15 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 - [x] 建立 Dio Client（DONE）
 - [x] 建立 API Error Handler（DONE）
-- [ ] 建立 go_router
-- [ ] 建立 Theme
-- [ ] 建立 Loading / Error / Empty 共用元件
+- [x] 建立 go_router（DONE）
+- [x] 建立 Theme（DONE）
+- [x] 建立 Loading / Error / Empty 共用元件（DONE）
 
 ---
 
 ## Phase 2：會員與個人資料
 
-- [ ] 註冊 API
+- [x] 註冊 API（DONE）
 - [ ] 登入 API
 - [ ] Google 登入 API
 - [ ] 忘記密碼 API

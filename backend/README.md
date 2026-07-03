@@ -83,3 +83,35 @@ JWT 基礎環境變數：
 - `../docs/CODING_STANDARD.md`
 - `../docs/API_SPEC.md`
 - `../docs/DATABASE_SPEC.md`
+
+## Auth API
+
+### Register
+
+`POST /api/auth/register`
+
+Request:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "password123",
+  "userName": "Wei"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Register success",
+  "data": {
+    "userId": 1,
+    "email": "user@example.com",
+    "userName": "Wei"
+  }
+}
+```
+
+The register flow creates `users` and `user_credentials` records. Passwords are stored only as BCrypt hashes.

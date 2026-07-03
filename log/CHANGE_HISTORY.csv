@@ -168,3 +168,69 @@
 2026-07-02,14:33,TASK-013,Documentation,docs/TASKS.md,修改,修正前端任務清單斷行並標記 API Error Handler DONE,Codex,否,否,否,否,已依 TODO IN PROGRESS REVIEW DONE 推進
 2026-07-02,14:33,TASK-013,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-013 變更紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除
 2026-07-02,14:33,TASK-013,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-013 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除
+2026-07-03,09:08,TASK-014,Frontend,frontend/pubspec.yaml,修改,新增 go_router dependency,Codex,否,否,是,否,Log 保存期限已檢查且未刪除
+2026-07-03,09:08,TASK-014,Frontend,frontend/pubspec.lock,修改,更新 Flutter dependency lockfile,Codex,否,否,是,否,flutter pub add go_router 已完成
+2026-07-03,09:08,TASK-014,Frontend,frontend/lib/main.dart,修改,改為 ProviderScope 啟動 MonstersApp,Codex,否,否,是,否,入口使用 MaterialApp.router
+2026-07-03,09:08,TASK-014,Frontend,frontend/lib/app.dart,新增,建立 App 根元件並使用 MaterialApp.router,Codex,否,否,是,否,透過 appRouterProvider 注入 router
+2026-07-03,09:08,TASK-014,Frontend,frontend/lib/routes/app_router.dart,新增,建立 go_router 集中路由設定,Codex,否,否,是,否,包含 splash home login register
+2026-07-03,09:08,TASK-014,Frontend,frontend/lib/routes/app_routes.dart,新增,建立路由名稱與 path 常數,Codex,否,否,是,否,避免 hard code route 字串
+2026-07-03,09:08,TASK-014,Frontend,frontend/lib/pages/splash_page.dart,新增,建立初始頁路由容器,Codex,否,否,是,否,提供登入與註冊路由入口
+2026-07-03,09:08,TASK-014,Frontend,frontend/lib/pages/home_page.dart,新增,建立首頁路由容器,Codex,否,否,是,否,後續 Task 擴充實際首頁
+2026-07-03,09:08,TASK-014,Frontend,frontend/lib/pages/login_page.dart,新增,建立登入頁路由容器,Codex,否,否,是,否,後續 Task 擴充登入流程
+2026-07-03,09:08,TASK-014,Frontend,frontend/lib/pages/register_page.dart,新增,建立註冊頁路由容器,Codex,否,否,是,否,後續 Task 擴充註冊流程
+2026-07-03,09:08,TASK-014,Test,frontend/test/widget_test.dart,修改,改為 App 路由 smoke test,Codex,否,否,是,否,取代 counter template test
+2026-07-03,09:08,TASK-014,Test,frontend/test/routes/app_router_test.dart,新增,新增 route navigation 測試,Codex,否,否,是,否,涵蓋 home initial route 與 register to login
+2026-07-03,09:08,TASK-014,Documentation,frontend/README.md,修改,新增 Routing 說明,Codex,否,否,是,否,文件同步完成
+2026-07-03,09:08,TASK-014,Documentation,docs/UI_SPEC.md,修改,新增 Flutter Router 基礎規範,Codex,否,否,是,否,記錄 Navigator 限制
+2026-07-03,09:08,TASK-014,Documentation,docs/TASKS.md,修改,標記 go_router Task DONE,Codex,否,否,否,否,已依 TODO IN PROGRESS REVIEW DONE 推進
+2026-07-03,09:08,TASK-014,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-014 變更紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除
+2026-07-03,09:08,TASK-014,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-014 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除
+2026-07-03,09:19,TASK-015,Frontend,frontend/lib/theme/app_theme.dart,新增,建立 light dark ThemeData 與共用元件 theme,Codex,否,否,是,否,Log 保存期限已檢查且未刪除
+2026-07-03,09:19,TASK-015,Frontend,frontend/lib/theme/app_colors.dart,新增,建立 Theme 色票與 seed color,Codex,否,否,是,否,集中管理顏色
+2026-07-03,09:19,TASK-015,Frontend,frontend/lib/theme/app_spacing.dart,新增,建立 spacing 與 radius token,Codex,否,否,是,否,集中管理間距與圓角
+2026-07-03,09:19,TASK-015,Frontend,frontend/lib/app.dart,修改,套用 AppTheme light dark 與 ThemeMode.system,Codex,否,否,是,否,入口集中套用 ThemeData
+2026-07-03,09:19,TASK-015,Test,frontend/test/theme/app_theme_test.dart,新增,新增 Theme 單元測試,Codex,否,否,是,否,涵蓋 light dark Material3 與背景色
+2026-07-03,09:19,TASK-015,Documentation,frontend/README.md,修改,新增 Theme 使用說明,Codex,否,否,是,否,文件同步完成
+2026-07-03,09:19,TASK-015,Documentation,docs/UI_SPEC.md,修改,新增 Flutter Theme 基礎規範,Codex,否,否,是,否,記錄禁止 hard code 共用樣式
+2026-07-03,09:19,TASK-015,Documentation,docs/TASKS.md,修改,標記 Theme Task DONE,Codex,否,否,否,否,已依 TODO IN PROGRESS REVIEW DONE 推進
+2026-07-03,09:19,TASK-015,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-015 變更紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除
+2026-07-03,09:19,TASK-015,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-015 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除
+2026-07-03,09:31,DOC-010,Database,docs/DATABASE_SPEC.md,修改,依 system_data 舊資料與現有 API 重構並正規化資料庫架構,Codex,否,是,否,是,新增 Log 前已檢查保存期限，未刪除過期 Log
+2026-07-03,09:31,DOC-010,Database,database/init/01_schema.sql,新增,新增 MySQL 初始正規化 schema,Codex,否,是,否,是,只會在 Docker volume 首次建立時執行
+2026-07-03,09:31,DOC-010,Documentation,database/init/README.md,修改,補充 init SQL 執行時機與限制,Codex,否,是,否,否,既有 volume 不會自動套用
+2026-07-03,09:31,DOC-010,Documentation,log/CHANGE_LOG.md,修改,新增 DOC-010 工作紀錄,Codex,否,是,否,否,Log 保存期限已檢查
+2026-07-03,09:31,DOC-010,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-010 歷史紀錄,Codex,否,是,否,否,Log 保存期限已檢查
+2026-07-03,14:17,DOC-011,Git,develop,修改,將 feature/theme merge 至 develop 並推送,Codex,否,否,是,否,新增 Log 前已檢查保存期限，未刪除過期 Log
+2026-07-03,14:17,DOC-011,Frontend,frontend/lib/theme/app_theme.dart,修改,移除 deprecated ColorScheme.background 使用並改由 scaffoldBackgroundColor 傳入,Codex,否,否,是,否,修正 flutter analyze 失敗
+2026-07-03,14:17,DOC-011,Documentation,log/CHANGE_LOG.md,修改,新增 DOC-011 merge 與修正紀錄,Codex,否,否,否,否,Log 保存期限已檢查
+
+2026-07-03,14:17,DOC-011,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-011 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查
+2026-07-03,14:23,TASK-016,Frontend,frontend/lib/widgets/state/loading_view.dart,新增,建立 LoadingView 共用載入狀態元件,Codex,否,否,是,否,Log 保存期限已檢查且未刪除
+2026-07-03,14:23,TASK-016,Frontend,frontend/lib/widgets/state/error_view.dart,新增,建立 ErrorView 共用錯誤狀態元件,Codex,否,否,是,否,支援重試 action
+2026-07-03,14:23,TASK-016,Frontend,frontend/lib/widgets/state/empty_view.dart,新增,建立 EmptyView 共用空資料狀態元件,Codex,否,否,是,否,支援可選 action
+2026-07-03,14:23,TASK-016,Test,frontend/test/widgets/state_views_test.dart,新增,新增共用狀態元件 widget tests,Codex,否,否,是,否,覆蓋 loading error empty
+2026-07-03,14:23,TASK-016,Documentation,frontend/README.md,修改,補充 Common State Widgets 說明,Codex,否,否,是,否,文件同步
+2026-07-03,14:23,TASK-016,Documentation,docs/UI_SPEC.md,修改,補充 Flutter Common State Widgets 規範,Codex,否,否,是,否,文件同步
+2026-07-03,14:23,TASK-016,Documentation,docs/TASKS.md,修改,標記 Loading Error Empty 共用元件 Task DONE,Codex,否,否,是,否,Task 狀態已經過 IN PROGRESS 與 REVIEW
+2026-07-03,14:23,TASK-016,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-016 工作紀錄,Codex,否,否,否,否,Log 保存期限已檢查
+2026-07-03,14:23,TASK-016,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-016 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查
+
+2026-07-03,14:55,TASK-017,Backend,backend/src/main/java/com/monsters/auth/controller/AuthController.java,新增,新增註冊 API Controller,Codex,是,否,否,否,POST /api/auth/register
+2026-07-03,14:55,TASK-017,Backend,backend/src/main/java/com/monsters/auth/service/AuthService.java,新增,新增註冊商業邏輯與 BCrypt 密碼雜湊,Codex,是,是,否,否,密碼不寫入 log
+2026-07-03,14:55,TASK-017,Backend,backend/src/main/java/com/monsters/auth/dto/RegisterRequest.java,新增,新增註冊 Request DTO 與 Validation,Codex,是,否,否,否,
+2026-07-03,14:55,TASK-017,Backend,backend/src/main/java/com/monsters/auth/dto/RegisterResponse.java,新增,新增註冊 Response DTO,Codex,是,否,否,否,
+2026-07-03,14:55,TASK-017,Backend,backend/src/main/java/com/monsters/user/entity/User.java,新增,新增 users Entity 對應,Codex,否,是,否,否,沿用既有 schema
+2026-07-03,14:55,TASK-017,Backend,backend/src/main/java/com/monsters/user/entity/UserCredential.java,新增,新增 user_credentials Entity 對應,Codex,否,是,否,否,沿用既有 schema
+2026-07-03,14:55,TASK-017,Backend,backend/src/main/java/com/monsters/user/repository/UserRepository.java,新增,新增 User Repository,Codex,否,是,否,否,
+2026-07-03,14:55,TASK-017,Backend,backend/src/main/java/com/monsters/user/repository/UserCredentialRepository.java,新增,新增 UserCredential Repository,Codex,否,是,否,否,
+2026-07-03,14:55,TASK-017,Test,backend/src/test/java/com/monsters/auth/controller/AuthControllerTest.java,新增,新增註冊 Controller 測試,Codex,是,否,否,否,
+2026-07-03,14:55,TASK-017,Test,backend/src/test/java/com/monsters/auth/service/AuthServiceTest.java,新增,新增註冊 Service 測試,Codex,是,是,否,否,
+2026-07-03,14:55,TASK-017,Test,backend/src/test/java/com/monsters/MonstersApplicationTests.java,修改,新增 Repository mock 維持不連 DB context 測試,Codex,否,否,否,否,
+2026-07-03,14:55,TASK-017,Backend,backend/src/main/java/com/monsters/common/exception/GlobalExceptionHandler.java,修改,修正既有亂碼字串語法以恢復編譯,Codex,否,否,否,否,
+2026-07-03,14:55,TASK-017,Test,backend/src/test/java/com/monsters/common/exception/GlobalExceptionHandlerTest.java,修改,修正既有例外處理測試字串,Codex,否,否,否,否,
+2026-07-03,14:55,TASK-017,Documentation,docs/API_SPEC.md,修改,補充註冊 API 規格,Codex,是,否,否,否,
+2026-07-03,14:55,TASK-017,Documentation,docs/DATABASE_SPEC.md,修改,補充註冊 API 資料表對應,Codex,否,是,否,否,
+2026-07-03,14:55,TASK-017,Documentation,backend/README.md,修改,補充註冊 API 使用說明,Codex,是,是,否,否,
+2026-07-03,14:55,TASK-017,Documentation,docs/TASKS.md,修改,註冊 API Task DONE,Codex,否,否,否,否,完成 TODO 到 IN PROGRESS 到 REVIEW 到 DONE
+2026-07-03,14:55,TASK-017,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-017 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-03,14:55,TASK-017,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-017 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log

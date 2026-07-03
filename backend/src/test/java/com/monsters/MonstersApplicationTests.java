@@ -1,7 +1,10 @@
 package com.monsters;
 
+import com.monsters.user.repository.UserCredentialRepository;
+import com.monsters.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 @SpringBootTest(properties = {
         "spring.autoconfigure.exclude="
@@ -9,6 +12,12 @@ import org.springframework.boot.test.context.SpringBootTest;
                 + "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration"
 })
 class MonstersApplicationTests {
+
+    @MockBean
+    private UserRepository userRepository;
+
+    @MockBean
+    private UserCredentialRepository userCredentialRepository;
 
     @Test
     void contextLoads() {

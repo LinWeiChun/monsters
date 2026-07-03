@@ -64,6 +64,415 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-07-03 14:55
+
+Task
+TASK-017 Register API
+
+Agent
+Codex
+
+### Completed
+
+- Added `POST /api/auth/register`.
+- Added User and UserCredential JPA entities mapped to `users` and `user_credentials`.
+- Added repositories, DTOs, AuthService, and AuthController.
+- Added service and controller tests for successful registration, validation, and duplicate email behavior.
+- Fixed existing common exception handler/test mojibake string syntax so backend tests can compile.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/auth/controller/AuthController.java`
+- `backend/src/main/java/com/monsters/auth/dto/RegisterRequest.java`
+- `backend/src/main/java/com/monsters/auth/dto/RegisterResponse.java`
+- `backend/src/main/java/com/monsters/auth/service/AuthService.java`
+- `backend/src/main/java/com/monsters/user/entity/User.java`
+- `backend/src/main/java/com/monsters/user/entity/UserCredential.java`
+- `backend/src/main/java/com/monsters/user/repository/UserRepository.java`
+- `backend/src/main/java/com/monsters/user/repository/UserCredentialRepository.java`
+- `backend/src/test/java/com/monsters/auth/controller/AuthControllerTest.java`
+- `backend/src/test/java/com/monsters/auth/service/AuthServiceTest.java`
+
+### Modified
+
+- `backend/README.md`
+- `backend/src/main/java/com/monsters/common/exception/GlobalExceptionHandler.java`
+- `backend/src/test/java/com/monsters/MonstersApplicationTests.java`
+- `backend/src/test/java/com/monsters/common/exception/GlobalExceptionHandlerTest.java`
+- `docs/API_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- Added `POST /api/auth/register`.
+
+### Database
+
+- No schema change. Register API writes to existing `users` and `user_credentials` tables.
+
+### Tests
+
+- `.\gradlew.bat test`
+- `.\gradlew.bat build`
+- `git diff --check`
+
+### Commit Message
+
+```text
+feat(auth): 建立註冊 API
+```
+
+### Notes
+
+- Passwords are stored only as BCrypt hashes.
+
+---
+
+## 2026-07-03 14:23
+
+Task
+TASK-016 建立 Loading / Error / Empty 共用元件
+
+變更者
+Codex
+
+### 本次完成
+
+- 新增 Flutter 共用狀態元件 `LoadingView`、`ErrorView`、`EmptyView`。
+- 狀態元件集中放置於 `frontend/lib/widgets/state/`。
+- 元件使用 `Theme.of(context)` 與 `AppSpacing`，避免 hard code 共用樣式。
+- 新增 widget tests，覆蓋 loading indicator、error retry action、empty action。
+- 更新 frontend README 與 UI_SPEC，補充共用狀態元件規範。
+- 新增 Log 前已檢查 `log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv` 保存期限，未發現超過一個月的紀錄，未刪除過期 Log。
+
+### 新增
+
+- `frontend/lib/widgets/state/loading_view.dart`
+- `frontend/lib/widgets/state/error_view.dart`
+- `frontend/lib/widgets/state/empty_view.dart`
+- `frontend/test/widgets/state_views_test.dart`
+
+### 修改
+
+- `frontend/README.md`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- `dart format lib/widgets/state test/widgets/state_views_test.dart`
+- `flutter analyze`
+- `flutter test`
+- `flutter build web`
+
+### Commit 撱箄降
+
+```text
+feat(frontend): 建立共用狀態元件
+```
+
+### 註記 / 待確認事項
+
+- 後續頁面應使用共用狀態元件呈現 loading / error / empty 狀態。
+
+---
+
+## 2026-07-03 14:17
+
+Task
+DOC-011 merge feature/theme into develop
+
+變更者
+Codex
+
+### 本次完成
+
+- 將 `feature/theme` 合併至 `develop`。
+- 解決 `log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv` 的 merge conflict，保留 DOC-010 與 TASK-015 紀錄。
+- 修正 `frontend/lib/theme/app_theme.dart` 使用 deprecated `ColorScheme.background` 導致 `flutter analyze` 失敗的問題。
+- 新增 Log 前已檢查 `log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv` 保存期限，未發現超過一個月的紀錄，未刪除過期 Log。
+
+### 新增
+
+- 無
+
+### 修改
+
+- `frontend/lib/theme/app_theme.dart`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- `flutter analyze`
+- `flutter test`
+- `flutter build web`
+- `git diff --check`
+
+### Commit 撱箄降
+
+```text
+merge: feature theme into develop
+docs(log): 補充 theme merge 紀錄
+```
+
+### 註記 / 待確認事項
+
+- `feature/theme` commit 已包含於 `develop`。
+
+---
+
+## 2026-07-03 09:31
+
+Task
+DOC-010 資料庫架構正規化重構
+
+變更者
+Codex
+
+### 本次完成
+
+- 依照 `system_data` 舊後端 Entity 與現有 API 規格重構資料庫架構。
+- 將使用者關聯統一改用 `users.id`，不再以 `account` 作為跨表關聯鍵。
+- 拆分使用者認證、OAuth、隱私鎖、怪物資產、紀錄媒體、每日測驗選項。
+- 將 diary / annoyance 正規化為共用 `entries`，並以 `entry_type` 區分。
+- 將 diary / annoyance 社群按讚與留言整合為 `entry_likes`、`entry_comments`。
+- 新增 MySQL 初始化 schema `database/init/01_schema.sql`。
+- 新增 Log 前已檢查 `log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv` 保存期限，未發現超過一個月的紀錄，未刪除過期 Log。
+
+### 新增
+
+- `database/init/01_schema.sql`
+
+### 修改
+
+- `docs/DATABASE_SPEC.md`
+- `database/init/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 新增 Docker MySQL 首次初始化用 schema。
+- 既有資料庫 volume 不會自動套用，若已有資料需另行撰寫資料搬遷 script。
+
+### API
+
+- 無 endpoint 異動。
+- Community API 的資料底層將由共用 `entries` / `entry_likes` / `entry_comments` 支援。
+
+### Database
+
+- 重構為正規化 schema，新增 users、credentials、OAuth、monster asset、entries、entry media、daily test options 等資料表。
+
+### 測試
+
+- `git diff --check`
+- `docker compose config`
+
+### Commit 撱箄降
+
+```text
+refactor(database): 正規化資料庫架構
+```
+
+### 註記 / 待確認事項
+
+- 後續實作 Auth / Diary / Annoyance / Community Entity 時需依此 schema 建立 JPA Entity 與 DTO。
+
+---
+
+## 2026-07-03 09:19
+
+Task
+TASK-015 建立 Theme
+
+修改來源
+Codex
+
+### 本次完成
+
+- 新增 Flutter Theme 基礎層，集中建立 light / dark ThemeData。
+- 新增 AppColors、AppSpacing、AppRadius 作為共用設計 token。
+- App 入口套用 AppTheme.light()、AppTheme.dark() 與 ThemeMode.system。
+- 新增 Theme 單元測試，驗證 light / dark theme、Material 3、背景色與共用元件 theme 設定。
+- 更新 frontend README 與 UI_SPEC，記錄 Theme 檔案位置與禁止頁面 hard code 共用樣式。
+- 新增 Log 前已檢查 log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv 保存期限，未發現超過一個月紀錄，未刪除紀錄。
+
+### 新增
+
+- `frontend/lib/theme/app_theme.dart`
+- `frontend/lib/theme/app_colors.dart`
+- `frontend/lib/theme/app_spacing.dart`
+- `frontend/test/theme/app_theme_test.dart`
+
+### 修改
+
+- `frontend/lib/app.dart`
+- `frontend/README.md`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- `flutter analyze`
+- `flutter test`
+- `flutter build web`
+
+### Commit 建議
+
+```text
+feat(frontend): 建立 theme
+```
+
+### 備註 / 待確認事項
+
+- Theme 為基礎視覺設定，後續共用元件 Task 應優先使用 ThemeData 與 theme token。
+---
+
+## 2026-07-03 09:08
+
+Task
+TASK-014 建立 go_router
+
+修改來源
+Codex
+
+### 本次完成
+
+- 新增 Flutter go_router 依賴並更新 pubspec.lock。
+- 將 App 入口改為 Riverpod ProviderScope + MaterialApp.router。
+- 新增集中式路由設定 appRouterProvider、AppRoute、AppPath。
+- 新增基礎路由頁面 SplashPage、HomePage、LoginPage、RegisterPage。
+- 移除 Flutter template counter app 與 counter widget test。
+- 新增 route widget tests，驗證初始路由、登入路由與註冊轉登入流程。
+- 更新 frontend README 與 UI_SPEC，記錄 go_router 基礎路由與 Navigator 使用限制。
+- 新增 Log 前已檢查 log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv 保存期限，未發現超過一個月紀錄，未刪除紀錄。
+
+### 新增
+
+- `frontend/lib/app.dart`
+- `frontend/lib/routes/app_router.dart`
+- `frontend/lib/routes/app_routes.dart`
+- `frontend/lib/pages/splash_page.dart`
+- `frontend/lib/pages/home_page.dart`
+- `frontend/lib/pages/login_page.dart`
+- `frontend/lib/pages/register_page.dart`
+- `frontend/test/routes/app_router_test.dart`
+
+### 修改
+
+- `frontend/lib/main.dart`
+- `frontend/test/widget_test.dart`
+- `frontend/pubspec.yaml`
+- `frontend/pubspec.lock`
+- `frontend/README.md`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- `flutter analyze`
+- `flutter test`
+- `flutter build web`
+
+### Commit 建議
+
+```text
+feat(frontend): 建立 go_router
+```
+
+### 備註 / 待確認事項
+
+- 目前頁面為路由容器骨架，實際登入、註冊與首頁功能將依後續 Task 補齊。
+---
+
 ## 2026-07-02 14:33
 
 Task

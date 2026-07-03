@@ -240,3 +240,67 @@ Web 版規則：
 - 不在每個頁面硬編碼顏色、字級、圓角與間距；需集中於 Theme 與共用樣式。
 - 不保留過長 Page Widget；聊天、卡片、表單、抽屜項目與狀態畫面需拆成可測試共用元件。
 - `system_data` 可保留舊系統圖片與動畫素材作為參考；若要正式納入新版資產，仍需另行整理授權、命名與資產規格。
+## Flutter Router 基礎規範
+
+前端路由統一使用 go_router，入口必須使用 `MaterialApp.router`。
+
+路由設定位置：
+
+- `frontend/lib/routes/app_router.dart`
+- `frontend/lib/routes/app_routes.dart`
+
+目前基礎路由：
+
+| Path | Name | Page | 用途 |
+|---|---|---|---|
+| `/` | `splash` | `SplashPage` | App 初始頁 |
+| `/home` | `home` | `HomePage` | 首頁容器 |
+| `/login` | `login` | `LoginPage` | 登入頁容器 |
+| `/register` | `register` | `RegisterPage` | 註冊頁容器 |
+
+頁面不得直接使用 `Navigator.push`。頁面切換應使用 go_router 的 `context.goNamed()` 或集中路由設定。
+## Flutter Theme 基礎規範
+
+前端視覺樣式統一使用 `ThemeData`，入口由 `MaterialApp.router` 套用 light / dark theme 與 `ThemeMode.system`。
+
+Theme 設定位置：
+
+- `frontend/lib/theme/app_theme.dart`
+- `frontend/lib/theme/app_colors.dart`
+- `frontend/lib/theme/app_spacing.dart`
+
+目前 Theme 規範：
+
+| 類別 | 檔案 | 用途 |
+|---|---|---|
+| AppTheme | `app_theme.dart` | 建立 light / dark `ThemeData` |
+| AppColors | `app_colors.dart` | 集中管理色票與 seed color |
+| AppSpacing / AppRadius | `app_spacing.dart` | 集中管理間距與圓角 token |
+
+頁面不得自行 hard code 共用顏色、字體、圓角與間距；應優先使用 `Theme.of(context)` 與 theme token。
+## Flutter Common State Widgets
+
+前端共用狀態元件位置：
+
+- `frontend/lib/widgets/state/loading_view.dart`
+- `frontend/lib/widgets/state/error_view.dart`
+- `frontend/lib/widgets/state/empty_view.dart`
+
+共用狀態元件：
+
+| Widget | 用途 | 規範 |
+|---|---|---|
+| LoadingView | 資料載入中 | 顯示 progress indicator 與可選文字 |
+| ErrorView | 錯誤狀態 | 顯示錯誤標題、訊息與可選重試按鈕 |
+| EmptyView | 空資料狀態 | 顯示空狀態標題、訊息與可選操作按鈕 |
+
+狀態元件只負責 UI 呈現，不得直接呼叫 API、Repository 或 Service。
+
+頁面應將資料狀態轉換為：
+
+- loading：使用 `LoadingView`
+- error：使用 `ErrorView`
+- empty：使用 `EmptyView`
+- data：顯示實際內容
+
+狀態元件必須使用 `Theme.of(context)` 與 `AppSpacing` / `AppRadius`，不得 hard code 共用顏色、間距或圓角。
