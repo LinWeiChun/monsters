@@ -115,3 +115,39 @@ Response:
 ```
 
 The register flow creates `users` and `user_credentials` records. Passwords are stored only as BCrypt hashes.
+
+### Login
+
+`POST /api/auth/login`
+
+Request:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Login success",
+  "data": {
+    "accessToken": "jwt_access_token",
+    "refreshToken": "jwt_refresh_token",
+    "tokenType": "Bearer",
+    "expiresIn": 3600,
+    "user": {
+      "userId": 1,
+      "email": "user@example.com",
+      "userName": "Wei",
+      "avatarUrl": null
+    }
+  }
+}
+```
+
+Login normalizes email before lookup, verifies the stored BCrypt password hash, and returns JWT access and refresh tokens. `JWT_SECRET` must be configured before login can issue tokens.

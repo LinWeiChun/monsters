@@ -40,7 +40,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 ## Phase 2：會員與個人資料
 
 - [x] 註冊 API（DONE）
-- [ ] 登入 API
+- [x] 登入 API（DONE）
 - [ ] Google 登入 API
 - [ ] 忘記密碼 API
 - [ ] 登出 API

@@ -234,3 +234,20 @@
 2026-07-03,14:55,TASK-017,Documentation,docs/TASKS.md,修改,註冊 API Task DONE,Codex,否,否,否,否,完成 TODO 到 IN PROGRESS 到 REVIEW 到 DONE
 2026-07-03,14:55,TASK-017,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-017 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-03,14:55,TASK-017,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-017 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-03,20:36,TASK-018,Backend,backend/src/main/java/com/monsters/auth/dto/LoginRequest.java,新增,新增登入 Request DTO 與 Validation,Codex,是,否,否,否,
+2026-07-03,20:36,TASK-018,Backend,backend/src/main/java/com/monsters/auth/dto/LoginResponse.java,新增,新增登入 Response DTO,Codex,是,否,否,否,
+2026-07-03,20:36,TASK-018,Backend,backend/src/main/java/com/monsters/auth/dto/AuthUserResponse.java,新增,新增登入使用者 Response DTO,Codex,是,否,否,否,
+2026-07-03,20:36,TASK-018,Backend,backend/src/main/java/com/monsters/common/security/JwtTokenService.java,新增,新增 JWT access refresh token 產生服務,Codex,是,否,否,否,使用 JDK HMAC-SHA256 未新增第三方套件
+2026-07-03,20:36,TASK-018,Backend,backend/src/main/java/com/monsters/auth/controller/AuthController.java,修改,新增 POST /api/auth/login endpoint,Codex,是,否,否,否,
+2026-07-03,20:36,TASK-018,Backend,backend/src/main/java/com/monsters/auth/service/AuthService.java,修改,新增登入驗證與 token 回傳流程,Codex,是,是,否,否,密碼與 JWT 不寫入 log
+2026-07-03,20:36,TASK-018,Backend,backend/src/main/java/com/monsters/user/repository/UserRepository.java,修改,新增未刪除使用者 email 查詢,Codex,否,是,否,否,
+2026-07-03,20:36,TASK-018,Backend,backend/src/main/java/com/monsters/user/repository/UserCredentialRepository.java,修改,新增使用者憑證查詢,Codex,否,是,否,否,
+2026-07-03,20:36,TASK-018,Test,backend/src/test/java/com/monsters/auth/controller/AuthControllerTest.java,修改,新增登入 Controller 測試,Codex,是,否,否,否,
+2026-07-03,20:36,TASK-018,Test,backend/src/test/java/com/monsters/auth/service/AuthServiceTest.java,修改,新增登入 Service 測試,Codex,是,是,否,否,
+2026-07-03,20:36,TASK-018,Test,backend/src/test/java/com/monsters/common/security/JwtTokenServiceTest.java,新增,新增 JWT token 產生測試,Codex,是,否,否,否,
+2026-07-03,20:36,TASK-018,Documentation,docs/API_SPEC.md,修改,補充登入 API request response 與錯誤規則,Codex,是,否,否,否,
+2026-07-03,20:36,TASK-018,Documentation,docs/DATABASE_SPEC.md,修改,補充登入 API 資料表對應,Codex,否,是,否,否,
+2026-07-03,20:36,TASK-018,Documentation,backend/README.md,修改,補充登入 API 使用說明,Codex,是,是,否,否,
+2026-07-03,20:36,TASK-018,Documentation,docs/TASKS.md,修改,登入 API Task DONE,Codex,否,否,否,否,完成 TODO 到 IN PROGRESS 到 REVIEW 到 DONE
+2026-07-03,20:36,TASK-018,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-018 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-03,20:36,TASK-018,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-018 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log

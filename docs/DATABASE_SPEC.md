@@ -532,3 +532,14 @@ database/init/01_schema.sql
 | password | user_credentials | password_hash | Stored as BCrypt hash only |
 
 Register API must not store raw passwords, JWT values, or secrets in logs.
+
+## Login API Database Mapping
+
+`POST /api/auth/login` reads data from the normalized auth tables:
+
+| API Field | Table | Column | Note |
+|---|---|---|---|
+| email | users | email | Lowercase normalized before lookup; deleted users are rejected |
+| password | user_credentials | password_hash | Compared with BCrypt `PasswordEncoder.matches` |
+
+Login API returns JWT access and refresh tokens, but tokens must not be persisted or written to logs.

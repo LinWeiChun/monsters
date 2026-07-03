@@ -1,5 +1,7 @@
 package com.monsters.auth.controller;
 
+import com.monsters.auth.dto.LoginRequest;
+import com.monsters.auth.dto.LoginResponse;
 import com.monsters.auth.dto.RegisterRequest;
 import com.monsters.auth.dto.RegisterResponse;
 import com.monsters.auth.service.AuthService;
@@ -30,5 +32,13 @@ public class AuthController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Register success", response));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<LoginResponse>> login(
+            @Valid @RequestBody LoginRequest request
+    ) {
+        LoginResponse response = authService.login(request);
+        return ResponseEntity.ok(ApiResponse.success("Login success", response));
     }
 }

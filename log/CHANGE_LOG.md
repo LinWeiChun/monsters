@@ -8,6 +8,79 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-03 20:36
+
+Task
+TASK-018 Login API
+
+Agent
+Codex
+
+### Completed
+
+- Added `POST /api/auth/login`.
+- Added login request and response DTOs.
+- Added JWT access and refresh token generation with JDK HMAC-SHA256 APIs, without adding a third-party dependency.
+- Added login service logic for normalized email lookup, BCrypt password matching, deleted-user rejection, and 401 invalid credential handling.
+- Added service, controller, and JWT token tests.
+- Updated API, database, backend README, task, and log documents.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/auth/dto/AuthUserResponse.java`
+- `backend/src/main/java/com/monsters/auth/dto/LoginRequest.java`
+- `backend/src/main/java/com/monsters/auth/dto/LoginResponse.java`
+- `backend/src/main/java/com/monsters/common/security/JwtTokenService.java`
+- `backend/src/test/java/com/monsters/common/security/JwtTokenServiceTest.java`
+
+### Modified
+
+- `backend/README.md`
+- `backend/src/main/java/com/monsters/auth/controller/AuthController.java`
+- `backend/src/main/java/com/monsters/auth/service/AuthService.java`
+- `backend/src/main/java/com/monsters/user/repository/UserCredentialRepository.java`
+- `backend/src/main/java/com/monsters/user/repository/UserRepository.java`
+- `backend/src/test/java/com/monsters/auth/controller/AuthControllerTest.java`
+- `backend/src/test/java/com/monsters/auth/service/AuthServiceTest.java`
+- `docs/API_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- Added `POST /api/auth/login`.
+
+### Database
+
+- No schema change. Login API reads existing `users` and `user_credentials` tables.
+
+### Tests
+
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew test`
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew build`
+- `git diff --check`
+
+### Commit Message
+
+```text
+feat(auth): 建立登入 API
+```
+
+### Notes
+
+- `JWT_SECRET` must be configured before login can issue JWT tokens.
+
 ## 紀錄格式
 
 ```markdown
