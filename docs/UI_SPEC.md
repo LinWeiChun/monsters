@@ -278,3 +278,29 @@ Theme 設定位置：
 | AppSpacing / AppRadius | `app_spacing.dart` | 集中管理間距與圓角 token |
 
 頁面不得自行 hard code 共用顏色、字體、圓角與間距；應優先使用 `Theme.of(context)` 與 theme token。
+## Flutter Common State Widgets
+
+前端共用狀態元件位置：
+
+- `frontend/lib/widgets/state/loading_view.dart`
+- `frontend/lib/widgets/state/error_view.dart`
+- `frontend/lib/widgets/state/empty_view.dart`
+
+共用狀態元件：
+
+| Widget | 用途 | 規範 |
+|---|---|---|
+| LoadingView | 資料載入中 | 顯示 progress indicator 與可選文字 |
+| ErrorView | 錯誤狀態 | 顯示錯誤標題、訊息與可選重試按鈕 |
+| EmptyView | 空資料狀態 | 顯示空狀態標題、訊息與可選操作按鈕 |
+
+狀態元件只負責 UI 呈現，不得直接呼叫 API、Repository 或 Service。
+
+頁面應將資料狀態轉換為：
+
+- loading：使用 `LoadingView`
+- error：使用 `ErrorView`
+- empty：使用 `EmptyView`
+- data：顯示實際內容
+
+狀態元件必須使用 `Theme.of(context)` 與 `AppSpacing` / `AppRadius`，不得 hard code 共用顏色、間距或圓角。

@@ -205,3 +205,12 @@
 2026-07-03,14:17,DOC-011,Documentation,log/CHANGE_LOG.md,修改,新增 DOC-011 merge 與修正紀錄,Codex,否,否,否,否,Log 保存期限已檢查
 
 2026-07-03,14:17,DOC-011,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-011 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查
+2026-07-03,14:23,TASK-016,Frontend,frontend/lib/widgets/state/loading_view.dart,新增,建立 LoadingView 共用載入狀態元件,Codex,否,否,是,否,Log 保存期限已檢查且未刪除
+2026-07-03,14:23,TASK-016,Frontend,frontend/lib/widgets/state/error_view.dart,新增,建立 ErrorView 共用錯誤狀態元件,Codex,否,否,是,否,支援重試 action
+2026-07-03,14:23,TASK-016,Frontend,frontend/lib/widgets/state/empty_view.dart,新增,建立 EmptyView 共用空資料狀態元件,Codex,否,否,是,否,支援可選 action
+2026-07-03,14:23,TASK-016,Test,frontend/test/widgets/state_views_test.dart,新增,新增共用狀態元件 widget tests,Codex,否,否,是,否,覆蓋 loading error empty
+2026-07-03,14:23,TASK-016,Documentation,frontend/README.md,修改,補充 Common State Widgets 說明,Codex,否,否,是,否,文件同步
+2026-07-03,14:23,TASK-016,Documentation,docs/UI_SPEC.md,修改,補充 Flutter Common State Widgets 規範,Codex,否,否,是,否,文件同步
+2026-07-03,14:23,TASK-016,Documentation,docs/TASKS.md,修改,標記 Loading Error Empty 共用元件 Task DONE,Codex,否,否,是,否,Task 狀態已經過 IN PROGRESS 與 REVIEW
+2026-07-03,14:23,TASK-016,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-016 工作紀錄,Codex,否,否,否,否,Log 保存期限已檢查
+2026-07-03,14:23,TASK-016,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-016 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查

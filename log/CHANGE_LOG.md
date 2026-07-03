@@ -64,6 +64,73 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-07-03 14:23
+
+Task
+TASK-016 建立 Loading / Error / Empty 共用元件
+
+變更者
+Codex
+
+### 本次完成
+
+- 新增 Flutter 共用狀態元件 `LoadingView`、`ErrorView`、`EmptyView`。
+- 狀態元件集中放置於 `frontend/lib/widgets/state/`。
+- 元件使用 `Theme.of(context)` 與 `AppSpacing`，避免 hard code 共用樣式。
+- 新增 widget tests，覆蓋 loading indicator、error retry action、empty action。
+- 更新 frontend README 與 UI_SPEC，補充共用狀態元件規範。
+- 新增 Log 前已檢查 `log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv` 保存期限，未發現超過一個月的紀錄，未刪除過期 Log。
+
+### 新增
+
+- `frontend/lib/widgets/state/loading_view.dart`
+- `frontend/lib/widgets/state/error_view.dart`
+- `frontend/lib/widgets/state/empty_view.dart`
+- `frontend/test/widgets/state_views_test.dart`
+
+### 修改
+
+- `frontend/README.md`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- `dart format lib/widgets/state test/widgets/state_views_test.dart`
+- `flutter analyze`
+- `flutter test`
+- `flutter build web`
+
+### Commit 撱箄降
+
+```text
+feat(frontend): 建立共用狀態元件
+```
+
+### 註記 / 待確認事項
+
+- 後續頁面應使用共用狀態元件呈現 loading / error / empty 狀態。
+
+---
+
 ## 2026-07-03 14:17
 
 Task

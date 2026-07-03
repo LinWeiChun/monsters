@@ -33,7 +33,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] 建立 API Error Handler（DONE）
 - [x] 建立 go_router（DONE）
 - [x] 建立 Theme（DONE）
-- [ ] 建立 Loading / Error / Empty 共用元件
+- [x] 建立 Loading / Error / Empty 共用元件（DONE）
 
 ---
 
