@@ -518,3 +518,17 @@ database/init/01_schema.sql
 - Service 負責 transaction
 - Repository 只負責資料存取
 - 密碼、JWT、隱私鎖不得寫入 log
+
+---
+
+## Register API Database Mapping
+
+`POST /api/auth/register` writes data to the normalized auth tables:
+
+| API Field | Table | Column | Note |
+|---|---|---|---|
+| email | users | email | Lowercase normalized before duplicate check |
+| userName | users | user_name | Trimmed before persistence |
+| password | user_credentials | password_hash | Stored as BCrypt hash only |
+
+Register API must not store raw passwords, JWT values, or secrets in logs.

@@ -64,6 +64,82 @@ feat(scope): 說明本次異動
 
 ---
 
+## 2026-07-03 14:55
+
+Task
+TASK-017 Register API
+
+Agent
+Codex
+
+### Completed
+
+- Added `POST /api/auth/register`.
+- Added User and UserCredential JPA entities mapped to `users` and `user_credentials`.
+- Added repositories, DTOs, AuthService, and AuthController.
+- Added service and controller tests for successful registration, validation, and duplicate email behavior.
+- Fixed existing common exception handler/test mojibake string syntax so backend tests can compile.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/auth/controller/AuthController.java`
+- `backend/src/main/java/com/monsters/auth/dto/RegisterRequest.java`
+- `backend/src/main/java/com/monsters/auth/dto/RegisterResponse.java`
+- `backend/src/main/java/com/monsters/auth/service/AuthService.java`
+- `backend/src/main/java/com/monsters/user/entity/User.java`
+- `backend/src/main/java/com/monsters/user/entity/UserCredential.java`
+- `backend/src/main/java/com/monsters/user/repository/UserRepository.java`
+- `backend/src/main/java/com/monsters/user/repository/UserCredentialRepository.java`
+- `backend/src/test/java/com/monsters/auth/controller/AuthControllerTest.java`
+- `backend/src/test/java/com/monsters/auth/service/AuthServiceTest.java`
+
+### Modified
+
+- `backend/README.md`
+- `backend/src/main/java/com/monsters/common/exception/GlobalExceptionHandler.java`
+- `backend/src/test/java/com/monsters/MonstersApplicationTests.java`
+- `backend/src/test/java/com/monsters/common/exception/GlobalExceptionHandlerTest.java`
+- `docs/API_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- Added `POST /api/auth/register`.
+
+### Database
+
+- No schema change. Register API writes to existing `users` and `user_credentials` tables.
+
+### Tests
+
+- `.\gradlew.bat test`
+- `.\gradlew.bat build`
+- `git diff --check`
+
+### Commit Message
+
+```text
+feat(auth): 建立註冊 API
+```
+
+### Notes
+
+- Passwords are stored only as BCrypt hashes.
+
+---
+
 ## 2026-07-03 14:23
 
 Task

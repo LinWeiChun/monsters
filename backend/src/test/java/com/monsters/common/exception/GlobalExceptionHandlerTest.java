@@ -16,41 +16,41 @@ class GlobalExceptionHandlerTest {
     @Test
     void businessExceptionShouldReturnBadRequest() {
         ResponseEntity<ApiResponse<Void>> response =
-                handler.handleBusinessException(new BusinessException("商業邏輯錯誤"));
+                handler.handleBusinessException(new BusinessException("Business error"));
 
-        assertErrorResponse(response, HttpStatus.BAD_REQUEST, "商業邏輯錯誤");
+        assertErrorResponse(response, HttpStatus.BAD_REQUEST, "Business error");
     }
 
     @Test
     void resourceNotFoundExceptionShouldReturnNotFound() {
         ResponseEntity<ApiResponse<Void>> response =
-                handler.handleBusinessException(new ResourceNotFoundException("資料不存在"));
+                handler.handleBusinessException(new ResourceNotFoundException("Resource not found"));
 
-        assertErrorResponse(response, HttpStatus.NOT_FOUND, "資料不存在");
+        assertErrorResponse(response, HttpStatus.NOT_FOUND, "Resource not found");
     }
 
     @Test
     void conflictExceptionShouldReturnConflict() {
         ResponseEntity<ApiResponse<Void>> response =
-                handler.handleBusinessException(new ConflictException("資料已存在"));
+                handler.handleBusinessException(new ConflictException("Resource conflict"));
 
-        assertErrorResponse(response, HttpStatus.CONFLICT, "資料已存在");
+        assertErrorResponse(response, HttpStatus.CONFLICT, "Resource conflict");
     }
 
     @Test
     void unauthorizedExceptionShouldReturnUnauthorized() {
         ResponseEntity<ApiResponse<Void>> response =
-                handler.handleBusinessException(new UnauthorizedException("尚未登入"));
+                handler.handleBusinessException(new UnauthorizedException("Unauthorized"));
 
-        assertErrorResponse(response, HttpStatus.UNAUTHORIZED, "尚未登入");
+        assertErrorResponse(response, HttpStatus.UNAUTHORIZED, "Unauthorized");
     }
 
     @Test
     void forbiddenExceptionShouldReturnForbidden() {
         ResponseEntity<ApiResponse<Void>> response =
-                handler.handleBusinessException(new ForbiddenException("權限不足"));
+                handler.handleBusinessException(new ForbiddenException("Forbidden"));
 
-        assertErrorResponse(response, HttpStatus.FORBIDDEN, "權限不足");
+        assertErrorResponse(response, HttpStatus.FORBIDDEN, "Forbidden");
     }
 
     @Test
@@ -59,14 +59,14 @@ class GlobalExceptionHandlerTest {
 
         ResponseEntity<ApiResponse<Void>> response = handler.handleConstraintViolationException(exception);
 
-        assertErrorResponse(response, HttpStatus.BAD_REQUEST, "請確認輸入資料");
+        assertErrorResponse(response, HttpStatus.BAD_REQUEST, "Request validation failed");
     }
 
     @Test
     void unhandledExceptionShouldReturnInternalServerError() {
         ResponseEntity<ApiResponse<Void>> response = handler.handleException(new RuntimeException("hidden"));
 
-        assertErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, "系統發生錯誤");
+        assertErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
     }
 
     private void assertErrorResponse(

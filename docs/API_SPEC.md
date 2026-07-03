@@ -435,3 +435,50 @@ diary:1
 跨文件決策與待確認事項集中於：
 
 - docs/DECISIONS.md
+
+---
+
+## Auth API Implementation Notes
+
+### Register
+
+`POST /api/auth/register`
+
+Request:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "password123",
+  "userName": "Wei"
+}
+```
+
+Validation:
+
+| Field | Rule |
+|---|---|
+| email | Required, valid email format |
+| password | Required, 8 to 72 characters |
+| userName | Required, max 80 characters |
+
+Success response: `201 Created`
+
+```json
+{
+  "success": true,
+  "message": "Register success",
+  "data": {
+    "userId": 1,
+    "email": "user@example.com",
+    "userName": "Wei"
+  }
+}
+```
+
+Error response:
+
+| Status | Condition |
+|---:|---|
+| 400 | Request validation failed |
+| 409 | Email already registered |

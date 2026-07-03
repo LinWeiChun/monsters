@@ -214,3 +214,23 @@
 2026-07-03,14:23,TASK-016,Documentation,docs/TASKS.md,修改,標記 Loading Error Empty 共用元件 Task DONE,Codex,否,否,是,否,Task 狀態已經過 IN PROGRESS 與 REVIEW
 2026-07-03,14:23,TASK-016,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-016 工作紀錄,Codex,否,否,否,否,Log 保存期限已檢查
 2026-07-03,14:23,TASK-016,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-016 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查
+
+2026-07-03,14:55,TASK-017,Backend,backend/src/main/java/com/monsters/auth/controller/AuthController.java,新增,新增註冊 API Controller,Codex,是,否,否,否,POST /api/auth/register
+2026-07-03,14:55,TASK-017,Backend,backend/src/main/java/com/monsters/auth/service/AuthService.java,新增,新增註冊商業邏輯與 BCrypt 密碼雜湊,Codex,是,是,否,否,密碼不寫入 log
+2026-07-03,14:55,TASK-017,Backend,backend/src/main/java/com/monsters/auth/dto/RegisterRequest.java,新增,新增註冊 Request DTO 與 Validation,Codex,是,否,否,否,
+2026-07-03,14:55,TASK-017,Backend,backend/src/main/java/com/monsters/auth/dto/RegisterResponse.java,新增,新增註冊 Response DTO,Codex,是,否,否,否,
+2026-07-03,14:55,TASK-017,Backend,backend/src/main/java/com/monsters/user/entity/User.java,新增,新增 users Entity 對應,Codex,否,是,否,否,沿用既有 schema
+2026-07-03,14:55,TASK-017,Backend,backend/src/main/java/com/monsters/user/entity/UserCredential.java,新增,新增 user_credentials Entity 對應,Codex,否,是,否,否,沿用既有 schema
+2026-07-03,14:55,TASK-017,Backend,backend/src/main/java/com/monsters/user/repository/UserRepository.java,新增,新增 User Repository,Codex,否,是,否,否,
+2026-07-03,14:55,TASK-017,Backend,backend/src/main/java/com/monsters/user/repository/UserCredentialRepository.java,新增,新增 UserCredential Repository,Codex,否,是,否,否,
+2026-07-03,14:55,TASK-017,Test,backend/src/test/java/com/monsters/auth/controller/AuthControllerTest.java,新增,新增註冊 Controller 測試,Codex,是,否,否,否,
+2026-07-03,14:55,TASK-017,Test,backend/src/test/java/com/monsters/auth/service/AuthServiceTest.java,新增,新增註冊 Service 測試,Codex,是,是,否,否,
+2026-07-03,14:55,TASK-017,Test,backend/src/test/java/com/monsters/MonstersApplicationTests.java,修改,新增 Repository mock 維持不連 DB context 測試,Codex,否,否,否,否,
+2026-07-03,14:55,TASK-017,Backend,backend/src/main/java/com/monsters/common/exception/GlobalExceptionHandler.java,修改,修正既有亂碼字串語法以恢復編譯,Codex,否,否,否,否,
+2026-07-03,14:55,TASK-017,Test,backend/src/test/java/com/monsters/common/exception/GlobalExceptionHandlerTest.java,修改,修正既有例外處理測試字串,Codex,否,否,否,否,
+2026-07-03,14:55,TASK-017,Documentation,docs/API_SPEC.md,修改,補充註冊 API 規格,Codex,是,否,否,否,
+2026-07-03,14:55,TASK-017,Documentation,docs/DATABASE_SPEC.md,修改,補充註冊 API 資料表對應,Codex,否,是,否,否,
+2026-07-03,14:55,TASK-017,Documentation,backend/README.md,修改,補充註冊 API 使用說明,Codex,是,是,否,否,
+2026-07-03,14:55,TASK-017,Documentation,docs/TASKS.md,修改,註冊 API Task DONE,Codex,否,否,否,否,完成 TODO 到 IN PROGRESS 到 REVIEW 到 DONE
+2026-07-03,14:55,TASK-017,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-017 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-03,14:55,TASK-017,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-017 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log

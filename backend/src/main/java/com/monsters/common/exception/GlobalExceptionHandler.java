@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-    private static final String DEFAULT_VALIDATION_MESSAGE = "請確認輸入資料";
-    private static final String DEFAULT_ERROR_MESSAGE = "系統發生錯誤";
+    private static final String DEFAULT_VALIDATION_MESSAGE = "Request validation failed";
+    private static final String DEFAULT_ERROR_MESSAGE = "Internal server error";
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException exception) {
