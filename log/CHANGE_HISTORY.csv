@@ -185,6 +185,16 @@
 2026-07-03,09:08,TASK-014,Documentation,docs/TASKS.md,修改,標記 go_router Task DONE,Codex,否,否,否,否,已依 TODO IN PROGRESS REVIEW DONE 推進
 2026-07-03,09:08,TASK-014,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-014 變更紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除
 2026-07-03,09:08,TASK-014,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-014 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除
+2026-07-03,09:19,TASK-015,Frontend,frontend/lib/theme/app_theme.dart,新增,建立 light dark ThemeData 與共用元件 theme,Codex,否,否,是,否,Log 保存期限已檢查且未刪除
+2026-07-03,09:19,TASK-015,Frontend,frontend/lib/theme/app_colors.dart,新增,建立 Theme 色票與 seed color,Codex,否,否,是,否,集中管理顏色
+2026-07-03,09:19,TASK-015,Frontend,frontend/lib/theme/app_spacing.dart,新增,建立 spacing 與 radius token,Codex,否,否,是,否,集中管理間距與圓角
+2026-07-03,09:19,TASK-015,Frontend,frontend/lib/app.dart,修改,套用 AppTheme light dark 與 ThemeMode.system,Codex,否,否,是,否,入口集中套用 ThemeData
+2026-07-03,09:19,TASK-015,Test,frontend/test/theme/app_theme_test.dart,新增,新增 Theme 單元測試,Codex,否,否,是,否,涵蓋 light dark Material3 與背景色
+2026-07-03,09:19,TASK-015,Documentation,frontend/README.md,修改,新增 Theme 使用說明,Codex,否,否,是,否,文件同步完成
+2026-07-03,09:19,TASK-015,Documentation,docs/UI_SPEC.md,修改,新增 Flutter Theme 基礎規範,Codex,否,否,是,否,記錄禁止 hard code 共用樣式
+2026-07-03,09:19,TASK-015,Documentation,docs/TASKS.md,修改,標記 Theme Task DONE,Codex,否,否,否,否,已依 TODO IN PROGRESS REVIEW DONE 推進
+2026-07-03,09:19,TASK-015,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-015 變更紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除
+2026-07-03,09:19,TASK-015,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-015 history 紀錄,Codex,否,否,否,否,Log 保存期限已檢查且未刪除
 2026-07-03,09:31,DOC-010,Database,docs/DATABASE_SPEC.md,修改,依 system_data 舊資料與現有 API 重構並正規化資料庫架構,Codex,否,是,否,是,新增 Log 前已檢查保存期限，未刪除過期 Log
 2026-07-03,09:31,DOC-010,Database,database/init/01_schema.sql,新增,新增 MySQL 初始正規化 schema,Codex,否,是,否,是,只會在 Docker volume 首次建立時執行
 

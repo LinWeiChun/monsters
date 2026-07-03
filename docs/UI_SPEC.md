@@ -259,3 +259,22 @@ Web 版規則：
 | `/register` | `register` | `RegisterPage` | 註冊頁容器 |
 
 頁面不得直接使用 `Navigator.push`。頁面切換應使用 go_router 的 `context.goNamed()` 或集中路由設定。
+## Flutter Theme 基礎規範
+
+前端視覺樣式統一使用 `ThemeData`，入口由 `MaterialApp.router` 套用 light / dark theme 與 `ThemeMode.system`。
+
+Theme 設定位置：
+
+- `frontend/lib/theme/app_theme.dart`
+- `frontend/lib/theme/app_colors.dart`
+- `frontend/lib/theme/app_spacing.dart`
+
+目前 Theme 規範：
+
+| 類別 | 檔案 | 用途 |
+|---|---|---|
+| AppTheme | `app_theme.dart` | 建立 light / dark `ThemeData` |
+| AppColors | `app_colors.dart` | 集中管理色票與 seed color |
+| AppSpacing / AppRadius | `app_spacing.dart` | 集中管理間距與圓角 token |
+
+頁面不得自行 hard code 共用顏色、字體、圓角與間距；應優先使用 `Theme.of(context)` 與 theme token。
