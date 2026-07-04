@@ -11,7 +11,7 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 ## 2026-07-04 11:45
 
 Task
-TASK-024 登出 API（REVIEW）
+TASK-024 登出 API
 
 Agent
 Codex
@@ -25,7 +25,7 @@ Codex
 - Extended JWT service with access token verification and SHA-256 token hashing.
 - Added controller, service, JWT, and security tests.
 - Updated API, database, backend README, decision, task, schema, and log documents.
-- Completed local commit. Remote push remains blocked by external GitHub egress safety review.
+- Confirmed remote `develop` contains the logout API commit and updated task state to DONE.
 - Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
 
 ### Added
@@ -86,8 +86,73 @@ feat(auth): 建立登出 API
 
 ### Notes
 
-- Task remains in REVIEW until remote push completes.
 - Logout uses JWT revocation, not only frontend token cleanup.
+
+## 2026-07-04 11:53
+
+Task
+TASK-025 查詢個人資料 API（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Added `GET /api/users/me`.
+- Added user profile response DTO.
+- Added user service query by authenticated JWT principal user id.
+- Added user controller and service tests.
+- Updated API spec, backend README, task, and log documents.
+- Completed local commit. Remote push remains blocked by external GitHub egress safety review.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/user/controller/UserController.java`
+- `backend/src/main/java/com/monsters/user/dto/UserProfileResponse.java`
+- `backend/src/main/java/com/monsters/user/service/UserService.java`
+- `backend/src/test/java/com/monsters/user/controller/UserControllerTest.java`
+- `backend/src/test/java/com/monsters/user/service/UserServiceTest.java`
+
+### Modified
+
+- `backend/README.md`
+- `backend/src/main/java/com/monsters/user/repository/UserRepository.java`
+- `docs/API_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- Added `GET /api/users/me`.
+
+### Database
+
+- No schema change. Profile API reads existing `users` table.
+
+### Tests
+
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew test`
+
+### Commit Message
+
+```text
+feat(user): 建立查詢個人資料 API
+```
+
+### Notes
+
+- Task remains in REVIEW until remote push completes.
+- The API uses authenticated JWT principal data and does not accept user id or account from the client.
 
 ## 2026-07-04 11:36
 

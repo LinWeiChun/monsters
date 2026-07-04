@@ -333,6 +333,17 @@
 2026-07-04,11:45,TASK-024,Documentation,docs/DATABASE_SPEC.md,修改,補充 revoked_tokens 資料表規格,Codex,否,是,否,否,
 2026-07-04,11:45,TASK-024,Documentation,docs/DECISIONS.md,修改,定案登出 JWT revocation 策略,Codex,否,否,否,否,
 2026-07-04,11:45,TASK-024,Documentation,backend/README.md,修改,補充登出 API 使用說明,Codex,否,否,否,否,
-2026-07-04,11:45,TASK-024,Documentation,docs/TASKS.md,修改,登出 API Task REVIEW,Codex,否,否,否,否,本地實作測試與 commit 完成；待 GitHub push
-2026-07-04,11:45,TASK-024,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-024 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-04,11:45,TASK-024,Documentation,docs/TASKS.md,修改,登出 API Task DONE,Codex,否,否,否,否,遠端 develop 已包含登出 API commit
+2026-07-04,11:45,TASK-024,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-024 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-04,11:45,TASK-024,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-024 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-04,11:53,TASK-025,Backend,backend/src/main/java/com/monsters/user/dto/UserProfileResponse.java,新增,新增個人資料 Response DTO,Codex,是,是,否,否,
+2026-07-04,11:53,TASK-025,Backend,backend/src/main/java/com/monsters/user/service/UserService.java,新增,新增個人資料查詢 Service,Codex,是,是,否,否,依 JWT principal userId 查詢
+2026-07-04,11:53,TASK-025,Backend,backend/src/main/java/com/monsters/user/controller/UserController.java,新增,新增 GET /api/users/me endpoint,Codex,是,否,否,否,
+2026-07-04,11:53,TASK-025,Backend,backend/src/main/java/com/monsters/user/repository/UserRepository.java,修改,新增未刪除使用者 id 查詢,Codex,否,是,否,否,
+2026-07-04,11:53,TASK-025,Test,backend/src/test/java/com/monsters/user/controller/UserControllerTest.java,新增,新增 User Controller 測試,Codex,否,否,否,否,
+2026-07-04,11:53,TASK-025,Test,backend/src/test/java/com/monsters/user/service/UserServiceTest.java,新增,新增 User Service 測試,Codex,是,是,否,否,
+2026-07-04,11:53,TASK-025,Documentation,docs/API_SPEC.md,修改,補充查詢個人資料 API 規格,Codex,是,否,否,否,
+2026-07-04,11:53,TASK-025,Documentation,backend/README.md,修改,補充 User API 使用說明,Codex,否,否,否,否,
+2026-07-04,11:53,TASK-025,Documentation,docs/TASKS.md,修改,查詢個人資料 API Task REVIEW,Codex,否,否,否,否,本地實作測試與 commit 完成；待 GitHub push
+2026-07-04,11:53,TASK-025,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-025 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-04,11:53,TASK-025,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-025 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log

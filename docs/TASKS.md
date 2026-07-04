@@ -61,8 +61,8 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] 登入 API（DONE）
 - [x] Google 登入 API（DONE）
 - [x] 忘記密碼 API（DONE）
-- [ ] 登出 API（REVIEW：本地實作、測試與 commit 完成；待 GitHub push）
-- [ ] 查詢個人資料 API
+- [x] 登出 API（DONE）
+- [ ] 查詢個人資料 API（REVIEW：本地實作、測試與 commit 完成；待 GitHub push）
 - [ ] 修改個人資料 API
 - [ ] 更改頭貼 API
 - [ ] 密碼鎖 API

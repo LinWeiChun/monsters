@@ -445,6 +445,37 @@ Response：
 
 `GET /api/users/me`
 
+Header：
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Profile query success",
+  "data": {
+    "userId": 1,
+    "account": "old-account",
+    "email": "user@example.com",
+    "userName": "使用者名稱",
+    "birthday": "2000-01-02",
+    "avatarUrl": "https://example.com/avatar.png"
+  }
+}
+```
+
+規則：
+
+- 需登入。
+- 後端必須從 JWT 驗證後的 `userId` 查詢目前使用者，不得由前端傳入 user id 或 account。
+- 只查詢未刪除使用者。
+- 查無使用者時回傳 404。
+- 回傳欄位以新版 `users` 表為準；舊系統 `lock`、`dailyTest` 不放入本 API。
+
 ### 3.2 修改個人資料
 
 `PUT /api/users/me`

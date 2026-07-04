@@ -268,3 +268,34 @@ Response:
 ```
 
 Logout verifies the access token and stores only its SHA-256 hash in `revoked_tokens` until the original token expiration. JWT authentication rejects revoked tokens for protected APIs.
+
+## User API
+
+### Get My Profile
+
+`GET /api/users/me`
+
+Header:
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Profile query success",
+  "data": {
+    "userId": 1,
+    "account": "old-account",
+    "email": "user@example.com",
+    "userName": "Wei",
+    "birthday": "2000-01-02",
+    "avatarUrl": "https://example.com/avatar.png"
+  }
+}
+```
+
+The profile query uses the authenticated JWT principal and reads the current undeleted `users` record. The client does not submit user id or account for this API.
