@@ -337,3 +337,51 @@ Response:
 ```
 
 The profile update uses the authenticated JWT principal and updates only `userName` and `birthday`. Avatar, account, email, and password lock changes use separate flows.
+
+### Update My Avatar
+
+`PUT /api/users/me/avatar`
+
+Header:
+
+```text
+Authorization: Bearer <access_token>
+Content-Type: multipart/form-data
+```
+
+Form data:
+
+| Field | Type | Required |
+|---|---|---|
+| file | image/jpeg, image/png, image/webp | yes |
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Avatar update success",
+  "data": {
+    "userId": 1,
+    "account": "old-account",
+    "email": "user@example.com",
+    "userName": "Wei",
+    "birthday": "2000-01-02",
+    "avatarUrl": "https://cdn.example.com/users/avatars/1/avatar.png"
+  }
+}
+```
+
+Avatar upload stores the image in Cloudflare R2 and writes only the public URL to `users.avatar_url`.
+
+R2 settings:
+
+| Setting | Environment variable |
+|---|---|
+| app.storage.r2.account-id | R2_ACCOUNT_ID |
+| app.storage.r2.access-key-id | R2_ACCESS_KEY_ID |
+| app.storage.r2.secret-access-key | R2_SECRET_ACCESS_KEY |
+| app.storage.r2.bucket | R2_BUCKET |
+| app.storage.r2.public-base-url | R2_PUBLIC_BASE_URL |
+| app.storage.r2.avatar-key-prefix | R2_AVATAR_KEY_PREFIX |
+| app.storage.r2.max-avatar-size-bytes | R2_MAX_AVATAR_SIZE_BYTES |

@@ -8,10 +8,87 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-04 12:13
+
+Task
+TASK-027 更改頭貼 API（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Added `PUT /api/users/me/avatar`.
+- Added Cloudflare R2 S3-compatible storage settings and avatar storage service.
+- Added AWS SDK S3 dependency with user-approved package addition.
+- Added avatar file validation for required file, supported image MIME types, and file size.
+- Added user avatar update flow that uploads the file to R2 and stores only the public avatar URL.
+- Added controller, service, and storage tests.
+- Updated API spec, backend README, decision, task, and log documents.
+- Confirmed the previous `PUT /api/users/me` task is on remote `develop` and corrected its stale REVIEW status to DONE.
+- Completed local commit. Remote push remains blocked by external GitHub egress safety review.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/common/storage/AvatarStorageService.java`
+- `backend/src/main/java/com/monsters/common/storage/R2AvatarStorageService.java`
+- `backend/src/main/java/com/monsters/common/storage/R2Properties.java`
+- `backend/src/main/java/com/monsters/common/storage/R2StorageConfig.java`
+- `backend/src/test/java/com/monsters/common/storage/R2AvatarStorageServiceTest.java`
+
+### Modified
+
+- `backend/README.md`
+- `backend/build.gradle`
+- `backend/src/main/java/com/monsters/user/controller/UserController.java`
+- `backend/src/main/java/com/monsters/user/entity/User.java`
+- `backend/src/main/java/com/monsters/user/service/UserService.java`
+- `backend/src/main/resources/application.yml`
+- `backend/src/test/java/com/monsters/user/controller/UserControllerTest.java`
+- `backend/src/test/java/com/monsters/user/service/UserServiceTest.java`
+- `docs/API_SPEC.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- Added `PUT /api/users/me/avatar`.
+
+### Database
+
+- No schema change. Avatar update writes existing `users.avatar_url`.
+
+### Tests
+
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew test`
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew build`
+
+### Commit Message
+
+```text
+feat(user): 建立更改頭貼 API
+```
+
+### Notes
+
+- Task remains in REVIEW until remote push completes.
+- R2 credentials and bucket values must be provided through environment variables before using avatar upload in runtime.
+
 ## 2026-07-04 12:01
 
 Task
-TASK-026 修改個人資料 API（REVIEW）
+TASK-026 修改個人資料 API
 
 Agent
 Codex
@@ -24,7 +101,7 @@ Codex
 - Added controller and service tests for profile update success and missing user cases.
 - Updated API spec, backend README, task, and log documents.
 - Confirmed the previous `GET /api/users/me` task is on remote `develop` and corrected its stale REVIEW status to DONE.
-- Completed local commit. Remote push remains blocked by external GitHub egress safety review.
+- Confirmed remote `develop` contains the profile update API commit and updated task state to DONE.
 - Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
 
 ### Added
@@ -73,7 +150,6 @@ feat(user): 建立修改個人資料 API
 
 ### Notes
 
-- Task remains in REVIEW until remote push completes.
 - This API updates only `userName` and `birthday`; avatar, account, email, and password lock remain separate flows.
 
 ## 2026-07-04 11:45

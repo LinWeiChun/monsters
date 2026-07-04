@@ -63,8 +63,8 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] 忘記密碼 API（DONE）
 - [x] 登出 API（DONE）
 - [x] 查詢個人資料 API（DONE）
-- [ ] 修改個人資料 API（REVIEW：本地實作、測試、build 與 commit 完成；待 GitHub push）
-- [ ] 更改頭貼 API
+- [x] 修改個人資料 API（DONE）
+- [ ] 更改頭貼 API（REVIEW：本地實作、測試、build 與 commit 完成；待 GitHub push）
 - [ ] 密碼鎖 API
 - [ ] Flutter 登入頁
 - [ ] Flutter 註冊頁

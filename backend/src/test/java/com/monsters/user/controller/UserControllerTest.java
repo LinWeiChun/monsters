@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
@@ -71,6 +72,37 @@ class UserControllerTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().success()).isTrue();
         assertThat(response.getBody().message()).isEqualTo("Profile update success");
+        assertThat(response.getBody().data()).isEqualTo(profile);
+    }
+
+    @Test
+    void updateAvatarShouldReturnUpdatedProfile() {
+        UserController controller = new UserController(userService);
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "avatar.png",
+                "image/png",
+                new byte[]{1, 2, 3}
+        );
+        UserProfileResponse profile = new UserProfileResponse(
+                1L,
+                "old-account",
+                "user@example.com",
+                "Wei",
+                LocalDate.of(2000, 1, 2),
+                "https://cdn.example.com/users/avatars/1/avatar.png"
+        );
+        when(userService.updateAvatar(1L, file)).thenReturn(profile);
+
+        ResponseEntity<ApiResponse<UserProfileResponse>> response = controller.updateAvatar(
+                new AuthenticatedUser(1L, "user@example.com"),
+                file
+        );
+
+        assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isTrue();
+        assertThat(response.getBody().message()).isEqualTo("Avatar update success");
         assertThat(response.getBody().data()).isEqualTo(profile);
     }
 }

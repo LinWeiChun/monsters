@@ -22,7 +22,7 @@
 | Google 登入 Client ID | 後端透過 `GOOGLE_CLIENT_IDS` 設定允許的 Google Client ID，可用逗號支援 Web / App 多組 Client ID |
 | 忘記密碼流程 | 後端產生 15 分鐘短效 reset token，資料庫只保存 token hash；目前回傳 resetToken 供開發串接，正式寄信服務待後續定案 |
 | 登出流程 | 使用 JWT revocation；登出時只保存 access token hash 與原 token 過期時間，JWT 驗證需拒絕已撤銷 token |
-| 檔案上傳儲存方式 | 使用 Cloudflare R2 雲端儲存；連線設定與環境變數於檔案上傳 Task 實作時補齊 |
+| 檔案上傳儲存方式 | 使用 Cloudflare R2 雲端儲存；以 S3-compatible API 上傳，環境變數使用 `R2_ACCOUNT_ID`、`R2_ACCESS_KEY_ID`、`R2_SECRET_ACCESS_KEY`、`R2_BUCKET`、`R2_PUBLIC_BASE_URL`、`R2_AVATAR_KEY_PREFIX`、`R2_MAX_AVATAR_SIZE_BYTES` |
 | Web 管理後台 | 需要建立 Web 管理後台；實作範圍與權限模型於後續管理後台 Task 細化 |
 | 正式寄信服務 | 忘記密碼正式環境使用 SMTP 寄送 reset link |
 | 舊資料庫相容性 | 不直接沿用舊錯字表名；以新版 schema 為準，必要時以 mapping 文件將舊資料概念結合至新版資料庫 |
@@ -57,7 +57,6 @@
 
 | 項目 | 目前狀態 |
 |------|----------|
-| R2 連線設定 | 待細化：Account ID、Bucket、Access Key、Secret Key、公開 URL / CDN 網域與環境變數命名 |
 | SMTP 設定 | 待細化：SMTP host、port、TLS、帳號、寄件者、reset link base URL 與正式環境 secret 管理方式 |
 | Web 管理後台 | 待細化：管理者角色、登入方式、可管理資料範圍、稽核 log 與前端路由 |
 | 舊 API 對照表 | 待建立：需依 `system_data/` 舊後端與舊前端呼叫整理完整對照 |

@@ -192,6 +192,18 @@ Google 登入設定：
 |---|---|---|
 | app.security.google.client-ids | GOOGLE_CLIENT_IDS | 空字串，啟用 Google 登入前必須提供 |
 
+Cloudflare R2 檔案上傳設定：
+
+| 設定 | 環境變數 | 預設值 |
+|---|---|---|
+| app.storage.r2.account-id | R2_ACCOUNT_ID | 空字串，啟用頭貼上傳前必須提供 |
+| app.storage.r2.access-key-id | R2_ACCESS_KEY_ID | 空字串，啟用頭貼上傳前必須提供 |
+| app.storage.r2.secret-access-key | R2_SECRET_ACCESS_KEY | 空字串，啟用頭貼上傳前必須提供 |
+| app.storage.r2.bucket | R2_BUCKET | 空字串，啟用頭貼上傳前必須提供 |
+| app.storage.r2.public-base-url | R2_PUBLIC_BASE_URL | 空字串，啟用頭貼上傳前必須提供 |
+| app.storage.r2.avatar-key-prefix | R2_AVATAR_KEY_PREFIX | users/avatars |
+| app.storage.r2.max-avatar-size-bytes | R2_MAX_AVATAR_SIZE_BYTES | 5242880 |
+
 ---
 
 ## 一之一、舊系統 API 參考原則
@@ -526,6 +538,50 @@ Response：
 ### 3.3 更改頭貼
 
 `PUT /api/users/me/avatar`
+
+Header：
+
+```text
+Authorization: Bearer <access_token>
+Content-Type: multipart/form-data
+```
+
+Request：
+
+| 欄位 | 型別 | 必填 | 說明 |
+|---|---|---|---|
+| file | file | 是 | 頭貼圖片 |
+
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Avatar update success",
+  "data": {
+    "userId": 1,
+    "account": "old-account",
+    "email": "user@example.com",
+    "userName": "使用者名稱",
+    "birthday": "2000-01-02",
+    "avatarUrl": "https://cdn.example.com/users/avatars/1/avatar.png"
+  }
+}
+```
+
+規則：
+
+- 需登入。
+- 後端必須從 JWT 驗證後的 `userId` 更新目前使用者，不得由前端傳入 user id 或 account。
+- 只更新未刪除使用者。
+- 圖片必須上傳到 Cloudflare R2，資料庫只保存公開可讀的 `avatarUrl`。
+- 檔案欄位名稱固定為 `file`。
+- 僅接受 `image/jpeg`、`image/png`、`image/webp`。
+- 預設檔案大小上限為 5 MB，可透過 `R2_MAX_AVATAR_SIZE_BYTES` 調整。
+- R2 object key 預設格式為 `users/avatars/{userId}/{uuid}.{ext}`。
+- 查無使用者時回傳 404。
+- R2 設定缺漏或上傳失敗時回傳 500。
+- 更新成功後回傳最新個人資料，欄位格式與查詢個人資料 API 相同。
 
 ### 3.4 設定密碼鎖
 

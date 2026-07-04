@@ -46,6 +46,10 @@ public class User extends BaseEntity {
         this.birthday = birthday;
     }
 
+    public void updateAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
+
     public String getAccount() {
         return account;
     }

@@ -355,6 +355,24 @@
 2026-07-04,12:01,TASK-026,Test,backend/src/test/java/com/monsters/user/service/UserServiceTest.java,修改,補上修改個人資料 Service 測試,Codex,是,是,否,否,
 2026-07-04,12:01,TASK-026,Documentation,docs/API_SPEC.md,修改,補充修改個人資料 API 規格,Codex,是,否,否,否,
 2026-07-04,12:01,TASK-026,Documentation,backend/README.md,修改,補充修改個人資料 API 使用說明,Codex,否,否,否,否,
-2026-07-04,12:01,TASK-026,Documentation,docs/TASKS.md,修改,修改個人資料 API Task REVIEW,Codex,否,否,否,否,本地實作測試 build 與 commit 完成；待 GitHub push
-2026-07-04,12:01,TASK-026,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-026 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log；遠端 push 被安全審核拒絕
+2026-07-04,12:01,TASK-026,Documentation,docs/TASKS.md,修改,修改個人資料 API Task DONE,Codex,否,否,否,否,遠端 develop 已包含修改個人資料 API commit
+2026-07-04,12:01,TASK-026,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-026 DONE 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-04,12:01,TASK-026,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-026 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-04,12:13,TASK-027,Backend,backend/build.gradle,修改,新增 AWS SDK S3 dependency,Codex,否,否,否,否,使用者已同意新增 R2 相關套件
+2026-07-04,12:13,TASK-027,Backend,backend/src/main/java/com/monsters/common/storage/AvatarStorageService.java,新增,新增頭貼儲存服務介面,Codex,是,否,否,否,
+2026-07-04,12:13,TASK-027,Backend,backend/src/main/java/com/monsters/common/storage/R2AvatarStorageService.java,新增,新增 R2 頭貼上傳服務,Codex,是,否,否,否,驗證圖片 MIME 與大小
+2026-07-04,12:13,TASK-027,Backend,backend/src/main/java/com/monsters/common/storage/R2Properties.java,新增,新增 R2 設定屬性,Codex,否,否,否,否,
+2026-07-04,12:13,TASK-027,Backend,backend/src/main/java/com/monsters/common/storage/R2StorageConfig.java,新增,新增 R2 S3 client 設定,Codex,否,否,否,否,
+2026-07-04,12:13,TASK-027,Backend,backend/src/main/java/com/monsters/user/entity/User.java,修改,新增 avatarUrl 更新方法,Codex,是,是,否,否,
+2026-07-04,12:13,TASK-027,Backend,backend/src/main/java/com/monsters/user/service/UserService.java,修改,新增更改頭貼 Service,Codex,是,是,否,否,依 JWT principal userId 更新
+2026-07-04,12:13,TASK-027,Backend,backend/src/main/java/com/monsters/user/controller/UserController.java,修改,新增 PUT /api/users/me/avatar endpoint,Codex,是,否,否,否,
+2026-07-04,12:13,TASK-027,Config,backend/src/main/resources/application.yml,修改,新增 R2 環境變數設定,Codex,否,否,否,否,
+2026-07-04,12:13,TASK-027,Test,backend/src/test/java/com/monsters/common/storage/R2AvatarStorageServiceTest.java,新增,新增 R2 頭貼上傳驗證測試,Codex,否,否,否,否,
+2026-07-04,12:13,TASK-027,Test,backend/src/test/java/com/monsters/user/controller/UserControllerTest.java,修改,補上更改頭貼 Controller 測試,Codex,否,否,否,否,
+2026-07-04,12:13,TASK-027,Test,backend/src/test/java/com/monsters/user/service/UserServiceTest.java,修改,補上更改頭貼 Service 測試,Codex,是,是,否,否,
+2026-07-04,12:13,TASK-027,Documentation,docs/API_SPEC.md,修改,補充更改頭貼 API 與 R2 設定規格,Codex,是,否,否,否,
+2026-07-04,12:13,TASK-027,Documentation,docs/DECISIONS.md,修改,定案 R2 環境變數命名,Codex,否,否,否,否,
+2026-07-04,12:13,TASK-027,Documentation,backend/README.md,修改,補充更改頭貼 API 使用說明,Codex,否,否,否,否,
+2026-07-04,12:13,TASK-027,Documentation,docs/TASKS.md,修改,更改頭貼 API Task REVIEW,Codex,否,否,否,否,本地實作測試 build 與 commit 完成；待 GitHub push
+2026-07-04,12:13,TASK-027,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-027 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log；遠端 push 被安全審核拒絕
+2026-07-04,12:13,TASK-027,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-027 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
