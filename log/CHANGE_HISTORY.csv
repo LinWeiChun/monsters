@@ -310,3 +310,6 @@
 2026-07-04,11:21,TASK-022,Documentation,docs/TASKS.md,修改,忘記密碼 API Task DONE,Codex,否,否,否,否,完成 TODO 到 IN PROGRESS 到 REVIEW 到 DONE
 2026-07-04,11:21,TASK-022,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-022 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-04,11:21,TASK-022,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-022 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-04,11:36,TASK-023,Documentation,docs/DECISIONS.md,修改,整理已定案事項與待細化事項,Codex,否,否,否,否,將 R2 SMTP Web 管理後台 舊系統對照等決策移入已定案
+2026-07-04,11:36,TASK-023,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-023 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-04,11:36,TASK-023,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-023 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log

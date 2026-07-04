@@ -8,6 +8,65 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-04 11:36
+
+Task
+TASK-023 整理 DECISIONS 決策狀態
+
+Agent
+Codex
+
+### Completed
+
+- Reviewed `docs/DECISIONS.md`.
+- Moved already-decided items from pending confirmation into the confirmed decision table.
+- Confirmed Cloudflare R2 as the file upload storage direction.
+- Confirmed SMTP as the formal email delivery direction for forgot password.
+- Confirmed Web admin backend is needed.
+- Clarified old database, old API, old Flutter UI, and old material reuse decisions.
+- Replaced the pending confirmation table with a pending-detail table for implementation details.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `docs/DECISIONS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- None
+
+### Database
+
+- None
+
+### Tests
+
+- `git diff --check`
+
+### Commit Message
+
+```text
+docs(decisions): 整理已定案事項
+```
+
+### Notes
+
+- R2 credentials, SMTP credentials, Web admin permission model, old API mapping, old UI mapping, and material inventory remain implementation details for later tasks.
+
 ## 2026-07-04 11:21
 
 Task
