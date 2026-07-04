@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import com.monsters.common.dto.ApiResponse;
 import com.monsters.common.security.AuthenticatedUser;
+import com.monsters.user.dto.UpdateUserProfileRequest;
 import com.monsters.user.dto.UserProfileResponse;
 import com.monsters.user.service.UserService;
 import java.time.LocalDate;
@@ -41,6 +42,35 @@ class UserControllerTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().success()).isTrue();
         assertThat(response.getBody().message()).isEqualTo("Profile query success");
+        assertThat(response.getBody().data()).isEqualTo(profile);
+    }
+
+    @Test
+    void updateMeShouldReturnUpdatedProfile() {
+        UserController controller = new UserController(userService);
+        UpdateUserProfileRequest request = new UpdateUserProfileRequest(
+                "Lin",
+                LocalDate.of(2001, 3, 4)
+        );
+        UserProfileResponse profile = new UserProfileResponse(
+                1L,
+                "old-account",
+                "user@example.com",
+                "Lin",
+                LocalDate.of(2001, 3, 4),
+                "https://example.com/avatar.png"
+        );
+        when(userService.updateProfile(1L, request)).thenReturn(profile);
+
+        ResponseEntity<ApiResponse<UserProfileResponse>> response = controller.updateMe(
+                new AuthenticatedUser(1L, "user@example.com"),
+                request
+        );
+
+        assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isTrue();
+        assertThat(response.getBody().message()).isEqualTo("Profile update success");
         assertThat(response.getBody().data()).isEqualTo(profile);
     }
 }

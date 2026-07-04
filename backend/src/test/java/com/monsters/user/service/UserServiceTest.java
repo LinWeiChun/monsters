@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import com.monsters.common.exception.ResourceNotFoundException;
+import com.monsters.user.dto.UpdateUserProfileRequest;
 import com.monsters.user.dto.UserProfileResponse;
 import com.monsters.user.entity.User;
 import com.monsters.user.repository.UserRepository;
@@ -48,6 +49,44 @@ class UserServiceTest {
         when(userRepository.findByIdAndDeletedFalse(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.getProfile(1L))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("User not found");
+    }
+
+    @Test
+    void updateProfileShouldUpdateCurrentUserProfile() {
+        UserService userService = new UserService(userRepository);
+        User user = new User("user@example.com", "Wei");
+        ReflectionTestUtils.setField(user, "id", 1L);
+        ReflectionTestUtils.setField(user, "account", "old-account");
+        ReflectionTestUtils.setField(user, "birthday", LocalDate.of(2000, 1, 2));
+        ReflectionTestUtils.setField(user, "avatarUrl", "https://example.com/avatar.png");
+        when(userRepository.findByIdAndDeletedFalse(1L)).thenReturn(Optional.of(user));
+
+        UserProfileResponse response = userService.updateProfile(
+                1L,
+                new UpdateUserProfileRequest("  Lin  ", LocalDate.of(2001, 3, 4))
+        );
+
+        assertThat(response.userId()).isEqualTo(1L);
+        assertThat(response.account()).isEqualTo("old-account");
+        assertThat(response.email()).isEqualTo("user@example.com");
+        assertThat(response.userName()).isEqualTo("Lin");
+        assertThat(response.birthday()).isEqualTo(LocalDate.of(2001, 3, 4));
+        assertThat(response.avatarUrl()).isEqualTo("https://example.com/avatar.png");
+        assertThat(user.getUserName()).isEqualTo("Lin");
+        assertThat(user.getBirthday()).isEqualTo(LocalDate.of(2001, 3, 4));
+    }
+
+    @Test
+    void updateProfileShouldRejectMissingUser() {
+        UserService userService = new UserService(userRepository);
+        when(userRepository.findByIdAndDeletedFalse(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.updateProfile(
+                1L,
+                new UpdateUserProfileRequest("Lin", LocalDate.of(2001, 3, 4))
+        ))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("User not found");
     }

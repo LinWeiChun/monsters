@@ -480,6 +480,49 @@ Response：
 
 `PUT /api/users/me`
 
+Header：
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Request：
+
+```json
+{
+  "userName": "新的使用者名稱",
+  "birthday": "2000-01-02"
+}
+```
+
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Profile update success",
+  "data": {
+    "userId": 1,
+    "account": "old-account",
+    "email": "user@example.com",
+    "userName": "新的使用者名稱",
+    "birthday": "2000-01-02",
+    "avatarUrl": "https://example.com/avatar.png"
+  }
+}
+```
+
+規則：
+
+- 需登入。
+- 後端必須從 JWT 驗證後的 `userId` 更新目前使用者，不得由前端傳入 user id 或 account。
+- 只更新未刪除使用者。
+- `userName` 必填，最大長度 80，後端儲存前會移除前後空白。
+- `birthday` 可為 `null`；傳入日期時格式為 `yyyy-MM-dd`。
+- 本 API 僅更新 `userName` 與 `birthday`；`email`、`account`、`avatarUrl` 與密碼鎖不由本 API 修改。
+- 查無使用者時回傳 404。
+- 更新成功後回傳最新個人資料，欄位格式與查詢個人資料 API 相同。
+
 ### 3.3 更改頭貼
 
 `PUT /api/users/me/avatar`

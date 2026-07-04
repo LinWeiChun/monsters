@@ -8,6 +8,74 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-04 12:01
+
+Task
+TASK-026 修改個人資料 API（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Added `PUT /api/users/me`.
+- Added profile update request DTO with `userName` validation.
+- Added user profile update service logic using authenticated JWT principal user id.
+- Added controller and service tests for profile update success and missing user cases.
+- Updated API spec, backend README, task, and log documents.
+- Confirmed the previous `GET /api/users/me` task is on remote `develop` and corrected its stale REVIEW status to DONE.
+- Completed local commit. Remote push remains blocked by external GitHub egress safety review.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/user/dto/UpdateUserProfileRequest.java`
+
+### Modified
+
+- `backend/README.md`
+- `backend/src/main/java/com/monsters/user/controller/UserController.java`
+- `backend/src/main/java/com/monsters/user/entity/User.java`
+- `backend/src/main/java/com/monsters/user/service/UserService.java`
+- `backend/src/test/java/com/monsters/user/controller/UserControllerTest.java`
+- `backend/src/test/java/com/monsters/user/service/UserServiceTest.java`
+- `docs/API_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- Added `PUT /api/users/me`.
+
+### Database
+
+- No schema change. Profile update writes existing `users.user_name` and `users.birthday`.
+
+### Tests
+
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew test`
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew build`
+
+### Commit Message
+
+```text
+feat(user): 建立修改個人資料 API
+```
+
+### Notes
+
+- Task remains in REVIEW until remote push completes.
+- This API updates only `userName` and `birthday`; avatar, account, email, and password lock remain separate flows.
+
 ## 2026-07-04 11:45
 
 Task
@@ -91,7 +159,7 @@ feat(auth): 建立登出 API
 ## 2026-07-04 11:53
 
 Task
-TASK-025 查詢個人資料 API（REVIEW）
+TASK-025 查詢個人資料 API
 
 Agent
 Codex
@@ -103,7 +171,7 @@ Codex
 - Added user service query by authenticated JWT principal user id.
 - Added user controller and service tests.
 - Updated API spec, backend README, task, and log documents.
-- Completed local commit. Remote push remains blocked by external GitHub egress safety review.
+- Confirmed remote `develop` contains the profile query API commit and updated task state to DONE.
 - Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
 
 ### Added
@@ -151,7 +219,6 @@ feat(user): 建立查詢個人資料 API
 
 ### Notes
 
-- Task remains in REVIEW until remote push completes.
 - The API uses authenticated JWT principal data and does not accept user id or account from the client.
 
 ## 2026-07-04 11:36

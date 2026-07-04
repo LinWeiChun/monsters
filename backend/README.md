@@ -299,3 +299,41 @@ Response:
 ```
 
 The profile query uses the authenticated JWT principal and reads the current undeleted `users` record. The client does not submit user id or account for this API.
+
+### Update My Profile
+
+`PUT /api/users/me`
+
+Header:
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Request:
+
+```json
+{
+  "userName": "Lin",
+  "birthday": "2001-03-04"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Profile update success",
+  "data": {
+    "userId": 1,
+    "account": "old-account",
+    "email": "user@example.com",
+    "userName": "Lin",
+    "birthday": "2001-03-04",
+    "avatarUrl": "https://example.com/avatar.png"
+  }
+}
+```
+
+The profile update uses the authenticated JWT principal and updates only `userName` and `birthday`. Avatar, account, email, and password lock changes use separate flows.
