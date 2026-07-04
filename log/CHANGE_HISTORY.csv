@@ -286,6 +286,6 @@
 2026-07-04,06:42,TASK-021,Documentation,docs/DATABASE_SPEC.md,修改,補充 Google 登入資料表對應,Codex,否,是,否,否,
 2026-07-04,06:42,TASK-021,Documentation,docs/DECISIONS.md,修改,定案 Google Client ID 後端環境變數策略,Codex,否,否,否,否,
 2026-07-04,06:42,TASK-021,Documentation,backend/README.md,修改,補充 Google 登入 API 使用說明,Codex,否,否,否,否,
-2026-07-04,06:42,TASK-021,Documentation,docs/TASKS.md,修改,Google 登入 API Task REVIEW,Codex,否,否,否,否,本地實作測試與 commit 完成；待 GitHub 憑證完成 push
-2026-07-04,06:42,TASK-021,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-021 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-04,06:42,TASK-021,Documentation,docs/TASKS.md,修改,Google 登入 API Task DONE,Codex,否,否,否,否,遠端分支已包含 Google 登入提交
+2026-07-04,06:42,TASK-021,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-021 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-04,06:42,TASK-021,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-021 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
