@@ -8,6 +8,87 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-04 11:45
+
+Task
+TASK-024 登出 API（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Added `POST /api/auth/logout`.
+- Added JWT access token verification for protected APIs.
+- Added revoked token persistence with token hash and original token expiration.
+- Added JWT authentication filter that rejects revoked tokens and invalid tokens.
+- Extended JWT service with access token verification and SHA-256 token hashing.
+- Added controller, service, JWT, and security tests.
+- Updated API, database, backend README, decision, task, schema, and log documents.
+- Completed local commit. Remote push remains blocked by external GitHub egress safety review.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/auth/service/TokenRevocationService.java`
+- `backend/src/main/java/com/monsters/common/security/AuthenticatedUser.java`
+- `backend/src/main/java/com/monsters/common/security/JwtAuthenticationFilter.java`
+- `backend/src/main/java/com/monsters/common/security/JwtTokenPayload.java`
+- `backend/src/main/java/com/monsters/user/entity/RevokedToken.java`
+- `backend/src/main/java/com/monsters/user/repository/RevokedTokenRepository.java`
+- `backend/src/test/java/com/monsters/auth/service/TokenRevocationServiceTest.java`
+
+### Modified
+
+- `backend/README.md`
+- `backend/src/main/java/com/monsters/auth/controller/AuthController.java`
+- `backend/src/main/java/com/monsters/common/security/JwtTokenService.java`
+- `backend/src/main/java/com/monsters/common/security/SecurityConfig.java`
+- `backend/src/test/java/com/monsters/MonstersApplicationTests.java`
+- `backend/src/test/java/com/monsters/auth/controller/AuthControllerTest.java`
+- `backend/src/test/java/com/monsters/common/config/CorsConfigTest.java`
+- `backend/src/test/java/com/monsters/common/security/JwtTokenServiceTest.java`
+- `backend/src/test/java/com/monsters/common/security/SecurityConfigTest.java`
+- `database/init/01_schema.sql`
+- `docs/API_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- Added `revoked_tokens` to `database/init/01_schema.sql`.
+
+### API
+
+- Added `POST /api/auth/logout`.
+
+### Database
+
+- Added `revoked_tokens`.
+- JWT plaintext is not stored; only token hash is persisted.
+
+### Tests
+
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew test`
+
+### Commit Message
+
+```text
+feat(auth): 建立登出 API
+```
+
+### Notes
+
+- Task remains in REVIEW until remote push completes.
+- Logout uses JWT revocation, not only frontend token cleanup.
+
 ## 2026-07-04 11:36
 
 Task

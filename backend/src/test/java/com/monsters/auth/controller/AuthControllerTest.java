@@ -16,7 +16,10 @@ import com.monsters.auth.dto.LoginResponse;
 import com.monsters.auth.dto.RegisterRequest;
 import com.monsters.auth.dto.RegisterResponse;
 import com.monsters.auth.service.AuthService;
+import com.monsters.auth.service.TokenRevocationService;
 import com.monsters.common.exception.GlobalExceptionHandler;
+import com.monsters.common.security.JwtTokenService;
+import com.monsters.user.repository.RevokedTokenRepository;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +43,15 @@ class AuthControllerTest {
 
     @MockBean
     private AuthService authService;
+
+    @MockBean
+    private TokenRevocationService tokenRevocationService;
+
+    @MockBean
+    private JwtTokenService jwtTokenService;
+
+    @MockBean
+    private RevokedTokenRepository revokedTokenRepository;
 
     @Test
     void registerShouldReturnCreatedResponse() throws Exception {
@@ -199,6 +211,22 @@ class AuthControllerTest {
                                 "newPassword", "short"
                         ))))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    void logoutShouldReturnOkResponse() throws Exception {
+        mockMvc.perform(post("/api/auth/logout")
+                        .header("Authorization", "Bearer access-token"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Logout success"));
+    }
+
+    @Test
+    void logoutShouldRequireBearerToken() throws Exception {
+        mockMvc.perform(post("/api/auth/logout"))
+                .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.success").value(false));
     }
 }

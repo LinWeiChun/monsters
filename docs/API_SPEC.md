@@ -166,6 +166,7 @@ com.monsters.common.security.SecurityConfig
 | /api/auth/google-login | POST | 允許匿名 |
 | /api/auth/forgot-password | POST | 允許匿名 |
 | /api/auth/reset-password | POST | 允許匿名 |
+| /api/auth/logout | POST | 需驗證 |
 | /api/** | ALL | 需驗證 |
 | 其他路徑 | ALL | 拒絕 |
 
@@ -409,6 +410,32 @@ Response：
 ### 2.6 登出
 
 `POST /api/auth/logout`
+
+Header：
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Logout success",
+  "data": null
+}
+```
+
+規則：
+
+- 登出 API 需登入。
+- 後端必須驗證 access token 簽章、issuer、type 與 exp。
+- 登出時不得保存 token 明文，僅保存 token hash 至 `revoked_tokens`。
+- token 撤銷紀錄需保存至原 token 過期時間。
+- JWT 驗證流程需拒絕已撤銷 token。
+- 無 Authorization header、非 Bearer token、token 無效、token 已過期或 token 已撤銷時，回傳 401。
+- 不得將 JWT 明文或 token hash 寫入 log。
 
 ---
 

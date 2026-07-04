@@ -1,6 +1,7 @@
 package com.monsters;
 
 import com.monsters.user.repository.PasswordResetTokenRepository;
+import com.monsters.user.repository.RevokedTokenRepository;
 import com.monsters.user.repository.UserCredentialRepository;
 import com.monsters.user.repository.UserOAuthAccountRepository;
 import com.monsters.user.repository.UserRepository;
@@ -26,6 +27,9 @@ class MonstersApplicationTests {
 
     @MockBean
     private PasswordResetTokenRepository passwordResetTokenRepository;
+
+    @MockBean
+    private RevokedTokenRepository revokedTokenRepository;
 
     @Test
     void contextLoads() {

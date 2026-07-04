@@ -21,6 +21,7 @@
 | AI 回報要求 | AI 若參考 `system_data/`，需於工作報告中說明參考內容與轉換方式 |
 | Google 登入 Client ID | 後端透過 `GOOGLE_CLIENT_IDS` 設定允許的 Google Client ID，可用逗號支援 Web / App 多組 Client ID |
 | 忘記密碼流程 | 後端產生 15 分鐘短效 reset token，資料庫只保存 token hash；目前回傳 resetToken 供開發串接，正式寄信服務待後續定案 |
+| 登出流程 | 使用 JWT revocation；登出時只保存 access token hash 與原 token 過期時間，JWT 驗證需拒絕已撤銷 token |
 | 檔案上傳儲存方式 | 使用 Cloudflare R2 雲端儲存；連線設定與環境變數於檔案上傳 Task 實作時補齊 |
 | Web 管理後台 | 需要建立 Web 管理後台；實作範圍與權限模型於後續管理後台 Task 細化 |
 | 正式寄信服務 | 忘記密碼正式環境使用 SMTP 寄送 reset link |

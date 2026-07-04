@@ -313,3 +313,26 @@
 2026-07-04,11:36,TASK-023,Documentation,docs/DECISIONS.md,修改,整理已定案事項與待細化事項,Codex,否,否,否,否,將 R2 SMTP Web 管理後台 舊系統對照等決策移入已定案
 2026-07-04,11:36,TASK-023,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-023 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-04,11:36,TASK-023,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-023 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-04,11:45,TASK-024,Backend,backend/src/main/java/com/monsters/auth/service/TokenRevocationService.java,新增,新增 JWT token 撤銷服務,Codex,是,是,否,否,只保存 token hash
+2026-07-04,11:45,TASK-024,Backend,backend/src/main/java/com/monsters/common/security/AuthenticatedUser.java,新增,新增 JWT 驗證後 principal,Codex,否,否,否,否,
+2026-07-04,11:45,TASK-024,Backend,backend/src/main/java/com/monsters/common/security/JwtAuthenticationFilter.java,新增,新增 JWT 驗證 Filter,Codex,否,是,否,否,拒絕撤銷 token
+2026-07-04,11:45,TASK-024,Backend,backend/src/main/java/com/monsters/common/security/JwtTokenPayload.java,新增,新增 JWT payload DTO,Codex,否,否,否,否,
+2026-07-04,11:45,TASK-024,Backend,backend/src/main/java/com/monsters/user/entity/RevokedToken.java,新增,新增 revoked token Entity,Codex,否,是,否,否,
+2026-07-04,11:45,TASK-024,Backend,backend/src/main/java/com/monsters/user/repository/RevokedTokenRepository.java,新增,新增 revoked token Repository,Codex,否,是,否,否,
+2026-07-04,11:45,TASK-024,Backend,backend/src/main/java/com/monsters/auth/controller/AuthController.java,修改,新增 POST /api/auth/logout endpoint,Codex,是,否,否,否,
+2026-07-04,11:45,TASK-024,Backend,backend/src/main/java/com/monsters/common/security/JwtTokenService.java,修改,新增 JWT access token 驗證與 hash,Codex,否,否,否,否,不記錄 JWT
+2026-07-04,11:45,TASK-024,Backend,backend/src/main/java/com/monsters/common/security/SecurityConfig.java,修改,接入 JWT Authentication Filter,Codex,否,否,否,否,
+2026-07-04,11:45,TASK-024,Database,database/init/01_schema.sql,修改,新增 revoked_tokens schema,Codex,否,是,否,否,
+2026-07-04,11:45,TASK-024,Test,backend/src/test/java/com/monsters/auth/service/TokenRevocationServiceTest.java,新增,新增 token 撤銷服務測試,Codex,否,是,否,否,
+2026-07-04,11:45,TASK-024,Test,backend/src/test/java/com/monsters/auth/controller/AuthControllerTest.java,修改,新增登出 Controller 測試,Codex,是,否,否,否,
+2026-07-04,11:45,TASK-024,Test,backend/src/test/java/com/monsters/common/security/JwtTokenServiceTest.java,修改,新增 JWT 驗證與 hash 測試,Codex,否,否,否,否,
+2026-07-04,11:45,TASK-024,Test,backend/src/test/java/com/monsters/common/security/SecurityConfigTest.java,修改,新增有效 token 與撤銷 token 安全測試,Codex,否,是,否,否,
+2026-07-04,11:45,TASK-024,Test,backend/src/test/java/com/monsters/common/config/CorsConfigTest.java,修改,補上 JWT filter 測試 mock,Codex,否,否,否,否,
+2026-07-04,11:45,TASK-024,Test,backend/src/test/java/com/monsters/MonstersApplicationTests.java,修改,補上 RevokedTokenRepository 測試 mock,Codex,否,否,否,否,
+2026-07-04,11:45,TASK-024,Documentation,docs/API_SPEC.md,修改,補充登出 API 與 JWT revocation 規格,Codex,是,否,否,否,
+2026-07-04,11:45,TASK-024,Documentation,docs/DATABASE_SPEC.md,修改,補充 revoked_tokens 資料表規格,Codex,否,是,否,否,
+2026-07-04,11:45,TASK-024,Documentation,docs/DECISIONS.md,修改,定案登出 JWT revocation 策略,Codex,否,否,否,否,
+2026-07-04,11:45,TASK-024,Documentation,backend/README.md,修改,補充登出 API 使用說明,Codex,否,否,否,否,
+2026-07-04,11:45,TASK-024,Documentation,docs/TASKS.md,修改,登出 API Task REVIEW,Codex,否,否,否,否,本地實作測試與 commit 完成；待 GitHub push
+2026-07-04,11:45,TASK-024,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-024 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-04,11:45,TASK-024,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-024 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log

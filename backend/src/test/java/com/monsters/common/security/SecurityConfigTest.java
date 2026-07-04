@@ -7,23 +7,30 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.monsters.common.dto.ApiResponse;
+import com.monsters.user.entity.User;
+import com.monsters.user.repository.RevokedTokenRepository;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.test.util.ReflectionTestUtils;
+import static org.mockito.Mockito.when;
 
 @WebMvcTest(SecurityConfigTest.TestController.class)
 @Import({
         SecurityConfig.class,
         SecurityExceptionHandler.class,
+        JwtAuthenticationFilter.class,
+        JwtTokenService.class,
         SecurityConfigTest.TestController.class
 })
 @EnableConfigurationProperties(JwtProperties.class)
@@ -43,6 +50,12 @@ class SecurityConfigTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtTokenService jwtTokenService;
+
+    @MockBean
+    private RevokedTokenRepository revokedTokenRepository;
 
     @Test
     void jwtPropertiesShouldBindFromConfiguration() {
@@ -75,6 +88,33 @@ class SecurityConfigTest {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("尚未登入或 Token 無效"))
                 .andExpect(jsonPath("$.data").doesNotExist());
+    }
+
+    @Test
+    void protectedApiShouldPermitValidAccessToken() throws Exception {
+        User user = new User("user@example.com", "Wei");
+        ReflectionTestUtils.setField(user, "id", 1L);
+        String token = jwtTokenService.createAccessToken(user);
+        when(revokedTokenRepository.existsByTokenHash(jwtTokenService.hashToken(token))).thenReturn(false);
+
+        mockMvc.perform(get("/api/protected")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.status").value("protected"));
+    }
+
+    @Test
+    void protectedApiShouldRejectRevokedAccessToken() throws Exception {
+        User user = new User("user@example.com", "Wei");
+        ReflectionTestUtils.setField(user, "id", 1L);
+        String token = jwtTokenService.createAccessToken(user);
+        when(revokedTokenRepository.existsByTokenHash(jwtTokenService.hashToken(token))).thenReturn(true);
+
+        mockMvc.perform(get("/api/protected")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false));
     }
 
     @RestController

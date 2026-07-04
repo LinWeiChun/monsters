@@ -9,8 +9,11 @@ import com.monsters.auth.dto.RegisterRequest;
 import com.monsters.auth.dto.RegisterResponse;
 import com.monsters.auth.dto.ResetPasswordRequest;
 import com.monsters.auth.service.AuthService;
+import com.monsters.auth.service.TokenRevocationService;
 import com.monsters.common.dto.ApiResponse;
+import com.monsters.common.exception.UnauthorizedException;
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,9 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final TokenRevocationService tokenRevocationService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, TokenRevocationService tokenRevocationService) {
         this.authService = authService;
+        this.tokenRevocationService = tokenRevocationService;
     }
 
     @PostMapping("/register")
@@ -68,5 +73,23 @@ public class AuthController {
     ) {
         authService.resetPassword(request);
         return ResponseEntity.ok(ApiResponse.success("Password reset success", null));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest request) {
+        tokenRevocationService.revokeAccessToken(requiredBearerToken(request));
+        return ResponseEntity.ok(ApiResponse.success("Logout success", null));
+    }
+
+    private String requiredBearerToken(HttpServletRequest request) {
+        String authorization = request.getHeader("Authorization");
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            throw new UnauthorizedException("尚未登入或 Token 無效");
+        }
+        String token = authorization.substring("Bearer ".length()).trim();
+        if (token.isBlank()) {
+            throw new UnauthorizedException("尚未登入或 Token 無效");
+        }
+        return token;
     }
 }

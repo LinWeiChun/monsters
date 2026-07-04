@@ -125,6 +125,29 @@ Index：
 - token 使用後必須寫入 `used_at`。
 - 過期、已使用或對應已刪除使用者的 token 不得重設密碼。
 
+### 3.2.2 revoked_tokens
+
+登出後撤銷的 JWT。
+
+| 欄位 | 型別 | 約束 | 說明 |
+|---|---|---|---|
+| id | BIGINT | PK | ID |
+| token_hash | VARCHAR(255) | UNIQUE NOT NULL | JWT hash |
+| expires_at | DATETIME | NOT NULL | 原 JWT 過期時間 |
+| created_at | DATETIME | NOT NULL | 建立時間 |
+| updated_at | DATETIME | NOT NULL | 更新時間 |
+
+Index：
+
+- `expires_at`
+
+規則：
+
+- 不得保存 JWT 明文。
+- 登出時保存 access token hash 與原 token 過期時間。
+- JWT 驗證流程必須拒絕存在於本表且尚未過期的 token。
+- 可定期刪除 `expires_at` 已過期的紀錄。
+
 ### 3.3 user_oauth_accounts
 
 第三方登入帳號。

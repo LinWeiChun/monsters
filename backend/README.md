@@ -246,3 +246,25 @@ Response:
 ```
 
 Reset password hashes the submitted token before lookup, rejects invalid, expired, used, or deleted-user tokens, stores the new password as a BCrypt hash, and marks the reset token as used.
+
+### Logout
+
+`POST /api/auth/logout`
+
+Header:
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Logout success",
+  "data": null
+}
+```
+
+Logout verifies the access token and stores only its SHA-256 hash in `revoked_tokens` until the original token expiration. JWT authentication rejects revoked tokens for protected APIs.
