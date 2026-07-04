@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monsters.auth.dto.AuthUserResponse;
+import com.monsters.auth.dto.ForgotPasswordRequest;
+import com.monsters.auth.dto.ForgotPasswordResponse;
 import com.monsters.auth.dto.GoogleLoginRequest;
 import com.monsters.auth.dto.LoginRequest;
 import com.monsters.auth.dto.LoginResponse;
@@ -142,6 +144,59 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
                                 "idToken", ""
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    void forgotPasswordShouldReturnOkResponse() throws Exception {
+        when(authService.forgotPassword(any(ForgotPasswordRequest.class)))
+                .thenReturn(new ForgotPasswordResponse("reset-token", 900));
+
+        mockMvc.perform(post("/api/auth/forgot-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", "user@example.com"
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Password reset token issued"))
+                .andExpect(jsonPath("$.data.resetToken").value("reset-token"))
+                .andExpect(jsonPath("$.data.expiresIn").value(900));
+    }
+
+    @Test
+    void forgotPasswordShouldValidateRequestBody() throws Exception {
+        mockMvc.perform(post("/api/auth/forgot-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", "invalid"
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    void resetPasswordShouldReturnOkResponse() throws Exception {
+        mockMvc.perform(post("/api/auth/reset-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "resetToken", "reset-token",
+                                "newPassword", "password123"
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Password reset success"));
+    }
+
+    @Test
+    void resetPasswordShouldValidateRequestBody() throws Exception {
+        mockMvc.perform(post("/api/auth/reset-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "resetToken", "",
+                                "newPassword", "short"
                         ))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false));

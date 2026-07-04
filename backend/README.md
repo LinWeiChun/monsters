@@ -194,3 +194,55 @@ Response:
 ```
 
 Google login verifies the ID token on the backend with Google's signing keys, checks issuer, audience, expiration, and verified email, then links or creates a local user through `user_oauth_accounts`. `JWT_SECRET` and `GOOGLE_CLIENT_IDS` must be configured before Google login can issue tokens.
+
+### Forgot Password
+
+`POST /api/auth/forgot-password`
+
+Request:
+
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Password reset token issued",
+  "data": {
+    "resetToken": "password_reset_token",
+    "expiresIn": 900
+  }
+}
+```
+
+The forgot password flow normalizes email, creates a 15-minute one-time reset token for existing active users, stores only the token hash in `password_reset_tokens`, and invalidates previous unused tokens for the same user. Unknown emails still return 200 with a null `resetToken`.
+
+### Reset Password
+
+`POST /api/auth/reset-password`
+
+Request:
+
+```json
+{
+  "resetToken": "password_reset_token",
+  "newPassword": "password123"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Password reset success",
+  "data": null
+}
+```
+
+Reset password hashes the submitted token before lookup, rejects invalid, expired, used, or deleted-user tokens, stores the new password as a BCrypt hash, and marks the reset token as used.

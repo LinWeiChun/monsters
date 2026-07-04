@@ -99,6 +99,32 @@ Email / Password 登入憑證。
 | created_at | DATETIME | NOT NULL | 建立時間 |
 | updated_at | DATETIME | NOT NULL | 更新時間 |
 
+### 3.2.1 password_reset_tokens
+
+忘記密碼 reset token。
+
+| 欄位 | 型別 | 約束 | 說明 |
+|---|---|---|---|
+| id | BIGINT | PK | ID |
+| user_id | BIGINT | FK NOT NULL | 使用者 ID |
+| token_hash | VARCHAR(255) | UNIQUE NOT NULL | reset token hash |
+| expires_at | DATETIME | NOT NULL | 過期時間 |
+| used_at | DATETIME | NULL | 使用時間，NULL 表示尚未使用 |
+| created_at | DATETIME | NOT NULL | 建立時間 |
+| updated_at | DATETIME | NOT NULL | 更新時間 |
+
+Index：
+
+- `user_id, used_at`
+- `expires_at`
+
+規則：
+
+- 不得保存 reset token 明文。
+- 同一使用者重新申請忘記密碼時，未使用的舊 token 需失效。
+- token 使用後必須寫入 `used_at`。
+- 過期、已使用或對應已刪除使用者的 token 不得重設密碼。
+
 ### 3.3 user_oauth_accounts
 
 第三方登入帳號。

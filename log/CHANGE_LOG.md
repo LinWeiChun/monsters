@@ -8,6 +8,85 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-04 11:21
+
+Task
+TASK-022 忘記密碼 API
+
+Agent
+Codex
+
+### Completed
+
+- Added `POST /api/auth/forgot-password`.
+- Added `POST /api/auth/reset-password`.
+- Added one-time password reset token generation with 15-minute expiration.
+- Stored only reset token hashes in `password_reset_tokens`.
+- Invalidated previous unused reset tokens when a new token is issued for the same user.
+- Added password reset flow to update existing credentials or create credentials for OAuth-only users after token verification.
+- Added controller, service, and token hashing tests.
+- Updated API, database, backend README, decision, task, schema, and log documents.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/auth/dto/ForgotPasswordRequest.java`
+- `backend/src/main/java/com/monsters/auth/dto/ForgotPasswordResponse.java`
+- `backend/src/main/java/com/monsters/auth/dto/ResetPasswordRequest.java`
+- `backend/src/main/java/com/monsters/common/security/PasswordResetTokenService.java`
+- `backend/src/main/java/com/monsters/user/entity/PasswordResetToken.java`
+- `backend/src/main/java/com/monsters/user/repository/PasswordResetTokenRepository.java`
+- `backend/src/test/java/com/monsters/common/security/PasswordResetTokenServiceTest.java`
+
+### Modified
+
+- `backend/README.md`
+- `backend/src/main/java/com/monsters/auth/controller/AuthController.java`
+- `backend/src/main/java/com/monsters/auth/service/AuthService.java`
+- `backend/src/main/java/com/monsters/user/entity/UserCredential.java`
+- `backend/src/test/java/com/monsters/MonstersApplicationTests.java`
+- `backend/src/test/java/com/monsters/auth/controller/AuthControllerTest.java`
+- `backend/src/test/java/com/monsters/auth/service/AuthServiceTest.java`
+- `database/init/01_schema.sql`
+- `docs/API_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- Added `password_reset_tokens` to `database/init/01_schema.sql`.
+
+### API
+
+- Added `POST /api/auth/forgot-password`.
+- Added `POST /api/auth/reset-password`.
+
+### Database
+
+- Added `password_reset_tokens`.
+- Reset token plaintext is not stored; only token hash is persisted.
+
+### Tests
+
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew test`
+
+### Commit Message
+
+```text
+feat(auth): 建立忘記密碼 API
+```
+
+### Notes
+
+- Current forgot-password response returns `resetToken` for development and frontend integration. Formal email delivery remains pending in `docs/DECISIONS.md`.
+
 ## 2026-07-04 06:42
 
 Task

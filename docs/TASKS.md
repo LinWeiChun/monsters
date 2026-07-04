@@ -60,7 +60,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] 註冊 API（DONE）
 - [x] 登入 API（DONE）
 - [x] Google 登入 API（DONE）
-- [ ] 忘記密碼 API
+- [x] 忘記密碼 API（DONE）
 - [ ] 登出 API
 - [ ] 查詢個人資料 API
 - [ ] 修改個人資料 API

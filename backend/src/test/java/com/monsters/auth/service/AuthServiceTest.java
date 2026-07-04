@@ -4,30 +4,39 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
+import com.monsters.auth.dto.ForgotPasswordRequest;
+import com.monsters.auth.dto.ForgotPasswordResponse;
 import com.monsters.auth.dto.LoginRequest;
 import com.monsters.auth.dto.LoginResponse;
 import com.monsters.auth.dto.GoogleLoginRequest;
 import com.monsters.auth.dto.RegisterRequest;
 import com.monsters.auth.dto.RegisterResponse;
+import com.monsters.auth.dto.ResetPasswordRequest;
 import com.monsters.common.exception.ConflictException;
 import com.monsters.common.exception.UnauthorizedException;
 import com.monsters.common.security.GoogleIdTokenVerifier;
 import com.monsters.common.security.GoogleUserInfo;
 import com.monsters.common.security.JwtProperties;
 import com.monsters.common.security.JwtTokenService;
+import com.monsters.common.security.PasswordResetTokenService;
+import com.monsters.user.entity.PasswordResetToken;
 import com.monsters.user.entity.User;
 import com.monsters.user.entity.UserCredential;
 import com.monsters.user.entity.UserOAuthAccount;
+import com.monsters.user.repository.PasswordResetTokenRepository;
 import com.monsters.user.repository.UserCredentialRepository;
 import com.monsters.user.repository.UserOAuthAccountRepository;
 import com.monsters.user.repository.UserRepository;
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,6 +55,9 @@ class AuthServiceTest {
     private UserOAuthAccountRepository userOAuthAccountRepository;
 
     @Mock
+    private PasswordResetTokenRepository passwordResetTokenRepository;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
@@ -57,8 +69,26 @@ class AuthServiceTest {
     @Mock
     private GoogleIdTokenVerifier googleIdTokenVerifier;
 
-    @InjectMocks
+    @Mock
+    private PasswordResetTokenService passwordResetTokenService;
+
     private AuthService authService;
+
+    @BeforeEach
+    void setUp() {
+        authService = new AuthService(
+                userRepository,
+                userCredentialRepository,
+                userOAuthAccountRepository,
+                passwordResetTokenRepository,
+                passwordEncoder,
+                jwtTokenService,
+                jwtProperties,
+                googleIdTokenVerifier,
+                passwordResetTokenService,
+                Clock.systemDefaultZone()
+        );
+    }
 
     @Test
     void registerShouldCreateUserAndCredential() {
@@ -215,5 +245,105 @@ class AuthServiceTest {
 
         assertThat(response.user().email()).isEqualTo("user@example.com");
         verify(userOAuthAccountRepository).save(any(UserOAuthAccount.class));
+    }
+
+    @Test
+    void forgotPasswordShouldCreateResetTokenForExistingUser() {
+        ForgotPasswordRequest request = new ForgotPasswordRequest(" USER@example.COM ");
+        User user = new User("user@example.com", "Wei");
+        when(userRepository.findByEmailAndDeletedFalse("user@example.com")).thenReturn(Optional.of(user));
+        when(passwordResetTokenService.createToken()).thenReturn("reset-token");
+        when(passwordResetTokenService.hashToken("reset-token")).thenReturn("token-hash");
+
+        ForgotPasswordResponse response = authService.forgotPassword(request);
+
+        assertThat(response.resetToken()).isEqualTo("reset-token");
+        assertThat(response.expiresIn()).isEqualTo(900);
+        verify(passwordResetTokenRepository).deleteByUserAndUsedAtIsNull(user);
+
+        ArgumentCaptor<PasswordResetToken> tokenCaptor = ArgumentCaptor.forClass(PasswordResetToken.class);
+        verify(passwordResetTokenRepository).save(tokenCaptor.capture());
+        assertThat(tokenCaptor.getValue().getUser()).isEqualTo(user);
+        assertThat(tokenCaptor.getValue().getTokenHash()).isEqualTo("token-hash");
+        assertThat(tokenCaptor.getValue().getExpiresAt()).isAfter(LocalDateTime.now());
+    }
+
+    @Test
+    void forgotPasswordShouldNotRevealUnknownEmail() {
+        ForgotPasswordRequest request = new ForgotPasswordRequest("unknown@example.com");
+        when(userRepository.findByEmailAndDeletedFalse("unknown@example.com")).thenReturn(Optional.empty());
+
+        ForgotPasswordResponse response = authService.forgotPassword(request);
+
+        assertThat(response.resetToken()).isNull();
+        assertThat(response.expiresIn()).isEqualTo(900);
+        verify(passwordResetTokenRepository, never()).save(any(PasswordResetToken.class));
+    }
+
+    @Test
+    void resetPasswordShouldUpdateExistingCredentialAndMarkTokenUsed() {
+        ResetPasswordRequest request = new ResetPasswordRequest("reset-token", "password123");
+        User user = new User("user@example.com", "Wei");
+        UserCredential credential = new UserCredential(user, "old-password-hash");
+        PasswordResetToken resetToken = new PasswordResetToken(
+                user,
+                "token-hash",
+                LocalDateTime.now().plusMinutes(10)
+        );
+
+        when(passwordResetTokenService.hashToken("reset-token")).thenReturn("token-hash");
+        when(passwordResetTokenRepository.findByTokenHashAndUsedAtIsNull("token-hash"))
+                .thenReturn(Optional.of(resetToken));
+        when(passwordEncoder.encode("password123")).thenReturn("new-password-hash");
+        when(userCredentialRepository.findByUser(user)).thenReturn(Optional.of(credential));
+
+        authService.resetPassword(request);
+
+        assertThat(credential.getPasswordHash()).isEqualTo("new-password-hash");
+        assertThat(resetToken.getUsedAt()).isNotNull();
+    }
+
+    @Test
+    void resetPasswordShouldCreateCredentialForOAuthOnlyUser() {
+        ResetPasswordRequest request = new ResetPasswordRequest("reset-token", "password123");
+        User user = new User("user@example.com", "Wei");
+        PasswordResetToken resetToken = new PasswordResetToken(
+                user,
+                "token-hash",
+                LocalDateTime.now().plusMinutes(10)
+        );
+
+        when(passwordResetTokenService.hashToken("reset-token")).thenReturn("token-hash");
+        when(passwordResetTokenRepository.findByTokenHashAndUsedAtIsNull("token-hash"))
+                .thenReturn(Optional.of(resetToken));
+        when(passwordEncoder.encode("password123")).thenReturn("new-password-hash");
+        when(userCredentialRepository.findByUser(user)).thenReturn(Optional.empty());
+
+        authService.resetPassword(request);
+
+        ArgumentCaptor<UserCredential> credentialCaptor = ArgumentCaptor.forClass(UserCredential.class);
+        verify(userCredentialRepository).save(credentialCaptor.capture());
+        assertThat(credentialCaptor.getValue().getUser()).isEqualTo(user);
+        assertThat(credentialCaptor.getValue().getPasswordHash()).isEqualTo("new-password-hash");
+        assertThat(resetToken.getUsedAt()).isNotNull();
+    }
+
+    @Test
+    void resetPasswordShouldRejectExpiredToken() {
+        ResetPasswordRequest request = new ResetPasswordRequest("reset-token", "password123");
+        User user = new User("user@example.com", "Wei");
+        PasswordResetToken resetToken = new PasswordResetToken(
+                user,
+                "token-hash",
+                LocalDateTime.now().minusMinutes(1)
+        );
+
+        when(passwordResetTokenService.hashToken("reset-token")).thenReturn("token-hash");
+        when(passwordResetTokenRepository.findByTokenHashAndUsedAtIsNull("token-hash"))
+                .thenReturn(Optional.of(resetToken));
+
+        assertThatThrownBy(() -> authService.resetPassword(request))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("Invalid password reset token");
     }
 }

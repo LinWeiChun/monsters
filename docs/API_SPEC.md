@@ -339,9 +339,72 @@ Response：
 
 `POST /api/auth/forgot-password`
 
+Request：
+
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Password reset token issued",
+  "data": {
+    "resetToken": "password_reset_token",
+    "expiresIn": 900
+  }
+}
+```
+
+規則：
+
+- `email` 必須轉為小寫並去除前後空白後查詢。
+- 若 email 對應未刪除使用者，後端產生一次性 reset token。
+- reset token 明文只回傳一次；資料庫僅保存 token hash。
+- reset token 有效時間為 900 秒。
+- 同一使用者重新申請時，未使用的舊 reset token 需失效。
+- 若 email 不存在或使用者已刪除，仍回傳 200，`resetToken` 為 `null`，避免暴露帳號是否存在。
+- 不得將 email 對應結果、reset token 明文或 token hash 寫入 log。
+- 目前 response 回傳 `resetToken` 供開發與前端串接；正式寄信服務定案後，應改為由後端寄送 reset link 或驗證碼。
+
 ### 2.5 重設密碼
 
 `POST /api/auth/reset-password`
+
+Request：
+
+```json
+{
+  "resetToken": "password_reset_token",
+  "newPassword": "password123"
+}
+```
+
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Password reset success",
+  "data": null
+}
+```
+
+規則：
+
+- `resetToken` 必填。
+- `newPassword` 必填，長度 8 到 72 字元。
+- 後端必須先 hash `resetToken` 後查詢，不得以明文 token 查詢資料庫。
+- reset token 不存在、已使用、已過期或對應使用者已刪除時，回傳 401。
+- 密碼需使用 BCrypt 重新雜湊。
+- 使用者已有 Email / Password 憑證時，更新既有 `user_credentials.password_hash`。
+- 僅有 Google 登入的使用者若完成 reset token 驗證，可建立新的 `user_credentials`。
+- 密碼重設成功後，reset token 必須標記為已使用。
+- 不得將新密碼、reset token 明文或 token hash 寫入 log。
 
 ### 2.6 登出
 
