@@ -639,3 +639,31 @@ Register API must not store raw passwords, JWT values, or secrets in logs.
 | password | user_credentials | password_hash | Compared with BCrypt `PasswordEncoder.matches` |
 
 Login API returns JWT access and refresh tokens, but tokens must not be persisted or written to logs.
+
+## User API Database Mapping
+
+`GET /api/users/me` reads the authenticated user's normalized profile data:
+
+| API Field | Table | Column | Note |
+|---|---|---|---|
+| userId | users | id | Read from authenticated JWT principal, not from client input |
+| account | users | account | Kept for old-system compatibility and import only |
+| email | users | email | Read-only in this API |
+| userName | users | user_name | Display name |
+| birthday | users | birthday | Nullable profile field |
+| avatarUrl | users | avatar_url | Nullable public avatar URL |
+
+`PUT /api/users/me` updates only editable profile columns:
+
+| API Field | Table | Column | Note |
+|---|---|---|---|
+| userName | users | user_name | Required, max length 80, trimmed before persistence |
+| birthday | users | birthday | Nullable `DATE` value |
+
+`PUT /api/users/me/avatar` uploads the avatar file to Cloudflare R2 and updates only the public URL:
+
+| API Field | Table | Column | Note |
+|---|---|---|---|
+| file | users | avatar_url | File binary is not stored in MySQL; only the public R2 URL is persisted |
+
+User APIs must query or update only non-deleted users and must not accept `userId` or `account` from client input for the current-user profile flow.

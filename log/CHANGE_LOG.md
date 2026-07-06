@@ -8,6 +8,69 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-06 11:16
+
+Task
+TASK-028 Phase 2 會員規格一致性檢查
+
+Agent
+Codex
+
+### Completed
+
+- Confirmed Phase 0 and Phase 1 tasks are complete.
+- Confirmed current Phase 2 member API implementation has reached avatar update and is present on remote `develop`.
+- Cross-checked implemented User APIs against `docs/API_SPEC.md`, `docs/DATABASE_SPEC.md`, `docs/CODING_STANDARD.md`, backend controller, service, R2 storage settings, and tests.
+- Added missing User API database mapping for profile query, profile update, and avatar update.
+- Updated `docs/TASKS.md` to mark the Phase 2 implementation alignment item as DONE.
+- Updated the stale avatar API REVIEW status to DONE because `origin/develop` already contains the avatar API commit.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `docs/DATABASE_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- No endpoint change. This task only verified and documented existing User APIs.
+
+### Database
+
+- No schema change. Added documentation mapping for existing `users` columns used by User APIs.
+
+### Tests
+
+- `$env:JAVA_HOME='C:\Program Files\Java\jdk-18.0.2'; $env:Path="$env:JAVA_HOME\bin;$env:Path"; .\gradlew.bat test`
+- `$env:JAVA_HOME='C:\Program Files\Java\jdk-18.0.2'; $env:Path="$env:JAVA_HOME\bin;$env:Path"; .\gradlew.bat build`
+- `git diff --check`
+
+### Commit Message
+
+```text
+docs(phase2): 同步會員規格狀態
+```
+
+### Notes
+
+- Next executable task after this alignment is `密碼鎖 API`.
+
+---
+
 ## 2026-07-04 12:13
 
 Task

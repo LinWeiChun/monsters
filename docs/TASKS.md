@@ -55,7 +55,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 - [x] 檢查 `system_data/` 中舊會員、登入、個人資料與密碼鎖相關寫法（DONE）
 - [x] 整理可參考的流程與欄位（DONE）
-- [ ] 依新版 API、Database、Coding Standard 重新實作
+- [x] 依新版 API、Database、Coding Standard 重新實作（DONE）
 
 - [x] 註冊 API（DONE）
 - [x] 登入 API（DONE）
@@ -64,7 +64,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] 登出 API（DONE）
 - [x] 查詢個人資料 API（DONE）
 - [x] 修改個人資料 API（DONE）
-- [ ] 更改頭貼 API（REVIEW：本地實作、測試、build 與 commit 完成；待 GitHub push）
+- [x] 更改頭貼 API（DONE）
 - [ ] 密碼鎖 API
 - [ ] Flutter 登入頁
 - [ ] Flutter 註冊頁

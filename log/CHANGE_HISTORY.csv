@@ -376,3 +376,7 @@
 2026-07-04,12:13,TASK-027,Documentation,docs/TASKS.md,修改,更改頭貼 API Task REVIEW,Codex,否,否,否,否,本地實作測試 build 與 commit 完成；待 GitHub push
 2026-07-04,12:13,TASK-027,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-027 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log；遠端 push 被安全審核拒絕
 2026-07-04,12:13,TASK-027,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-027 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-06,11:16,TASK-028,Documentation,docs/DATABASE_SPEC.md,修改,補齊 User API Database Mapping,Codex,否,是,否,否,文件補充既有 users 欄位對應；無 schema 異動
+2026-07-06,11:16,TASK-028,Documentation,docs/TASKS.md,修改,標記 Phase 2 規格一致性檢查與更改頭貼 API DONE,Codex,否,否,否,否,完成 TODO 到 IN PROGRESS 到 REVIEW 到 DONE 的既有流程收斂
+2026-07-06,11:16,TASK-028,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-028 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-06,11:16,TASK-028,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-028 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
