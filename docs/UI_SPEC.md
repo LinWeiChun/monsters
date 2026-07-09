@@ -378,6 +378,53 @@ REST API
 - 註冊頁不得直接呼叫 Dio。
 - 註冊頁不得保存密碼或 token 至 SharedPreferences。
 - 註冊成功不自動登入；使用者需回登入頁登入取得 token。
+## Flutter Profile Page 實作規範
+
+個人資料頁位置：
+
+- `frontend/lib/pages/profile_page.dart`
+
+個人資料頁支援：
+
+- 呼叫 `GET /api/users/me` 查詢目前登入使用者個人資料
+- 顯示頭貼、暱稱、Email、舊帳號與生日
+- 修改暱稱與生日
+- 呼叫 `PUT /api/users/me` 儲存個人資料
+- Loading 狀態
+- API 錯誤訊息與重試
+- 儲存成功提示
+- 從首頁進入個人資料頁
+
+個人資料頁資料流程：
+
+```text
+ProfilePage
+↓
+UserProfileController
+↓
+UserRepository
+↓
+ApiClient
+↓
+REST API
+```
+
+實作檔案：
+
+| 類型 | 檔案 |
+|---|---|
+| Page | `frontend/lib/pages/profile_page.dart` |
+| Provider | `frontend/lib/providers/user_profile_provider.dart` |
+| Repository | `frontend/lib/repositories/user_repository.dart` |
+| Model | `frontend/lib/models/user_profile.dart`、`frontend/lib/models/user_profile.g.dart` |
+
+規則：
+
+- 個人資料頁不得直接呼叫 Dio。
+- 個人資料頁不得由前端傳入 user id 或 account 進行查詢或修改。
+- `userName` 必填，最大長度 80。
+- `birthday` 可為空；若填寫，格式需為 `yyyy-MM-dd`。
+- 頭貼上傳涉及三平台檔案選取流程，需於後續更改頭貼 UI Task 定案檔案選取方案後實作。
 ## Flutter Router 基礎規範
 
 前端路由統一使用 go_router，入口必須使用 `MaterialApp.router`。
@@ -395,6 +442,7 @@ REST API
 | `/home` | `home` | `HomePage` | 首頁容器 |
 | `/login` | `login` | `LoginPage` | 登入頁容器 |
 | `/register` | `register` | `RegisterPage` | 註冊頁容器 |
+| `/profile` | `profile` | `ProfilePage` | 個人資料頁容器 |
 
 頁面不得直接使用 `Navigator.push`。頁面切換應使用 go_router 的 `context.goNamed()` 或集中路由設定。
 ## Flutter Theme 基礎規範

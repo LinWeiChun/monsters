@@ -434,3 +434,17 @@
 2026-07-09,20:29,TASK-031,Test,frontend,檢查,執行 Flutter analyze 與 Web Android iOS build 驗證,Codex,否,否,是,否,Web 與 Android 通過；iOS 因本機 Xcode 缺少 iOS 26.2 platform 阻擋
 2026-07-09,20:29,TASK-031,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-031 三平台補齊紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-09,20:29,TASK-031,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-031 三平台補齊 history,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-09,20:58,TASK-032,Frontend,frontend/lib/models/user_profile.dart,新增,新增個人資料資料模型,Codex,是,否,是,否,對應 GET PUT /api/users/me 回應欄位
+2026-07-09,20:58,TASK-032,Frontend,frontend/lib/models/user_profile.g.dart,新增,新增個人資料 JSON mapping,Codex,是,否,是,否,json_serializable mapping
+2026-07-09,20:58,TASK-032,Frontend,frontend/lib/repositories/user_repository.dart,新增,新增個人資料 API repository,Codex,是,否,是,否,使用既有 ApiClient 不直接呼叫 Dio
+2026-07-09,20:58,TASK-032,Frontend,frontend/lib/providers/user_profile_provider.dart,新增,新增個人資料 Riverpod 狀態流程,Codex,是,否,是,否,支援載入 儲存 錯誤 成功狀態
+2026-07-09,20:58,TASK-032,Frontend,frontend/lib/pages/profile_page.dart,新增,新增個人資料頁,Codex,是,否,是,否,支援三平台共用 Flutter UI
+2026-07-09,20:58,TASK-032,Frontend,frontend/lib/pages/home_page.dart,修改,新增首頁前往個人資料入口,Codex,否,否,是,否,
+2026-07-09,20:58,TASK-032,Frontend,frontend/lib/routes/app_router.dart,修改,新增 profile route,Codex,否,否,是,否,
+2026-07-09,20:58,TASK-032,Frontend,frontend/lib/routes/app_routes.dart,修改,新增 profile route 常數,Codex,否,否,是,否,
+2026-07-09,20:58,TASK-032,Test,frontend/test/profile_page_test.dart,新增,新增個人資料頁 widget 測試,Codex,否,否,是,否,涵蓋載入 驗證 儲存 錯誤 首頁導頁
+2026-07-09,20:58,TASK-032,Documentation,docs/UI_SPEC.md,修改,補充 Flutter Profile Page 實作規範,Codex,是,否,是,否,文件同步
+2026-07-09,20:58,TASK-032,Documentation,docs/TASKS.md,修改,Flutter 個人資料頁 Task REVIEW,Codex,否,否,否,否,本地實作測試與 analyze 完成；待 GitHub push
+2026-07-09,20:58,TASK-032,Documentation,frontend/README.md,修改,補充個人資料頁前端結構,Codex,否,否,否,否,文件同步
+2026-07-09,20:58,TASK-032,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-032 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-09,20:58,TASK-032,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-032 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log

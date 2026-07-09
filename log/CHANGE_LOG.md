@@ -8,6 +8,76 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-09 20:58
+
+Task
+TASK-032 Flutter 個人資料頁（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Added shared Flutter profile page for Web, Android, and iOS.
+- Added `UserProfile` model, `UserRepository`, and Riverpod `UserProfileController`.
+- Connected `/profile` go_router route and added a home-page entry action.
+- Implemented profile loading, API error retry, user name validation, birthday validation, and profile update success feedback.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `frontend/lib/models/user_profile.dart`
+- `frontend/lib/models/user_profile.g.dart`
+- `frontend/lib/pages/profile_page.dart`
+- `frontend/lib/providers/user_profile_provider.dart`
+- `frontend/lib/repositories/user_repository.dart`
+- `frontend/test/profile_page_test.dart`
+
+### Modified
+
+- `frontend/lib/pages/home_page.dart`
+- `frontend/lib/routes/app_router.dart`
+- `frontend/lib/routes/app_routes.dart`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `frontend/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- Uses existing `GET /api/users/me`.
+- Uses existing `PUT /api/users/me`.
+
+### Database
+
+- None
+
+### Tests
+
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub test/profile_page_test.dart`
+
+### Commit Message
+
+```text
+feat(frontend): 新增個人資料頁
+```
+
+### Notes
+
+- `system_data/` reference: checked old `drawer_personalInfo.dart`, `edit_personalInfo.dart`, `memberRepo.dart`, and `memberModel.dart`; reused the profile display/edit flow only.
+- Not reused: old global account state, direct HTTP calls, old API paths, `Navigator` routing, hard-coded colors, and avatar monster-index logic.
+- Avatar file upload UI is deferred because cross-platform file picking requires a separate approved package or platform strategy.
+
 ## 2026-07-09 20:29
 
 Task

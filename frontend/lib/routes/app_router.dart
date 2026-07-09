@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../pages/home_page.dart';
 import '../pages/login_page.dart';
+import '../pages/profile_page.dart';
 import '../pages/register_page.dart';
 import '../pages/splash_page.dart';
 import 'app_routes.dart';
@@ -34,6 +35,11 @@ GoRouter createAppRouter({String initialLocation = AppPath.splash}) {
         path: AppPath.register,
         name: AppRoute.register,
         builder: (context, state) => const RegisterPage(),
+      ),
+      GoRoute(
+        path: AppPath.profile,
+        name: AppRoute.profile,
+        builder: (context, state) => const ProfilePage(),
       ),
     ],
   );

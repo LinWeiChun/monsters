@@ -67,6 +67,17 @@ UI 不得直接呼叫 Dio，後續功能需透過 Provider / Repository 使用 `
 註冊流程使用 `AuthRepository` 呼叫 `POST /api/auth/register`，成功後導回登入頁，不自動登入，也不保存密碼或 token。
 
 目前不將 JWT、Refresh Token 或密碼寫入 SharedPreferences。Google 登入入口已保留，但需後續 Google Sign-In SDK 與 ID Token 流程完成後才能正式啟用。
+## User Profile
+
+個人資料頁與資料流：
+
+- `lib/pages/profile_page.dart`
+- `lib/providers/user_profile_provider.dart`
+- `lib/repositories/user_repository.dart`
+- `lib/models/user_profile.dart`
+- `lib/models/user_profile.g.dart`
+
+個人資料流程使用 `UserRepository` 呼叫 `GET /api/users/me` 與 `PUT /api/users/me`，由後端依目前 Authorization token 判斷使用者；前端不傳入 user id 或 account。頁面支援載入、錯誤重試、暱稱與生日編輯、儲存成功提示。頭貼目前支援顯示 `avatarUrl`，三平台檔案選取與上傳會於更改頭貼 UI Task 定案後補齊。
 ## Routing
 
 前端路由統一使用 go_router：
@@ -85,6 +96,7 @@ App 入口使用 `MaterialApp.router`，路由由 `appRouterProvider` 提供。
 | `/home` | `home` | `HomePage` |
 | `/login` | `login` | `LoginPage` |
 | `/register` | `register` | `RegisterPage` |
+| `/profile` | `profile` | `ProfilePage` |
 
 UI 不得直接使用 `Navigator.push`，頁面切換應透過 `context.goNamed()` 或集中路由設定。
 ## Theme
