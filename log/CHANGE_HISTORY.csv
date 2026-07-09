@@ -413,3 +413,15 @@
 2026-07-09,14:59,TASK-030,Frontend,frontend/lib/models/login_result.g.dart,新增,新增登入結果模型 JSON 產生檔,Codex,是,否,否,否,json_serializable 產物
 2026-07-09,14:59,TASK-030,Frontend,frontend/pubspec.yaml,修改,加入已核准 json_serializable 工具鏈,Codex,否,否,否,否,符合 CODING_STANDARD Flutter JSON 規範
 2026-07-09,14:59,TASK-030,Frontend,frontend/pubspec.lock,修改,更新 Flutter dependency lock,Codex,否,否,否,否,flutter pub add 產生
+2026-07-09,20:20,TASK-031,Frontend,frontend/lib/models/register_result.dart,新增,新增註冊結果模型,Codex,是,否,否,否,對應 Auth API register data
+2026-07-09,20:20,TASK-031,Frontend,frontend/lib/repositories/auth_repository.dart,修改,新增註冊 API 呼叫,Codex,是,否,否,否,使用既有 ApiClient 呼叫 POST /api/auth/register
+2026-07-09,20:20,TASK-031,Frontend,frontend/lib/providers/auth_provider.dart,修改,新增 Riverpod 註冊流程狀態,Codex,是,否,是,否,不保存密碼 token
+2026-07-09,20:20,TASK-031,Frontend,frontend/lib/pages/register_page.dart,修改,建立註冊頁 UI 與狀態處理,Codex,是,否,是,否,成功後導回登入頁
+2026-07-09,20:20,TASK-031,Test,frontend/test/register_page_test.dart,新增,新增註冊頁 widget 測試,Codex,否,否,是,否,涵蓋表單 驗證 成功導頁 錯誤顯示
+2026-07-09,20:20,TASK-031,Test,frontend/test/routes/app_router_test.dart,修改,更新 register to login 路由測試文字,Codex,否,否,是,否,
+2026-07-09,20:20,TASK-031,Documentation,docs/API_SPEC.md,修改,補充註冊 API response 與規則,Codex,是,否,否,否,文件同步
+2026-07-09,20:20,TASK-031,Documentation,docs/UI_SPEC.md,修改,補充 Flutter Register Page 實作規範,Codex,否,否,是,否,文件同步
+2026-07-09,20:20,TASK-031,Documentation,frontend/README.md,修改,補充註冊流程前端結構,Codex,否,否,否,否,文件同步
+2026-07-09,20:20,TASK-031,Documentation,docs/TASKS.md,修改,Flutter 註冊頁 Task REVIEW,Codex,否,否,否,否,本地實作測試 analyze 與 commit 完成；待 GitHub push
+2026-07-09,20:20,TASK-031,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-031 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log；遠端 push 被安全審核拒絕
+2026-07-09,20:20,TASK-031,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-031 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log

@@ -8,6 +8,77 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-09 20:20
+
+Task
+TASK-031 Flutter 註冊頁（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Replaced the placeholder Flutter register route with a complete registration form.
+- Added register flow to `AuthRepository` and Riverpod `AuthController` using the existing `ApiClient`.
+- Added register result model for the current Auth API response shape.
+- Added Email, nickname, password length, and confirm-password validation.
+- Added loading, API error, success navigation, and login navigation states.
+- Added register page widget tests and updated router test for the new register UI.
+- Updated API spec, UI spec, frontend README, task, and log documents.
+- Completed local commit. Remote push remains blocked by external GitHub egress safety review.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `frontend/lib/models/register_result.dart`
+- `frontend/test/register_page_test.dart`
+
+### Modified
+
+- `frontend/README.md`
+- `frontend/lib/pages/register_page.dart`
+- `frontend/lib/providers/auth_provider.dart`
+- `frontend/lib/repositories/auth_repository.dart`
+- `frontend/test/routes/app_router_test.dart`
+- `docs/API_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- No backend endpoint change. Frontend now calls existing `POST /api/auth/register`.
+
+### Database
+
+- None
+
+### Tests
+
+- `/Users/linweijun/fultter/flutter/bin/dart format lib/pages/register_page.dart lib/providers/auth_provider.dart lib/repositories/auth_repository.dart lib/models/register_result.dart test/register_page_test.dart test/routes/app_router_test.dart`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+
+### Commit Message
+
+```text
+feat(frontend): 建立註冊頁
+```
+
+### Notes
+
+- Task remains in REVIEW until remote push completes.
+- Register success returns to the login route; it does not persist password or token and does not auto-login.
+
 ## 2026-07-09 14:59
 
 Task

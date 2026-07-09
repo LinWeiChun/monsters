@@ -330,6 +330,52 @@ REST API
 - 登入頁不得直接保存 JWT、Refresh Token 或密碼至 SharedPreferences。
 - Access Token 僅由 `ApiClient.setAccessToken()` 暫存於目前執行階段。`AuthUser` 與 `LoginResult` 必須使用 `json_serializable` 產生 JSON mapping。
 - Google Sign-In SDK 尚未導入前，不得假造 Google ID Token 或沿用舊系統空密碼登入流程。
+
+## Flutter Register Page 實作規範
+
+註冊頁位置：
+
+- `frontend/lib/pages/register_page.dart`
+
+註冊頁支援：
+
+- Email 輸入與格式驗證
+- 暱稱輸入與長度驗證
+- 密碼輸入、確認密碼與一致性驗證
+- 呼叫 `POST /api/auth/register`
+- Loading 狀態
+- API 錯誤訊息呈現
+- 註冊成功後導向 `login` route
+- 前往登入頁
+
+註冊頁資料流程：
+
+```text
+RegisterPage
+↓
+AuthController
+↓
+AuthRepository
+↓
+ApiClient
+↓
+REST API
+```
+
+實作檔案：
+
+| 類型 | 檔案 |
+|---|---|
+| Page | `frontend/lib/pages/register_page.dart` |
+| Provider | `frontend/lib/providers/auth_provider.dart` |
+| Repository | `frontend/lib/repositories/auth_repository.dart` |
+| Model | `frontend/lib/models/register_result.dart` |
+
+規則：
+
+- 註冊頁不得直接呼叫 Dio。
+- 註冊頁不得保存密碼或 token 至 SharedPreferences。
+- 註冊成功不自動登入；使用者需回登入頁登入取得 token。
 ## Flutter Router 基礎規範
 
 前端路由統一使用 go_router，入口必須使用 `MaterialApp.router`。

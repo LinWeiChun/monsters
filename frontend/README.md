@@ -51,14 +51,18 @@ UI 不得直接呼叫 Dio，後續功能需透過 Provider / Repository 使用 `
 登入頁與登入狀態邏輯：
 
 - `lib/pages/login_page.dart`
+- `lib/pages/register_page.dart`
 - `lib/providers/auth_provider.dart`
 - `lib/repositories/auth_repository.dart`
 - `lib/models/auth_user.dart`
 - `lib/models/auth_user.g.dart`
 - `lib/models/login_result.dart`
 - `lib/models/login_result.g.dart`
+- `lib/models/register_result.dart`
 
 登入流程使用 `AuthRepository` 呼叫 `POST /api/auth/login`，成功後由 `ApiClient.setAccessToken()` 將 access token 套用到目前執行階段的 Authorization header。Auth model 使用 `json_serializable` 產生 JSON mapping。
+
+註冊流程使用 `AuthRepository` 呼叫 `POST /api/auth/register`，成功後導回登入頁，不自動登入，也不保存密碼或 token。
 
 目前不將 JWT、Refresh Token 或密碼寫入 SharedPreferences。Google 登入入口已保留，但需後續 Google Sign-In SDK 與 ID Token 流程完成後才能正式啟用。
 ## Routing

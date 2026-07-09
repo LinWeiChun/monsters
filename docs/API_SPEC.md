@@ -255,10 +255,33 @@ Request：
 ```json
 {
   "email": "user@example.com",
-  "password": "password",
+  "password": "password123",
   "userName": "使用者名稱"
 }
 ```
+
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Register success",
+  "data": {
+    "userId": 1,
+    "email": "user@example.com",
+    "userName": "使用者名稱"
+  }
+}
+```
+
+規則：
+
+- `email` 必填，必須符合 Email 格式。
+- `password` 必填，長度 8 到 72 字元。
+- `userName` 必填，最大長度 80。
+- 註冊成功後建立 `users` 與 `user_credentials`。
+- 密碼必須以 BCrypt hash 保存，不得保存或記錄明文。
+- Email 已被註冊時回傳 409。
 
 ### 2.2 登入
 

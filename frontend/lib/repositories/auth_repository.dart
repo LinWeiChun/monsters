@@ -2,6 +2,7 @@ import '../core/network/api_client.dart';
 import '../core/network/api_error_type.dart';
 import '../core/network/api_exception.dart';
 import '../models/login_result.dart';
+import '../models/register_result.dart';
 
 class AuthRepository {
   const AuthRepository(this._apiClient);
@@ -23,6 +24,25 @@ class AuthRepository {
     }
 
     _apiClient.setAccessToken(response.data.accessToken);
+    return response.data;
+  }
+
+  Future<RegisterResult> register({
+    required String email,
+    required String password,
+    required String userName,
+  }) async {
+    final response = await _apiClient.post<RegisterResult>(
+      '/auth/register',
+      data: {'email': email, 'password': password, 'userName': userName},
+      fromJsonT: (json) =>
+          RegisterResult.fromJson(json! as Map<String, dynamic>),
+    );
+
+    if (!response.success) {
+      throw ApiException(type: ApiErrorType.unknown, message: response.message);
+    }
+
     return response.data;
   }
 }
