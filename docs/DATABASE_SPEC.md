@@ -667,3 +667,20 @@ Login API returns JWT access and refresh tokens, but tokens must not be persiste
 | file | users | avatar_url | File binary is not stored in MySQL; only the public R2 URL is persisted |
 
 User APIs must query or update only non-deleted users and must not accept `userId` or `account` from client input for the current-user profile flow.
+
+## Password Lock API Database Mapping
+
+`PUT /api/users/me/password-lock` creates or updates the authenticated user's password lock:
+
+| API Field | Table | Column | Note |
+|---|---|---|---|
+| lockPassword | user_password_locks | lock_password_hash | Stored as BCrypt hash only |
+| - | user_password_locks | enabled | Set to `true` when a lock is created or updated |
+
+`POST /api/users/me/password-lock/verify` reads the authenticated user's enabled password lock:
+
+| API Field | Table | Column | Note |
+|---|---|---|---|
+| lockPassword | user_password_locks | lock_password_hash | Compared with BCrypt `PasswordEncoder.matches` |
+
+Password Lock API must not store or log raw lock passwords. The client must not submit `userId` or `account`; the backend uses the authenticated JWT principal.

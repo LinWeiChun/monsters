@@ -385,3 +385,67 @@ R2 settings:
 | app.storage.r2.public-base-url | R2_PUBLIC_BASE_URL |
 | app.storage.r2.avatar-key-prefix | R2_AVATAR_KEY_PREFIX |
 | app.storage.r2.max-avatar-size-bytes | R2_MAX_AVATAR_SIZE_BYTES |
+
+### Set My Password Lock
+
+`PUT /api/users/me/password-lock`
+
+Header:
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Request:
+
+```json
+{
+  "lockPassword": "1234"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Password lock update success",
+  "data": {
+    "enabled": true
+  }
+}
+```
+
+The lock password must be exactly 4 digits. The backend stores only a BCrypt hash in `user_password_locks.lock_password_hash`.
+
+### Verify My Password Lock
+
+`POST /api/users/me/password-lock/verify`
+
+Header:
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Request:
+
+```json
+{
+  "lockPassword": "1234"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Password lock verify success",
+  "data": {
+    "verified": true
+  }
+}
+```
+
+Wrong lock passwords return `verified: false`; missing or disabled password locks return 404.

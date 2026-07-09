@@ -2,6 +2,9 @@ package com.monsters.user.controller;
 
 import com.monsters.common.dto.ApiResponse;
 import com.monsters.common.security.AuthenticatedUser;
+import com.monsters.user.dto.PasswordLockRequest;
+import com.monsters.user.dto.PasswordLockStatusResponse;
+import com.monsters.user.dto.PasswordLockVerificationResponse;
 import com.monsters.user.dto.UpdateUserProfileRequest;
 import com.monsters.user.dto.UserProfileResponse;
 import com.monsters.user.service.UserService;
@@ -10,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,5 +55,23 @@ public class UserController {
     ) {
         UserProfileResponse response = userService.updateAvatar(currentUser.userId(), file);
         return ResponseEntity.ok(ApiResponse.success("Avatar update success", response));
+    }
+
+    @PutMapping("/me/password-lock")
+    public ResponseEntity<ApiResponse<PasswordLockStatusResponse>> setPasswordLock(
+            @AuthenticationPrincipal AuthenticatedUser currentUser,
+            @Valid @RequestBody PasswordLockRequest request
+    ) {
+        PasswordLockStatusResponse response = userService.setPasswordLock(currentUser.userId(), request);
+        return ResponseEntity.ok(ApiResponse.success("Password lock update success", response));
+    }
+
+    @PostMapping("/me/password-lock/verify")
+    public ResponseEntity<ApiResponse<PasswordLockVerificationResponse>> verifyPasswordLock(
+            @AuthenticationPrincipal AuthenticatedUser currentUser,
+            @Valid @RequestBody PasswordLockRequest request
+    ) {
+        PasswordLockVerificationResponse response = userService.verifyPasswordLock(currentUser.userId(), request);
+        return ResponseEntity.ok(ApiResponse.success("Password lock verify success", response));
     }
 }

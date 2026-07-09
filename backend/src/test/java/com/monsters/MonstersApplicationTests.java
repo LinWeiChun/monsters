@@ -4,6 +4,7 @@ import com.monsters.user.repository.PasswordResetTokenRepository;
 import com.monsters.user.repository.RevokedTokenRepository;
 import com.monsters.user.repository.UserCredentialRepository;
 import com.monsters.user.repository.UserOAuthAccountRepository;
+import com.monsters.user.repository.UserPasswordLockRepository;
 import com.monsters.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,6 +31,9 @@ class MonstersApplicationTests {
 
     @MockBean
     private RevokedTokenRepository revokedTokenRepository;
+
+    @MockBean
+    private UserPasswordLockRepository userPasswordLockRepository;
 
     @Test
     void contextLoads() {

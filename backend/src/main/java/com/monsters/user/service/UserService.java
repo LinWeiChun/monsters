@@ -2,10 +2,16 @@ package com.monsters.user.service;
 
 import com.monsters.common.exception.ResourceNotFoundException;
 import com.monsters.common.storage.AvatarStorageService;
+import com.monsters.user.dto.PasswordLockRequest;
+import com.monsters.user.dto.PasswordLockStatusResponse;
+import com.monsters.user.dto.PasswordLockVerificationResponse;
 import com.monsters.user.dto.UpdateUserProfileRequest;
 import com.monsters.user.dto.UserProfileResponse;
 import com.monsters.user.entity.User;
+import com.monsters.user.entity.UserPasswordLock;
+import com.monsters.user.repository.UserPasswordLockRepository;
 import com.monsters.user.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,11 +20,20 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserPasswordLockRepository userPasswordLockRepository;
     private final AvatarStorageService avatarStorageService;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, AvatarStorageService avatarStorageService) {
+    public UserService(
+            UserRepository userRepository,
+            UserPasswordLockRepository userPasswordLockRepository,
+            AvatarStorageService avatarStorageService,
+            PasswordEncoder passwordEncoder
+    ) {
         this.userRepository = userRepository;
+        this.userPasswordLockRepository = userPasswordLockRepository;
         this.avatarStorageService = avatarStorageService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true)
@@ -43,6 +58,28 @@ public class UserService {
         String avatarUrl = avatarStorageService.uploadAvatar(userId, file);
         user.updateAvatarUrl(avatarUrl);
         return toProfileResponse(user);
+    }
+
+    @Transactional
+    public PasswordLockStatusResponse setPasswordLock(Long userId, PasswordLockRequest request) {
+        User user = userRepository.findByIdAndDeletedFalse(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        String passwordHash = passwordEncoder.encode(request.lockPassword());
+        UserPasswordLock passwordLock = userPasswordLockRepository.findByUserId(userId)
+                .orElseGet(() -> new UserPasswordLock(user, passwordHash));
+        passwordLock.updateLockPasswordHash(passwordHash);
+        userPasswordLockRepository.save(passwordLock);
+        return new PasswordLockStatusResponse(true);
+    }
+
+    @Transactional(readOnly = true)
+    public PasswordLockVerificationResponse verifyPasswordLock(Long userId, PasswordLockRequest request) {
+        userRepository.findByIdAndDeletedFalse(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        UserPasswordLock passwordLock = userPasswordLockRepository.findByUserIdAndEnabledTrue(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Password lock not found"));
+        boolean verified = passwordEncoder.matches(request.lockPassword(), passwordLock.getLockPasswordHash());
+        return new PasswordLockVerificationResponse(verified);
     }
 
     private UserProfileResponse toProfileResponse(User user) {

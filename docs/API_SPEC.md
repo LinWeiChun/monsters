@@ -587,9 +587,82 @@ Response：
 
 `PUT /api/users/me/password-lock`
 
+Header：
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Request：
+
+```json
+{
+  "lockPassword": "1234"
+}
+```
+
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Password lock update success",
+  "data": {
+    "enabled": true
+  }
+}
+```
+
+規則：
+
+- 需登入。
+- 後端必須從 JWT 驗證後的 `userId` 設定目前使用者的密碼鎖，不得由前端傳入 user id 或 account。
+- `lockPassword` 必填，格式固定為 4 位數字。
+- 密碼鎖需使用 BCrypt hash 保存至 `user_password_locks.lock_password_hash`，不得保存明文。
+- 同一使用者重複設定時更新既有密碼鎖 hash，並保持 `enabled = true`。
+- 查無使用者時回傳 404。
+- 不得將密碼鎖明文或 hash 寫入 log。
+
 ### 3.5 驗證密碼鎖
 
 `POST /api/users/me/password-lock/verify`
+
+Header：
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Request：
+
+```json
+{
+  "lockPassword": "1234"
+}
+```
+
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Password lock verify success",
+  "data": {
+    "verified": true
+  }
+}
+```
+
+規則：
+
+- 需登入。
+- 後端必須從 JWT 驗證後的 `userId` 驗證目前使用者的密碼鎖，不得由前端傳入 user id 或 account。
+- `lockPassword` 必填，格式固定為 4 位數字。
+- 後端以 `PasswordEncoder.matches` 比對，不得以明文查詢資料庫。
+- 密碼鎖不存在或未啟用時回傳 404。
+- 密碼鎖錯誤時回傳 200，`verified = false`，由前端決定是否提示重試。
+- 查無使用者時回傳 404。
+- 不得將密碼鎖明文或 hash 寫入 log。
 
 ---
 

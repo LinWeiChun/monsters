@@ -380,3 +380,19 @@
 2026-07-06,11:16,TASK-028,Documentation,docs/TASKS.md,修改,標記 Phase 2 規格一致性檢查與更改頭貼 API DONE,Codex,否,否,否,否,完成 TODO 到 IN PROGRESS 到 REVIEW 到 DONE 的既有流程收斂
 2026-07-06,11:16,TASK-028,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-028 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-06,11:16,TASK-028,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-028 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-09,14:40,TASK-029,Backend,backend/src/main/java/com/monsters/user/dto/PasswordLockRequest.java,新增,新增密碼鎖 Request DTO 與 4 位數驗證,Codex,是,否,否,否,
+2026-07-09,14:40,TASK-029,Backend,backend/src/main/java/com/monsters/user/dto/PasswordLockStatusResponse.java,新增,新增密碼鎖狀態 Response DTO,Codex,是,否,否,否,
+2026-07-09,14:40,TASK-029,Backend,backend/src/main/java/com/monsters/user/dto/PasswordLockVerificationResponse.java,新增,新增密碼鎖驗證 Response DTO,Codex,是,否,否,否,
+2026-07-09,14:40,TASK-029,Backend,backend/src/main/java/com/monsters/user/entity/UserPasswordLock.java,新增,新增使用者密碼鎖 Entity,Codex,是,是,否,否,對應既有 user_password_locks schema
+2026-07-09,14:40,TASK-029,Backend,backend/src/main/java/com/monsters/user/repository/UserPasswordLockRepository.java,新增,新增使用者密碼鎖 Repository,Codex,否,是,否,否,
+2026-07-09,14:40,TASK-029,Backend,backend/src/main/java/com/monsters/user/controller/UserController.java,修改,新增密碼鎖設定與驗證 endpoints,Codex,是,否,否,否,
+2026-07-09,14:40,TASK-029,Backend,backend/src/main/java/com/monsters/user/service/UserService.java,修改,新增密碼鎖 BCrypt hash 儲存與驗證流程,Codex,是,是,否,否,不保存或記錄明文密碼鎖
+2026-07-09,14:40,TASK-029,Test,backend/src/test/java/com/monsters/MonstersApplicationTests.java,修改,補上 UserPasswordLockRepository context mock,Codex,否,否,否,否,
+2026-07-09,14:40,TASK-029,Test,backend/src/test/java/com/monsters/user/controller/UserControllerTest.java,修改,新增密碼鎖 Controller 測試,Codex,否,否,否,否,
+2026-07-09,14:40,TASK-029,Test,backend/src/test/java/com/monsters/user/service/UserServiceTest.java,修改,新增密碼鎖 Service 測試,Codex,是,是,否,否,
+2026-07-09,14:40,TASK-029,Documentation,docs/API_SPEC.md,修改,補充密碼鎖 API request response 與規則,Codex,是,否,否,否,
+2026-07-09,14:40,TASK-029,Documentation,docs/DATABASE_SPEC.md,修改,補充密碼鎖 API Database Mapping,Codex,否,是,否,否,無 schema 異動
+2026-07-09,14:40,TASK-029,Documentation,backend/README.md,修改,補充密碼鎖 API 使用說明,Codex,否,否,否,否,
+2026-07-09,14:40,TASK-029,Documentation,docs/TASKS.md,修改,密碼鎖 API Task DONE,Codex,否,否,否,否,完成 TODO 到 IN PROGRESS 到 REVIEW 到 DONE
+2026-07-09,14:40,TASK-029,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-029 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-09,14:40,TASK-029,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-029 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log

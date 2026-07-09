@@ -65,7 +65,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] 查詢個人資料 API（DONE）
 - [x] 修改個人資料 API（DONE）
 - [x] 更改頭貼 API（DONE）
-- [ ] 密碼鎖 API
+- [x] 密碼鎖 API（DONE）
 - [ ] Flutter 登入頁
 - [ ] Flutter 註冊頁
 - [ ] Flutter 個人資料頁

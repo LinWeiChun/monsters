@@ -5,6 +5,9 @@ import static org.mockito.Mockito.when;
 
 import com.monsters.common.dto.ApiResponse;
 import com.monsters.common.security.AuthenticatedUser;
+import com.monsters.user.dto.PasswordLockRequest;
+import com.monsters.user.dto.PasswordLockStatusResponse;
+import com.monsters.user.dto.PasswordLockVerificationResponse;
 import com.monsters.user.dto.UpdateUserProfileRequest;
 import com.monsters.user.dto.UserProfileResponse;
 import com.monsters.user.service.UserService;
@@ -104,5 +107,43 @@ class UserControllerTest {
         assertThat(response.getBody().success()).isTrue();
         assertThat(response.getBody().message()).isEqualTo("Avatar update success");
         assertThat(response.getBody().data()).isEqualTo(profile);
+    }
+
+    @Test
+    void setPasswordLockShouldReturnEnabledStatus() {
+        UserController controller = new UserController(userService);
+        PasswordLockRequest request = new PasswordLockRequest("1234");
+        PasswordLockStatusResponse status = new PasswordLockStatusResponse(true);
+        when(userService.setPasswordLock(1L, request)).thenReturn(status);
+
+        ResponseEntity<ApiResponse<PasswordLockStatusResponse>> response = controller.setPasswordLock(
+                new AuthenticatedUser(1L, "user@example.com"),
+                request
+        );
+
+        assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isTrue();
+        assertThat(response.getBody().message()).isEqualTo("Password lock update success");
+        assertThat(response.getBody().data()).isEqualTo(status);
+    }
+
+    @Test
+    void verifyPasswordLockShouldReturnVerificationResult() {
+        UserController controller = new UserController(userService);
+        PasswordLockRequest request = new PasswordLockRequest("1234");
+        PasswordLockVerificationResponse verification = new PasswordLockVerificationResponse(true);
+        when(userService.verifyPasswordLock(1L, request)).thenReturn(verification);
+
+        ResponseEntity<ApiResponse<PasswordLockVerificationResponse>> response = controller.verifyPasswordLock(
+                new AuthenticatedUser(1L, "user@example.com"),
+                request
+        );
+
+        assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isTrue();
+        assertThat(response.getBody().message()).isEqualTo("Password lock verify success");
+        assertThat(response.getBody().data()).isEqualTo(verification);
     }
 }

@@ -8,6 +8,81 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-09 14:40
+
+Task
+TASK-029 密碼鎖 API
+
+Agent
+Codex
+
+### Completed
+
+- Added password lock APIs for the authenticated current user.
+- Added `UserPasswordLock` entity and repository for existing `user_password_locks` schema.
+- Added request and response DTOs for password lock update and verification.
+- Stored password locks with BCrypt hash only; no raw lock password is persisted.
+- Added service and controller tests for create/update/verify/missing user/missing lock flows.
+- Updated API spec, database mapping, backend README, task, and log documents.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/user/dto/PasswordLockRequest.java`
+- `backend/src/main/java/com/monsters/user/dto/PasswordLockStatusResponse.java`
+- `backend/src/main/java/com/monsters/user/dto/PasswordLockVerificationResponse.java`
+- `backend/src/main/java/com/monsters/user/entity/UserPasswordLock.java`
+- `backend/src/main/java/com/monsters/user/repository/UserPasswordLockRepository.java`
+
+### Modified
+
+- `backend/README.md`
+- `backend/src/main/java/com/monsters/user/controller/UserController.java`
+- `backend/src/main/java/com/monsters/user/service/UserService.java`
+- `backend/src/test/java/com/monsters/MonstersApplicationTests.java`
+- `backend/src/test/java/com/monsters/user/controller/UserControllerTest.java`
+- `backend/src/test/java/com/monsters/user/service/UserServiceTest.java`
+- `docs/API_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None. The existing `database/init/01_schema.sql` already contains `user_password_locks`.
+
+### API
+
+- Added `PUT /api/users/me/password-lock`.
+- Added `POST /api/users/me/password-lock/verify`.
+
+### Database
+
+- No schema change. Password lock API uses existing `user_password_locks`.
+
+### Tests
+
+- `$env:JAVA_HOME='C:\Program Files\Java\jdk-18.0.2'; $env:Path="$env:JAVA_HOME\bin;$env:Path"; .\gradlew.bat test`
+- `$env:JAVA_HOME='C:\Program Files\Java\jdk-18.0.2'; $env:Path="$env:JAVA_HOME\bin;$env:Path"; .\gradlew.bat build`
+- `git diff --check`
+
+### Commit Message
+
+```text
+feat(user): 建立密碼鎖 API
+```
+
+### Notes
+
+- The old system stored a 4-digit lock value in user profile data and frontend local state. The new implementation stores only a backend BCrypt hash and verifies by authenticated user id.
+
+---
+
 ## 2026-07-06 11:16
 
 Task
