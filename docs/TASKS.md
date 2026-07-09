@@ -67,10 +67,10 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] 更改頭貼 API（DONE）
 - [x] 密碼鎖 API（DONE）
 - [x] Flutter 登入頁（DONE）
-- [ ] Flutter 註冊頁（REVIEW：本地實作、測試、analyze 與 commit 完成；待 GitHub push）
-- [ ] Flutter 個人資料頁（REVIEW：本地實作、測試與 analyze 完成；待 GitHub push）
-- [ ] Flutter 密碼鎖頁（REVIEW：本地實作、測試與 analyze 完成；待 GitHub push）
-- [ ] 測試
+- [x] Flutter 註冊頁（DONE）
+- [x] Flutter 個人資料頁（DONE）
+- [x] Flutter 密碼鎖頁（DONE）
+- [ ] 測試（REVIEW：Phase 2 後端測試、前端測試與 Web / Android / iOS build 驗證完成；待 GitHub push）
 
 ---
 
