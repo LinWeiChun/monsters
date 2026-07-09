@@ -8,6 +8,84 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-09 14:59
+
+Task
+TASK-030 Flutter 登入頁
+
+Agent
+Codex
+
+### Completed
+
+- Replaced the placeholder Flutter login route with a complete Email / password login form.
+- Added Auth Repository and Riverpod Auth Controller flow using the existing `ApiClient`.
+- Added login response models for the current Auth API response shape using `json_serializable`.
+- Added loading, validation, API error, register navigation, forgot-password hint, and Google-login pending states.
+- Kept JWT out of SharedPreferences; access token is applied only to the current `ApiClient` runtime header.
+- Added login page widget tests and updated router / app tests for the new login UI.
+- Updated UI spec, frontend README, task, and log documents.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `frontend/lib/models/auth_user.dart`
+- `frontend/lib/models/auth_user.g.dart`
+- `frontend/lib/models/login_result.dart`
+- `frontend/lib/models/login_result.g.dart`
+- `frontend/lib/providers/auth_provider.dart`
+- `frontend/lib/repositories/auth_repository.dart`
+- `frontend/test/login_page_test.dart`
+
+### Modified
+
+- `frontend/README.md`
+- `frontend/pubspec.yaml`
+- `frontend/pubspec.lock`
+- `frontend/lib/pages/login_page.dart`
+- `frontend/test/routes/app_router_test.dart`
+- `frontend/test/widget_test.dart`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- No backend endpoint change. Frontend now calls existing `POST /api/auth/login`.
+
+### Database
+
+- None
+
+### Tests
+
+- `flutter pub add json_annotation dev:build_runner dev:json_serializable`
+- `dart run build_runner build --delete-conflicting-outputs`
+- `dart format lib test`
+- `flutter test`
+- `flutter analyze`
+
+### Commit Message
+
+```text
+feat(frontend): 建立登入頁
+```
+
+### Notes
+
+- Google login UI entry is present, but Google Sign-In SDK is not introduced in this task to avoid adding an unapproved dependency. It shows a pending message until the dedicated Google Sign-In frontend task is defined.
+
+---
+
 ## 2026-07-09 14:40
 
 Task
@@ -1286,8 +1364,6 @@ Codex
 
 - `frontend/lib/main.dart`
 - `frontend/test/widget_test.dart`
-- `frontend/pubspec.yaml`
-- `frontend/pubspec.lock`
 - `frontend/README.md`
 - `docs/UI_SPEC.md`
 - `docs/TASKS.md`
@@ -1424,8 +1500,6 @@ Codex
 
 ### 修改
 
-- `frontend/pubspec.yaml`
-- `frontend/pubspec.lock`
 - `frontend/README.md`
 - `docs/API_SPEC.md`
 - `docs/TASKS.md`

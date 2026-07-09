@@ -396,3 +396,20 @@
 2026-07-09,14:40,TASK-029,Documentation,docs/TASKS.md,修改,密碼鎖 API Task DONE,Codex,否,否,否,否,完成 TODO 到 IN PROGRESS 到 REVIEW 到 DONE
 2026-07-09,14:40,TASK-029,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-029 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-09,14:40,TASK-029,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-029 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-09,14:59,TASK-030,Frontend,frontend/lib/models/auth_user.dart,新增,新增登入使用者模型,Codex,是,否,否,否,對應 Auth API user response
+2026-07-09,14:59,TASK-030,Frontend,frontend/lib/models/login_result.dart,新增,新增登入結果模型,Codex,是,否,否,否,對應 Auth API login data
+2026-07-09,14:59,TASK-030,Frontend,frontend/lib/providers/auth_provider.dart,新增,新增 Riverpod Auth Controller 與登入狀態,Codex,是,否,是,否,不將 JWT 寫入 SharedPreferences
+2026-07-09,14:59,TASK-030,Frontend,frontend/lib/repositories/auth_repository.dart,新增,新增 AuthRepository 呼叫登入 API,Codex,是,否,否,否,使用既有 ApiClient
+2026-07-09,14:59,TASK-030,Frontend,frontend/lib/pages/login_page.dart,修改,建立 Email 密碼登入頁 UI 與狀態處理,Codex,是,否,是,否,Google 登入入口保留但暫不導入 SDK
+2026-07-09,14:59,TASK-030,Test,frontend/test/login_page_test.dart,新增,新增登入頁 widget 測試,Codex,否,否,是,否,涵蓋表單 驗證 成功導頁 錯誤顯示
+2026-07-09,14:59,TASK-030,Test,frontend/test/routes/app_router_test.dart,修改,更新登入頁路由測試 ProviderScope 包裝,Codex,否,否,是,否,登入頁使用 Riverpod
+2026-07-09,14:59,TASK-030,Test,frontend/test/widget_test.dart,修改,更新 splash 前往登入頁測試期望,Codex,否,否,是,否,登入頁不再是 placeholder
+2026-07-09,14:59,TASK-030,Documentation,docs/UI_SPEC.md,修改,補充 Flutter Login Page 實作規範,Codex,否,否,是,否,文件同步
+2026-07-09,14:59,TASK-030,Documentation,frontend/README.md,修改,補充 Auth 前端結構與 token 暫存說明,Codex,否,否,否,否,文件同步
+2026-07-09,14:59,TASK-030,Documentation,docs/TASKS.md,修改,Flutter 登入頁 Task DONE,Codex,否,否,否,否,完成 TODO 到 IN PROGRESS 到 REVIEW 到 DONE
+2026-07-09,14:59,TASK-030,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-030 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-09,14:59,TASK-030,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-030 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-09,14:59,TASK-030,Frontend,frontend/lib/models/auth_user.g.dart,新增,新增登入使用者模型 JSON 產生檔,Codex,是,否,否,否,json_serializable 產物
+2026-07-09,14:59,TASK-030,Frontend,frontend/lib/models/login_result.g.dart,新增,新增登入結果模型 JSON 產生檔,Codex,是,否,否,否,json_serializable 產物
+2026-07-09,14:59,TASK-030,Frontend,frontend/pubspec.yaml,修改,加入已核准 json_serializable 工具鏈,Codex,否,否,否,否,符合 CODING_STANDARD Flutter JSON 規範
+2026-07-09,14:59,TASK-030,Frontend,frontend/pubspec.lock,修改,更新 Flutter dependency lock,Codex,否,否,否,否,flutter pub add 產生

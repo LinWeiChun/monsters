@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:monsters/routes/app_router.dart';
 import 'package:monsters/routes/app_routes.dart';
 
 void main() {
   testWidgets('supports home initial route', (tester) async {
     await tester.pumpWidget(
-      MaterialApp.router(
-        routerConfig: createAppRouter(initialLocation: AppPath.home),
+      ProviderScope(
+        child: MaterialApp.router(
+          routerConfig: createAppRouter(initialLocation: AppPath.home),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -17,8 +20,10 @@ void main() {
 
   testWidgets('register route can navigate to login route', (tester) async {
     await tester.pumpWidget(
-      MaterialApp.router(
-        routerConfig: createAppRouter(initialLocation: AppPath.register),
+      ProviderScope(
+        child: MaterialApp.router(
+          routerConfig: createAppRouter(initialLocation: AppPath.register),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -26,6 +31,6 @@ void main() {
     await tester.tap(find.text('已有帳號'));
     await tester.pumpAndSettle();
 
-    expect(find.text('前往首頁'), findsOneWidget);
+    expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
   });
 }
