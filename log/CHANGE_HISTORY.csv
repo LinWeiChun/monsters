@@ -425,3 +425,12 @@
 2026-07-09,20:20,TASK-031,Documentation,docs/TASKS.md,修改,Flutter 註冊頁 Task REVIEW,Codex,否,否,否,否,本地實作測試 analyze 與 commit 完成；待 GitHub push
 2026-07-09,20:20,TASK-031,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-031 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log；遠端 push 被安全審核拒絕
 2026-07-09,20:20,TASK-031,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-031 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-09,20:29,TASK-031,Frontend,frontend/android/app/src/main/AndroidManifest.xml,修改,補齊 Android app label,Codex,否,否,是,否,三平台 metadata 補齊
+2026-07-09,20:29,TASK-031,Frontend,frontend/ios/Runner/Info.plist,修改,補齊 iOS display name,Codex,否,否,是,否,三平台 metadata 補齊
+2026-07-09,20:29,TASK-031,Frontend,frontend/web/index.html,修改,補齊 Web title 與 description,Codex,否,否,是,否,三平台 metadata 補齊
+2026-07-09,20:29,TASK-031,Frontend,frontend/web/manifest.json,修改,補齊 Web manifest name 與 description,Codex,否,否,是,否,三平台 metadata 補齊
+2026-07-09,20:29,TASK-031,Documentation,docs/UI_SPEC.md,修改,補充後續前端任務三平台預設規範,Codex,否,否,是,否,
+2026-07-09,20:29,TASK-031,Documentation,frontend/README.md,修改,補充前端三平台支援說明,Codex,否,否,否,否,
+2026-07-09,20:29,TASK-031,Test,frontend,檢查,執行 Flutter analyze 與 Web Android iOS build 驗證,Codex,否,否,是,否,Web 與 Android 通過；iOS 因本機 Xcode 缺少 iOS 26.2 platform 阻擋
+2026-07-09,20:29,TASK-031,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-031 三平台補齊紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-09,20:29,TASK-031,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-031 三平台補齊 history,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log

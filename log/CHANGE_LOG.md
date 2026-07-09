@@ -8,6 +8,72 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-09 20:29
+
+Task
+TASK-031 Flutter 註冊頁三平台補齊
+
+Agent
+Codex
+
+### Completed
+
+- Confirmed the Flutter app already has Web, Android, and iOS platform project folders.
+- Confirmed current Flutter pages are implemented in shared `frontend/lib/` code and therefore target Web, Android, and iOS together.
+- Updated Android, iOS, and Web app metadata from Flutter defaults to `貘nsters`.
+- Updated UI spec and frontend README to make Web / Android / iOS support the default expectation for future frontend tasks.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `frontend/android/app/src/main/AndroidManifest.xml`
+- `frontend/ios/Runner/Info.plist`
+- `frontend/web/index.html`
+- `frontend/web/manifest.json`
+- `docs/UI_SPEC.md`
+- `frontend/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- None
+
+### Database
+
+- None
+
+### Tests
+
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build web --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build apk --debug --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --no-codesign --no-pub`（blocked：local Xcode is missing iOS 26.2 platform）
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --simulator --no-pub`（blocked：local Xcode is missing iOS 26.2 platform）
+
+### Commit Message
+
+```text
+chore(frontend): 補齊三平台 metadata
+```
+
+### Notes
+
+- Future frontend tasks must be implemented as cross-platform Flutter code by default, with platform-specific handling documented when needed.
+- Web and Android builds passed. iOS build is blocked by local Xcode platform installation, not by a Dart or Flutter compile error.
+
 ## 2026-07-09 20:20
 
 Task
