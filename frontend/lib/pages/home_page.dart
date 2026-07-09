@@ -25,6 +25,13 @@ class HomePage extends StatelessWidget {
                 icon: const Icon(Icons.person_outline),
                 label: const Text('個人資料'),
               ),
+              const SizedBox(height: AppSpacing.md),
+              OutlinedButton.icon(
+                key: const Key('homePasswordLockButton'),
+                onPressed: () => context.goNamed(AppRoute.passwordLock),
+                icon: const Icon(Icons.lock_outline),
+                label: const Text('密碼鎖'),
+              ),
             ],
           ),
         ),
