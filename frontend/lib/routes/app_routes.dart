@@ -6,6 +6,7 @@ class AppRoute {
   static const login = 'login';
   static const register = 'register';
   static const profile = 'profile';
+  static const passwordLock = 'passwordLock';
 }
 
 class AppPath {
@@ -16,4 +17,5 @@ class AppPath {
   static const login = '/login';
   static const register = '/register';
   static const profile = '/profile';
+  static const passwordLock = '/password-lock';
 }

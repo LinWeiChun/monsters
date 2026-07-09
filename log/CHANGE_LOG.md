@@ -8,6 +8,86 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-10 07:16
+
+Task
+TASK-034 Flutter 密碼鎖頁（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Added shared Flutter password lock page for Web, Android, and iOS.
+- Added password lock status and verification models.
+- Added `UserRepository` calls for `PUT /api/users/me/password-lock` and `POST /api/users/me/password-lock/verify`.
+- Added Riverpod password lock controller for setting and verifying lock password.
+- Added `/password-lock` route and home-page entry action.
+- Added widget tests for required validation, mismatch validation, successful set, successful verify, failed verify, and home navigation.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `frontend/lib/models/password_lock_status.dart`
+- `frontend/lib/models/password_lock_status.g.dart`
+- `frontend/lib/models/password_lock_verification.dart`
+- `frontend/lib/models/password_lock_verification.g.dart`
+- `frontend/lib/pages/password_lock_page.dart`
+- `frontend/lib/providers/password_lock_provider.dart`
+- `frontend/test/password_lock_page_test.dart`
+
+### Modified
+
+- `frontend/lib/repositories/user_repository.dart`
+- `frontend/lib/pages/home_page.dart`
+- `frontend/lib/routes/app_router.dart`
+- `frontend/lib/routes/app_routes.dart`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `frontend/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- Uses existing `PUT /api/users/me/password-lock`.
+- Uses existing `POST /api/users/me/password-lock/verify`.
+
+### Database
+
+- None
+
+### Tests
+
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub test/password_lock_page_test.dart`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build web --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build apk --debug --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --no-codesign --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --simulator --no-pub`
+
+### Commit Message
+
+```text
+feat(frontend): 新增密碼鎖頁
+```
+
+### Notes
+
+- `system_data/` reference: checked old `setting_lock_page.dart`, `check_lock_page.dart`, `lock_page.dart`, `lock_widget.dart`, and member repository lock-related methods.
+- Reused the set / confirm / verify interaction flow only.
+- Not reused: old SharedPreferences PIN storage, local lock state, `Navigator` routing, direct old repository calls, and hard-coded page colors.
+- Forgot password lock flow is not implemented in this task because no formal API is defined yet.
+
 ## 2026-07-10 07:07
 
 Task

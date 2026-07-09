@@ -78,6 +78,17 @@ UI 不得直接呼叫 Dio，後續功能需透過 Provider / Repository 使用 `
 - `lib/models/user_profile.g.dart`
 
 個人資料流程使用 `UserRepository` 呼叫 `GET /api/users/me` 與 `PUT /api/users/me`，由後端依目前 Authorization token 判斷使用者；前端不傳入 user id 或 account。頁面支援載入、錯誤重試、暱稱與生日編輯、儲存成功提示。頭貼目前支援顯示 `avatarUrl`，三平台檔案選取與上傳會於更改頭貼 UI Task 定案後補齊。
+## Password Lock
+
+密碼鎖頁與資料流：
+
+- `lib/pages/password_lock_page.dart`
+- `lib/providers/password_lock_provider.dart`
+- `lib/repositories/user_repository.dart`
+- `lib/models/password_lock_status.dart`
+- `lib/models/password_lock_verification.dart`
+
+密碼鎖流程使用 `UserRepository` 呼叫 `PUT /api/users/me/password-lock` 與 `POST /api/users/me/password-lock/verify`。前端只做 4 位數字格式檢查與設定確認，不保存密碼鎖明文，也不使用 SharedPreferences 保存密碼鎖狀態。忘記密碼鎖流程需待正式 API 定案後補齊。
 ## Routing
 
 前端路由統一使用 go_router：
@@ -97,6 +108,7 @@ App 入口使用 `MaterialApp.router`，路由由 `appRouterProvider` 提供。
 | `/login` | `login` | `LoginPage` |
 | `/register` | `register` | `RegisterPage` |
 | `/profile` | `profile` | `ProfilePage` |
+| `/password-lock` | `passwordLock` | `PasswordLockPage` |
 
 UI 不得直接使用 `Navigator.push`，頁面切換應透過 `context.goNamed()` 或集中路由設定。
 ## Theme

@@ -425,6 +425,55 @@ REST API
 - `userName` 必填，最大長度 80。
 - `birthday` 可為空；若填寫，格式需為 `yyyy-MM-dd`。
 - 頭貼上傳涉及三平台檔案選取流程，需於後續更改頭貼 UI Task 定案檔案選取方案後實作。
+## Flutter Password Lock Page 實作規範
+
+密碼鎖頁位置：
+
+- `frontend/lib/pages/password_lock_page.dart`
+
+密碼鎖頁支援：
+
+- 設定或更改四位數密碼鎖
+- 呼叫 `PUT /api/users/me/password-lock`
+- 驗證四位數密碼鎖
+- 呼叫 `POST /api/users/me/password-lock/verify`
+- 前端 4 位數字格式驗證
+- 設定時需再次輸入確認
+- Loading 狀態
+- API 錯誤訊息呈現
+- 設定成功與驗證成功提示
+- 從首頁進入密碼鎖頁
+
+密碼鎖頁資料流程：
+
+```text
+PasswordLockPage
+↓
+PasswordLockController
+↓
+UserRepository
+↓
+ApiClient
+↓
+REST API
+```
+
+實作檔案：
+
+| 類型 | 檔案 |
+|---|---|
+| Page | `frontend/lib/pages/password_lock_page.dart` |
+| Provider | `frontend/lib/providers/password_lock_provider.dart` |
+| Repository | `frontend/lib/repositories/user_repository.dart` |
+| Model | `frontend/lib/models/password_lock_status.dart`、`frontend/lib/models/password_lock_verification.dart` |
+
+規則：
+
+- 密碼鎖頁不得直接呼叫 Dio。
+- 密碼鎖頁不得由前端傳入 user id 或 account。
+- 密碼鎖固定為 4 位數字。
+- 密碼鎖不得保存於 SharedPreferences 或其他前端本地儲存。
+- 忘記密碼鎖流程尚未有正式 API，需於後續 API 定案後實作。
 ## Flutter Router 基礎規範
 
 前端路由統一使用 go_router，入口必須使用 `MaterialApp.router`。
@@ -443,6 +492,7 @@ REST API
 | `/login` | `login` | `LoginPage` | 登入頁容器 |
 | `/register` | `register` | `RegisterPage` | 註冊頁容器 |
 | `/profile` | `profile` | `ProfilePage` | 個人資料頁容器 |
+| `/password-lock` | `passwordLock` | `PasswordLockPage` | 密碼鎖頁容器 |
 
 頁面不得直接使用 `Navigator.push`。頁面切換應使用 go_router 的 `context.goNamed()` 或集中路由設定。
 ## Flutter Theme 基礎規範

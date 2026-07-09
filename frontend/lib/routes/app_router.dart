@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../pages/home_page.dart';
 import '../pages/login_page.dart';
+import '../pages/password_lock_page.dart';
 import '../pages/profile_page.dart';
 import '../pages/register_page.dart';
 import '../pages/splash_page.dart';
@@ -40,6 +41,11 @@ GoRouter createAppRouter({String initialLocation = AppPath.splash}) {
         path: AppPath.profile,
         name: AppRoute.profile,
         builder: (context, state) => const ProfilePage(),
+      ),
+      GoRoute(
+        path: AppPath.passwordLock,
+        name: AppRoute.passwordLock,
+        builder: (context, state) => const PasswordLockPage(),
       ),
     ],
   );
