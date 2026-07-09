@@ -75,6 +75,14 @@ JWT 基礎環境變數：
 | `JWT_ACCESS_TOKEN_EXPIRATION_SECONDS` | `3600` |
 | `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` | `1209600` |
 
+Google 登入環境變數：
+
+| 環境變數 | 預設值 |
+|----------|--------|
+| `GOOGLE_CLIENT_IDS` | 空字串，啟用 Google 登入前必須提供 |
+
+`GOOGLE_CLIENT_IDS` 可用逗號設定多組 Web / Android / iOS Client ID。後端會以此檢查 Google ID Token 的 `aud`。
+
 ## 專案規範
 
 後端開發需遵守：
@@ -115,3 +123,329 @@ Response:
 ```
 
 The register flow creates `users` and `user_credentials` records. Passwords are stored only as BCrypt hashes.
+
+### Login
+
+`POST /api/auth/login`
+
+Request:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Login success",
+  "data": {
+    "accessToken": "jwt_access_token",
+    "refreshToken": "jwt_refresh_token",
+    "tokenType": "Bearer",
+    "expiresIn": 3600,
+    "user": {
+      "userId": 1,
+      "email": "user@example.com",
+      "userName": "Wei",
+      "avatarUrl": null
+    }
+  }
+}
+```
+
+Login normalizes email before lookup, verifies the stored BCrypt password hash, and returns JWT access and refresh tokens. `JWT_SECRET` must be configured before login can issue tokens.
+
+### Google Login
+
+`POST /api/auth/google-login`
+
+Request:
+
+```json
+{
+  "idToken": "google_id_token"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Google login success",
+  "data": {
+    "accessToken": "jwt_access_token",
+    "refreshToken": "jwt_refresh_token",
+    "tokenType": "Bearer",
+    "expiresIn": 3600,
+    "user": {
+      "userId": 1,
+      "email": "user@example.com",
+      "userName": "Wei",
+      "avatarUrl": null
+    }
+  }
+}
+```
+
+Google login verifies the ID token on the backend with Google's signing keys, checks issuer, audience, expiration, and verified email, then links or creates a local user through `user_oauth_accounts`. `JWT_SECRET` and `GOOGLE_CLIENT_IDS` must be configured before Google login can issue tokens.
+
+### Forgot Password
+
+`POST /api/auth/forgot-password`
+
+Request:
+
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Password reset token issued",
+  "data": {
+    "resetToken": "password_reset_token",
+    "expiresIn": 900
+  }
+}
+```
+
+The forgot password flow normalizes email, creates a 15-minute one-time reset token for existing active users, stores only the token hash in `password_reset_tokens`, and invalidates previous unused tokens for the same user. Unknown emails still return 200 with a null `resetToken`.
+
+### Reset Password
+
+`POST /api/auth/reset-password`
+
+Request:
+
+```json
+{
+  "resetToken": "password_reset_token",
+  "newPassword": "password123"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Password reset success",
+  "data": null
+}
+```
+
+Reset password hashes the submitted token before lookup, rejects invalid, expired, used, or deleted-user tokens, stores the new password as a BCrypt hash, and marks the reset token as used.
+
+### Logout
+
+`POST /api/auth/logout`
+
+Header:
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Logout success",
+  "data": null
+}
+```
+
+Logout verifies the access token and stores only its SHA-256 hash in `revoked_tokens` until the original token expiration. JWT authentication rejects revoked tokens for protected APIs.
+
+## User API
+
+### Get My Profile
+
+`GET /api/users/me`
+
+Header:
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Profile query success",
+  "data": {
+    "userId": 1,
+    "account": "old-account",
+    "email": "user@example.com",
+    "userName": "Wei",
+    "birthday": "2000-01-02",
+    "avatarUrl": "https://example.com/avatar.png"
+  }
+}
+```
+
+The profile query uses the authenticated JWT principal and reads the current undeleted `users` record. The client does not submit user id or account for this API.
+
+### Update My Profile
+
+`PUT /api/users/me`
+
+Header:
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Request:
+
+```json
+{
+  "userName": "Lin",
+  "birthday": "2001-03-04"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Profile update success",
+  "data": {
+    "userId": 1,
+    "account": "old-account",
+    "email": "user@example.com",
+    "userName": "Lin",
+    "birthday": "2001-03-04",
+    "avatarUrl": "https://example.com/avatar.png"
+  }
+}
+```
+
+The profile update uses the authenticated JWT principal and updates only `userName` and `birthday`. Avatar, account, email, and password lock changes use separate flows.
+
+### Update My Avatar
+
+`PUT /api/users/me/avatar`
+
+Header:
+
+```text
+Authorization: Bearer <access_token>
+Content-Type: multipart/form-data
+```
+
+Form data:
+
+| Field | Type | Required |
+|---|---|---|
+| file | image/jpeg, image/png, image/webp | yes |
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Avatar update success",
+  "data": {
+    "userId": 1,
+    "account": "old-account",
+    "email": "user@example.com",
+    "userName": "Wei",
+    "birthday": "2000-01-02",
+    "avatarUrl": "https://cdn.example.com/users/avatars/1/avatar.png"
+  }
+}
+```
+
+Avatar upload stores the image in Cloudflare R2 and writes only the public URL to `users.avatar_url`.
+
+R2 settings:
+
+| Setting | Environment variable |
+|---|---|
+| app.storage.r2.account-id | R2_ACCOUNT_ID |
+| app.storage.r2.access-key-id | R2_ACCESS_KEY_ID |
+| app.storage.r2.secret-access-key | R2_SECRET_ACCESS_KEY |
+| app.storage.r2.bucket | R2_BUCKET |
+| app.storage.r2.public-base-url | R2_PUBLIC_BASE_URL |
+| app.storage.r2.avatar-key-prefix | R2_AVATAR_KEY_PREFIX |
+| app.storage.r2.max-avatar-size-bytes | R2_MAX_AVATAR_SIZE_BYTES |
+
+### Set My Password Lock
+
+`PUT /api/users/me/password-lock`
+
+Header:
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Request:
+
+```json
+{
+  "lockPassword": "1234"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Password lock update success",
+  "data": {
+    "enabled": true
+  }
+}
+```
+
+The lock password must be exactly 4 digits. The backend stores only a BCrypt hash in `user_password_locks.lock_password_hash`.
+
+### Verify My Password Lock
+
+`POST /api/users/me/password-lock/verify`
+
+Header:
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Request:
+
+```json
+{
+  "lockPassword": "1234"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Password lock verify success",
+  "data": {
+    "verified": true
+  }
+}
+```
+
+Wrong lock passwords return `verified: false`; missing or disabled password locks return 404.

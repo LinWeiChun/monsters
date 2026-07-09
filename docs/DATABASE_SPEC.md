@@ -99,6 +99,55 @@ Email / Password 登入憑證。
 | created_at | DATETIME | NOT NULL | 建立時間 |
 | updated_at | DATETIME | NOT NULL | 更新時間 |
 
+### 3.2.1 password_reset_tokens
+
+忘記密碼 reset token。
+
+| 欄位 | 型別 | 約束 | 說明 |
+|---|---|---|---|
+| id | BIGINT | PK | ID |
+| user_id | BIGINT | FK NOT NULL | 使用者 ID |
+| token_hash | VARCHAR(255) | UNIQUE NOT NULL | reset token hash |
+| expires_at | DATETIME | NOT NULL | 過期時間 |
+| used_at | DATETIME | NULL | 使用時間，NULL 表示尚未使用 |
+| created_at | DATETIME | NOT NULL | 建立時間 |
+| updated_at | DATETIME | NOT NULL | 更新時間 |
+
+Index：
+
+- `user_id, used_at`
+- `expires_at`
+
+規則：
+
+- 不得保存 reset token 明文。
+- 同一使用者重新申請忘記密碼時，未使用的舊 token 需失效。
+- token 使用後必須寫入 `used_at`。
+- 過期、已使用或對應已刪除使用者的 token 不得重設密碼。
+
+### 3.2.2 revoked_tokens
+
+登出後撤銷的 JWT。
+
+| 欄位 | 型別 | 約束 | 說明 |
+|---|---|---|---|
+| id | BIGINT | PK | ID |
+| token_hash | VARCHAR(255) | UNIQUE NOT NULL | JWT hash |
+| expires_at | DATETIME | NOT NULL | 原 JWT 過期時間 |
+| created_at | DATETIME | NOT NULL | 建立時間 |
+| updated_at | DATETIME | NOT NULL | 更新時間 |
+
+Index：
+
+- `expires_at`
+
+規則：
+
+- 不得保存 JWT 明文。
+- 登出時保存 access token hash 與原 token 過期時間。
+- JWT 驗證流程必須拒絕存在於本表且尚未過期的 token。
+- 可定期刪除 `expires_at` 已過期的紀錄。
+
 ### 3.3 user_oauth_accounts
 
 第三方登入帳號。
@@ -113,6 +162,15 @@ Email / Password 登入憑證。
 | updated_at | DATETIME | NOT NULL | 更新時間 |
 
 Unique：`provider, provider_user_id`
+
+Google 登入規則：
+
+- Google provider 固定使用 `google`。
+- `provider_user_id` 必須保存 Google ID Token 的 `sub`，不得保存 ID Token 本體。
+- 首次 Google 登入時，若 email 尚未存在於未刪除的 `users`，需建立 `users` 與 `user_oauth_accounts`。
+- 首次 Google 登入時，若 email 已存在於未刪除的 `users`，需建立 `user_oauth_accounts` 並連結既有使用者。
+- 已連結的 Google 帳號登入時，需透過 `provider + provider_user_id` 查詢使用者。
+- 已刪除使用者不得透過既有 OAuth 帳號登入。
 
 ### 3.4 user_password_locks
 
@@ -570,3 +628,59 @@ Migration 應包含：
 | password | user_credentials | password_hash | Stored as BCrypt hash only |
 
 Register API must not store raw passwords, JWT values, or secrets in logs.
+
+## Login API Database Mapping
+
+`POST /api/auth/login` reads data from the normalized auth tables:
+
+| API Field | Table | Column | Note |
+|---|---|---|---|
+| email | users | email | Lowercase normalized before lookup; deleted users are rejected |
+| password | user_credentials | password_hash | Compared with BCrypt `PasswordEncoder.matches` |
+
+Login API returns JWT access and refresh tokens, but tokens must not be persisted or written to logs.
+
+## User API Database Mapping
+
+`GET /api/users/me` reads the authenticated user's normalized profile data:
+
+| API Field | Table | Column | Note |
+|---|---|---|---|
+| userId | users | id | Read from authenticated JWT principal, not from client input |
+| account | users | account | Kept for old-system compatibility and import only |
+| email | users | email | Read-only in this API |
+| userName | users | user_name | Display name |
+| birthday | users | birthday | Nullable profile field |
+| avatarUrl | users | avatar_url | Nullable public avatar URL |
+
+`PUT /api/users/me` updates only editable profile columns:
+
+| API Field | Table | Column | Note |
+|---|---|---|---|
+| userName | users | user_name | Required, max length 80, trimmed before persistence |
+| birthday | users | birthday | Nullable `DATE` value |
+
+`PUT /api/users/me/avatar` uploads the avatar file to Cloudflare R2 and updates only the public URL:
+
+| API Field | Table | Column | Note |
+|---|---|---|---|
+| file | users | avatar_url | File binary is not stored in MySQL; only the public R2 URL is persisted |
+
+User APIs must query or update only non-deleted users and must not accept `userId` or `account` from client input for the current-user profile flow.
+
+## Password Lock API Database Mapping
+
+`PUT /api/users/me/password-lock` creates or updates the authenticated user's password lock:
+
+| API Field | Table | Column | Note |
+|---|---|---|---|
+| lockPassword | user_password_locks | lock_password_hash | Stored as BCrypt hash only |
+| - | user_password_locks | enabled | Set to `true` when a lock is created or updated |
+
+`POST /api/users/me/password-lock/verify` reads the authenticated user's enabled password lock:
+
+| API Field | Table | Column | Note |
+|---|---|---|---|
+| lockPassword | user_password_locks | lock_password_hash | Compared with BCrypt `PasswordEncoder.matches` |
+
+Password Lock API must not store or log raw lock passwords. The client must not submit `userId` or `account`; the backend uses the authenticated JWT principal.

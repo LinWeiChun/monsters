@@ -8,6 +8,938 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-09 14:59
+
+Task
+TASK-030 Flutter 登入頁
+
+Agent
+Codex
+
+### Completed
+
+- Replaced the placeholder Flutter login route with a complete Email / password login form.
+- Added Auth Repository and Riverpod Auth Controller flow using the existing `ApiClient`.
+- Added login response models for the current Auth API response shape using `json_serializable`.
+- Added loading, validation, API error, register navigation, forgot-password hint, and Google-login pending states.
+- Kept JWT out of SharedPreferences; access token is applied only to the current `ApiClient` runtime header.
+- Added login page widget tests and updated router / app tests for the new login UI.
+- Updated UI spec, frontend README, task, and log documents.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `frontend/lib/models/auth_user.dart`
+- `frontend/lib/models/auth_user.g.dart`
+- `frontend/lib/models/login_result.dart`
+- `frontend/lib/models/login_result.g.dart`
+- `frontend/lib/providers/auth_provider.dart`
+- `frontend/lib/repositories/auth_repository.dart`
+- `frontend/test/login_page_test.dart`
+
+### Modified
+
+- `frontend/README.md`
+- `frontend/pubspec.yaml`
+- `frontend/pubspec.lock`
+- `frontend/lib/pages/login_page.dart`
+- `frontend/test/routes/app_router_test.dart`
+- `frontend/test/widget_test.dart`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- No backend endpoint change. Frontend now calls existing `POST /api/auth/login`.
+
+### Database
+
+- None
+
+### Tests
+
+- `flutter pub add json_annotation dev:build_runner dev:json_serializable`
+- `dart run build_runner build --delete-conflicting-outputs`
+- `dart format lib test`
+- `flutter test`
+- `flutter analyze`
+
+### Commit Message
+
+```text
+feat(frontend): 建立登入頁
+```
+
+### Notes
+
+- Google login UI entry is present, but Google Sign-In SDK is not introduced in this task to avoid adding an unapproved dependency. It shows a pending message until the dedicated Google Sign-In frontend task is defined.
+
+---
+
+## 2026-07-09 14:40
+
+Task
+TASK-029 密碼鎖 API
+
+Agent
+Codex
+
+### Completed
+
+- Added password lock APIs for the authenticated current user.
+- Added `UserPasswordLock` entity and repository for existing `user_password_locks` schema.
+- Added request and response DTOs for password lock update and verification.
+- Stored password locks with BCrypt hash only; no raw lock password is persisted.
+- Added service and controller tests for create/update/verify/missing user/missing lock flows.
+- Updated API spec, database mapping, backend README, task, and log documents.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/user/dto/PasswordLockRequest.java`
+- `backend/src/main/java/com/monsters/user/dto/PasswordLockStatusResponse.java`
+- `backend/src/main/java/com/monsters/user/dto/PasswordLockVerificationResponse.java`
+- `backend/src/main/java/com/monsters/user/entity/UserPasswordLock.java`
+- `backend/src/main/java/com/monsters/user/repository/UserPasswordLockRepository.java`
+
+### Modified
+
+- `backend/README.md`
+- `backend/src/main/java/com/monsters/user/controller/UserController.java`
+- `backend/src/main/java/com/monsters/user/service/UserService.java`
+- `backend/src/test/java/com/monsters/MonstersApplicationTests.java`
+- `backend/src/test/java/com/monsters/user/controller/UserControllerTest.java`
+- `backend/src/test/java/com/monsters/user/service/UserServiceTest.java`
+- `docs/API_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None. The existing `database/init/01_schema.sql` already contains `user_password_locks`.
+
+### API
+
+- Added `PUT /api/users/me/password-lock`.
+- Added `POST /api/users/me/password-lock/verify`.
+
+### Database
+
+- No schema change. Password lock API uses existing `user_password_locks`.
+
+### Tests
+
+- `$env:JAVA_HOME='C:\Program Files\Java\jdk-18.0.2'; $env:Path="$env:JAVA_HOME\bin;$env:Path"; .\gradlew.bat test`
+- `$env:JAVA_HOME='C:\Program Files\Java\jdk-18.0.2'; $env:Path="$env:JAVA_HOME\bin;$env:Path"; .\gradlew.bat build`
+- `git diff --check`
+
+### Commit Message
+
+```text
+feat(user): 建立密碼鎖 API
+```
+
+### Notes
+
+- The old system stored a 4-digit lock value in user profile data and frontend local state. The new implementation stores only a backend BCrypt hash and verifies by authenticated user id.
+
+---
+
+## 2026-07-06 11:16
+
+Task
+TASK-028 Phase 2 會員規格一致性檢查
+
+Agent
+Codex
+
+### Completed
+
+- Confirmed Phase 0 and Phase 1 tasks are complete.
+- Confirmed current Phase 2 member API implementation has reached avatar update and is present on remote `develop`.
+- Cross-checked implemented User APIs against `docs/API_SPEC.md`, `docs/DATABASE_SPEC.md`, `docs/CODING_STANDARD.md`, backend controller, service, R2 storage settings, and tests.
+- Added missing User API database mapping for profile query, profile update, and avatar update.
+- Updated `docs/TASKS.md` to mark the Phase 2 implementation alignment item as DONE.
+- Updated the stale avatar API REVIEW status to DONE because `origin/develop` already contains the avatar API commit.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `docs/DATABASE_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- No endpoint change. This task only verified and documented existing User APIs.
+
+### Database
+
+- No schema change. Added documentation mapping for existing `users` columns used by User APIs.
+
+### Tests
+
+- `$env:JAVA_HOME='C:\Program Files\Java\jdk-18.0.2'; $env:Path="$env:JAVA_HOME\bin;$env:Path"; .\gradlew.bat test`
+- `$env:JAVA_HOME='C:\Program Files\Java\jdk-18.0.2'; $env:Path="$env:JAVA_HOME\bin;$env:Path"; .\gradlew.bat build`
+- `git diff --check`
+
+### Commit Message
+
+```text
+docs(phase2): 同步會員規格狀態
+```
+
+### Notes
+
+- Next executable task after this alignment is `密碼鎖 API`.
+
+---
+
+## 2026-07-04 12:13
+
+Task
+TASK-027 更改頭貼 API（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Added `PUT /api/users/me/avatar`.
+- Added Cloudflare R2 S3-compatible storage settings and avatar storage service.
+- Added AWS SDK S3 dependency with user-approved package addition.
+- Added avatar file validation for required file, supported image MIME types, and file size.
+- Added user avatar update flow that uploads the file to R2 and stores only the public avatar URL.
+- Added controller, service, and storage tests.
+- Updated API spec, backend README, decision, task, and log documents.
+- Confirmed the previous `PUT /api/users/me` task is on remote `develop` and corrected its stale REVIEW status to DONE.
+- Completed local commit. Remote push remains blocked by external GitHub egress safety review.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/common/storage/AvatarStorageService.java`
+- `backend/src/main/java/com/monsters/common/storage/R2AvatarStorageService.java`
+- `backend/src/main/java/com/monsters/common/storage/R2Properties.java`
+- `backend/src/main/java/com/monsters/common/storage/R2StorageConfig.java`
+- `backend/src/test/java/com/monsters/common/storage/R2AvatarStorageServiceTest.java`
+
+### Modified
+
+- `backend/README.md`
+- `backend/build.gradle`
+- `backend/src/main/java/com/monsters/user/controller/UserController.java`
+- `backend/src/main/java/com/monsters/user/entity/User.java`
+- `backend/src/main/java/com/monsters/user/service/UserService.java`
+- `backend/src/main/resources/application.yml`
+- `backend/src/test/java/com/monsters/user/controller/UserControllerTest.java`
+- `backend/src/test/java/com/monsters/user/service/UserServiceTest.java`
+- `docs/API_SPEC.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- Added `PUT /api/users/me/avatar`.
+
+### Database
+
+- No schema change. Avatar update writes existing `users.avatar_url`.
+
+### Tests
+
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew test`
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew build`
+
+### Commit Message
+
+```text
+feat(user): 建立更改頭貼 API
+```
+
+### Notes
+
+- Task remains in REVIEW until remote push completes.
+- R2 credentials and bucket values must be provided through environment variables before using avatar upload in runtime.
+
+## 2026-07-04 12:01
+
+Task
+TASK-026 修改個人資料 API
+
+Agent
+Codex
+
+### Completed
+
+- Added `PUT /api/users/me`.
+- Added profile update request DTO with `userName` validation.
+- Added user profile update service logic using authenticated JWT principal user id.
+- Added controller and service tests for profile update success and missing user cases.
+- Updated API spec, backend README, task, and log documents.
+- Confirmed the previous `GET /api/users/me` task is on remote `develop` and corrected its stale REVIEW status to DONE.
+- Confirmed remote `develop` contains the profile update API commit and updated task state to DONE.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/user/dto/UpdateUserProfileRequest.java`
+
+### Modified
+
+- `backend/README.md`
+- `backend/src/main/java/com/monsters/user/controller/UserController.java`
+- `backend/src/main/java/com/monsters/user/entity/User.java`
+- `backend/src/main/java/com/monsters/user/service/UserService.java`
+- `backend/src/test/java/com/monsters/user/controller/UserControllerTest.java`
+- `backend/src/test/java/com/monsters/user/service/UserServiceTest.java`
+- `docs/API_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- Added `PUT /api/users/me`.
+
+### Database
+
+- No schema change. Profile update writes existing `users.user_name` and `users.birthday`.
+
+### Tests
+
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew test`
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew build`
+
+### Commit Message
+
+```text
+feat(user): 建立修改個人資料 API
+```
+
+### Notes
+
+- This API updates only `userName` and `birthday`; avatar, account, email, and password lock remain separate flows.
+
+## 2026-07-04 11:45
+
+Task
+TASK-024 登出 API
+
+Agent
+Codex
+
+### Completed
+
+- Added `POST /api/auth/logout`.
+- Added JWT access token verification for protected APIs.
+- Added revoked token persistence with token hash and original token expiration.
+- Added JWT authentication filter that rejects revoked tokens and invalid tokens.
+- Extended JWT service with access token verification and SHA-256 token hashing.
+- Added controller, service, JWT, and security tests.
+- Updated API, database, backend README, decision, task, schema, and log documents.
+- Confirmed remote `develop` contains the logout API commit and updated task state to DONE.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/auth/service/TokenRevocationService.java`
+- `backend/src/main/java/com/monsters/common/security/AuthenticatedUser.java`
+- `backend/src/main/java/com/monsters/common/security/JwtAuthenticationFilter.java`
+- `backend/src/main/java/com/monsters/common/security/JwtTokenPayload.java`
+- `backend/src/main/java/com/monsters/user/entity/RevokedToken.java`
+- `backend/src/main/java/com/monsters/user/repository/RevokedTokenRepository.java`
+- `backend/src/test/java/com/monsters/auth/service/TokenRevocationServiceTest.java`
+
+### Modified
+
+- `backend/README.md`
+- `backend/src/main/java/com/monsters/auth/controller/AuthController.java`
+- `backend/src/main/java/com/monsters/common/security/JwtTokenService.java`
+- `backend/src/main/java/com/monsters/common/security/SecurityConfig.java`
+- `backend/src/test/java/com/monsters/MonstersApplicationTests.java`
+- `backend/src/test/java/com/monsters/auth/controller/AuthControllerTest.java`
+- `backend/src/test/java/com/monsters/common/config/CorsConfigTest.java`
+- `backend/src/test/java/com/monsters/common/security/JwtTokenServiceTest.java`
+- `backend/src/test/java/com/monsters/common/security/SecurityConfigTest.java`
+- `database/init/01_schema.sql`
+- `docs/API_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- Added `revoked_tokens` to `database/init/01_schema.sql`.
+
+### API
+
+- Added `POST /api/auth/logout`.
+
+### Database
+
+- Added `revoked_tokens`.
+- JWT plaintext is not stored; only token hash is persisted.
+
+### Tests
+
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew test`
+
+### Commit Message
+
+```text
+feat(auth): 建立登出 API
+```
+
+### Notes
+
+- Logout uses JWT revocation, not only frontend token cleanup.
+
+## 2026-07-04 11:53
+
+Task
+TASK-025 查詢個人資料 API
+
+Agent
+Codex
+
+### Completed
+
+- Added `GET /api/users/me`.
+- Added user profile response DTO.
+- Added user service query by authenticated JWT principal user id.
+- Added user controller and service tests.
+- Updated API spec, backend README, task, and log documents.
+- Confirmed remote `develop` contains the profile query API commit and updated task state to DONE.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/user/controller/UserController.java`
+- `backend/src/main/java/com/monsters/user/dto/UserProfileResponse.java`
+- `backend/src/main/java/com/monsters/user/service/UserService.java`
+- `backend/src/test/java/com/monsters/user/controller/UserControllerTest.java`
+- `backend/src/test/java/com/monsters/user/service/UserServiceTest.java`
+
+### Modified
+
+- `backend/README.md`
+- `backend/src/main/java/com/monsters/user/repository/UserRepository.java`
+- `docs/API_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- Added `GET /api/users/me`.
+
+### Database
+
+- No schema change. Profile API reads existing `users` table.
+
+### Tests
+
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew test`
+
+### Commit Message
+
+```text
+feat(user): 建立查詢個人資料 API
+```
+
+### Notes
+
+- The API uses authenticated JWT principal data and does not accept user id or account from the client.
+
+## 2026-07-04 11:36
+
+Task
+TASK-023 整理 DECISIONS 決策狀態
+
+Agent
+Codex
+
+### Completed
+
+- Reviewed `docs/DECISIONS.md`.
+- Moved already-decided items from pending confirmation into the confirmed decision table.
+- Confirmed Cloudflare R2 as the file upload storage direction.
+- Confirmed SMTP as the formal email delivery direction for forgot password.
+- Confirmed Web admin backend is needed.
+- Clarified old database, old API, old Flutter UI, and old material reuse decisions.
+- Replaced the pending confirmation table with a pending-detail table for implementation details.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `docs/DECISIONS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- None
+
+### Database
+
+- None
+
+### Tests
+
+- `git diff --check`
+
+### Commit Message
+
+```text
+docs(decisions): 整理已定案事項
+```
+
+### Notes
+
+- R2 credentials, SMTP credentials, Web admin permission model, old API mapping, old UI mapping, and material inventory remain implementation details for later tasks.
+
+## 2026-07-04 11:21
+
+Task
+TASK-022 忘記密碼 API
+
+Agent
+Codex
+
+### Completed
+
+- Added `POST /api/auth/forgot-password`.
+- Added `POST /api/auth/reset-password`.
+- Added one-time password reset token generation with 15-minute expiration.
+- Stored only reset token hashes in `password_reset_tokens`.
+- Invalidated previous unused reset tokens when a new token is issued for the same user.
+- Added password reset flow to update existing credentials or create credentials for OAuth-only users after token verification.
+- Added controller, service, and token hashing tests.
+- Updated API, database, backend README, decision, task, schema, and log documents.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/auth/dto/ForgotPasswordRequest.java`
+- `backend/src/main/java/com/monsters/auth/dto/ForgotPasswordResponse.java`
+- `backend/src/main/java/com/monsters/auth/dto/ResetPasswordRequest.java`
+- `backend/src/main/java/com/monsters/common/security/PasswordResetTokenService.java`
+- `backend/src/main/java/com/monsters/user/entity/PasswordResetToken.java`
+- `backend/src/main/java/com/monsters/user/repository/PasswordResetTokenRepository.java`
+- `backend/src/test/java/com/monsters/common/security/PasswordResetTokenServiceTest.java`
+
+### Modified
+
+- `backend/README.md`
+- `backend/src/main/java/com/monsters/auth/controller/AuthController.java`
+- `backend/src/main/java/com/monsters/auth/service/AuthService.java`
+- `backend/src/main/java/com/monsters/user/entity/UserCredential.java`
+- `backend/src/test/java/com/monsters/MonstersApplicationTests.java`
+- `backend/src/test/java/com/monsters/auth/controller/AuthControllerTest.java`
+- `backend/src/test/java/com/monsters/auth/service/AuthServiceTest.java`
+- `database/init/01_schema.sql`
+- `docs/API_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- Added `password_reset_tokens` to `database/init/01_schema.sql`.
+
+### API
+
+- Added `POST /api/auth/forgot-password`.
+- Added `POST /api/auth/reset-password`.
+
+### Database
+
+- Added `password_reset_tokens`.
+- Reset token plaintext is not stored; only token hash is persisted.
+
+### Tests
+
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew test`
+
+### Commit Message
+
+```text
+feat(auth): 建立忘記密碼 API
+```
+
+### Notes
+
+- Current forgot-password response returns `resetToken` for development and frontend integration. Formal email delivery remains pending in `docs/DECISIONS.md`.
+
+## 2026-07-04 06:42
+
+Task
+TASK-021 Google 登入 API
+
+Agent
+Codex
+
+### Completed
+
+- Added backend Google login endpoint implementation for `POST /api/auth/google-login`.
+- Added backend Google ID Token verification with Google's JWKS, RS256 signature validation, issuer validation, audience validation, expiration validation, and verified-email validation.
+- Added `GOOGLE_CLIENT_IDS` configuration to allow one or more Web / App Google Client IDs.
+- Added `user_oauth_accounts` JPA entity and repository for Google account linking.
+- Added Google login service flow to reuse an existing OAuth account, link an existing email user, or create a new user.
+- Added controller, service, and token verifier tests.
+- Updated API, database, backend README, decision, task, and log documents.
+- Completed full backend test and build verification after fixing Spring constructor injection selection.
+- Confirmed remote branch status now includes the Google login commit and updated task state to DONE.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/auth/dto/GoogleLoginRequest.java`
+- `backend/src/main/java/com/monsters/common/security/GoogleIdTokenVerifier.java`
+- `backend/src/main/java/com/monsters/common/security/GoogleJwkProvider.java`
+- `backend/src/main/java/com/monsters/common/security/GoogleJwkProviderImpl.java`
+- `backend/src/main/java/com/monsters/common/security/GoogleProperties.java`
+- `backend/src/main/java/com/monsters/common/security/GoogleUserInfo.java`
+- `backend/src/main/java/com/monsters/user/entity/UserOAuthAccount.java`
+- `backend/src/main/java/com/monsters/user/repository/UserOAuthAccountRepository.java`
+- `backend/src/test/java/com/monsters/common/security/GoogleIdTokenVerifierTest.java`
+
+### Modified
+
+- `backend/README.md`
+- `backend/src/main/java/com/monsters/auth/controller/AuthController.java`
+- `backend/src/main/java/com/monsters/auth/service/AuthService.java`
+- `backend/src/main/java/com/monsters/common/security/SecurityConfig.java`
+- `backend/src/main/resources/application.yml`
+- `backend/src/test/java/com/monsters/MonstersApplicationTests.java`
+- `backend/src/test/java/com/monsters/auth/controller/AuthControllerTest.java`
+- `backend/src/test/java/com/monsters/auth/service/AuthServiceTest.java`
+- `docs/API_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- Added `POST /api/auth/google-login`.
+
+### Database
+
+- Added JPA mapping for existing spec table `user_oauth_accounts`.
+- Google login reads and writes `users` and `user_oauth_accounts`.
+
+### Tests
+
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew test`
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew build`
+- `git diff --check`
+- First rerun found Spring constructor injection selection issues in `GoogleIdTokenVerifier` and `GoogleJwkProviderImpl`; both were fixed with explicit `@Autowired` constructors.
+
+### Commit Message
+
+```text
+feat(auth): 建立 Google 登入 API
+```
+
+### Notes
+
+- `GOOGLE_CLIENT_IDS` and `JWT_SECRET` must be configured before Google login can issue JWT tokens.
+
+## 2026-07-03 20:58
+
+Task
+TASK-020 遮罩 system_data 敏感字串
+
+Agent
+Codex
+
+### Completed
+
+- Masked old database host, database name, username, and password in `system_data/back-end/src/main/resources/application.yml`.
+- Masked old database name constant in `system_data/back-end/src/main/java/com/example/demo/config/DatabaseConfig.java`.
+- Masked Android debug signing passwords in `system_data/front-end/monsters_front_end/android/app/build.gradle`.
+- Masked hardcoded accessToken strings in four old Flutter reference pages.
+- Re-scanned `system_data/` and confirmed the original sensitive values were no longer present.
+- Confirmed no checked build artifact or credential file extension was found.
+- Updated `docs/SYSTEM_DATA_REFERENCE.md`, `docs/TASKS.md`, and logs.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `docs/SYSTEM_DATA_REFERENCE.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+- `system_data/back-end/src/main/java/com/example/demo/config/DatabaseConfig.java`
+- `system_data/back-end/src/main/resources/application.yml`
+- `system_data/front-end/monsters_front_end/android/app/build.gradle`
+- `system_data/front-end/monsters_front_end/lib/pages/account/forgetPassword/forget_psw_auth.dart`
+- `system_data/front-end/monsters_front_end/lib/pages/account/lock/forget_lock_auth.dart`
+- `system_data/front-end/monsters_front_end/lib/pages/drawer/user_Feedback.dart`
+- `system_data/front-end/monsters_front_end/lib/pages/social.dart`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- None
+
+### Database
+
+- None
+
+### Tests
+
+- Searched for original sensitive values in `system_data/`.
+- Checked common build artifact and credential file extensions.
+- Checked common generated dependency/build directories.
+- `git diff --check`
+
+### Commit Message
+
+```text
+docs(system-data): 遮罩舊系統敏感字串
+```
+
+### Notes
+
+- `system_data/` reference files were preserved; only sensitive literal values were replaced with placeholders.
+
+## 2026-07-03 20:51
+
+Task
+TASK-019 補齊 system_data 參考任務
+
+Agent
+Codex
+
+### Completed
+
+- Added `docs/SYSTEM_DATA_REFERENCE.md` to record the `system_data/` inventory, PDF summary, old code/material organization, feature mapping, shared pattern conversion, and member/auth reference notes.
+- Confirmed `system_data/` contains old manuals, old backend code, old Flutter code, and assets.
+- Confirmed no obvious build artifact file or directory was found in the checked patterns.
+- Updated `docs/TASKS.md` for completed Phase 0, Phase 1, and Phase 2 reference-check tasks.
+- Kept the Phase 0 sensitive-data cleanup task in REVIEW because old database credentials, Android signing password strings, and hardcoded accessToken strings were found.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `docs/SYSTEM_DATA_REFERENCE.md`
+
+### Modified
+
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- None
+
+### Database
+
+- None
+
+### Tests
+
+- Checked `system_data/` file and directory counts.
+- Checked common build artifact and credential file extensions.
+- Scanned text files for sensitive keyword patterns.
+- Reviewed old backend common layers, member controller, member service, and old Flutter member repository/API.
+- `git diff --check`
+
+### Commit Message
+
+```text
+docs(system-data): 補齊舊系統參考任務
+```
+
+### Notes
+
+- `system_data/` was not modified.
+- The remaining Phase 0 sensitive-data task requires user confirmation before masking, removing, or relocating old reference files.
+
+## 2026-07-03 20:36
+
+Task
+TASK-018 Login API
+
+Agent
+Codex
+
+### Completed
+
+- Added `POST /api/auth/login`.
+- Added login request and response DTOs.
+- Added JWT access and refresh token generation with JDK HMAC-SHA256 APIs, without adding a third-party dependency.
+- Added login service logic for normalized email lookup, BCrypt password matching, deleted-user rejection, and 401 invalid credential handling.
+- Added service, controller, and JWT token tests.
+- Updated API, database, backend README, task, and log documents.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/auth/dto/AuthUserResponse.java`
+- `backend/src/main/java/com/monsters/auth/dto/LoginRequest.java`
+- `backend/src/main/java/com/monsters/auth/dto/LoginResponse.java`
+- `backend/src/main/java/com/monsters/common/security/JwtTokenService.java`
+- `backend/src/test/java/com/monsters/common/security/JwtTokenServiceTest.java`
+
+### Modified
+
+- `backend/README.md`
+- `backend/src/main/java/com/monsters/auth/controller/AuthController.java`
+- `backend/src/main/java/com/monsters/auth/service/AuthService.java`
+- `backend/src/main/java/com/monsters/user/repository/UserCredentialRepository.java`
+- `backend/src/main/java/com/monsters/user/repository/UserRepository.java`
+- `backend/src/test/java/com/monsters/auth/controller/AuthControllerTest.java`
+- `backend/src/test/java/com/monsters/auth/service/AuthServiceTest.java`
+- `docs/API_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- Added `POST /api/auth/login`.
+
+### Database
+
+- No schema change. Login API reads existing `users` and `user_credentials` tables.
+
+### Tests
+
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew test`
+- `GRADLE_USER_HOME=/Users/linweijun/Desktop/monsters/.gradle-cache JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home sh gradlew build`
+- `git diff --check`
+
+### Commit Message
+
+```text
+feat(auth): 建立登入 API
+```
+
+### Notes
+
+- `JWT_SECRET` must be configured before login can issue JWT tokens.
+
 ## 紀錄格式
 
 ```markdown
@@ -432,8 +1364,6 @@ Codex
 
 - `frontend/lib/main.dart`
 - `frontend/test/widget_test.dart`
-- `frontend/pubspec.yaml`
-- `frontend/pubspec.lock`
 - `frontend/README.md`
 - `docs/UI_SPEC.md`
 - `docs/TASKS.md`
@@ -570,8 +1500,6 @@ Codex
 
 ### 修改
 
-- `frontend/pubspec.yaml`
-- `frontend/pubspec.lock`
 - `frontend/README.md`
 - `docs/API_SPEC.md`
 - `docs/TASKS.md`

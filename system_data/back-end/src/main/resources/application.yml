@@ -2,7 +2,7 @@ project:
   root: com.example.demo
   name: monsters
 database:
-  name: 111- monsters
+  name: <OLD_DB_NAME>
   driver: com.mysql.cj.jdbc.Driver
 file:
   path: D:/monsters/back-end/file
@@ -10,9 +10,9 @@ spring:
   main:
     allow-bean-definition-overriding: true
   datasource:
-    url: jdbc:mysql://140.131.114.242:3306/111- monsters?useSSL=false&serverTimezone=Asia/Taipei
-    username: monsters
-    password: MONsters@ntub108
+    url: jdbc:mysql://<OLD_DB_HOST>:3306/<OLD_DB_NAME>?useSSL=false&serverTimezone=Asia/Taipei
+    username: <OLD_DB_USERNAME>
+    password: <OLD_DB_PASSWORD>
   jpa:
     database: mysql
     database-platform: org.hibernate.dialect.MySQL8Dialect

@@ -43,4 +43,9 @@ public class UserCredential extends BaseEntity {
     public LocalDateTime getPasswordUpdatedAt() {
         return passwordUpdatedAt;
     }
+
+    public void updatePasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+        this.passwordUpdatedAt = LocalDateTime.now();
+    }
 }

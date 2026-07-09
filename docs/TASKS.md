@@ -21,17 +21,17 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] 建立 MySQL 連線設定（DONE）
 - [x] 建立 Docker Compose（MySQL + Backend）（DONE）
 - [x] 建立 README 執行說明（DONE）
-- [ ] 建立並確認 `system_data/` 目錄
-- [ ] 整理舊系統參考程式與素材
-- [ ] 確認 `system_data/` 不包含金鑰、憑證、build artifact 或不必要雜檔
-- [ ] 建立舊系統功能與新版模組的初步對照
+- [x] 建立並確認 `system_data/` 目錄（DONE）
+- [x] 整理舊系統參考程式與素材（DONE）
+- [x] 確認 `system_data/` 不包含金鑰、憑證、build artifact 或不必要雜檔（DONE）
+- [x] 建立舊系統功能與新版模組的初步對照（DONE）
 
 ---
 
 ## Phase 1：共用基礎建設
 
-- [ ] 檢查 `system_data/` 中舊共用元件、API Client、錯誤處理與基礎設定寫法
-- [ ] 整理可參考的共用模式並轉換為新版架構
+- [x] 檢查 `system_data/` 中舊共用元件、API Client、錯誤處理與基礎設定寫法（DONE）
+- [x] 整理可參考的共用模式並轉換為新版架構（DONE）
 
 ### 後端
 
@@ -53,20 +53,20 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ## Phase 2：會員與個人資料
 
-- [ ] 檢查 `system_data/` 中舊會員、登入、個人資料與密碼鎖相關寫法
-- [ ] 整理可參考的流程與欄位
-- [ ] 依新版 API、Database、Coding Standard 重新實作
+- [x] 檢查 `system_data/` 中舊會員、登入、個人資料與密碼鎖相關寫法（DONE）
+- [x] 整理可參考的流程與欄位（DONE）
+- [x] 依新版 API、Database、Coding Standard 重新實作（DONE）
 
 - [x] 註冊 API（DONE）
-- [ ] 登入 API
-- [ ] Google 登入 API
-- [ ] 忘記密碼 API
-- [ ] 登出 API
-- [ ] 查詢個人資料 API
-- [ ] 修改個人資料 API
-- [ ] 更改頭貼 API
-- [ ] 密碼鎖 API
-- [ ] Flutter 登入頁
+- [x] 登入 API（DONE）
+- [x] Google 登入 API（DONE）
+- [x] 忘記密碼 API（DONE）
+- [x] 登出 API（DONE）
+- [x] 查詢個人資料 API（DONE）
+- [x] 修改個人資料 API（DONE）
+- [x] 更改頭貼 API（DONE）
+- [x] 密碼鎖 API（DONE）
+- [x] Flutter 登入頁（DONE）
 - [ ] Flutter 註冊頁
 - [ ] Flutter 個人資料頁
 - [ ] Flutter 密碼鎖頁

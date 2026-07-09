@@ -1372,7 +1372,7 @@ class _SocialPageState extends State<SocialPage>
           'service_id': serviceId,
           'template_id': templateId,
           'user_id': userId,
-          'accessToken': "9OoipUoZgha107DzjjE3w",
+          'accessToken': "<ACCESS_TOKEN>",
           'template_params': {
             'user_name': name,
             'user_email': email,

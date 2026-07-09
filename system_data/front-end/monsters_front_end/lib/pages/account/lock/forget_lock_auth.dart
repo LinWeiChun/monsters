@@ -79,7 +79,7 @@ class _Forget_Lock_AuthState extends State<Forget_Lock_Auth> {
           'service_id': serviceId,
           'template_id': templateId,
           'user_id': userId,
-          'accessToken': "9OoipUoZgha107DzjjE3w",
+          'accessToken': "<ACCESS_TOKEN>",
           'template_params': {
             'user_email': email,
             'verify_code': code,

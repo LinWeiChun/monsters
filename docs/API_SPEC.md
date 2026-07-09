@@ -166,6 +166,7 @@ com.monsters.common.security.SecurityConfig
 | /api/auth/google-login | POST | 允許匿名 |
 | /api/auth/forgot-password | POST | 允許匿名 |
 | /api/auth/reset-password | POST | 允許匿名 |
+| /api/auth/logout | POST | 需驗證 |
 | /api/** | ALL | 需驗證 |
 | 其他路徑 | ALL | 拒絕 |
 
@@ -184,6 +185,24 @@ JWT 基礎設定：
 | app.security.jwt.secret | JWT_SECRET | 空字串，正式環境必須提供 |
 | app.security.jwt.access-token-expiration-seconds | JWT_ACCESS_TOKEN_EXPIRATION_SECONDS | 3600 |
 | app.security.jwt.refresh-token-expiration-seconds | JWT_REFRESH_TOKEN_EXPIRATION_SECONDS | 1209600 |
+
+Google 登入設定：
+
+| 設定 | 環境變數 | 預設值 |
+|---|---|---|
+| app.security.google.client-ids | GOOGLE_CLIENT_IDS | 空字串，啟用 Google 登入前必須提供 |
+
+Cloudflare R2 檔案上傳設定：
+
+| 設定 | 環境變數 | 預設值 |
+|---|---|---|
+| app.storage.r2.account-id | R2_ACCOUNT_ID | 空字串，啟用頭貼上傳前必須提供 |
+| app.storage.r2.access-key-id | R2_ACCESS_KEY_ID | 空字串，啟用頭貼上傳前必須提供 |
+| app.storage.r2.secret-access-key | R2_SECRET_ACCESS_KEY | 空字串，啟用頭貼上傳前必須提供 |
+| app.storage.r2.bucket | R2_BUCKET | 空字串，啟用頭貼上傳前必須提供 |
+| app.storage.r2.public-base-url | R2_PUBLIC_BASE_URL | 空字串，啟用頭貼上傳前必須提供 |
+| app.storage.r2.avatar-key-prefix | R2_AVATAR_KEY_PREFIX | users/avatars |
+| app.storage.r2.max-avatar-size-bytes | R2_MAX_AVATAR_SIZE_BYTES | 5242880 |
 
 ---
 
@@ -254,6 +273,35 @@ Request：
 }
 ```
 
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Login success",
+  "data": {
+    "accessToken": "jwt_access_token",
+    "refreshToken": "jwt_refresh_token",
+    "tokenType": "Bearer",
+    "expiresIn": 3600,
+    "user": {
+      "userId": 1,
+      "email": "user@example.com",
+      "userName": "使用者名稱",
+      "avatarUrl": null
+    }
+  }
+}
+```
+
+規則：
+
+- `email` 必須轉為小寫並去除前後空白後查詢。
+- 密碼以 BCrypt `PasswordEncoder.matches` 比對，不得明文保存或寫入 log。
+- Email 不存在、帳號已刪除、憑證不存在或密碼錯誤時，回傳 401。
+- `accessToken` 與 `refreshToken` 使用 HMAC-SHA256 JWT 產生。
+- `JWT_SECRET` 必須設定，否則不得產生 JWT。
+
 ### 2.3 Google 登入
 
 `POST /api/auth/google-login`
@@ -266,17 +314,140 @@ Request：
 }
 ```
 
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Google login success",
+  "data": {
+    "accessToken": "jwt_access_token",
+    "refreshToken": "jwt_refresh_token",
+    "tokenType": "Bearer",
+    "expiresIn": 3600,
+    "user": {
+      "userId": 1,
+      "email": "user@example.com",
+      "userName": "Wei",
+      "avatarUrl": null
+    }
+  }
+}
+```
+
+規則：
+
+- 後端必須驗證 Google ID Token，不接受前端自行驗證後傳入的使用者資料。
+- `idToken` 必填。
+- Google ID Token 必須符合 RS256 簽章、有效 `kid`、Google issuer、未過期、`email_verified = true`。
+- `aud` 必須存在於 `GOOGLE_CLIENT_IDS` 設定，可用逗號設定多組 Web / App Client ID。
+- 驗證成功後，以 Google `sub` 對應 `user_oauth_accounts.provider_user_id`。
+- 若 OAuth 帳號已存在，使用既有使用者產生 JWT。
+- 若 OAuth 帳號不存在但 email 已有未刪除使用者，建立 OAuth 連結後產生 JWT。
+- 若 OAuth 帳號不存在且 email 尚未註冊，建立 `users` 與 `user_oauth_accounts` 後產生 JWT。
+- ID Token 無效、email 未驗證、對應使用者已刪除或 `GOOGLE_CLIENT_IDS` 未設定時，回傳 401。
+- 不得將 Google ID Token、JWT、Google 公鑰 response 或敏感驗證細節寫入 log。
+
 ### 2.4 忘記密碼
 
 `POST /api/auth/forgot-password`
+
+Request：
+
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Password reset token issued",
+  "data": {
+    "resetToken": "password_reset_token",
+    "expiresIn": 900
+  }
+}
+```
+
+規則：
+
+- `email` 必須轉為小寫並去除前後空白後查詢。
+- 若 email 對應未刪除使用者，後端產生一次性 reset token。
+- reset token 明文只回傳一次；資料庫僅保存 token hash。
+- reset token 有效時間為 900 秒。
+- 同一使用者重新申請時，未使用的舊 reset token 需失效。
+- 若 email 不存在或使用者已刪除，仍回傳 200，`resetToken` 為 `null`，避免暴露帳號是否存在。
+- 不得將 email 對應結果、reset token 明文或 token hash 寫入 log。
+- 目前 response 回傳 `resetToken` 供開發與前端串接；正式寄信服務定案後，應改為由後端寄送 reset link 或驗證碼。
 
 ### 2.5 重設密碼
 
 `POST /api/auth/reset-password`
 
+Request：
+
+```json
+{
+  "resetToken": "password_reset_token",
+  "newPassword": "password123"
+}
+```
+
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Password reset success",
+  "data": null
+}
+```
+
+規則：
+
+- `resetToken` 必填。
+- `newPassword` 必填，長度 8 到 72 字元。
+- 後端必須先 hash `resetToken` 後查詢，不得以明文 token 查詢資料庫。
+- reset token 不存在、已使用、已過期或對應使用者已刪除時，回傳 401。
+- 密碼需使用 BCrypt 重新雜湊。
+- 使用者已有 Email / Password 憑證時，更新既有 `user_credentials.password_hash`。
+- 僅有 Google 登入的使用者若完成 reset token 驗證，可建立新的 `user_credentials`。
+- 密碼重設成功後，reset token 必須標記為已使用。
+- 不得將新密碼、reset token 明文或 token hash 寫入 log。
+
 ### 2.6 登出
 
 `POST /api/auth/logout`
+
+Header：
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Logout success",
+  "data": null
+}
+```
+
+規則：
+
+- 登出 API 需登入。
+- 後端必須驗證 access token 簽章、issuer、type 與 exp。
+- 登出時不得保存 token 明文，僅保存 token hash 至 `revoked_tokens`。
+- token 撤銷紀錄需保存至原 token 過期時間。
+- JWT 驗證流程需拒絕已撤銷 token。
+- 無 Authorization header、非 Bearer token、token 無效、token 已過期或 token 已撤銷時，回傳 401。
+- 不得將 JWT 明文或 token hash 寫入 log。
 
 ---
 
@@ -286,21 +457,212 @@ Request：
 
 `GET /api/users/me`
 
+Header：
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Profile query success",
+  "data": {
+    "userId": 1,
+    "account": "old-account",
+    "email": "user@example.com",
+    "userName": "使用者名稱",
+    "birthday": "2000-01-02",
+    "avatarUrl": "https://example.com/avatar.png"
+  }
+}
+```
+
+規則：
+
+- 需登入。
+- 後端必須從 JWT 驗證後的 `userId` 查詢目前使用者，不得由前端傳入 user id 或 account。
+- 只查詢未刪除使用者。
+- 查無使用者時回傳 404。
+- 回傳欄位以新版 `users` 表為準；舊系統 `lock`、`dailyTest` 不放入本 API。
+
 ### 3.2 修改個人資料
 
 `PUT /api/users/me`
+
+Header：
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Request：
+
+```json
+{
+  "userName": "新的使用者名稱",
+  "birthday": "2000-01-02"
+}
+```
+
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Profile update success",
+  "data": {
+    "userId": 1,
+    "account": "old-account",
+    "email": "user@example.com",
+    "userName": "新的使用者名稱",
+    "birthday": "2000-01-02",
+    "avatarUrl": "https://example.com/avatar.png"
+  }
+}
+```
+
+規則：
+
+- 需登入。
+- 後端必須從 JWT 驗證後的 `userId` 更新目前使用者，不得由前端傳入 user id 或 account。
+- 只更新未刪除使用者。
+- `userName` 必填，最大長度 80，後端儲存前會移除前後空白。
+- `birthday` 可為 `null`；傳入日期時格式為 `yyyy-MM-dd`。
+- 本 API 僅更新 `userName` 與 `birthday`；`email`、`account`、`avatarUrl` 與密碼鎖不由本 API 修改。
+- 查無使用者時回傳 404。
+- 更新成功後回傳最新個人資料，欄位格式與查詢個人資料 API 相同。
 
 ### 3.3 更改頭貼
 
 `PUT /api/users/me/avatar`
 
+Header：
+
+```text
+Authorization: Bearer <access_token>
+Content-Type: multipart/form-data
+```
+
+Request：
+
+| 欄位 | 型別 | 必填 | 說明 |
+|---|---|---|---|
+| file | file | 是 | 頭貼圖片 |
+
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Avatar update success",
+  "data": {
+    "userId": 1,
+    "account": "old-account",
+    "email": "user@example.com",
+    "userName": "使用者名稱",
+    "birthday": "2000-01-02",
+    "avatarUrl": "https://cdn.example.com/users/avatars/1/avatar.png"
+  }
+}
+```
+
+規則：
+
+- 需登入。
+- 後端必須從 JWT 驗證後的 `userId` 更新目前使用者，不得由前端傳入 user id 或 account。
+- 只更新未刪除使用者。
+- 圖片必須上傳到 Cloudflare R2，資料庫只保存公開可讀的 `avatarUrl`。
+- 檔案欄位名稱固定為 `file`。
+- 僅接受 `image/jpeg`、`image/png`、`image/webp`。
+- 預設檔案大小上限為 5 MB，可透過 `R2_MAX_AVATAR_SIZE_BYTES` 調整。
+- R2 object key 預設格式為 `users/avatars/{userId}/{uuid}.{ext}`。
+- 查無使用者時回傳 404。
+- R2 設定缺漏或上傳失敗時回傳 500。
+- 更新成功後回傳最新個人資料，欄位格式與查詢個人資料 API 相同。
+
 ### 3.4 設定密碼鎖
 
 `PUT /api/users/me/password-lock`
 
+Header：
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Request：
+
+```json
+{
+  "lockPassword": "1234"
+}
+```
+
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Password lock update success",
+  "data": {
+    "enabled": true
+  }
+}
+```
+
+規則：
+
+- 需登入。
+- 後端必須從 JWT 驗證後的 `userId` 設定目前使用者的密碼鎖，不得由前端傳入 user id 或 account。
+- `lockPassword` 必填，格式固定為 4 位數字。
+- 密碼鎖需使用 BCrypt hash 保存至 `user_password_locks.lock_password_hash`，不得保存明文。
+- 同一使用者重複設定時更新既有密碼鎖 hash，並保持 `enabled = true`。
+- 查無使用者時回傳 404。
+- 不得將密碼鎖明文或 hash 寫入 log。
+
 ### 3.5 驗證密碼鎖
 
 `POST /api/users/me/password-lock/verify`
+
+Header：
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Request：
+
+```json
+{
+  "lockPassword": "1234"
+}
+```
+
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Password lock verify success",
+  "data": {
+    "verified": true
+  }
+}
+```
+
+規則：
+
+- 需登入。
+- 後端必須從 JWT 驗證後的 `userId` 驗證目前使用者的密碼鎖，不得由前端傳入 user id 或 account。
+- `lockPassword` 必填，格式固定為 4 位數字。
+- 後端以 `PasswordEncoder.matches` 比對，不得以明文查詢資料庫。
+- 密碼鎖不存在或未啟用時回傳 404。
+- 密碼鎖錯誤時回傳 200，`verified = false`，由前端決定是否提示重試。
+- 查無使用者時回傳 404。
+- 不得將密碼鎖明文或 hash 寫入 log。
 
 ---
 

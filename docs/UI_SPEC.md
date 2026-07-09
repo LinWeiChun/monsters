@@ -284,6 +284,52 @@ AI 或開發者參考 `system_data/` 舊 UI 時，應檢查以下項目：
 - 不保留過長 Page Widget；聊天、卡片、表單、抽屜項目與狀態畫面需拆成可測試共用元件。
 - `system_data` 可保留舊系統圖片與動畫素材作為參考；若要正式納入新版資產，仍需另行整理授權、命名與資產規格。
 
+## Flutter Login Page 實作規範
+
+登入頁位置：
+
+- `frontend/lib/pages/login_page.dart`
+
+登入頁支援：
+
+- Email / 密碼輸入與前端必填驗證
+- 呼叫 `POST /api/auth/login`
+- Loading 狀態
+- API 錯誤訊息呈現
+- 登入成功後導向 `home` route
+- 前往註冊頁
+- 忘記密碼入口提示
+- Google 登入入口提示
+
+登入頁資料流程：
+
+```text
+LoginPage
+↓
+AuthController
+↓
+AuthRepository
+↓
+ApiClient
+↓
+REST API
+```
+
+實作檔案：
+
+| 類型 | 檔案 |
+|---|---|
+| Page | `frontend/lib/pages/login_page.dart` |
+| Provider | `frontend/lib/providers/auth_provider.dart` |
+| Repository | `frontend/lib/repositories/auth_repository.dart` |
+| Model | `frontend/lib/models/auth_user.dart`、`frontend/lib/models/auth_user.g.dart`、`frontend/lib/models/login_result.dart`、`frontend/lib/models/login_result.g.dart` |
+
+規則：
+
+- 登入頁不得直接呼叫 Dio。
+- 登入頁不得直接保存 JWT、Refresh Token 或密碼至 SharedPreferences。
+- Access Token 僅由 `ApiClient.setAccessToken()` 暫存於目前執行階段。`AuthUser` 與 `LoginResult` 必須使用 `json_serializable` 產生 JSON mapping。
+- Google Sign-In SDK 尚未導入前，不得假造 Google ID Token 或沿用舊系統空密碼登入流程。
 ## Flutter Router 基礎規範
 
 前端路由統一使用 go_router，入口必須使用 `MaterialApp.router`。
