@@ -8,6 +8,71 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-10 07:28
+
+Task
+TASK-035 Phase 2 測試與 Task 標示整理（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Updated previous Flutter Phase 2 task labels from `REVIEW` to `DONE` because they are now merged into `develop`.
+- Added Phase 2 test report and test matrix.
+- Fixed `backend/gradlew` executable permission so backend tests can run through the project wrapper.
+- Ran backend tests, frontend analyze, frontend tests, and Web / Android / iOS builds.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `docs/PHASE2_TEST_REPORT.md`
+
+### Modified
+
+- `backend/gradlew`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- None
+
+### Database
+
+- None
+
+### Tests
+
+- `cd backend && ./gradlew test`
+- `cd frontend && /Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `cd frontend && /Users/linweijun/fultter/flutter/bin/flutter test --no-pub`
+- `cd frontend && /Users/linweijun/fultter/flutter/bin/flutter build web --no-pub`
+- `cd frontend && /Users/linweijun/fultter/flutter/bin/flutter build apk --debug --no-pub`
+- `cd frontend && /Users/linweijun/fultter/flutter/bin/flutter build ios --no-codesign --no-pub`
+- `cd frontend && /Users/linweijun/fultter/flutter/bin/flutter build ios --simulator --no-pub`
+
+### Commit Message
+
+```text
+test(phase2): 補齊會員功能測試報告
+```
+
+### Notes
+
+- `system_data/` reference: no additional old-system code was needed for this test-summary task; previous Phase 2 feature tasks already recorded their references.
+- Existing untracked `backend/bin/` was left untouched.
+- Android build still reports a Kotlin version future-deprecation warning; it does not block the build.
+
 ## 2026-07-10 07:16
 
 Task

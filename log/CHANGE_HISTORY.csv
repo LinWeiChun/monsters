@@ -468,3 +468,9 @@
 2026-07-10,07:16,TASK-034,Documentation,frontend/README.md,修改,補充密碼鎖頁前端結構,Codex,否,否,否,否,文件同步
 2026-07-10,07:16,TASK-034,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-034 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-10,07:16,TASK-034,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-034 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,07:28,TASK-035,Documentation,docs/PHASE2_TEST_REPORT.md,新增,新增 Phase 2 測試矩陣與驗證結果,Codex,否,否,否,否,測試整理
+2026-07-10,07:28,TASK-035,Backend,backend/gradlew,修改,補上 Gradle wrapper 執行權限,Codex,否,否,否,否,使後端測試可透過 wrapper 執行
+2026-07-10,07:28,TASK-035,Documentation,docs/TASKS.md,修改,更新 Phase 2 前端 Task 標示與測試 REVIEW,Codex,否,否,否,否,前置 Flutter Task 已 merge 至 develop
+2026-07-10,07:28,TASK-035,Test,backend frontend,檢查,執行 Phase 2 後端測試 前端測試與三平台 build,Codex,否,否,是,否,全部通過；Android 有既有 Kotlin 版本提示
+2026-07-10,07:28,TASK-035,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-035 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,07:28,TASK-035,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-035 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
