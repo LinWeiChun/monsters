@@ -463,6 +463,15 @@ Theme 設定位置：
 | AppColors | `app_colors.dart` | 集中管理色票與 seed color |
 | AppSpacing / AppRadius | `app_spacing.dart` | 集中管理間距與圓角 token |
 
+Theme 色票需承接舊版暖黃色與棕色視覺語彙：
+
+| Token | 色值 | 舊版來源 |
+|---|---|---|
+| `legacyBackgroundLight` / `lightBackground` | `#FFFED4` | `BackgroundColorLight` |
+| `legacyBackgroundSoft` | `#FFED97` | `BackgroundColorSoft` |
+| `legacyWarm` / `seed` | `#A0522D` | `BackgroundColorWarm` |
+| `legacyWarmOpacity` | `#E6A0522D` | `BackgroundColorWarmOpacity` |
+
 頁面不得自行 hard code 共用顏色、字體、圓角與間距；應優先使用 `Theme.of(context)` 與 theme token。
 ## Flutter Common State Widgets
 

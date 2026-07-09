@@ -8,6 +8,71 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-10 07:07
+
+Task
+TASK-033 前端色調調整為舊版暖黃色 / 棕色
+
+Agent
+Codex
+
+### Completed
+
+- Cleaned local branch state by deleting local branches already merged into `origin/main`.
+- Kept `main`, `develop`, `feature/flutter-register-page`, and `feature/profile-page`; then created `feature/frontend-legacy-colors` for this UI color task.
+- Updated centralized Flutter theme colors to match old system warm yellow and brown palette.
+- Updated UI spec and frontend README with legacy color token mapping.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `frontend/lib/theme/app_colors.dart`
+- `docs/UI_SPEC.md`
+- `frontend/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- None
+
+### Database
+
+- None
+
+### Tests
+
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build web --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build apk --debug --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --no-codesign --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --simulator --no-pub`
+
+### Commit Message
+
+```text
+style(frontend): 調整前端為舊版暖色調
+```
+
+### Notes
+
+- `system_data/` reference: checked `system_data/front-end/monsters_front_end/lib/pages/settings/style.dart`.
+- Reused old color intent and values only; did not copy old widget structure or page-level hard-coded styling.
+- Branch cleanup used safe local branch deletion for branches already merged to `origin/main`.
+
 ## 2026-07-09 20:58
 
 Task
