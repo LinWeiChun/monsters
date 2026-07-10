@@ -8,6 +8,72 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-10 19:08
+
+Task
+TASK-044 Phase 3 舊煩惱流程檢查（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Reviewed the old system manual and introduction for annoyance, chat, mood drawing, score, sharing, solved state, and reward flows.
+- Reviewed the related old Flutter pages, models, repositories, API interface, assets, Spring Boot controller, service, DAO, entity, history, and social query behavior.
+- Recorded the eight-step legacy annoyance flow, six categories, 1-to-5 score visuals, optional drawing tools, sharing toggle, solved-state flow, and monster reward response.
+- Mapped old fields and behavior to the normalized Entry architecture without treating old IDs or implementations as the new specification.
+- Recorded legacy defects and unsafe patterns that must not be reused.
+- Identified formal specification gaps that must be resolved before Annoyance implementation begins.
+- Updated the Phase 3 first Task from TODO through IN PROGRESS to REVIEW.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `docs/SYSTEM_DATA_REFERENCE.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Tests
+
+- Documentation-only task; backend and Flutter compilation were not required.
+- `git diff --check` passed.
+- Confirmed every documented legacy source path exists.
+- Cross-checked the six categories, score range, sharing behavior, drawing controls, and reward response against both manual text/screenshots and source code.
+- Imported and inspected the updated `CHANGE_HISTORY.csv` as a 13-column table.
+
+### system_data Reference
+
+- Referenced both old-system PDFs, the annoyance chat and drawing pages, history detail page, annoyance model/repository/API interface, backend annoyance layers, history/social controllers, mood score assets, and reward asset.
+- Reused only business intent, flow order, UI vocabulary, categories, score visuals, and asset references.
+- Did not reuse the old widget structure, integer state machine, API paths, Base64 media storage, account-based ownership, hardcoded domain/path, JSON assembly, exception handling, or flawed validation.
+- `system_data/` was not modified.
+
+### API
+
+- No API change.
+- Recorded that Annoyance Request/Response, media upload, pagination, owner validation, validation errors, and reward response remain undefined.
+
+### Database
+
+- No Database change or migration.
+- Recorded the video media-type mismatch and missing `annoyance_types` / `moods` seed data as later DoR items.
+
+### Notes
+
+- The next Phase 3 Task should convert the audit into explicit business/UI proposals and resolve the documented options before implementation.
+- This Task remains REVIEW until its PR is merged into `feature/phase3`.
+
+---
+
 ## 2026-07-10 18:57
 
 Task
