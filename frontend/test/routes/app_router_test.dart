@@ -28,7 +28,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('已有帳號'));
+    await tester.tap(find.text('已有帳號？前往登入'));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('loginEmailField')), findsOneWidget);

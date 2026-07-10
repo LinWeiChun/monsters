@@ -207,3 +207,10 @@ secrets/
 
 .AppleDouble
 .LSOverride
+
+token/
+*.secret.json
+*client_secret*.json
+backend/bin/
+backend/build/
+backend/target/

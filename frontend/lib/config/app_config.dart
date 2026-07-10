@@ -4,6 +4,8 @@ class AppConfig {
     required this.connectTimeout,
     required this.receiveTimeout,
     required this.sendTimeout,
+    this.googleClientId = '',
+    this.googleServerClientId = '',
   });
 
   factory AppConfig.fromEnvironment() {
@@ -15,6 +17,8 @@ class AppConfig {
       connectTimeout: Duration(seconds: 10),
       receiveTimeout: Duration(seconds: 20),
       sendTimeout: Duration(seconds: 20),
+      googleClientId: String.fromEnvironment('GOOGLE_CLIENT_ID'),
+      googleServerClientId: String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID'),
     );
   }
 
@@ -22,4 +26,6 @@ class AppConfig {
   final Duration connectTimeout;
   final Duration receiveTimeout;
   final Duration sendTimeout;
+  final String googleClientId;
+  final String googleServerClientId;
 }

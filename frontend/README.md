@@ -13,6 +13,8 @@
 - iOS
 - Web
 
+前端功能預設以 Flutter 共用程式支援三平台。新增頁面或互動流程時，需同步確認 Web、Android、iOS 皆有可執行入口；若有平台限制，需在對應 Task 文件中記錄替代處理。
+
 ## 專案規範
 
 前端開發需遵守：
@@ -51,16 +53,67 @@ UI 不得直接呼叫 Dio，後續功能需透過 Provider / Repository 使用 `
 登入頁與登入狀態邏輯：
 
 - `lib/pages/login_page.dart`
+- `lib/pages/register_page.dart`
 - `lib/providers/auth_provider.dart`
 - `lib/repositories/auth_repository.dart`
+- `lib/repositories/auth_session_store.dart`
 - `lib/models/auth_user.dart`
 - `lib/models/auth_user.g.dart`
 - `lib/models/login_result.dart`
 - `lib/models/login_result.g.dart`
+- `lib/models/register_result.dart`
 
-登入流程使用 `AuthRepository` 呼叫 `POST /api/auth/login`，成功後由 `ApiClient.setAccessToken()` 將 access token 套用到目前執行階段的 Authorization header。Auth model 使用 `json_serializable` 產生 JSON mapping。
+登入流程使用 `AuthRepository` 呼叫 `POST /api/auth/login`，成功後由 `ApiClient.setAccessToken()` 將 access token 套用到目前執行階段的 Authorization header，並透過 `AuthSessionStore` 保存 `LoginResult` 與最後開啟時間。使用者未登出且 30 天內再次開啟 App 時，`SplashPage` 會恢復 session 並直接導向首頁；超過 30 天、session 無效或使用者登出時，會清除本地 session 並要求重新登入。
 
-目前不將 JWT、Refresh Token 或密碼寫入 SharedPreferences。Google 登入入口已保留，但需後續 Google Sign-In SDK 與 ID Token 流程完成後才能正式啟用。
+Google 登入流程使用 `GoogleSignInService` 透過 `google_sign_in` / `google_sign_in_web` 取得 Google ID Token，再由 `AuthRepository` 呼叫 `POST /api/auth/google-login` 交給後端驗證並換發本系統 JWT。Web 版使用 Google Identity Services 官方按鈕，Android / iOS 使用共用 Flutter 登入按鈕；成功後同樣由 `AuthSessionStore` 保存 30 天登入狀態。
+
+註冊流程使用 `AuthRepository` 呼叫 `POST /api/auth/register`，成功後導回登入頁，不自動登入，也不保存密碼或 token。帳號為必填且唯一，需英文開頭，只能包含英文、數字、底線，長度 4 到 50，前端送出前會轉為小寫。
+
+密碼不得寫入 SharedPreferences；登入 session 僅由 `AuthSessionStore` 集中管理，頁面不得直接讀寫 token。Google 登入不得假造 ID Token 或沿用舊系統空密碼登入流程。
+
+Google 登入執行時需提供 dart-define，且後端 `GOOGLE_CLIENT_IDS` 必須包含對應 Client ID：
+
+```bash
+# Web
+GOOGLE_CLIENT_ID=your-web-client-id.apps.googleusercontent.com \
+  ./tool/run_web_local.sh
+
+# Android / iOS
+/Users/linweijun/fultter/flutter/bin/flutter run \
+  --dart-define=GOOGLE_CLIENT_ID=your-platform-client-id.apps.googleusercontent.com \
+  --dart-define=GOOGLE_SERVER_CLIENT_ID=your-web-client-id.apps.googleusercontent.com
+```
+
+`tool/run_web_local.sh` 會固定 Web 本機網址為 `http://localhost:5050`，避免 Flutter Web 每次啟動改用不同 port 而被 Google OAuth 擋下。Google Cloud OAuth Client 的 Authorized JavaScript origins 請加入：
+
+```text
+http://localhost:5050
+```
+
+Web 版還需在 Google Cloud OAuth Client 設定 Authorized JavaScript origins，且 Web Google SDK 不支援 `serverClientId`，因此 Web 本機測試不要傳 `GOOGLE_SERVER_CLIENT_ID`。Android / iOS 需依 Google OAuth Client 設定 package name、bundle id 與簽章資訊。
+
+## User Profile
+
+個人資料頁與資料流：
+
+- `lib/pages/profile_page.dart`
+- `lib/providers/user_profile_provider.dart`
+- `lib/repositories/user_repository.dart`
+- `lib/models/user_profile.dart`
+- `lib/models/user_profile.g.dart`
+
+個人資料流程使用 `UserRepository` 呼叫 `GET /api/users/me` 與 `PUT /api/users/me`，由後端依目前 Authorization token 判斷使用者；前端不傳入 user id 或 account。頁面支援載入、錯誤重試、暱稱與生日編輯、儲存成功提示。頭貼目前支援顯示 `avatarUrl`，三平台檔案選取與上傳會於更改頭貼 UI Task 定案後補齊。
+## Password Lock
+
+密碼鎖頁與資料流：
+
+- `lib/pages/password_lock_page.dart`
+- `lib/providers/password_lock_provider.dart`
+- `lib/repositories/user_repository.dart`
+- `lib/models/password_lock_status.dart`
+- `lib/models/password_lock_verification.dart`
+
+密碼鎖流程使用 `UserRepository` 呼叫 `PUT /api/users/me/password-lock` 與 `POST /api/users/me/password-lock/verify`。前端只做 4 位數字格式檢查與設定確認，不保存密碼鎖明文，也不使用 SharedPreferences 保存密碼鎖狀態。忘記密碼鎖流程需待正式 API 定案後補齊。
 ## Routing
 
 前端路由統一使用 go_router：
@@ -79,6 +132,8 @@ App 入口使用 `MaterialApp.router`，路由由 `appRouterProvider` 提供。
 | `/home` | `home` | `HomePage` |
 | `/login` | `login` | `LoginPage` |
 | `/register` | `register` | `RegisterPage` |
+| `/profile` | `profile` | `ProfilePage` |
+| `/password-lock` | `passwordLock` | `PasswordLockPage` |
 
 UI 不得直接使用 `Navigator.push`，頁面切換應透過 `context.goNamed()` 或集中路由設定。
 ## Theme
@@ -91,7 +146,29 @@ UI 不得直接使用 `Navigator.push`，頁面切換應透過 `context.goNamed(
 
 App 入口在 `lib/app.dart` 套用 `AppTheme.light()`、`AppTheme.dark()` 與 `ThemeMode.system`。
 
+目前集中色票已承接舊版 Flutter 的暖黃色 / 棕色視覺語彙：
+
+- `#FFFED4`：主要背景
+- `#FFED97`：柔黃色輔助色
+- `#A0522D`：品牌主棕色與 Theme seed
+
 頁面不得自行 hard code 共用顏色、圓角與間距；應優先使用 `Theme.of(context)`、`AppColors`、`AppSpacing`、`AppRadius`。
+## App Icons / Logo
+
+三平台 App Icon 來源為根目錄 `../icon/icon.png`，產出至：
+
+- Android：`android/app/src/main/res/mipmap-*/ic_launcher.png`
+- iOS：`ios/Runner/Assets.xcassets/AppIcon.appiconset/*.png`
+- Web：`web/favicon.png`、`web/icons/*.png`
+
+Flutter 內部品牌圖來源為根目錄 `../icon/標題.png`，匯入至：
+
+- Logo：`assets/images/app_logo.png`
+- Icon：`assets/images/app_icon.png`
+
+Logo 目前套用於 splash、login、register 三個頁面。
+
+Web manifest 的 `background_color` 與 `theme_color` 需維持舊版暖黃色 / 棕色視覺，不使用 Flutter 預設藍色。
 ## Common State Widgets
 
 共用狀態元件位於：

@@ -30,6 +30,7 @@
 | 舊資料庫 migration | 不建立舊資料庫自動 migration；舊資料僅作欄位 mapping 與新版資料模型參考 |
 | 舊 API 對照表 | 需要建立完整舊 API 對照表，比對 path、method、request、response 與錯誤情境 |
 | 舊 Flutter UI 對照清單 | 需要建立舊 Flutter UI 畫面對照清單，比對流程、元件、狀態與素材 |
+| Phase 分支流程 | 所有後續 Phase 均由 `develop` 建立 `feature/phase<n>` 整合分支；Phase 內 Task 由該 Phase 分支切出獨立分支，Task PR 先合併回 Phase 分支，Phase 完成後再由 Phase 分支 PR 至 `develop` |
 
 ## 二、已核准套件與工具
 
@@ -42,6 +43,7 @@
 | JSON | json_serializable |
 | Routing | go_router |
 | Local Storage | SharedPreferences |
+| Google Sign-In | google_sign_in、google_sign_in_web |
 
 ### Backend
 

@@ -1,11 +1,11 @@
 {
-    "name": "monsters",
-    "short_name": "monsters",
+    "name": "貘nsters",
+    "short_name": "貘nsters",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FFFED4",
+    "theme_color": "#A0522D",
+    "description": "貘nsters 情緒記錄與紓壓系統。",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

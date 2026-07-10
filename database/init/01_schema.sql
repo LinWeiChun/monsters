@@ -6,7 +6,7 @@ USE monsters;
 
 CREATE TABLE IF NOT EXISTS users (
   id BIGINT NOT NULL AUTO_INCREMENT,
-  account VARCHAR(50) NULL,
+  account VARCHAR(50) NOT NULL,
   email VARCHAR(255) NOT NULL,
   user_name VARCHAR(80) NOT NULL,
   birthday DATE NULL,

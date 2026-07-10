@@ -35,7 +35,8 @@ public class User extends BaseEntity {
     protected User() {
     }
 
-    public User(String email, String userName) {
+    public User(String account, String email, String userName) {
+        this.account = account;
         this.email = email;
         this.userName = userName;
         this.deleted = false;

@@ -8,6 +8,1038 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-10 18:57
+
+Task
+DOC-012 建立 Phase 整合分支流程（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Adopted the Phase integration branch workflow for Phase 3 and all subsequent phases.
+- Defined `feature/phase<n>` as the integration branch created from `develop`.
+- Defined Phase Task branches as independent branches created from the corresponding Phase branch.
+- Defined Task PR targets as the corresponding Phase branch and the completed Phase PR target as `develop`.
+- Updated branch roles, naming, startup flow, merge restrictions, PR direction, issue flow, and cleanup rules.
+- Updated README Git instructions and recorded the decision in `docs/DECISIONS.md`.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `README.md`
+- `docs/GIT_RULE.md`
+- `docs/DECISIONS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Tests
+
+- Documentation-only change; compile and automated tests were not required.
+- `git diff --check` passed.
+- Git flow references were searched to confirm the previous direct `develop` Task flow was replaced in the updated sections.
+- `CHANGE_HISTORY.csv` was imported and inspected as a 13-column table; the header and all five new DOC-012 rows matched the expected structure.
+
+### system_data Reference
+
+- `system_data/` was not required and was not modified because this task only changes the repository branching policy.
+
+### API
+
+- None
+
+### Database
+
+- None
+
+### Notes
+
+- This documentation branch was created from `feature/phase3` and should be merged back into `feature/phase3`.
+- After this change is merged, all Phase 3 and later Task branches must use the corresponding Phase integration branch as their base.
+
+---
+
+## 2026-07-10 18:48
+
+Task
+TASK-043 App icon / Logo 圖片套用（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Regenerated Android, iOS, and Web app icon images from root `icon/icon.png`.
+- Added Flutter image assets from root icon/logo sources.
+- Added `app_logo.png` to splash, login, and register pages.
+- Added Flutter asset declarations for `app_icon.png` and `app_logo.png`.
+- Updated UI spec, frontend README, task status, and logs for the logo asset usage.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `frontend/assets/images/app_icon.png`
+- `frontend/assets/images/app_logo.png`
+
+### Modified
+
+- `frontend/android/app/src/main/res/mipmap-hdpi/ic_launcher.png`
+- `frontend/android/app/src/main/res/mipmap-mdpi/ic_launcher.png`
+- `frontend/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png`
+- `frontend/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png`
+- `frontend/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png`
+- `frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/*.png`
+- `frontend/web/favicon.png`
+- `frontend/web/icons/*.png`
+- `frontend/lib/pages/splash_page.dart`
+- `frontend/lib/pages/login_page.dart`
+- `frontend/lib/pages/register_page.dart`
+- `frontend/pubspec.yaml`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `frontend/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Tests
+
+- Not run by request. Image dimensions were checked locally with `sips`.
+- Dart format was run for the touched Flutter page files.
+
+### system_data Reference
+
+- No `system_data/` code was needed for this image-only task.
+- Root `icon/icon.png` and `icon/標題.png` were used as the source images.
+
+### Notes
+
+- `backend/src/main/resources/application.yml` remains an unrelated local configuration change and was not modified.
+- Task remains in REVIEW until tests and GitHub push are completed.
+
+---
+
+## 2026-07-10 18:40
+
+Task
+TASK-042 Phase 2 狀態收尾（DONE）
+
+Agent
+Codex
+
+### Completed
+
+- Confirmed Phase 0 and Phase 1 are fully marked DONE.
+- Confirmed Phase 2 review items have been merged into `develop`.
+- Updated Phase 2 account, 30-day login persistence, Flutter Google login, fixed Web Google local port, and test tasks from REVIEW to DONE.
+- Corrected previous Phase 2 log headings from REVIEW to DONE where the corresponding work is now merged.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Tests
+
+- Documentation/status-only change; compile and automated tests were not rerun.
+- Git history was checked locally to verify the Phase 2 commits are present in `develop`.
+
+### system_data Reference
+
+- Confirmed `system_data/` exists and was not modified.
+- No old system behavior was needed because this task only corrected task status metadata.
+
+### Notes
+
+- `backend/src/main/resources/application.yml` remains an unrelated local configuration change and was not modified.
+
+---
+
+## 2026-07-10 13:19
+
+Task
+TASK-041 正式啟用帳號欄位（DONE）
+
+Agent
+Codex
+
+### Completed
+
+- Enabled `account` as a formal required unique user field for registration.
+- Added backend account validation, normalization, duplicate checking, and response fields.
+- Updated Google first-login user creation to generate a unique account from the email prefix.
+- Updated Flutter registration page to collect and validate account.
+- Updated Flutter auth models and session test data so login users include account.
+- Updated API, database, project, UI, task, and README documentation.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `backend/src/main/java/com/monsters/auth/dto/AuthUserResponse.java`
+- `backend/src/main/java/com/monsters/auth/dto/RegisterRequest.java`
+- `backend/src/main/java/com/monsters/auth/dto/RegisterResponse.java`
+- `backend/src/main/java/com/monsters/auth/service/AuthService.java`
+- `backend/src/main/java/com/monsters/user/entity/User.java`
+- `backend/src/main/java/com/monsters/user/repository/UserRepository.java`
+- `backend/src/test/java/com/monsters/auth/controller/AuthControllerTest.java`
+- `backend/src/test/java/com/monsters/auth/service/AuthServiceTest.java`
+- `backend/src/test/java/com/monsters/common/security/JwtTokenServiceTest.java`
+- `backend/src/test/java/com/monsters/common/security/SecurityConfigTest.java`
+- `backend/src/test/java/com/monsters/user/service/UserServiceTest.java`
+- `database/init/01_schema.sql`
+- `frontend/lib/models/auth_user.dart`
+- `frontend/lib/models/auth_user.g.dart`
+- `frontend/lib/models/register_result.dart`
+- `frontend/lib/pages/register_page.dart`
+- `frontend/lib/providers/auth_provider.dart`
+- `frontend/lib/repositories/auth_repository.dart`
+- `frontend/test/auth_session_store_test.dart`
+- `frontend/test/login_page_test.dart`
+- `frontend/test/register_page_test.dart`
+- `docs/PROJECT_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/API_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `frontend/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- `database/init/01_schema.sql` now creates `users.account` as `NOT NULL`.
+- Existing local databases created before this change may need manual migration if they contain users with null account.
+
+### API
+
+- `POST /api/auth/register` request now requires `account`.
+- Register response includes `account`.
+- Login and Google login user response includes `account`.
+
+### Database
+
+- `users.account` changed from compatibility-only nullable field to formal required unique field.
+
+### Tests
+
+- `./gradlew test`
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build web --no-pub --dart-define=GOOGLE_CLIENT_ID=test-web-client.apps.googleusercontent.com`
+- `/Users/linweijun/fultter/flutter/bin/flutter build apk --debug --no-pub --dart-define=GOOGLE_CLIENT_ID=test-android-client.apps.googleusercontent.com --dart-define=GOOGLE_SERVER_CLIENT_ID=test-server-client.apps.googleusercontent.com`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --debug --no-codesign --no-pub --dart-define=GOOGLE_CLIENT_ID=test-ios-client.apps.googleusercontent.com --dart-define=GOOGLE_SERVER_CLIENT_ID=test-server-client.apps.googleusercontent.com`
+
+### Notes
+
+- `system_data/` reference: checked old account-based login and account-linked data flow.
+- Reused only the intent of a stable user account identifier.
+- Not reused: old account-as-cross-table-foreign-key pattern, old API paths, and page-level persistence.
+- Existing unrelated `backend/src/main/resources/application.yml` changes were left untouched and are not part of this task.
+
+## 2026-07-10 13:03
+
+Task
+TASK-040 Flutter Web Google 登入固定本機 port（DONE）
+
+Agent
+Codex
+
+### Completed
+
+- Added a macOS-friendly Flutter Web local launch script that fixes the local origin at `http://localhost:5050`.
+- Updated Google login local testing documentation so Google Cloud OAuth only needs `http://localhost:5050` in Authorized JavaScript origins.
+- Kept Google Web local testing on `GOOGLE_CLIENT_ID` only; no real Client ID is committed.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `frontend/tool/run_web_local.sh`
+
+### Modified
+
+- `frontend/README.md`
+- `docs/API_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- No API contract change.
+
+### Database
+
+- None
+
+### Tests
+
+- `bash -n frontend/tool/run_web_local.sh`
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub`
+
+### Notes
+
+- `system_data/` reference: not needed for this local development startup fix.
+- Google Cloud OAuth Client should add `http://localhost:5050` to Authorized JavaScript origins.
+- Existing unrelated `backend/src/main/resources/application.yml` changes were left untouched and are not part of this task.
+
+## 2026-07-10 12:51
+
+Task
+TASK-039 修正 Web Google 登入按鈕 Getting ready（DONE）
+
+Agent
+Codex
+
+### Completed
+
+- Fixed Web Google Sign-In initialization so `serverClientId` is only passed on Android / iOS.
+- Updated README and specs to clarify Web local testing should pass only `GOOGLE_CLIENT_ID`.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `frontend/lib/services/google_sign_in_service.dart`
+- `docs/API_SPEC.md`
+- `docs/UI_SPEC.md`
+- `frontend/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- No API contract change.
+
+### Database
+
+- None
+
+### Tests
+
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build web --no-pub --dart-define=GOOGLE_CLIENT_ID=test-web-client.apps.googleusercontent.com`
+
+### Notes
+
+- `system_data/` reference: not needed for this SDK compatibility fix.
+- Cause: `google_sign_in_web` does not support `serverClientId`; passing it in debug mode can leave the Web official button at `Getting ready`.
+- Existing unrelated `backend/src/main/resources/application.yml` changes were left untouched and are not part of this task.
+
+## 2026-07-10 12:20
+
+Task
+TASK-038 Flutter Google 登入（DONE）
+
+Agent
+Codex
+
+### Completed
+
+- Implemented approved option 1 for Flutter Google login using `google_sign_in` and `google_sign_in_web`.
+- Added a Google Sign-In service that initializes SDK client IDs from dart-define values and returns Google ID Tokens.
+- Updated login UI so Web uses the Google Identity Services official button, while Android and iOS use the shared Flutter Google login action.
+- Updated Auth repository and controller to call existing `POST /api/auth/google-login`, save the returned session, and navigate to home.
+- Updated logout to clear local session and attempt Google SDK sign-out.
+- Added widget tests for Google ID Token login, Google backend error handling, Web authentication-event login, and Google sign-out during logout.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `frontend/lib/services/google_sign_in_service.dart`
+- `frontend/lib/widgets/auth/google_sign_in_web_button.dart`
+- `frontend/lib/widgets/auth/google_sign_in_web_button_stub.dart`
+- `frontend/lib/widgets/auth/google_sign_in_web_button_web.dart`
+
+### Modified
+
+- `frontend/lib/config/app_config.dart`
+- `frontend/lib/pages/login_page.dart`
+- `frontend/lib/providers/auth_provider.dart`
+- `frontend/lib/repositories/auth_repository.dart`
+- `frontend/test/login_page_test.dart`
+- `frontend/pubspec.yaml`
+- `frontend/pubspec.lock`
+- `frontend/ios/Runner.xcodeproj/project.pbxproj`
+- `docs/DECISIONS.md`
+- `docs/PROJECT_SPEC.md`
+- `docs/API_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `frontend/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- Uses existing `POST /api/auth/google-login`.
+- No backend endpoint contract change.
+
+### Database
+
+- None
+
+### Tests
+
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build web --no-pub --dart-define=GOOGLE_CLIENT_ID=test-web-client.apps.googleusercontent.com --dart-define=GOOGLE_SERVER_CLIENT_ID=test-server-client.apps.googleusercontent.com`
+- `/Users/linweijun/fultter/flutter/bin/flutter build apk --debug --no-pub --dart-define=GOOGLE_CLIENT_ID=test-android-client.apps.googleusercontent.com --dart-define=GOOGLE_SERVER_CLIENT_ID=test-server-client.apps.googleusercontent.com`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --debug --no-codesign --no-pub --dart-define=GOOGLE_CLIENT_ID=test-ios-client.apps.googleusercontent.com --dart-define=GOOGLE_SERVER_CLIENT_ID=test-server-client.apps.googleusercontent.com`
+
+### Commit Message
+
+```text
+feat(frontend): 完成 Google 登入
+```
+
+### Notes
+
+- `system_data/` reference: checked old Flutter login code and `google_sign_in_API.dart`.
+- Reused only the intent of using Google Sign-In as the entry point.
+- Not reused: old empty-password API login flow, direct Google user-data trust, direct page-level API code, and old global navigation/state patterns.
+- Real Google OAuth Client IDs are intentionally not committed. Runtime must provide `GOOGLE_CLIENT_ID` and `GOOGLE_SERVER_CLIENT_ID`; backend `GOOGLE_CLIENT_IDS` must include the accepted audiences.
+- iOS CocoaPods added the Google Sign-In resources copy build phase to the Runner Xcode project.
+- Existing unrelated `backend/src/main/resources/application.yml` changes were left untouched and are not part of this task.
+
+## 2026-07-10 08:17
+
+Task
+TASK-037 Flutter 30 天登入狀態保存（DONE）
+
+Agent
+Codex
+
+### Completed
+
+- Added shared Flutter session persistence for Web, Android, and iOS using the approved SharedPreferences package.
+- Added `AuthSessionStore` to save `LoginResult` and last-opened time.
+- Updated login flow to save session after successful login.
+- Updated splash flow to restore valid sessions and navigate directly to home when the user has not logged out and opened the app within 30 days.
+- Added logout flow from home to call logout, clear Authorization header, clear local session, and return to login.
+- Added tests for session restore, session expiry, splash auto-navigation, and logout navigation.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `frontend/ios/Podfile`
+- `frontend/lib/repositories/auth_session_store.dart`
+- `frontend/test/auth_session_store_test.dart`
+
+### Modified
+
+- `frontend/lib/repositories/auth_repository.dart`
+- `frontend/lib/providers/auth_provider.dart`
+- `frontend/lib/pages/splash_page.dart`
+- `frontend/lib/pages/home_page.dart`
+- `frontend/test/login_page_test.dart`
+- `frontend/test/widget_test.dart`
+- `frontend/pubspec.yaml`
+- `frontend/pubspec.lock`
+- `frontend/ios/Flutter/Debug.xcconfig`
+- `frontend/ios/Flutter/Release.xcconfig`
+- `frontend/android/settings.gradle.kts`
+- `frontend/ios/Runner.xcodeproj/project.pbxproj`
+- `frontend/ios/Runner.xcworkspace/contents.xcworkspacedata`
+- `docs/PROJECT_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `frontend/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- Uses existing `POST /api/auth/login`.
+- Uses existing `POST /api/auth/logout`.
+
+### Database
+
+- None
+
+### Tests
+
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build web --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build apk --debug --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --no-codesign --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --simulator --no-pub`
+
+### Commit Message
+
+```text
+feat(frontend): 保存三平台登入狀態
+```
+
+### Notes
+
+- `system_data/` reference: checked old Flutter login pages that used SharedPreferences to remember self login.
+- Reused only the intent of remembering login state.
+- Not reused: old account-only persistence, direct page-level SharedPreferences access, `Navigator` routing, and missing expiry policy.
+- Android Kotlin Gradle plugin was updated from 1.8.22 to 2.1.0 so the approved `shared_preferences` Android plugin can compile.
+- Existing unrelated `backend/src/main/resources/application.yml` changes were left untouched and are not part of this task.
+
+## 2026-07-10 08:00
+
+Task
+TASK-036 Flutter App Icon 三平台替換（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Replaced default Flutter launcher icons for Android, iOS, and Web with icons generated from root `icon/icon.png`.
+- Generated Android mipmap launcher icons for all existing densities.
+- Generated iOS AppIcon image set including the 1024px marketing icon without transparency.
+- Generated Web favicon, PWA icons, and maskable icons.
+- Updated Web manifest theme and background colors from Flutter default blue to the legacy warm yellow / brown palette.
+- Updated UI spec, frontend README, and task status for the shared app icon source and generation rules.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `frontend/android/app/src/main/res/mipmap-mdpi/ic_launcher.png`
+- `frontend/android/app/src/main/res/mipmap-hdpi/ic_launcher.png`
+- `frontend/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png`
+- `frontend/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png`
+- `frontend/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png`
+- `frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/*.png`
+- `frontend/web/favicon.png`
+- `frontend/web/icons/*.png`
+- `frontend/web/manifest.json`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `frontend/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- None
+
+### Database
+
+- None
+
+### Tests
+
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build web --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build apk --debug --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --no-codesign --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --simulator --no-pub`
+
+### Commit Message
+
+```text
+style(frontend): 替換三平台 app icon
+```
+
+### Notes
+
+- `system_data/` reference: checked available files. No direct old app icon implementation was needed for this asset-only task.
+- Used `icon/icon.png` as the icon source. `icon/標題.png` was not used because it is a title image with a non-square ratio.
+- Existing unrelated `backend/src/main/resources/application.yml` changes were left untouched and are not part of this task.
+
+## 2026-07-10 07:28
+
+Task
+TASK-035 Phase 2 測試與 Task 標示整理（DONE）
+
+Agent
+Codex
+
+### Completed
+
+- Updated previous Flutter Phase 2 task labels from `REVIEW` to `DONE` because they are now merged into `develop`.
+- Added Phase 2 test report and test matrix.
+- Fixed `backend/gradlew` executable permission so backend tests can run through the project wrapper.
+- Ran backend tests, frontend analyze, frontend tests, and Web / Android / iOS builds.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `docs/PHASE2_TEST_REPORT.md`
+
+### Modified
+
+- `backend/gradlew`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- None
+
+### Database
+
+- None
+
+### Tests
+
+- `cd backend && ./gradlew test`
+- `cd frontend && /Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `cd frontend && /Users/linweijun/fultter/flutter/bin/flutter test --no-pub`
+- `cd frontend && /Users/linweijun/fultter/flutter/bin/flutter build web --no-pub`
+- `cd frontend && /Users/linweijun/fultter/flutter/bin/flutter build apk --debug --no-pub`
+- `cd frontend && /Users/linweijun/fultter/flutter/bin/flutter build ios --no-codesign --no-pub`
+- `cd frontend && /Users/linweijun/fultter/flutter/bin/flutter build ios --simulator --no-pub`
+
+### Commit Message
+
+```text
+test(phase2): 補齊會員功能測試報告
+```
+
+### Notes
+
+- `system_data/` reference: no additional old-system code was needed for this test-summary task; previous Phase 2 feature tasks already recorded their references.
+- Existing untracked `backend/bin/` was left untouched.
+- Android build still reports a Kotlin version future-deprecation warning; it does not block the build.
+
+## 2026-07-10 07:16
+
+Task
+TASK-034 Flutter 密碼鎖頁（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Added shared Flutter password lock page for Web, Android, and iOS.
+- Added password lock status and verification models.
+- Added `UserRepository` calls for `PUT /api/users/me/password-lock` and `POST /api/users/me/password-lock/verify`.
+- Added Riverpod password lock controller for setting and verifying lock password.
+- Added `/password-lock` route and home-page entry action.
+- Added widget tests for required validation, mismatch validation, successful set, successful verify, failed verify, and home navigation.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `frontend/lib/models/password_lock_status.dart`
+- `frontend/lib/models/password_lock_status.g.dart`
+- `frontend/lib/models/password_lock_verification.dart`
+- `frontend/lib/models/password_lock_verification.g.dart`
+- `frontend/lib/pages/password_lock_page.dart`
+- `frontend/lib/providers/password_lock_provider.dart`
+- `frontend/test/password_lock_page_test.dart`
+
+### Modified
+
+- `frontend/lib/repositories/user_repository.dart`
+- `frontend/lib/pages/home_page.dart`
+- `frontend/lib/routes/app_router.dart`
+- `frontend/lib/routes/app_routes.dart`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `frontend/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- Uses existing `PUT /api/users/me/password-lock`.
+- Uses existing `POST /api/users/me/password-lock/verify`.
+
+### Database
+
+- None
+
+### Tests
+
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub test/password_lock_page_test.dart`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build web --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build apk --debug --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --no-codesign --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --simulator --no-pub`
+
+### Commit Message
+
+```text
+feat(frontend): 新增密碼鎖頁
+```
+
+### Notes
+
+- `system_data/` reference: checked old `setting_lock_page.dart`, `check_lock_page.dart`, `lock_page.dart`, `lock_widget.dart`, and member repository lock-related methods.
+- Reused the set / confirm / verify interaction flow only.
+- Not reused: old SharedPreferences PIN storage, local lock state, `Navigator` routing, direct old repository calls, and hard-coded page colors.
+- Forgot password lock flow is not implemented in this task because no formal API is defined yet.
+
+## 2026-07-10 07:07
+
+Task
+TASK-033 前端色調調整為舊版暖黃色 / 棕色
+
+Agent
+Codex
+
+### Completed
+
+- Cleaned local branch state by deleting local branches already merged into `origin/main`.
+- Kept `main`, `develop`, `feature/flutter-register-page`, and `feature/profile-page`; then created `feature/frontend-legacy-colors` for this UI color task.
+- Updated centralized Flutter theme colors to match old system warm yellow and brown palette.
+- Updated UI spec and frontend README with legacy color token mapping.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `frontend/lib/theme/app_colors.dart`
+- `docs/UI_SPEC.md`
+- `frontend/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- None
+
+### Database
+
+- None
+
+### Tests
+
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build web --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build apk --debug --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --no-codesign --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --simulator --no-pub`
+
+### Commit Message
+
+```text
+style(frontend): 調整前端為舊版暖色調
+```
+
+### Notes
+
+- `system_data/` reference: checked `system_data/front-end/monsters_front_end/lib/pages/settings/style.dart`.
+- Reused old color intent and values only; did not copy old widget structure or page-level hard-coded styling.
+- Branch cleanup used safe local branch deletion for branches already merged to `origin/main`.
+
+## 2026-07-09 20:58
+
+Task
+TASK-032 Flutter 個人資料頁（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Added shared Flutter profile page for Web, Android, and iOS.
+- Added `UserProfile` model, `UserRepository`, and Riverpod `UserProfileController`.
+- Connected `/profile` go_router route and added a home-page entry action.
+- Implemented profile loading, API error retry, user name validation, birthday validation, and profile update success feedback.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `frontend/lib/models/user_profile.dart`
+- `frontend/lib/models/user_profile.g.dart`
+- `frontend/lib/pages/profile_page.dart`
+- `frontend/lib/providers/user_profile_provider.dart`
+- `frontend/lib/repositories/user_repository.dart`
+- `frontend/test/profile_page_test.dart`
+
+### Modified
+
+- `frontend/lib/pages/home_page.dart`
+- `frontend/lib/routes/app_router.dart`
+- `frontend/lib/routes/app_routes.dart`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `frontend/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- Uses existing `GET /api/users/me`.
+- Uses existing `PUT /api/users/me`.
+
+### Database
+
+- None
+
+### Tests
+
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub test/profile_page_test.dart`
+
+### Commit Message
+
+```text
+feat(frontend): 新增個人資料頁
+```
+
+### Notes
+
+- `system_data/` reference: checked old `drawer_personalInfo.dart`, `edit_personalInfo.dart`, `memberRepo.dart`, and `memberModel.dart`; reused the profile display/edit flow only.
+- Not reused: old global account state, direct HTTP calls, old API paths, `Navigator` routing, hard-coded colors, and avatar monster-index logic.
+- Avatar file upload UI is deferred because cross-platform file picking requires a separate approved package or platform strategy.
+
+## 2026-07-09 20:29
+
+Task
+TASK-031 Flutter 註冊頁三平台補齊
+
+Agent
+Codex
+
+### Completed
+
+- Confirmed the Flutter app already has Web, Android, and iOS platform project folders.
+- Confirmed current Flutter pages are implemented in shared `frontend/lib/` code and therefore target Web, Android, and iOS together.
+- Updated Android, iOS, and Web app metadata from Flutter defaults to `貘nsters`.
+- Updated UI spec and frontend README to make Web / Android / iOS support the default expectation for future frontend tasks.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `frontend/android/app/src/main/AndroidManifest.xml`
+- `frontend/ios/Runner/Info.plist`
+- `frontend/web/index.html`
+- `frontend/web/manifest.json`
+- `docs/UI_SPEC.md`
+- `frontend/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- None
+
+### Database
+
+- None
+
+### Tests
+
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build web --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build apk --debug --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --no-codesign --no-pub`（blocked：local Xcode is missing iOS 26.2 platform）
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --simulator --no-pub`（blocked：local Xcode is missing iOS 26.2 platform）
+
+### Commit Message
+
+```text
+chore(frontend): 補齊三平台 metadata
+```
+
+### Notes
+
+- Future frontend tasks must be implemented as cross-platform Flutter code by default, with platform-specific handling documented when needed.
+- Web and Android builds passed. iOS build is blocked by local Xcode platform installation, not by a Dart or Flutter compile error.
+
+## 2026-07-09 20:20
+
+Task
+TASK-031 Flutter 註冊頁（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Replaced the placeholder Flutter register route with a complete registration form.
+- Added register flow to `AuthRepository` and Riverpod `AuthController` using the existing `ApiClient`.
+- Added register result model for the current Auth API response shape.
+- Added Email, nickname, password length, and confirm-password validation.
+- Added loading, API error, success navigation, and login navigation states.
+- Added register page widget tests and updated router test for the new register UI.
+- Updated API spec, UI spec, frontend README, task, and log documents.
+- Completed local commit. Remote push remains blocked by external GitHub egress safety review.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `frontend/lib/models/register_result.dart`
+- `frontend/test/register_page_test.dart`
+
+### Modified
+
+- `frontend/README.md`
+- `frontend/lib/pages/register_page.dart`
+- `frontend/lib/providers/auth_provider.dart`
+- `frontend/lib/repositories/auth_repository.dart`
+- `frontend/test/routes/app_router_test.dart`
+- `docs/API_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- No backend endpoint change. Frontend now calls existing `POST /api/auth/register`.
+
+### Database
+
+- None
+
+### Tests
+
+- `/Users/linweijun/fultter/flutter/bin/dart format lib/pages/register_page.dart lib/providers/auth_provider.dart lib/repositories/auth_repository.dart lib/models/register_result.dart test/register_page_test.dart test/routes/app_router_test.dart`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+
+### Commit Message
+
+```text
+feat(frontend): 建立註冊頁
+```
+
+### Notes
+
+- Task remains in REVIEW until remote push completes.
+- Register success returns to the login route; it does not persist password or token and does not auto-login.
+
 ## 2026-07-09 14:59
 
 Task

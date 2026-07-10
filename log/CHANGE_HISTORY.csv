@@ -1,4 +1,27 @@
 日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
+2026-07-10,18:57,DOC-012,Documentation,docs/GIT_RULE.md,修改,建立適用 Phase 3 與後續 Phase 的整合分支與 Task PR 流程,Codex,否,否,否,否,版本更新為 v1.1
+2026-07-10,18:57,DOC-012,Documentation,docs/DECISIONS.md,修改,記錄 Phase 整合分支流程已定案,Codex,否,否,否,否,使用者確認採用新方案
+2026-07-10,18:57,DOC-012,Documentation,README.md,修改,更新 Phase 整合分支與 Task 分支建立說明,Codex,否,否,否,否,適用所有後續 Phase
+2026-07-10,18:57,DOC-012,Documentation,log/CHANGE_LOG.md,修改,新增 DOC-012 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,18:57,DOC-012,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-012 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,18:48,TASK-043,Frontend,frontend/assets/images/app_icon.png,新增,新增 Flutter 內部 app icon asset,Codex,否,否,是,否,來源為根目錄 icon/icon.png
+2026-07-10,18:48,TASK-043,Frontend,frontend/assets/images/app_logo.png,新增,新增 Flutter 內部品牌 logo asset,Codex,否,否,是,否,來源為根目錄 icon/標題.png
+2026-07-10,18:48,TASK-043,Frontend,frontend/android/app/src/main/res/mipmap-*/ic_launcher.png,修改,重新產生 Android launcher icons,Codex,否,否,是,否,來源為根目錄 icon/icon.png
+2026-07-10,18:48,TASK-043,Frontend,frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/*.png,修改,重新產生 iOS AppIcon 圖組,Codex,否,否,是,否,1024 icon 不含透明
+2026-07-10,18:48,TASK-043,Frontend,frontend/web/favicon.png,修改,重新產生 Web favicon,Codex,否,否,是,否,來源為根目錄 icon/icon.png
+2026-07-10,18:48,TASK-043,Frontend,frontend/web/icons/*.png,修改,重新產生 Web PWA icons,Codex,否,否,是,否,含 maskable icon
+2026-07-10,18:48,TASK-043,Frontend,frontend/lib/pages/splash_page.dart,修改,啟動畫面套用品牌 logo,Codex,否,否,是,否,
+2026-07-10,18:48,TASK-043,Frontend,frontend/lib/pages/login_page.dart,修改,登入頁套用品牌 logo,Codex,否,否,是,否,
+2026-07-10,18:48,TASK-043,Frontend,frontend/lib/pages/register_page.dart,修改,註冊頁套用品牌 logo,Codex,否,否,是,否,
+2026-07-10,18:48,TASK-043,Frontend,frontend/pubspec.yaml,修改,加入 app icon 與 logo asset 宣告,Codex,否,否,是,否,
+2026-07-10,18:48,TASK-043,Documentation,docs/UI_SPEC.md,修改,補充 App Icon 與 Logo 資產規範,Codex,否,否,是,否,文件同步
+2026-07-10,18:48,TASK-043,Documentation,docs/TASKS.md,修改,更新 App icon / Logo 任務 REVIEW 說明,Codex,否,否,否,否,待測試與 GitHub push
+2026-07-10,18:48,TASK-043,Documentation,frontend/README.md,修改,補充 Logo asset 路徑與套用頁面,Codex,否,否,否,否,文件同步
+2026-07-10,18:48,TASK-043,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-043 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,18:48,TASK-043,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-043 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,18:40,TASK-042,Documentation,docs/TASKS.md,修改,將 Phase 2 REVIEW 項目依 develop 合併狀態標記為 DONE,Codex,否,否,否,否,Phase 0 與 Phase 1 已全數 DONE；Phase 2 已收尾
+2026-07-10,18:40,TASK-042,Documentation,log/CHANGE_LOG.md,修改,新增 Phase 2 狀態收尾紀錄並修正相關 log 標題,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,18:40,TASK-042,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-042 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-06-29,17:10,DOC-001,Documentation,CHANGE_LOG.md,新增,建立文字版專案異動紀錄,ChatGPT,否,否,否,否,
 2026-06-29,17:10,DOC-001,Documentation,CHANGE_HISTORY.csv,新增,建立 CSV 版專案異動歷程,ChatGPT,否,否,否,否,
 2026-06-29,17:10,DOC-001,Documentation,CHANGE_HISTORY.xlsx,新增,建立 Excel 版專案異動歷程,ChatGPT,否,否,否,否,
@@ -413,3 +436,158 @@
 2026-07-09,14:59,TASK-030,Frontend,frontend/lib/models/login_result.g.dart,新增,新增登入結果模型 JSON 產生檔,Codex,是,否,否,否,json_serializable 產物
 2026-07-09,14:59,TASK-030,Frontend,frontend/pubspec.yaml,修改,加入已核准 json_serializable 工具鏈,Codex,否,否,否,否,符合 CODING_STANDARD Flutter JSON 規範
 2026-07-09,14:59,TASK-030,Frontend,frontend/pubspec.lock,修改,更新 Flutter dependency lock,Codex,否,否,否,否,flutter pub add 產生
+2026-07-09,20:20,TASK-031,Frontend,frontend/lib/models/register_result.dart,新增,新增註冊結果模型,Codex,是,否,否,否,對應 Auth API register data
+2026-07-09,20:20,TASK-031,Frontend,frontend/lib/repositories/auth_repository.dart,修改,新增註冊 API 呼叫,Codex,是,否,否,否,使用既有 ApiClient 呼叫 POST /api/auth/register
+2026-07-09,20:20,TASK-031,Frontend,frontend/lib/providers/auth_provider.dart,修改,新增 Riverpod 註冊流程狀態,Codex,是,否,是,否,不保存密碼 token
+2026-07-09,20:20,TASK-031,Frontend,frontend/lib/pages/register_page.dart,修改,建立註冊頁 UI 與狀態處理,Codex,是,否,是,否,成功後導回登入頁
+2026-07-09,20:20,TASK-031,Test,frontend/test/register_page_test.dart,新增,新增註冊頁 widget 測試,Codex,否,否,是,否,涵蓋表單 驗證 成功導頁 錯誤顯示
+2026-07-09,20:20,TASK-031,Test,frontend/test/routes/app_router_test.dart,修改,更新 register to login 路由測試文字,Codex,否,否,是,否,
+2026-07-09,20:20,TASK-031,Documentation,docs/API_SPEC.md,修改,補充註冊 API response 與規則,Codex,是,否,否,否,文件同步
+2026-07-09,20:20,TASK-031,Documentation,docs/UI_SPEC.md,修改,補充 Flutter Register Page 實作規範,Codex,否,否,是,否,文件同步
+2026-07-09,20:20,TASK-031,Documentation,frontend/README.md,修改,補充註冊流程前端結構,Codex,否,否,否,否,文件同步
+2026-07-09,20:20,TASK-031,Documentation,docs/TASKS.md,修改,Flutter 註冊頁 Task REVIEW,Codex,否,否,否,否,本地實作測試 analyze 與 commit 完成；待 GitHub push
+2026-07-09,20:20,TASK-031,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-031 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log；遠端 push 被安全審核拒絕
+2026-07-09,20:20,TASK-031,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-031 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-09,20:29,TASK-031,Frontend,frontend/android/app/src/main/AndroidManifest.xml,修改,補齊 Android app label,Codex,否,否,是,否,三平台 metadata 補齊
+2026-07-09,20:29,TASK-031,Frontend,frontend/ios/Runner/Info.plist,修改,補齊 iOS display name,Codex,否,否,是,否,三平台 metadata 補齊
+2026-07-09,20:29,TASK-031,Frontend,frontend/web/index.html,修改,補齊 Web title 與 description,Codex,否,否,是,否,三平台 metadata 補齊
+2026-07-09,20:29,TASK-031,Frontend,frontend/web/manifest.json,修改,補齊 Web manifest name 與 description,Codex,否,否,是,否,三平台 metadata 補齊
+2026-07-09,20:29,TASK-031,Documentation,docs/UI_SPEC.md,修改,補充後續前端任務三平台預設規範,Codex,否,否,是,否,
+2026-07-09,20:29,TASK-031,Documentation,frontend/README.md,修改,補充前端三平台支援說明,Codex,否,否,否,否,
+2026-07-09,20:29,TASK-031,Test,frontend,檢查,執行 Flutter analyze 與 Web Android iOS build 驗證,Codex,否,否,是,否,Web 與 Android 通過；iOS 因本機 Xcode 缺少 iOS 26.2 platform 阻擋
+2026-07-09,20:29,TASK-031,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-031 三平台補齊紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-09,20:29,TASK-031,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-031 三平台補齊 history,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-09,20:58,TASK-032,Frontend,frontend/lib/models/user_profile.dart,新增,新增個人資料資料模型,Codex,是,否,是,否,對應 GET PUT /api/users/me 回應欄位
+2026-07-09,20:58,TASK-032,Frontend,frontend/lib/models/user_profile.g.dart,新增,新增個人資料 JSON mapping,Codex,是,否,是,否,json_serializable mapping
+2026-07-09,20:58,TASK-032,Frontend,frontend/lib/repositories/user_repository.dart,新增,新增個人資料 API repository,Codex,是,否,是,否,使用既有 ApiClient 不直接呼叫 Dio
+2026-07-09,20:58,TASK-032,Frontend,frontend/lib/providers/user_profile_provider.dart,新增,新增個人資料 Riverpod 狀態流程,Codex,是,否,是,否,支援載入 儲存 錯誤 成功狀態
+2026-07-09,20:58,TASK-032,Frontend,frontend/lib/pages/profile_page.dart,新增,新增個人資料頁,Codex,是,否,是,否,支援三平台共用 Flutter UI
+2026-07-09,20:58,TASK-032,Frontend,frontend/lib/pages/home_page.dart,修改,新增首頁前往個人資料入口,Codex,否,否,是,否,
+2026-07-09,20:58,TASK-032,Frontend,frontend/lib/routes/app_router.dart,修改,新增 profile route,Codex,否,否,是,否,
+2026-07-09,20:58,TASK-032,Frontend,frontend/lib/routes/app_routes.dart,修改,新增 profile route 常數,Codex,否,否,是,否,
+2026-07-09,20:58,TASK-032,Test,frontend/test/profile_page_test.dart,新增,新增個人資料頁 widget 測試,Codex,否,否,是,否,涵蓋載入 驗證 儲存 錯誤 首頁導頁
+2026-07-09,20:58,TASK-032,Documentation,docs/UI_SPEC.md,修改,補充 Flutter Profile Page 實作規範,Codex,是,否,是,否,文件同步
+2026-07-09,20:58,TASK-032,Documentation,docs/TASKS.md,修改,Flutter 個人資料頁 Task REVIEW,Codex,否,否,否,否,本地實作測試與 analyze 完成；待 GitHub push
+2026-07-09,20:58,TASK-032,Documentation,frontend/README.md,修改,補充個人資料頁前端結構,Codex,否,否,否,否,文件同步
+2026-07-09,20:58,TASK-032,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-032 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-09,20:58,TASK-032,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-032 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,07:07,TASK-033,Git,local branches,清理,刪除已 merge 至 origin/main 的本地分支,Codex,否,否,否,否,保留 main develop feature/flutter-register-page feature/profile-page
+2026-07-10,07:07,TASK-033,Frontend,frontend/lib/theme/app_colors.dart,修改,前端集中色票改為舊版暖黃色與棕色,Codex,否,否,是,否,對齊舊版 BackgroundColorLight Soft Warm
+2026-07-10,07:07,TASK-033,Documentation,docs/UI_SPEC.md,修改,補充舊版色票 token 對應,Codex,否,否,是,否,文件同步
+2026-07-10,07:07,TASK-033,Documentation,frontend/README.md,修改,補充前端舊版色調說明,Codex,否,否,否,否,文件同步
+2026-07-10,07:07,TASK-033,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-033 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,07:07,TASK-033,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-033 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,07:16,TASK-034,Frontend,frontend/lib/models/password_lock_status.dart,新增,新增密碼鎖設定狀態模型,Codex,是,否,是,否,對應 PUT password-lock response
+2026-07-10,07:16,TASK-034,Frontend,frontend/lib/models/password_lock_verification.dart,新增,新增密碼鎖驗證模型,Codex,是,否,是,否,對應 POST password-lock verify response
+2026-07-10,07:16,TASK-034,Frontend,frontend/lib/repositories/user_repository.dart,修改,新增密碼鎖設定與驗證 API 呼叫,Codex,是,否,是,否,使用既有 ApiClient
+2026-07-10,07:16,TASK-034,Frontend,frontend/lib/providers/password_lock_provider.dart,新增,新增密碼鎖 Riverpod 狀態流程,Codex,是,否,是,否,支援設定 驗證 錯誤狀態
+2026-07-10,07:16,TASK-034,Frontend,frontend/lib/pages/password_lock_page.dart,新增,新增密碼鎖頁,Codex,是,否,是,否,三平台共用 Flutter UI
+2026-07-10,07:16,TASK-034,Frontend,frontend/lib/pages/home_page.dart,修改,新增首頁前往密碼鎖入口,Codex,否,否,是,否,
+2026-07-10,07:16,TASK-034,Frontend,frontend/lib/routes/app_router.dart,修改,新增 passwordLock route,Codex,否,否,是,否,
+2026-07-10,07:16,TASK-034,Frontend,frontend/lib/routes/app_routes.dart,修改,新增 passwordLock route 常數,Codex,否,否,是,否,
+2026-07-10,07:16,TASK-034,Test,frontend/test/password_lock_page_test.dart,新增,新增密碼鎖頁 widget 測試,Codex,否,否,是,否,涵蓋設定 驗證 失敗 導頁
+2026-07-10,07:16,TASK-034,Documentation,docs/UI_SPEC.md,修改,補充 Flutter Password Lock Page 實作規範,Codex,是,否,是,否,文件同步
+2026-07-10,07:16,TASK-034,Documentation,docs/TASKS.md,修改,Flutter 密碼鎖頁 Task REVIEW,Codex,否,否,否,否,本地實作測試與 analyze 完成；待 GitHub push
+2026-07-10,07:16,TASK-034,Documentation,frontend/README.md,修改,補充密碼鎖頁前端結構,Codex,否,否,否,否,文件同步
+2026-07-10,07:16,TASK-034,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-034 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,07:16,TASK-034,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-034 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,07:28,TASK-035,Documentation,docs/PHASE2_TEST_REPORT.md,新增,新增 Phase 2 測試矩陣與驗證結果,Codex,否,否,否,否,測試整理
+2026-07-10,07:28,TASK-035,Backend,backend/gradlew,修改,補上 Gradle wrapper 執行權限,Codex,否,否,否,否,使後端測試可透過 wrapper 執行
+2026-07-10,07:28,TASK-035,Documentation,docs/TASKS.md,修改,更新 Phase 2 前端 Task 標示與測試 REVIEW,Codex,否,否,否,否,前置 Flutter Task 已 merge 至 develop
+2026-07-10,07:28,TASK-035,Test,backend frontend,檢查,執行 Phase 2 後端測試 前端測試與三平台 build,Codex,否,否,是,否,全部通過；Android 有既有 Kotlin 版本提示
+2026-07-10,07:28,TASK-035,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-035 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,07:28,TASK-035,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-035 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,08:00,TASK-036,Frontend,frontend/android/app/src/main/res/mipmap-*/ic_launcher.png,修改,以根目錄 icon/icon.png 產生 Android launcher icons,Codex,否,否,是,否,替換 Flutter 預設 icon
+2026-07-10,08:00,TASK-036,Frontend,frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/*.png,修改,以根目錄 icon/icon.png 產生 iOS AppIcon 圖組,Codex,否,否,是,否,1024 icon 使用不透明背景
+2026-07-10,08:00,TASK-036,Frontend,frontend/web/favicon.png,修改,以根目錄 icon/icon.png 產生 Web favicon,Codex,否,否,是,否,替換 Flutter 預設 icon
+2026-07-10,08:00,TASK-036,Frontend,frontend/web/icons/*.png,修改,以根目錄 icon/icon.png 產生 Web PWA icons,Codex,否,否,是,否,含 maskable icon
+2026-07-10,08:00,TASK-036,Frontend,frontend/web/manifest.json,修改,Web manifest theme 與 background color 改為舊版暖色調,Codex,否,否,是,否,移除 Flutter 預設藍色
+2026-07-10,08:00,TASK-036,Documentation,docs/UI_SPEC.md,修改,補充三平台 App Icon 資產規範,Codex,否,否,是,否,文件同步
+2026-07-10,08:00,TASK-036,Documentation,docs/TASKS.md,修改,新增 App icon 三平台替換 REVIEW 狀態,Codex,否,否,否,否,待 GitHub push
+2026-07-10,08:00,TASK-036,Documentation,frontend/README.md,修改,補充 App Icons 產出位置與 manifest 色彩規範,Codex,否,否,否,否,文件同步
+2026-07-10,08:00,TASK-036,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-036 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,08:00,TASK-036,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-036 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,08:17,TASK-037,Frontend,frontend/lib/repositories/auth_session_store.dart,新增,新增 30 天登入 session 保存與還原,Codex,是,否,是,否,使用已核准 SharedPreferences
+2026-07-10,08:17,TASK-037,Frontend,frontend/lib/repositories/auth_repository.dart,修改,登入成功保存 session 並新增恢復與登出清除流程,Codex,是,否,是,否,使用既有 login logout API
+2026-07-10,08:17,TASK-037,Frontend,frontend/lib/providers/auth_provider.dart,修改,新增 restoreSession 與 logout 控制流程,Codex,否,否,是,否,Riverpod 狀態管理
+2026-07-10,08:17,TASK-037,Frontend,frontend/lib/pages/splash_page.dart,修改,啟動時恢復 30 天內有效登入並直接進首頁,Codex,否,否,是,否,三平台共用 Flutter UI
+2026-07-10,08:17,TASK-037,Frontend,frontend/lib/pages/home_page.dart,修改,新增首頁登出入口並清除登入狀態,Codex,否,否,是,否,登出後回登入頁
+2026-07-10,08:17,TASK-037,Frontend,frontend/pubspec.yaml,修改,加入 shared_preferences 依賴,Codex,否,否,是,否,套件已於 DECISIONS 核准
+2026-07-10,08:17,TASK-037,Frontend,frontend/pubspec.lock,修改,更新 shared_preferences 相關鎖定版本,Codex,否,否,否,否,flutter pub get
+2026-07-10,08:17,TASK-037,Frontend,frontend/android/settings.gradle.kts,修改,升級 Kotlin Android plugin 至 2.1.0,Codex,否,否,是,否,支援 shared_preferences_android 編譯
+2026-07-10,08:17,TASK-037,Frontend,frontend/ios/Podfile,新增,新增 Flutter iOS plugin CocoaPods 設定,Codex,否,否,是,否,shared_preferences iOS plugin 需要
+2026-07-10,08:17,TASK-037,Frontend,frontend/ios/Flutter/Debug.xcconfig,修改,補上 CocoaPods xcconfig include,Codex,否,否,是,否,shared_preferences iOS plugin 設定
+2026-07-10,08:17,TASK-037,Frontend,frontend/ios/Flutter/Release.xcconfig,修改,補上 CocoaPods xcconfig include,Codex,否,否,是,否,shared_preferences iOS plugin 設定
+2026-07-10,08:17,TASK-037,Frontend,frontend/ios/Runner.xcodeproj/project.pbxproj,修改,補上 CocoaPods build phase 與 framework 設定,Codex,否,否,是,否,shared_preferences iOS plugin 設定
+2026-07-10,08:17,TASK-037,Frontend,frontend/ios/Runner.xcworkspace/contents.xcworkspacedata,修改,補上 Pods workspace 參照,Codex,否,否,是,否,shared_preferences iOS plugin 設定
+2026-07-10,08:17,TASK-037,Test,frontend/test/auth_session_store_test.dart,新增,新增 session 還原與逾期清除測試,Codex,否,否,是,否,涵蓋 30 天政策
+2026-07-10,08:17,TASK-037,Test,frontend/test/login_page_test.dart,修改,新增 splash 自動登入與首頁登出測試,Codex,否,否,是,否,涵蓋未登入與已登入情境
+2026-07-10,08:17,TASK-037,Test,frontend/test/widget_test.dart,修改,補上 SharedPreferences mock 初始化,Codex,否,否,是,否,避免測試污染
+2026-07-10,08:17,TASK-037,Documentation,docs/PROJECT_SPEC.md,修改,補充 30 天登入保存需求,Codex,否,否,是,否,需求同步
+2026-07-10,08:17,TASK-037,Documentation,docs/UI_SPEC.md,修改,補充 Flutter 30 天登入 session 規範,Codex,是,否,是,否,文件同步
+2026-07-10,08:17,TASK-037,Documentation,docs/TASKS.md,修改,新增 Flutter 30 天登入狀態保存 REVIEW,Codex,否,否,否,否,本地實作測試 analyze 與 Web Android iOS build 完成；待 GitHub push
+2026-07-10,08:17,TASK-037,Documentation,frontend/README.md,修改,補充登入 session 保存與逾期規則,Codex,否,否,否,否,文件同步
+2026-07-10,08:17,TASK-037,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-037 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,08:17,TASK-037,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-037 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,12:20,TASK-038,Frontend,frontend/lib/services/google_sign_in_service.dart,新增,新增 Google Sign-In SDK 初始化與 ID Token 取得服務,Codex,是,否,是,否,方案一 google_sign_in
+2026-07-10,12:20,TASK-038,Frontend,frontend/lib/widgets/auth/google_sign_in_web_button.dart,新增,新增三平台條件匯出 Google Web 官方按鈕,Codex,否,否,是,否,Web 使用 GIS 官方按鈕
+2026-07-10,12:20,TASK-038,Frontend,frontend/lib/widgets/auth/google_sign_in_web_button_stub.dart,新增,新增非 Web Google 按鈕 stub,Codex,否,否,是,否,條件匯入
+2026-07-10,12:20,TASK-038,Frontend,frontend/lib/widgets/auth/google_sign_in_web_button_web.dart,新增,新增 google_sign_in_web renderButton 包裝,Codex,否,否,是,否,Web 使用官方按鈕
+2026-07-10,12:20,TASK-038,Frontend,frontend/lib/config/app_config.dart,修改,新增 GOOGLE_CLIENT_ID 與 GOOGLE_SERVER_CLIENT_ID dart-define,Codex,否,否,否,否,不提交真實 Client ID
+2026-07-10,12:20,TASK-038,Frontend,frontend/lib/repositories/auth_repository.dart,修改,新增 googleLogin 呼叫既有 Google 登入 API 並保存 session,Codex,是,否,是,否,使用 POST /api/auth/google-login
+2026-07-10,12:20,TASK-038,Frontend,frontend/lib/providers/auth_provider.dart,修改,新增 Google 登入控制流程與 logout SDK sign-out,Codex,否,否,是,否,Riverpod 狀態管理
+2026-07-10,12:20,TASK-038,Frontend,frontend/lib/pages/login_page.dart,修改,啟用 Google 登入按鈕與 Web 官方按鈕事件登入,Codex,否,否,是,否,三平台共用登入頁
+2026-07-10,12:20,TASK-038,Frontend,frontend/pubspec.yaml,修改,加入 google_sign_in 與 google_sign_in_web 依賴,Codex,否,否,是,否,使用者已同意新增套件
+2026-07-10,12:20,TASK-038,Frontend,frontend/pubspec.lock,修改,更新 Google Sign-In 相關鎖定版本,Codex,否,否,否,否,flutter pub add 產生
+2026-07-10,12:20,TASK-038,Frontend,frontend/ios/Runner.xcodeproj/project.pbxproj,修改,新增 Google Sign-In Pod resources copy build phase,Codex,否,否,是,否,iOS build 必要設定
+2026-07-10,12:20,TASK-038,Test,frontend/test/login_page_test.dart,修改,新增 Google 登入成功 失敗 Web 事件與登出測試,Codex,否,否,是,否,前端測試通過
+2026-07-10,12:20,TASK-038,Documentation,docs/DECISIONS.md,修改,補充已核准 Google Sign-In 前端套件,Codex,否,否,否,否,決策同步
+2026-07-10,12:20,TASK-038,Documentation,docs/PROJECT_SPEC.md,修改,補充 Flutter Google ID Token 交由後端驗證需求,Codex,否,否,是,否,需求同步
+2026-07-10,12:20,TASK-038,Documentation,docs/API_SPEC.md,修改,補充 Flutter Google 登入 dart-define 與 API 規則,Codex,是,否,否,否,API 文件同步
+2026-07-10,12:20,TASK-038,Documentation,docs/UI_SPEC.md,修改,更新登入頁 Google Sign-In 三平台實作規範,Codex,是,否,是,否,UI 文件同步
+2026-07-10,12:20,TASK-038,Documentation,docs/TASKS.md,修改,新增 Flutter Google 登入 REVIEW 狀態,Codex,否,否,否,否,本地實作測試 analyze 與 Web Android iOS build 完成；待 GitHub push
+2026-07-10,12:20,TASK-038,Documentation,frontend/README.md,修改,補充 Google 登入流程與 dart-define 執行說明,Codex,否,否,否,否,文件同步
+2026-07-10,12:20,TASK-038,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-038 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,12:20,TASK-038,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-038 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,12:51,TASK-039,Frontend,frontend/lib/services/google_sign_in_service.dart,修改,Web Google Sign-In 初始化不再傳 serverClientId,Codex,否,否,是,否,修正 Web 按鈕停留 Getting ready
+2026-07-10,12:51,TASK-039,Documentation,docs/API_SPEC.md,修改,補充 Web 不傳 GOOGLE_SERVER_CLIENT_ID 給 Google SDK,Codex,否,否,否,否,文件同步
+2026-07-10,12:51,TASK-039,Documentation,docs/UI_SPEC.md,修改,補充 Web Google SDK serverClientId 限制,Codex,否,否,是,否,文件同步
+2026-07-10,12:51,TASK-039,Documentation,frontend/README.md,修改,修正 Web 本機 Google 登入啟動參數,Codex,否,否,否,否,文件同步
+2026-07-10,12:51,TASK-039,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-039 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,12:51,TASK-039,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-039 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,13:03,TASK-040,Frontend,frontend/tool/run_web_local.sh,新增,新增固定 localhost 5050 的 Flutter Web 本機啟動腳本,Codex,否,否,否,否,避免 Google OAuth origin mismatch
+2026-07-10,13:03,TASK-040,Documentation,frontend/README.md,修改,補充 Web Google 登入固定 port 啟動方式,Codex,否,否,否,否,文件同步
+2026-07-10,13:03,TASK-040,Documentation,docs/API_SPEC.md,修改,補充 Web 本機 Google 登入固定 origin,Codex,否,否,否,否,文件同步
+2026-07-10,13:03,TASK-040,Documentation,docs/UI_SPEC.md,修改,補充 Web 本機測試固定 port 規則,Codex,否,否,是,否,文件同步
+2026-07-10,13:03,TASK-040,Documentation,docs/TASKS.md,修改,新增 Flutter Web Google 登入固定本機 port REVIEW,Codex,否,否,否,否,待 GitHub push
+2026-07-10,13:03,TASK-040,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-040 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,13:03,TASK-040,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-040 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,13:19,TASK-041,Backend,backend/src/main/java/com/monsters/auth/dto/RegisterRequest.java,修改,註冊 request 新增必填 account 與格式驗證,Codex,是,否,是,否,方案二正式啟用帳號
+2026-07-10,13:19,TASK-041,Backend,backend/src/main/java/com/monsters/auth/dto/RegisterResponse.java,修改,註冊 response 新增 account,Codex,是,否,是,否,
+2026-07-10,13:19,TASK-041,Backend,backend/src/main/java/com/monsters/auth/dto/AuthUserResponse.java,修改,登入使用者 response 新增 account,Codex,是,否,是,否,
+2026-07-10,13:19,TASK-041,Backend,backend/src/main/java/com/monsters/auth/service/AuthService.java,修改,新增帳號正規化 重複檢查 與 Google 帳號自動產生,Codex,是,否,是,否,Google 首次登入產生唯一 account
+2026-07-10,13:19,TASK-041,Backend,backend/src/main/java/com/monsters/user/entity/User.java,修改,User 建構子改為接收 account,Codex,否,否,是,否,
+2026-07-10,13:19,TASK-041,Backend,backend/src/main/java/com/monsters/user/repository/UserRepository.java,修改,新增 existsByAccount 查詢,Codex,否,否,是,否,唯一檢查
+2026-07-10,13:19,TASK-041,Database,database/init/01_schema.sql,修改,users.account 改為 NOT NULL,Codex,是,是,否,否,正式欄位
+2026-07-10,13:19,TASK-041,Frontend,frontend/lib/pages/register_page.dart,修改,註冊頁新增帳號欄位與前端格式驗證,Codex,否,否,是,否,三平台共用 Flutter UI
+2026-07-10,13:19,TASK-041,Frontend,frontend/lib/repositories/auth_repository.dart,修改,註冊 API 傳送 account,Codex,是,否,是,否,
+2026-07-10,13:19,TASK-041,Frontend,frontend/lib/providers/auth_provider.dart,修改,註冊時正規化 account 為小寫,Codex,否,否,是,否,
+2026-07-10,13:19,TASK-041,Frontend,frontend/lib/models/register_result.dart,修改,註冊結果模型新增 account,Codex,是,否,是,否,
+2026-07-10,13:19,TASK-041,Frontend,frontend/lib/models/auth_user.dart,修改,登入使用者模型新增 account,Codex,是,否,是,否,
+2026-07-10,13:19,TASK-041,Frontend,frontend/lib/models/auth_user.g.dart,修改,更新 AuthUser JSON mapping,Codex,是,否,是,否,
+2026-07-10,13:19,TASK-041,Test,backend/src/test/java/com/monsters/auth/service/AuthServiceTest.java,修改,新增帳號註冊與重複檢查測試,Codex,否,否,是,否,
+2026-07-10,13:19,TASK-041,Test,backend/src/test/java/com/monsters/auth/controller/AuthControllerTest.java,修改,更新註冊與登入 response account 測試,Codex,否,否,是,否,
+2026-07-10,13:19,TASK-041,Test,backend/src/test/java/com/monsters/common/security/JwtTokenServiceTest.java,修改,測試 User 建構子補 account,Codex,否,否,是,否,
+2026-07-10,13:19,TASK-041,Test,backend/src/test/java/com/monsters/common/security/SecurityConfigTest.java,修改,測試 User 建構子補 account,Codex,否,否,是,否,
+2026-07-10,13:19,TASK-041,Test,backend/src/test/java/com/monsters/user/service/UserServiceTest.java,修改,測試 User 建構子補 account,Codex,否,否,是,否,
+2026-07-10,13:19,TASK-041,Test,frontend/test/register_page_test.dart,修改,新增帳號欄位 顯示 驗證 送出測試,Codex,否,否,是,否,
+2026-07-10,13:19,TASK-041,Test,frontend/test/login_page_test.dart,修改,登入測試使用者補 account,Codex,否,否,是,否,
+2026-07-10,13:19,TASK-041,Test,frontend/test/auth_session_store_test.dart,修改,session 測試使用者補 account,Codex,否,否,是,否,
+2026-07-10,13:19,TASK-041,Documentation,docs/PROJECT_SPEC.md,修改,補充正式帳號需求,Codex,否,否,是,否,文件同步
+2026-07-10,13:19,TASK-041,Documentation,docs/DATABASE_SPEC.md,修改,users.account 改為正式必填唯一欄位,Codex,是,是,否,否,文件同步
+2026-07-10,13:19,TASK-041,Documentation,docs/API_SPEC.md,修改,補充註冊 登入 Google 登入 account 欄位,Codex,是,否,否,否,文件同步
+2026-07-10,13:19,TASK-041,Documentation,docs/UI_SPEC.md,修改,補充註冊頁帳號欄位與驗證規則,Codex,否,否,是,否,文件同步
+2026-07-10,13:19,TASK-041,Documentation,docs/TASKS.md,修改,新增正式啟用帳號欄位 REVIEW,Codex,否,否,否,否,待 GitHub push
+2026-07-10,13:19,TASK-041,Documentation,frontend/README.md,修改,補充前端註冊帳號規則,Codex,否,否,否,否,文件同步
+2026-07-10,13:19,TASK-041,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-041 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,13:19,TASK-041,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-041 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log

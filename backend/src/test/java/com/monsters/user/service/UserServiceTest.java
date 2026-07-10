@@ -45,7 +45,7 @@ class UserServiceTest {
     @Test
     void getProfileShouldReturnCurrentUserProfile() {
         UserService userService = userService();
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         ReflectionTestUtils.setField(user, "id", 1L);
         ReflectionTestUtils.setField(user, "account", "old-account");
         ReflectionTestUtils.setField(user, "birthday", LocalDate.of(2000, 1, 2));
@@ -75,7 +75,7 @@ class UserServiceTest {
     @Test
     void updateProfileShouldUpdateCurrentUserProfile() {
         UserService userService = userService();
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         ReflectionTestUtils.setField(user, "id", 1L);
         ReflectionTestUtils.setField(user, "account", "old-account");
         ReflectionTestUtils.setField(user, "birthday", LocalDate.of(2000, 1, 2));
@@ -113,7 +113,7 @@ class UserServiceTest {
     @Test
     void updateAvatarShouldUploadAndUpdateCurrentUserAvatar() {
         UserService userService = userService();
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         MockMultipartFile file = new MockMultipartFile(
                 "file",
                 "avatar.png",
@@ -155,7 +155,7 @@ class UserServiceTest {
     @Test
     void setPasswordLockShouldCreateCurrentUserPasswordLock() {
         UserService userService = userService();
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         ReflectionTestUtils.setField(user, "id", 1L);
         when(userRepository.findByIdAndDeletedFalse(1L)).thenReturn(Optional.of(user));
         when(userPasswordLockRepository.findByUserId(1L)).thenReturn(Optional.empty());
@@ -175,7 +175,7 @@ class UserServiceTest {
     @Test
     void setPasswordLockShouldUpdateExistingCurrentUserPasswordLock() {
         UserService userService = userService();
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         UserPasswordLock passwordLock = new UserPasswordLock(user, "old-lock");
         ReflectionTestUtils.setField(user, "id", 1L);
         when(userRepository.findByIdAndDeletedFalse(1L)).thenReturn(Optional.of(user));
@@ -206,7 +206,7 @@ class UserServiceTest {
     @Test
     void verifyPasswordLockShouldReturnTrueForMatchedPasswordLock() {
         UserService userService = userService();
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         UserPasswordLock passwordLock = new UserPasswordLock(user, "encoded-lock");
         when(userRepository.findByIdAndDeletedFalse(1L)).thenReturn(Optional.of(user));
         when(userPasswordLockRepository.findByUserIdAndEnabledTrue(1L)).thenReturn(Optional.of(passwordLock));
@@ -223,7 +223,7 @@ class UserServiceTest {
     @Test
     void verifyPasswordLockShouldReturnFalseForMismatchedPasswordLock() {
         UserService userService = userService();
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         UserPasswordLock passwordLock = new UserPasswordLock(user, "encoded-lock");
         when(userRepository.findByIdAndDeletedFalse(1L)).thenReturn(Optional.of(user));
         when(userPasswordLockRepository.findByUserIdAndEnabledTrue(1L)).thenReturn(Optional.of(passwordLock));
@@ -240,7 +240,7 @@ class UserServiceTest {
     @Test
     void verifyPasswordLockShouldRejectMissingPasswordLock() {
         UserService userService = userService();
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         when(userRepository.findByIdAndDeletedFalse(1L)).thenReturn(Optional.of(user));
         when(userPasswordLockRepository.findByUserIdAndEnabledTrue(1L)).thenReturn(Optional.empty());
 

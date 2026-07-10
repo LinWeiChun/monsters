@@ -67,10 +67,14 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] 更改頭貼 API（DONE）
 - [x] 密碼鎖 API（DONE）
 - [x] Flutter 登入頁（DONE）
-- [ ] Flutter 註冊頁
-- [ ] Flutter 個人資料頁
-- [ ] Flutter 密碼鎖頁
-- [ ] 測試
+- [x] 正式啟用帳號欄位（DONE）
+- [x] Flutter 30 天登入狀態保存（DONE）
+- [x] Flutter Google 登入（DONE）
+- [x] Flutter Web Google 登入固定本機 port（DONE）
+- [x] Flutter 註冊頁（DONE）
+- [x] Flutter 個人資料頁（DONE）
+- [x] Flutter 密碼鎖頁（DONE）
+- [x] 測試（DONE）
 
 ---
 
@@ -205,6 +209,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [ ] 排除舊系統金鑰、憑證、jar、metadata 與 build artifact
 - [ ] 依新版環境變數、部署與 Git 規範重新整理
 
+- [ ] App icon / Logo 三平台替換（REVIEW：本地產圖、登入 / 註冊 / 啟動畫面 logo 套用與文件同步完成；待測試與 GitHub push）
 - [ ] Android 測試
 - [ ] iOS 測試
 - [ ] Web 測試
