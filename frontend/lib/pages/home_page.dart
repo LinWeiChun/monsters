@@ -1,16 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../providers/auth_provider.dart';
 import '../routes/app_routes.dart';
 import '../theme/app_spacing.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(title: const Text('首頁')),
+      appBar: AppBar(
+        title: const Text('首頁'),
+        actions: [
+          IconButton(
+            key: const Key('homeLogoutButton'),
+            tooltip: '登出',
+            onPressed: () async {
+              await ref.read(authControllerProvider.notifier).logout();
+              if (context.mounted) {
+                context.goNamed(AppRoute.login);
+              }
+            },
+            icon: const Icon(Icons.logout),
+          ),
+        ],
+      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),

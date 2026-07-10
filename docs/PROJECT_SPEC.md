@@ -24,7 +24,9 @@
 
 - 使用者註冊
 - 使用者登入
-- Google 登入
+- 登入後若未登出，且距離上次開啟 App 未超過 30 天，Web、Android、iOS 需直接進入主畫面
+- 超過 30 天未開啟 App、使用者登出或本地登入狀態無效時，需重新登入
+- Google 登入：Flutter Web / Android / iOS 使用 Google Sign-In SDK 取得 Google ID Token，並交由後端驗證後換發本系統 JWT
 - 首次 Google 登入設定個人資料
 - 忘記密碼
 - 登出

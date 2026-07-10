@@ -42,6 +42,7 @@
 | JSON | json_serializable |
 | Routing | go_router |
 | Local Storage | SharedPreferences |
+| Google Sign-In | google_sign_in、google_sign_in_web |
 
 ### Backend
 

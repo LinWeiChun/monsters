@@ -192,6 +192,13 @@ Google 登入設定：
 |---|---|---|
 | app.security.google.client-ids | GOOGLE_CLIENT_IDS | 空字串，啟用 Google 登入前必須提供 |
 
+Flutter Google 登入設定：
+
+| Dart Define | 用途 | 預設值 |
+|---|---|---|
+| GOOGLE_CLIENT_ID | 前端 Google Sign-In 初始化用 Client ID，Web 必填，App 可依平台設定搭配使用 | 空字串 |
+| GOOGLE_SERVER_CLIENT_ID | 前端要求 ID Token 時使用的 Server / Web Client ID，需包含於後端 `GOOGLE_CLIENT_IDS` | 空字串 |
+
 Cloudflare R2 檔案上傳設定：
 
 | 設定 | 環境變數 | 預設值 |
@@ -361,6 +368,7 @@ Response：
 規則：
 
 - 後端必須驗證 Google ID Token，不接受前端自行驗證後傳入的使用者資料。
+- Flutter 端僅負責透過 Google Sign-In SDK 取得 Google ID Token，並呼叫本 API；不得傳入 Google 使用者資料取代 token。
 - `idToken` 必填。
 - Google ID Token 必須符合 RS256 簽章、有效 `kid`、Google issuer、未過期、`email_verified = true`。
 - `aud` 必須存在於 `GOOGLE_CLIENT_IDS` 設定，可用逗號設定多組 Web / App Client ID。

@@ -484,3 +484,45 @@
 2026-07-10,08:00,TASK-036,Documentation,frontend/README.md,修改,補充 App Icons 產出位置與 manifest 色彩規範,Codex,否,否,否,否,文件同步
 2026-07-10,08:00,TASK-036,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-036 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-10,08:00,TASK-036,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-036 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,08:17,TASK-037,Frontend,frontend/lib/repositories/auth_session_store.dart,新增,新增 30 天登入 session 保存與還原,Codex,是,否,是,否,使用已核准 SharedPreferences
+2026-07-10,08:17,TASK-037,Frontend,frontend/lib/repositories/auth_repository.dart,修改,登入成功保存 session 並新增恢復與登出清除流程,Codex,是,否,是,否,使用既有 login logout API
+2026-07-10,08:17,TASK-037,Frontend,frontend/lib/providers/auth_provider.dart,修改,新增 restoreSession 與 logout 控制流程,Codex,否,否,是,否,Riverpod 狀態管理
+2026-07-10,08:17,TASK-037,Frontend,frontend/lib/pages/splash_page.dart,修改,啟動時恢復 30 天內有效登入並直接進首頁,Codex,否,否,是,否,三平台共用 Flutter UI
+2026-07-10,08:17,TASK-037,Frontend,frontend/lib/pages/home_page.dart,修改,新增首頁登出入口並清除登入狀態,Codex,否,否,是,否,登出後回登入頁
+2026-07-10,08:17,TASK-037,Frontend,frontend/pubspec.yaml,修改,加入 shared_preferences 依賴,Codex,否,否,是,否,套件已於 DECISIONS 核准
+2026-07-10,08:17,TASK-037,Frontend,frontend/pubspec.lock,修改,更新 shared_preferences 相關鎖定版本,Codex,否,否,否,否,flutter pub get
+2026-07-10,08:17,TASK-037,Frontend,frontend/android/settings.gradle.kts,修改,升級 Kotlin Android plugin 至 2.1.0,Codex,否,否,是,否,支援 shared_preferences_android 編譯
+2026-07-10,08:17,TASK-037,Frontend,frontend/ios/Podfile,新增,新增 Flutter iOS plugin CocoaPods 設定,Codex,否,否,是,否,shared_preferences iOS plugin 需要
+2026-07-10,08:17,TASK-037,Frontend,frontend/ios/Flutter/Debug.xcconfig,修改,補上 CocoaPods xcconfig include,Codex,否,否,是,否,shared_preferences iOS plugin 設定
+2026-07-10,08:17,TASK-037,Frontend,frontend/ios/Flutter/Release.xcconfig,修改,補上 CocoaPods xcconfig include,Codex,否,否,是,否,shared_preferences iOS plugin 設定
+2026-07-10,08:17,TASK-037,Frontend,frontend/ios/Runner.xcodeproj/project.pbxproj,修改,補上 CocoaPods build phase 與 framework 設定,Codex,否,否,是,否,shared_preferences iOS plugin 設定
+2026-07-10,08:17,TASK-037,Frontend,frontend/ios/Runner.xcworkspace/contents.xcworkspacedata,修改,補上 Pods workspace 參照,Codex,否,否,是,否,shared_preferences iOS plugin 設定
+2026-07-10,08:17,TASK-037,Test,frontend/test/auth_session_store_test.dart,新增,新增 session 還原與逾期清除測試,Codex,否,否,是,否,涵蓋 30 天政策
+2026-07-10,08:17,TASK-037,Test,frontend/test/login_page_test.dart,修改,新增 splash 自動登入與首頁登出測試,Codex,否,否,是,否,涵蓋未登入與已登入情境
+2026-07-10,08:17,TASK-037,Test,frontend/test/widget_test.dart,修改,補上 SharedPreferences mock 初始化,Codex,否,否,是,否,避免測試污染
+2026-07-10,08:17,TASK-037,Documentation,docs/PROJECT_SPEC.md,修改,補充 30 天登入保存需求,Codex,否,否,是,否,需求同步
+2026-07-10,08:17,TASK-037,Documentation,docs/UI_SPEC.md,修改,補充 Flutter 30 天登入 session 規範,Codex,是,否,是,否,文件同步
+2026-07-10,08:17,TASK-037,Documentation,docs/TASKS.md,修改,新增 Flutter 30 天登入狀態保存 REVIEW,Codex,否,否,否,否,本地實作測試 analyze 與 Web Android iOS build 完成；待 GitHub push
+2026-07-10,08:17,TASK-037,Documentation,frontend/README.md,修改,補充登入 session 保存與逾期規則,Codex,否,否,否,否,文件同步
+2026-07-10,08:17,TASK-037,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-037 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,08:17,TASK-037,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-037 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,12:20,TASK-038,Frontend,frontend/lib/services/google_sign_in_service.dart,新增,新增 Google Sign-In SDK 初始化與 ID Token 取得服務,Codex,是,否,是,否,方案一 google_sign_in
+2026-07-10,12:20,TASK-038,Frontend,frontend/lib/widgets/auth/google_sign_in_web_button.dart,新增,新增三平台條件匯出 Google Web 官方按鈕,Codex,否,否,是,否,Web 使用 GIS 官方按鈕
+2026-07-10,12:20,TASK-038,Frontend,frontend/lib/widgets/auth/google_sign_in_web_button_stub.dart,新增,新增非 Web Google 按鈕 stub,Codex,否,否,是,否,條件匯入
+2026-07-10,12:20,TASK-038,Frontend,frontend/lib/widgets/auth/google_sign_in_web_button_web.dart,新增,新增 google_sign_in_web renderButton 包裝,Codex,否,否,是,否,Web 使用官方按鈕
+2026-07-10,12:20,TASK-038,Frontend,frontend/lib/config/app_config.dart,修改,新增 GOOGLE_CLIENT_ID 與 GOOGLE_SERVER_CLIENT_ID dart-define,Codex,否,否,否,否,不提交真實 Client ID
+2026-07-10,12:20,TASK-038,Frontend,frontend/lib/repositories/auth_repository.dart,修改,新增 googleLogin 呼叫既有 Google 登入 API 並保存 session,Codex,是,否,是,否,使用 POST /api/auth/google-login
+2026-07-10,12:20,TASK-038,Frontend,frontend/lib/providers/auth_provider.dart,修改,新增 Google 登入控制流程與 logout SDK sign-out,Codex,否,否,是,否,Riverpod 狀態管理
+2026-07-10,12:20,TASK-038,Frontend,frontend/lib/pages/login_page.dart,修改,啟用 Google 登入按鈕與 Web 官方按鈕事件登入,Codex,否,否,是,否,三平台共用登入頁
+2026-07-10,12:20,TASK-038,Frontend,frontend/pubspec.yaml,修改,加入 google_sign_in 與 google_sign_in_web 依賴,Codex,否,否,是,否,使用者已同意新增套件
+2026-07-10,12:20,TASK-038,Frontend,frontend/pubspec.lock,修改,更新 Google Sign-In 相關鎖定版本,Codex,否,否,否,否,flutter pub add 產生
+2026-07-10,12:20,TASK-038,Frontend,frontend/ios/Runner.xcodeproj/project.pbxproj,修改,新增 Google Sign-In Pod resources copy build phase,Codex,否,否,是,否,iOS build 必要設定
+2026-07-10,12:20,TASK-038,Test,frontend/test/login_page_test.dart,修改,新增 Google 登入成功 失敗 Web 事件與登出測試,Codex,否,否,是,否,前端測試通過
+2026-07-10,12:20,TASK-038,Documentation,docs/DECISIONS.md,修改,補充已核准 Google Sign-In 前端套件,Codex,否,否,否,否,決策同步
+2026-07-10,12:20,TASK-038,Documentation,docs/PROJECT_SPEC.md,修改,補充 Flutter Google ID Token 交由後端驗證需求,Codex,否,否,是,否,需求同步
+2026-07-10,12:20,TASK-038,Documentation,docs/API_SPEC.md,修改,補充 Flutter Google 登入 dart-define 與 API 規則,Codex,是,否,否,否,API 文件同步
+2026-07-10,12:20,TASK-038,Documentation,docs/UI_SPEC.md,修改,更新登入頁 Google Sign-In 三平台實作規範,Codex,是,否,是,否,UI 文件同步
+2026-07-10,12:20,TASK-038,Documentation,docs/TASKS.md,修改,新增 Flutter Google 登入 REVIEW 狀態,Codex,否,否,否,否,本地實作測試 analyze 與 Web Android iOS build 完成；待 GitHub push
+2026-07-10,12:20,TASK-038,Documentation,frontend/README.md,修改,補充 Google 登入流程與 dart-define 執行說明,Codex,否,否,否,否,文件同步
+2026-07-10,12:20,TASK-038,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-038 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,12:20,TASK-038,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-038 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log

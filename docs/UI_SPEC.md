@@ -301,7 +301,7 @@ AI 或開發者參考 `system_data/` 舊 UI 時，應檢查以下項目：
 - 登入成功後導向 `home` route
 - 前往註冊頁
 - 忘記密碼入口提示
-- Google 登入入口提示
+- Google 登入：Android / iOS 由 `google_sign_in` 觸發登入，Web 使用 `google_sign_in_web` 官方按鈕
 
 登入頁資料流程：
 
@@ -324,14 +324,24 @@ REST API
 | Page | `frontend/lib/pages/login_page.dart` |
 | Provider | `frontend/lib/providers/auth_provider.dart` |
 | Repository | `frontend/lib/repositories/auth_repository.dart` |
+| Google Sign-In Service | `frontend/lib/services/google_sign_in_service.dart` |
+| Web Google Sign-In Button | `frontend/lib/widgets/auth/google_sign_in_web_button.dart` |
+| Session Store | `frontend/lib/repositories/auth_session_store.dart` |
 | Model | `frontend/lib/models/auth_user.dart`、`frontend/lib/models/auth_user.g.dart`、`frontend/lib/models/login_result.dart`、`frontend/lib/models/login_result.g.dart` |
 
 規則：
 
 - 登入頁不得直接呼叫 Dio。
-- 登入頁不得直接保存 JWT、Refresh Token 或密碼至 SharedPreferences。
-- Access Token 僅由 `ApiClient.setAccessToken()` 暫存於目前執行階段。`AuthUser` 與 `LoginResult` 必須使用 `json_serializable` 產生 JSON mapping。
-- Google Sign-In SDK 尚未導入前，不得假造 Google ID Token 或沿用舊系統空密碼登入流程。
+- 登入頁不得直接保存 JWT、Refresh Token 或密碼至 SharedPreferences；登入狀態保存必須集中由 `AuthRepository` 與 `AuthSessionStore` 管理。
+- 登入成功後，`AuthSessionStore` 可保存 `LoginResult` 與最後開啟時間，讓 Web、Android、iOS 在未登出且 30 天內再次開啟時自動恢復登入。
+- App 啟動時由 `SplashPage` 透過 `AuthController.restoreSession()` 判斷登入狀態；若 session 有效，需套用 `ApiClient.setAccessToken()` 並導向 `home` route。
+- 若最後開啟時間超過 30 天、session 格式無效或使用者登出，必須清除本地登入狀態並要求重新登入。
+- 登出需呼叫 `AuthController.logout()`，由 Repository 呼叫登出 API、清除 `ApiClient` Authorization header 與本地 session。
+- 密碼不得保存至 SharedPreferences。`AuthUser` 與 `LoginResult` 必須使用 `json_serializable` 產生 JSON mapping。
+- Google 登入不得假造 Google ID Token、不得沿用舊系統空密碼登入流程、不得在前端自行驗證後傳入 Google 使用者資料。
+- Google 登入成功後需呼叫 `POST /api/auth/google-login`，由後端驗證 Google ID Token 並回傳本系統 `LoginResult`。
+- Web 版需使用 Google Identity Services 官方按鈕；Android / iOS 可使用共用 Flutter 按鈕觸發 Google SDK。
+- Google 登入成功後必須沿用 `AuthSessionStore` 保存 30 天登入狀態；登出時需同時清除本地 session 並嘗試執行 Google SDK sign-out。
 
 ## Flutter Register Page 實作規範
 
