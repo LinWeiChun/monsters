@@ -33,6 +33,11 @@ Git 操作則以 GIT_RULE.md 為準。
 ```text
 main
 └── develop
+    ├── feature/phase<n>
+    │   ├── feature/phase<n>-<module>
+    │   ├── fix/phase<n>-<module>
+    │   ├── refactor/phase<n>-<module>
+    │   └── docs/phase<n>-<module>
     ├── feature/*
     ├── fix/*
     ├── refactor/*
@@ -49,7 +54,11 @@ main
 
 - `main` 永遠保持可發布狀態。
 - `develop` 為主要整合分支。
-- 所有功能均由 `develop` 建立 Feature Branch。
+- 每個 Phase 開始時，必須由 `develop` 建立對應的 `feature/phase<n>` Phase 整合分支。
+- Phase 內的每個 Task 必須由對應的 `feature/phase<n>` 建立獨立工作分支。
+- Task 分支完成後先透過 Pull Request 合併回對應的 Phase 整合分支。
+- Phase 內所有 Task 通過整合測試後，Phase 整合分支再透過 Pull Request 合併至 `develop`。
+- 非 Phase 工作或未納入 Phase 的緊急工作，仍由 `develop` 建立對應分支。
 - Feature Branch 不得直接 Merge 至 `main`。
 - Release 完成後必須同步 Merge 回 `develop`。
 - Hotfix 完成後必須同步 Merge 回 `develop`。
@@ -62,10 +71,11 @@ main
 |---|---|---|
 | `main` | 正式版本 | 永遠保持可發布狀態，不得直接開發 |
 | `develop` | 開發整合分支 | 所有功能完成後先合併到此分支 |
-| `feature/<module>` | 新功能開發 | 從 `develop` 建立，完成後合併回 `develop` |
-| `fix/<module>` | Bug 修正 | 從 `develop` 建立，完成後合併回 `develop` |
-| `refactor/<module>` | 重構 | 不得改變既有功能行為 |
-| `docs/<module>` | 文件修改 | 僅用於文件與規格調整 |
+| `feature/phase<n>` | Phase 整合分支 | 從 `develop` 建立，收納該 Phase 的 Task PR，Phase 完成後合併回 `develop` |
+| `feature/phase<n>-<module>` | Phase 功能 Task | 從對應 `feature/phase<n>` 建立，完成後合併回該 Phase 分支 |
+| `fix/phase<n>-<module>` | Phase Bug 修正 | 從對應 `feature/phase<n>` 建立，完成後合併回該 Phase 分支 |
+| `refactor/phase<n>-<module>` | Phase 重構 Task | 從對應 `feature/phase<n>` 建立，不得改變既有功能行為 |
+| `docs/phase<n>-<module>` | Phase 文件 Task | 從對應 `feature/phase<n>` 建立，僅用於文件與規格調整 |
 | `release/<version>` | 發布前整理 | 從 `develop` 建立，測試完成後合併到 `main` |
 | `hotfix/<issue>` | 正式版緊急修正 | 從 `main` 建立，完成後合併回 `main` 與 `develop` |
 
@@ -76,6 +86,11 @@ main
 必須使用下列格式：
 
 ```text
+feature/phase3
+feature/phase3-annoyance-api
+fix/phase3-annoyance-validation
+refactor/phase3-entry-service
+docs/phase3-api-spec
 feature/auth
 feature/user
 feature/diary
@@ -161,7 +176,9 @@ git merge <feature-branch>
 
 限制：
 
-- `git merge` 僅允許用於 `feature/*`、`fix/*`、`refactor/*`、`docs/*` 合併至 `develop`。
+- Phase Task 的 `feature/*`、`fix/*`、`refactor/*`、`docs/*` 僅能合併至對應的 `feature/phase<n>`。
+- `feature/phase<n>` 僅能在 Phase 整合測試完成後合併至 `develop`。
+- 非 Phase 工作的 `feature/*`、`fix/*`、`refactor/*`、`docs/*` 仍只能合併至 `develop`。
 - AI 執行 `git commit` 前必須先檢查 `git status`。
 - AI 執行 `git push` 前必須確認目前分支不是 `main`。
 - AI 每次 Commit 後必須更新 `CHANGE_LOG.md` 與 `CHANGE_HISTORY.xlsx` 或 `CHANGE_HISTORY.csv`。
@@ -258,29 +275,44 @@ AI 不得在未被明確要求的情況下修改、刪除、搬移或格式化 `
 
 每一個 Task 建議對應一個 Branch。
 
-### 7.1 建立功能分支
+### 7.1 建立 Phase 整合分支
 
 ```bash
 git checkout develop
 git pull origin develop
-git checkout -b feature/<module>
+git checkout -b feature/phase<n>
+git push -u origin feature/phase<n>
 ```
 
-### 7.2 完成功能後提交
+### 7.2 建立 Phase Task 分支
+
+```bash
+git checkout feature/phase<n>
+git pull origin feature/phase<n>
+git checkout -b feature/phase<n>-<module>
+```
+
+### 7.3 完成 Task 後提交
 
 ```bash
 git status
 git add .
 git commit -m "feat(<module>): <summary>"
-git push origin feature/<module>
+git push origin feature/phase<n>-<module>
 ```
 
-### 7.3 建立 Pull Request
+### 7.4 建立 Pull Request
 
 Pull Request 方向：
 
 ```text
-feature/<module> → develop
+feature/phase<n>-<module> → feature/phase<n>
+```
+
+Phase 整合完成後：
+
+```text
+feature/phase<n> → develop
 ```
 
 正式發布方向：
@@ -321,7 +353,13 @@ Push
 產生 Pull Request Summary
 ```
 
-若目前 Branch 為 `main` 或 `develop`，不得直接開始修改程式，必須依任務建立適當分支。
+若目前 Branch 為 `main`、`develop` 或 `feature/phase<n>`，不得直接開始修改程式，必須依任務建立適當的 Task 分支。
+
+Phase Task 啟動前必須確認：
+
+- Task 分支的 base 是對應的 `feature/phase<n>`。
+- Pull Request 目標是對應的 `feature/phase<n>`，不是 `develop`。
+- Phase 整合分支只收納同一 Phase 的變更。
 
 ---
 
@@ -381,17 +419,19 @@ Issue
 ↓
 Task
 ↓
-Feature Branch
+Phase Task Branch
 ↓
 Commit
 ↓
 Push
 ↓
-Pull Request
+Pull Request → Phase Branch
 ↓
 Code Review
 ↓
-Merge develop
+Phase Integration Test
+↓
+Pull Request → develop
 ↓
 Release
 ↓
@@ -411,9 +451,11 @@ DOC-001
 
 ### 10.2 Branch 對應
 
-建議一個 Task 對應一個 Branch 與一個 Pull Request。
+建議一個 Task 對應一個 Branch 與一個 Pull Request，Task Branch 的目標為對應 Phase Branch。
 
 避免一個 Branch 完成多個功能。
+
+每個 Phase 只有一條整合分支，例如 `feature/phase3`。Phase 內的 Task Branch 不得跨 Phase 合併。
 
 ---
 
@@ -450,6 +492,8 @@ Repository 使用 GitHub Actions 每週一檢查分支。
 規則：
 
 - 永遠保留 `main` 與 `develop`。
+- 進行中且尚未合併至 `develop` 的 `feature/phase<n>` 不得刪除。
+- 尚未合併至對應 Phase Branch 的 Task Branch 不得刪除。
 - 已合併到 `main` 的工作分支可自動刪除。
 - 只合併到 `develop`、尚未合併到 `main` 的分支不得刪除。
 - 尚未合併到 `develop` 的分支不得刪除。
@@ -602,8 +646,8 @@ AI 不得自行決定。
 | 項目 | 內容 |
 |------|------|
 | 文件名稱 | GIT_RULE.md |
-| 版本 | v1.0 |
+| 版本 | v1.1 |
 | 專案 | 貘nsters |
 | 維護者 | WeiChun Lin |
 | 適用 | Repository 所有開發者與 AI Coding Agent |
-| 最後更新 | 2026-06-30 |
+| 最後更新 | 2026-07-10 |
