@@ -38,9 +38,8 @@ class AuthState {
   }) {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
-      errorMessage: clearErrorMessage
-          ? null
-          : errorMessage ?? this.errorMessage,
+      errorMessage:
+          clearErrorMessage ? null : errorMessage ?? this.errorMessage,
       loginResult: loginResult ?? this.loginResult,
       registerResult: registerResult ?? this.registerResult,
     );
@@ -51,6 +50,24 @@ class AuthController extends StateNotifier<AuthState> {
   AuthController(this._authRepository) : super(const AuthState());
 
   final AuthRepository _authRepository;
+
+  Future<bool> restoreSession({DateTime? now}) async {
+    state = state.copyWith(isLoading: true, clearErrorMessage: true);
+
+    try {
+      final result = await _authRepository.restoreSession(now: now);
+      if (result == null) {
+        state = const AuthState();
+        return false;
+      }
+
+      state = AuthState(loginResult: result);
+      return true;
+    } on Object {
+      state = const AuthState();
+      return false;
+    }
+  }
 
   Future<bool> login({required String email, required String password}) async {
     state = state.copyWith(isLoading: true, clearErrorMessage: true);
@@ -92,6 +109,16 @@ class AuthController extends StateNotifier<AuthState> {
     } on Object {
       state = const AuthState(errorMessage: '系統忙碌，請稍後再試');
       return false;
+    }
+  }
+
+  Future<void> logout() async {
+    state = state.copyWith(isLoading: true, clearErrorMessage: true);
+
+    try {
+      await _authRepository.logout();
+    } finally {
+      state = const AuthState();
     }
   }
 }

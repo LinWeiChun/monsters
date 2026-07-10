@@ -67,6 +67,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] 更改頭貼 API（DONE）
 - [x] 密碼鎖 API（DONE）
 - [x] Flutter 登入頁（DONE）
+- [ ] Flutter 30 天登入狀態保存（REVIEW：本地實作、測試、analyze 與 Web / Android / iOS build 完成；待 GitHub push）
 - [x] Flutter 註冊頁（DONE）
 - [x] Flutter 個人資料頁（DONE）
 - [x] Flutter 密碼鎖頁（DONE）

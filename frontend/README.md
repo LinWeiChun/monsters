@@ -56,17 +56,18 @@ UI 不得直接呼叫 Dio，後續功能需透過 Provider / Repository 使用 `
 - `lib/pages/register_page.dart`
 - `lib/providers/auth_provider.dart`
 - `lib/repositories/auth_repository.dart`
+- `lib/repositories/auth_session_store.dart`
 - `lib/models/auth_user.dart`
 - `lib/models/auth_user.g.dart`
 - `lib/models/login_result.dart`
 - `lib/models/login_result.g.dart`
 - `lib/models/register_result.dart`
 
-登入流程使用 `AuthRepository` 呼叫 `POST /api/auth/login`，成功後由 `ApiClient.setAccessToken()` 將 access token 套用到目前執行階段的 Authorization header。Auth model 使用 `json_serializable` 產生 JSON mapping。
+登入流程使用 `AuthRepository` 呼叫 `POST /api/auth/login`，成功後由 `ApiClient.setAccessToken()` 將 access token 套用到目前執行階段的 Authorization header，並透過 `AuthSessionStore` 保存 `LoginResult` 與最後開啟時間。使用者未登出且 30 天內再次開啟 App 時，`SplashPage` 會恢復 session 並直接導向首頁；超過 30 天、session 無效或使用者登出時，會清除本地 session 並要求重新登入。
 
 註冊流程使用 `AuthRepository` 呼叫 `POST /api/auth/register`，成功後導回登入頁，不自動登入，也不保存密碼或 token。
 
-目前不將 JWT、Refresh Token 或密碼寫入 SharedPreferences。Google 登入入口已保留，但需後續 Google Sign-In SDK 與 ID Token 流程完成後才能正式啟用。
+密碼不得寫入 SharedPreferences；登入 session 僅由 `AuthSessionStore` 集中管理，頁面不得直接讀寫 token。Google 登入入口已保留，但需後續 Google Sign-In SDK 與 ID Token 流程完成後才能正式啟用。
 ## User Profile
 
 個人資料頁與資料流：

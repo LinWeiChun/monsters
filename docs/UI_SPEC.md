@@ -324,13 +324,18 @@ REST API
 | Page | `frontend/lib/pages/login_page.dart` |
 | Provider | `frontend/lib/providers/auth_provider.dart` |
 | Repository | `frontend/lib/repositories/auth_repository.dart` |
+| Session Store | `frontend/lib/repositories/auth_session_store.dart` |
 | Model | `frontend/lib/models/auth_user.dart`、`frontend/lib/models/auth_user.g.dart`、`frontend/lib/models/login_result.dart`、`frontend/lib/models/login_result.g.dart` |
 
 規則：
 
 - 登入頁不得直接呼叫 Dio。
-- 登入頁不得直接保存 JWT、Refresh Token 或密碼至 SharedPreferences。
-- Access Token 僅由 `ApiClient.setAccessToken()` 暫存於目前執行階段。`AuthUser` 與 `LoginResult` 必須使用 `json_serializable` 產生 JSON mapping。
+- 登入頁不得直接保存 JWT、Refresh Token 或密碼至 SharedPreferences；登入狀態保存必須集中由 `AuthRepository` 與 `AuthSessionStore` 管理。
+- 登入成功後，`AuthSessionStore` 可保存 `LoginResult` 與最後開啟時間，讓 Web、Android、iOS 在未登出且 30 天內再次開啟時自動恢復登入。
+- App 啟動時由 `SplashPage` 透過 `AuthController.restoreSession()` 判斷登入狀態；若 session 有效，需套用 `ApiClient.setAccessToken()` 並導向 `home` route。
+- 若最後開啟時間超過 30 天、session 格式無效或使用者登出，必須清除本地登入狀態並要求重新登入。
+- 登出需呼叫 `AuthController.logout()`，由 Repository 呼叫登出 API、清除 `ApiClient` Authorization header 與本地 session。
+- 密碼不得保存至 SharedPreferences。`AuthUser` 與 `LoginResult` 必須使用 `json_serializable` 產生 JSON mapping。
 - Google Sign-In SDK 尚未導入前，不得假造 Google ID Token 或沿用舊系統空密碼登入流程。
 
 ## Flutter Register Page 實作規範

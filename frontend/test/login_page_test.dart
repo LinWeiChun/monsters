@@ -12,8 +12,13 @@ import 'package:monsters/providers/auth_provider.dart';
 import 'package:monsters/repositories/auth_repository.dart';
 import 'package:monsters/routes/app_router.dart';
 import 'package:monsters/routes/app_routes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   testWidgets('shows login form actions', (tester) async {
     await tester.pumpWidget(_loginApp(_FakeAuthRepository()));
     await tester.pumpAndSettle();
@@ -81,6 +86,49 @@ void main() {
     expect(find.byKey(const Key('loginErrorMessage')), findsOneWidget);
     expect(find.text('Login failed'), findsOneWidget);
   });
+
+  testWidgets('restores active session from splash and navigates to home', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _splashApp(_FakeAuthRepository(restoredSession: _loginResult)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('首頁'), findsWidgets);
+    expect(find.byKey(const Key('loginEmailField')), findsNothing);
+  });
+
+  testWidgets('stays on splash actions when no active session exists', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_splashApp(_FakeAuthRepository()));
+    await tester.pumpAndSettle();
+
+    expect(find.text('登入'), findsOneWidget);
+    expect(find.text('註冊'), findsOneWidget);
+  });
+
+  testWidgets('home logout clears session and navigates to login', (
+    tester,
+  ) async {
+    final repository = _FakeAuthRepository();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [authRepositoryProvider.overrideWithValue(repository)],
+        child: MaterialApp.router(
+          routerConfig: createAppRouter(initialLocation: AppPath.home),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('homeLogoutButton')));
+    await tester.pumpAndSettle();
+
+    expect(repository.didLogout, isTrue);
+    expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
+  });
 }
 
 Widget _loginApp(AuthRepository authRepository) {
@@ -92,12 +140,22 @@ Widget _loginApp(AuthRepository authRepository) {
   );
 }
 
+Widget _splashApp(AuthRepository authRepository) {
+  return ProviderScope(
+    overrides: [authRepositoryProvider.overrideWithValue(authRepository)],
+    child: MaterialApp.router(routerConfig: createAppRouter()),
+  );
+}
+
 class _FakeAuthRepository extends AuthRepository {
-  _FakeAuthRepository({this.exception}) : super(_dummyClient());
+  _FakeAuthRepository({this.exception, this.restoredSession})
+    : super(_dummyClient());
 
   final ApiException? exception;
+  final LoginResult? restoredSession;
   String? email;
   String? password;
+  bool didLogout = false;
 
   @override
   Future<LoginResult> login({
@@ -110,20 +168,32 @@ class _FakeAuthRepository extends AuthRepository {
     if (exception != null) {
       throw exception;
     }
-    return const LoginResult(
-      accessToken: 'access-token',
-      refreshToken: 'refresh-token',
-      tokenType: 'Bearer',
-      expiresIn: 3600,
-      user: AuthUser(
-        userId: 1,
-        email: 'user@example.com',
-        userName: 'Wei',
-        avatarUrl: null,
-      ),
-    );
+    return _loginResult;
+  }
+
+  @override
+  Future<LoginResult?> restoreSession({DateTime? now}) async {
+    return restoredSession;
+  }
+
+  @override
+  Future<void> logout() async {
+    didLogout = true;
   }
 }
+
+const _loginResult = LoginResult(
+  accessToken: 'access-token',
+  refreshToken: 'refresh-token',
+  tokenType: 'Bearer',
+  expiresIn: 3600,
+  user: AuthUser(
+    userId: 1,
+    email: 'user@example.com',
+    userName: 'Wei',
+    avatarUrl: null,
+  ),
+);
 
 ApiClient _dummyClient() {
   return ApiClient(

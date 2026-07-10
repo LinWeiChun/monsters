@@ -8,6 +8,92 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-10 08:17
+
+Task
+TASK-037 Flutter 30 天登入狀態保存（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Added shared Flutter session persistence for Web, Android, and iOS using the approved SharedPreferences package.
+- Added `AuthSessionStore` to save `LoginResult` and last-opened time.
+- Updated login flow to save session after successful login.
+- Updated splash flow to restore valid sessions and navigate directly to home when the user has not logged out and opened the app within 30 days.
+- Added logout flow from home to call logout, clear Authorization header, clear local session, and return to login.
+- Added tests for session restore, session expiry, splash auto-navigation, and logout navigation.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `frontend/ios/Podfile`
+- `frontend/lib/repositories/auth_session_store.dart`
+- `frontend/test/auth_session_store_test.dart`
+
+### Modified
+
+- `frontend/lib/repositories/auth_repository.dart`
+- `frontend/lib/providers/auth_provider.dart`
+- `frontend/lib/pages/splash_page.dart`
+- `frontend/lib/pages/home_page.dart`
+- `frontend/test/login_page_test.dart`
+- `frontend/test/widget_test.dart`
+- `frontend/pubspec.yaml`
+- `frontend/pubspec.lock`
+- `frontend/ios/Flutter/Debug.xcconfig`
+- `frontend/ios/Flutter/Release.xcconfig`
+- `frontend/android/settings.gradle.kts`
+- `frontend/ios/Runner.xcodeproj/project.pbxproj`
+- `frontend/ios/Runner.xcworkspace/contents.xcworkspacedata`
+- `docs/PROJECT_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `frontend/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- Uses existing `POST /api/auth/login`.
+- Uses existing `POST /api/auth/logout`.
+
+### Database
+
+- None
+
+### Tests
+
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build web --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build apk --debug --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --no-codesign --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --simulator --no-pub`
+
+### Commit Message
+
+```text
+feat(frontend): 保存三平台登入狀態
+```
+
+### Notes
+
+- `system_data/` reference: checked old Flutter login pages that used SharedPreferences to remember self login.
+- Reused only the intent of remembering login state.
+- Not reused: old account-only persistence, direct page-level SharedPreferences access, `Navigator` routing, and missing expiry policy.
+- Android Kotlin Gradle plugin was updated from 1.8.22 to 2.1.0 so the approved `shared_preferences` Android plugin can compile.
+- Existing unrelated `backend/src/main/resources/application.yml` changes were left untouched and are not part of this task.
+
 ## 2026-07-10 08:00
 
 Task
