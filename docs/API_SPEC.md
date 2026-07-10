@@ -197,7 +197,16 @@ Flutter Google 登入設定：
 | Dart Define | 用途 | 預設值 |
 |---|---|---|
 | GOOGLE_CLIENT_ID | 前端 Google Sign-In 初始化用 Client ID，Web 必填，App 可依平台設定搭配使用 | 空字串 |
-| GOOGLE_SERVER_CLIENT_ID | 前端要求 ID Token 時使用的 Server / Web Client ID，需包含於後端 `GOOGLE_CLIENT_IDS` | 空字串 |
+| GOOGLE_SERVER_CLIENT_ID | Android / iOS 前端要求 ID Token 時使用的 Server / Web Client ID，需包含於後端 `GOOGLE_CLIENT_IDS`；Web 不傳此值給 Google SDK | 空字串 |
+
+Web 本機 Google 登入測試固定使用：
+
+| 項目 | 值 |
+|---|---|
+| Local origin | http://localhost:5050 |
+| Frontend script | `frontend/tool/run_web_local.sh` |
+
+Google Cloud OAuth Client 的 Authorized JavaScript origins 必須加入 `http://localhost:5050`。
 
 Cloudflare R2 檔案上傳設定：
 
@@ -261,6 +270,7 @@ Request：
 
 ```json
 {
+  "account": "wei_account",
   "email": "user@example.com",
   "password": "password123",
   "userName": "使用者名稱"
@@ -275,6 +285,7 @@ Response：
   "message": "Register success",
   "data": {
     "userId": 1,
+    "account": "wei_account",
     "email": "user@example.com",
     "userName": "使用者名稱"
   }
@@ -283,11 +294,13 @@ Response：
 
 規則：
 
+- `account` 必填，長度 4 到 50，必須英文開頭，且只能包含英文、數字、底線；後端需轉為小寫保存。
 - `email` 必填，必須符合 Email 格式。
 - `password` 必填，長度 8 到 72 字元。
 - `userName` 必填，最大長度 80。
 - 註冊成功後建立 `users` 與 `user_credentials`。
 - 密碼必須以 BCrypt hash 保存，不得保存或記錄明文。
+- Account 已被註冊時回傳 409。
 - Email 已被註冊時回傳 409。
 
 ### 2.2 登入
@@ -316,6 +329,7 @@ Response：
     "expiresIn": 3600,
     "user": {
       "userId": 1,
+      "account": "wei_account",
       "email": "user@example.com",
       "userName": "使用者名稱",
       "avatarUrl": null
@@ -357,6 +371,7 @@ Response：
     "expiresIn": 3600,
     "user": {
       "userId": 1,
+      "account": "wei_account",
       "email": "user@example.com",
       "userName": "Wei",
       "avatarUrl": null
@@ -375,7 +390,7 @@ Response：
 - 驗證成功後，以 Google `sub` 對應 `user_oauth_accounts.provider_user_id`。
 - 若 OAuth 帳號已存在，使用既有使用者產生 JWT。
 - 若 OAuth 帳號不存在但 email 已有未刪除使用者，建立 OAuth 連結後產生 JWT。
-- 若 OAuth 帳號不存在且 email 尚未註冊，建立 `users` 與 `user_oauth_accounts` 後產生 JWT。
+- 若 OAuth 帳號不存在且 email 尚未註冊，由 email 前綴產生唯一 `account`，建立 `users` 與 `user_oauth_accounts` 後產生 JWT。
 - ID Token 無效、email 未驗證、對應使用者已刪除或 `GOOGLE_CLIENT_IDS` 未設定時，回傳 401。
 - 不得將 Google ID Token、JWT、Google 公鑰 response 或敏感驗證細節寫入 log。
 

@@ -341,6 +341,8 @@ REST API
 - Google 登入不得假造 Google ID Token、不得沿用舊系統空密碼登入流程、不得在前端自行驗證後傳入 Google 使用者資料。
 - Google 登入成功後需呼叫 `POST /api/auth/google-login`，由後端驗證 Google ID Token 並回傳本系統 `LoginResult`。
 - Web 版需使用 Google Identity Services 官方按鈕；Android / iOS 可使用共用 Flutter 按鈕觸發 Google SDK。
+- Web 版 Google SDK 初始化只傳 `GOOGLE_CLIENT_ID`，不得傳 `serverClientId`，避免官方按鈕停留在 `Getting ready` 狀態。
+- Web 本機測試需使用固定 origin `http://localhost:5050`，並透過 `frontend/tool/run_web_local.sh` 啟動，避免每次重啟隨機 port 造成 Google OAuth origin mismatch。
 - Google 登入成功後必須沿用 `AuthSessionStore` 保存 30 天登入狀態；登出時需同時清除本地 session 並嘗試執行 Google SDK sign-out。
 
 ## Flutter Register Page 實作規範
@@ -352,6 +354,7 @@ REST API
 註冊頁支援：
 
 - Email 輸入與格式驗證
+- 帳號輸入與格式驗證
 - 暱稱輸入與長度驗證
 - 密碼輸入、確認密碼與一致性驗證
 - 呼叫 `POST /api/auth/register`
@@ -388,6 +391,7 @@ REST API
 - 註冊頁不得直接呼叫 Dio。
 - 註冊頁不得保存密碼或 token 至 SharedPreferences。
 - 註冊成功不自動登入；使用者需回登入頁登入取得 token。
+- 帳號為必填，需英文開頭，只能包含英文、數字、底線，長度 4 到 50；送出前需轉為小寫。
 ## Flutter Profile Page 實作規範
 
 個人資料頁位置：

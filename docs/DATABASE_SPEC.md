@@ -76,7 +76,7 @@ Spring Boot 只能透過 JPA / Repository 存取資料庫；Flutter 不得直接
 | 欄位 | 型別 | 約束 | 說明 |
 |---|---|---|---|
 | id | BIGINT | PK | 使用者 ID |
-| account | VARCHAR(50) | UNIQUE NULL | 舊系統帳號，僅保留相容與匯入使用 |
+| account | VARCHAR(50) | UNIQUE NOT NULL | 使用者帳號，英文開頭，可包含英文、數字、底線，長度 4 到 50 |
 | email | VARCHAR(255) | UNIQUE NOT NULL | Email |
 | user_name | VARCHAR(80) | NOT NULL | 顯示名稱 |
 | birthday | DATE | NULL | 生日 |
@@ -167,7 +167,7 @@ Google 登入規則：
 
 - Google provider 固定使用 `google`。
 - `provider_user_id` 必須保存 Google ID Token 的 `sub`，不得保存 ID Token 本體。
-- 首次 Google 登入時，若 email 尚未存在於未刪除的 `users`，需建立 `users` 與 `user_oauth_accounts`。
+- 首次 Google 登入時，若 email 尚未存在於未刪除的 `users`，需由 email 前綴產生唯一 `account`，並建立 `users` 與 `user_oauth_accounts`。
 - 首次 Google 登入時，若 email 已存在於未刪除的 `users`，需建立 `user_oauth_accounts` 並連結既有使用者。
 - 已連結的 Google 帳號登入時，需透過 `provider + provider_user_id` 查詢使用者。
 - 已刪除使用者不得透過既有 OAuth 帳號登入。

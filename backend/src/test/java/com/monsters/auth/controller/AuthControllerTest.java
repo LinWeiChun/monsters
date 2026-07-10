@@ -56,11 +56,12 @@ class AuthControllerTest {
     @Test
     void registerShouldReturnCreatedResponse() throws Exception {
         when(authService.register(any(RegisterRequest.class)))
-                .thenReturn(new RegisterResponse(1L, "user@example.com", "Wei"));
+                .thenReturn(new RegisterResponse(1L, "wei_account", "user@example.com", "Wei"));
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
+                                "account", "wei_account",
                                 "email", "user@example.com",
                                 "password", "password123",
                                 "userName", "Wei"
@@ -69,6 +70,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("Register success"))
                 .andExpect(jsonPath("$.data.userId").value(1))
+                .andExpect(jsonPath("$.data.account").value("wei_account"))
                 .andExpect(jsonPath("$.data.email").value("user@example.com"))
                 .andExpect(jsonPath("$.data.userName").value("Wei"));
     }
@@ -78,6 +80,7 @@ class AuthControllerTest {
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
+                                "account", "abc",
                                 "email", "invalid",
                                 "password", "short",
                                 "userName", "Wei"
@@ -94,7 +97,7 @@ class AuthControllerTest {
                         "refresh-token",
                         "Bearer",
                         3600,
-                        new AuthUserResponse(1L, "user@example.com", "Wei", null)
+                        new AuthUserResponse(1L, "wei_account", "user@example.com", "Wei", null)
                 ));
 
         mockMvc.perform(post("/api/auth/login")
@@ -111,6 +114,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.data.tokenType").value("Bearer"))
                 .andExpect(jsonPath("$.data.expiresIn").value(3600))
                 .andExpect(jsonPath("$.data.user.userId").value(1))
+                .andExpect(jsonPath("$.data.user.account").value("wei_account"))
                 .andExpect(jsonPath("$.data.user.email").value("user@example.com"))
                 .andExpect(jsonPath("$.data.user.userName").value("Wei"));
     }
@@ -135,7 +139,7 @@ class AuthControllerTest {
                         "refresh-token",
                         "Bearer",
                         3600,
-                        new AuthUserResponse(1L, "user@example.com", "Wei", null)
+                        new AuthUserResponse(1L, "wei_account", "user@example.com", "Wei", null)
                 ));
 
         mockMvc.perform(post("/api/auth/google-login")
@@ -147,6 +151,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("Google login success"))
                 .andExpect(jsonPath("$.data.accessToken").value("access-token"))
+                .andExpect(jsonPath("$.data.user.account").value("wei_account"))
                 .andExpect(jsonPath("$.data.user.email").value("user@example.com"));
     }
 

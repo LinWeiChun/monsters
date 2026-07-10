@@ -526,3 +526,45 @@
 2026-07-10,12:20,TASK-038,Documentation,frontend/README.md,修改,補充 Google 登入流程與 dart-define 執行說明,Codex,否,否,否,否,文件同步
 2026-07-10,12:20,TASK-038,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-038 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-10,12:20,TASK-038,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-038 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,12:51,TASK-039,Frontend,frontend/lib/services/google_sign_in_service.dart,修改,Web Google Sign-In 初始化不再傳 serverClientId,Codex,否,否,是,否,修正 Web 按鈕停留 Getting ready
+2026-07-10,12:51,TASK-039,Documentation,docs/API_SPEC.md,修改,補充 Web 不傳 GOOGLE_SERVER_CLIENT_ID 給 Google SDK,Codex,否,否,否,否,文件同步
+2026-07-10,12:51,TASK-039,Documentation,docs/UI_SPEC.md,修改,補充 Web Google SDK serverClientId 限制,Codex,否,否,是,否,文件同步
+2026-07-10,12:51,TASK-039,Documentation,frontend/README.md,修改,修正 Web 本機 Google 登入啟動參數,Codex,否,否,否,否,文件同步
+2026-07-10,12:51,TASK-039,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-039 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,12:51,TASK-039,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-039 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,13:03,TASK-040,Frontend,frontend/tool/run_web_local.sh,新增,新增固定 localhost 5050 的 Flutter Web 本機啟動腳本,Codex,否,否,否,否,避免 Google OAuth origin mismatch
+2026-07-10,13:03,TASK-040,Documentation,frontend/README.md,修改,補充 Web Google 登入固定 port 啟動方式,Codex,否,否,否,否,文件同步
+2026-07-10,13:03,TASK-040,Documentation,docs/API_SPEC.md,修改,補充 Web 本機 Google 登入固定 origin,Codex,否,否,否,否,文件同步
+2026-07-10,13:03,TASK-040,Documentation,docs/UI_SPEC.md,修改,補充 Web 本機測試固定 port 規則,Codex,否,否,是,否,文件同步
+2026-07-10,13:03,TASK-040,Documentation,docs/TASKS.md,修改,新增 Flutter Web Google 登入固定本機 port REVIEW,Codex,否,否,否,否,待 GitHub push
+2026-07-10,13:03,TASK-040,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-040 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,13:03,TASK-040,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-040 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,13:19,TASK-041,Backend,backend/src/main/java/com/monsters/auth/dto/RegisterRequest.java,修改,註冊 request 新增必填 account 與格式驗證,Codex,是,否,是,否,方案二正式啟用帳號
+2026-07-10,13:19,TASK-041,Backend,backend/src/main/java/com/monsters/auth/dto/RegisterResponse.java,修改,註冊 response 新增 account,Codex,是,否,是,否,
+2026-07-10,13:19,TASK-041,Backend,backend/src/main/java/com/monsters/auth/dto/AuthUserResponse.java,修改,登入使用者 response 新增 account,Codex,是,否,是,否,
+2026-07-10,13:19,TASK-041,Backend,backend/src/main/java/com/monsters/auth/service/AuthService.java,修改,新增帳號正規化 重複檢查 與 Google 帳號自動產生,Codex,是,否,是,否,Google 首次登入產生唯一 account
+2026-07-10,13:19,TASK-041,Backend,backend/src/main/java/com/monsters/user/entity/User.java,修改,User 建構子改為接收 account,Codex,否,否,是,否,
+2026-07-10,13:19,TASK-041,Backend,backend/src/main/java/com/monsters/user/repository/UserRepository.java,修改,新增 existsByAccount 查詢,Codex,否,否,是,否,唯一檢查
+2026-07-10,13:19,TASK-041,Database,database/init/01_schema.sql,修改,users.account 改為 NOT NULL,Codex,是,是,否,否,正式欄位
+2026-07-10,13:19,TASK-041,Frontend,frontend/lib/pages/register_page.dart,修改,註冊頁新增帳號欄位與前端格式驗證,Codex,否,否,是,否,三平台共用 Flutter UI
+2026-07-10,13:19,TASK-041,Frontend,frontend/lib/repositories/auth_repository.dart,修改,註冊 API 傳送 account,Codex,是,否,是,否,
+2026-07-10,13:19,TASK-041,Frontend,frontend/lib/providers/auth_provider.dart,修改,註冊時正規化 account 為小寫,Codex,否,否,是,否,
+2026-07-10,13:19,TASK-041,Frontend,frontend/lib/models/register_result.dart,修改,註冊結果模型新增 account,Codex,是,否,是,否,
+2026-07-10,13:19,TASK-041,Frontend,frontend/lib/models/auth_user.dart,修改,登入使用者模型新增 account,Codex,是,否,是,否,
+2026-07-10,13:19,TASK-041,Frontend,frontend/lib/models/auth_user.g.dart,修改,更新 AuthUser JSON mapping,Codex,是,否,是,否,
+2026-07-10,13:19,TASK-041,Test,backend/src/test/java/com/monsters/auth/service/AuthServiceTest.java,修改,新增帳號註冊與重複檢查測試,Codex,否,否,是,否,
+2026-07-10,13:19,TASK-041,Test,backend/src/test/java/com/monsters/auth/controller/AuthControllerTest.java,修改,更新註冊與登入 response account 測試,Codex,否,否,是,否,
+2026-07-10,13:19,TASK-041,Test,backend/src/test/java/com/monsters/common/security/JwtTokenServiceTest.java,修改,測試 User 建構子補 account,Codex,否,否,是,否,
+2026-07-10,13:19,TASK-041,Test,backend/src/test/java/com/monsters/common/security/SecurityConfigTest.java,修改,測試 User 建構子補 account,Codex,否,否,是,否,
+2026-07-10,13:19,TASK-041,Test,backend/src/test/java/com/monsters/user/service/UserServiceTest.java,修改,測試 User 建構子補 account,Codex,否,否,是,否,
+2026-07-10,13:19,TASK-041,Test,frontend/test/register_page_test.dart,修改,新增帳號欄位 顯示 驗證 送出測試,Codex,否,否,是,否,
+2026-07-10,13:19,TASK-041,Test,frontend/test/login_page_test.dart,修改,登入測試使用者補 account,Codex,否,否,是,否,
+2026-07-10,13:19,TASK-041,Test,frontend/test/auth_session_store_test.dart,修改,session 測試使用者補 account,Codex,否,否,是,否,
+2026-07-10,13:19,TASK-041,Documentation,docs/PROJECT_SPEC.md,修改,補充正式帳號需求,Codex,否,否,是,否,文件同步
+2026-07-10,13:19,TASK-041,Documentation,docs/DATABASE_SPEC.md,修改,users.account 改為正式必填唯一欄位,Codex,是,是,否,否,文件同步
+2026-07-10,13:19,TASK-041,Documentation,docs/API_SPEC.md,修改,補充註冊 登入 Google 登入 account 欄位,Codex,是,否,否,否,文件同步
+2026-07-10,13:19,TASK-041,Documentation,docs/UI_SPEC.md,修改,補充註冊頁帳號欄位與驗證規則,Codex,否,否,是,否,文件同步
+2026-07-10,13:19,TASK-041,Documentation,docs/TASKS.md,修改,新增正式啟用帳號欄位 REVIEW,Codex,否,否,否,否,待 GitHub push
+2026-07-10,13:19,TASK-041,Documentation,frontend/README.md,修改,補充前端註冊帳號規則,Codex,否,否,否,否,文件同步
+2026-07-10,13:19,TASK-041,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-041 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,13:19,TASK-041,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-041 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log

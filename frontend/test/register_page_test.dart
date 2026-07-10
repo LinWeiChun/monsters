@@ -18,6 +18,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('建立帳號'), findsOneWidget);
+    expect(find.byKey(const Key('registerAccountField')), findsOneWidget);
     expect(find.byKey(const Key('registerEmailField')), findsOneWidget);
     expect(find.byKey(const Key('registerUserNameField')), findsOneWidget);
     expect(find.byKey(const Key('registerPasswordField')), findsOneWidget);
@@ -36,6 +37,7 @@ void main() {
     await tester.tap(find.byKey(const Key('registerSubmitButton')));
     await tester.pumpAndSettle();
 
+    expect(find.text('請輸入帳號'), findsOneWidget);
     expect(find.text('請輸入 Email'), findsOneWidget);
     expect(find.text('請輸入暱稱'), findsOneWidget);
     expect(find.text('請輸入密碼'), findsOneWidget);
@@ -46,6 +48,10 @@ void main() {
     await tester.pumpWidget(_registerApp(_FakeAuthRepository()));
     await tester.pumpAndSettle();
 
+    await tester.enterText(
+      find.byKey(const Key('registerAccountField')),
+      'wei_account',
+    );
     await tester.enterText(
       find.byKey(const Key('registerEmailField')),
       'user@example.com',
@@ -68,6 +74,31 @@ void main() {
     expect(find.text('兩次輸入的密碼不一致'), findsOneWidget);
   });
 
+  testWidgets('validates account format', (tester) async {
+    await tester.pumpWidget(_registerApp(_FakeAuthRepository()));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('registerAccountField')),
+      '123',
+    );
+    await tester.ensureVisible(find.byKey(const Key('registerSubmitButton')));
+    await tester.tap(find.byKey(const Key('registerSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('帳號至少 4 個字'), findsOneWidget);
+
+    await tester.enterText(
+      find.byKey(const Key('registerAccountField')),
+      '1234',
+    );
+    await tester.ensureVisible(find.byKey(const Key('registerSubmitButton')));
+    await tester.tap(find.byKey(const Key('registerSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('帳號需英文開頭，且只能使用英文、數字、底線'), findsOneWidget);
+  });
+
   testWidgets('submits register form and navigates to login on success', (
     tester,
   ) async {
@@ -75,6 +106,10 @@ void main() {
     await tester.pumpWidget(_registerApp(repository));
     await tester.pumpAndSettle();
 
+    await tester.enterText(
+      find.byKey(const Key('registerAccountField')),
+      ' Wei_Account ',
+    );
     await tester.enterText(
       find.byKey(const Key('registerEmailField')),
       ' user@example.com ',
@@ -94,6 +129,7 @@ void main() {
     await tester.tap(find.byKey(const Key('registerSubmitButton')));
     await tester.pumpAndSettle();
 
+    expect(repository.account, 'wei_account');
     expect(repository.email, 'user@example.com');
     expect(repository.userName, 'Wei');
     expect(repository.password, 'password123');
@@ -113,6 +149,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.enterText(
+      find.byKey(const Key('registerAccountField')),
+      'wei_account',
+    );
     await tester.enterText(
       find.byKey(const Key('registerEmailField')),
       'user@example.com',
@@ -153,13 +193,16 @@ class _FakeAuthRepository extends AuthRepository {
   String? email;
   String? password;
   String? userName;
+  String? account;
 
   @override
   Future<RegisterResult> register({
+    required String account,
     required String email,
     required String password,
     required String userName,
   }) async {
+    this.account = account;
     this.email = email;
     this.password = password;
     this.userName = userName;
@@ -167,7 +210,12 @@ class _FakeAuthRepository extends AuthRepository {
     if (exception != null) {
       throw exception;
     }
-    return RegisterResult(userId: 1, email: email, userName: userName);
+    return RegisterResult(
+      userId: 1,
+      account: account,
+      email: email,
+      userName: userName,
+    );
   }
 }
 

@@ -19,7 +19,7 @@ class JwtTokenServiceTest {
     void createAccessTokenShouldReturnSignedJwt() {
         JwtProperties jwtProperties = jwtProperties("test-secret");
         JwtTokenService jwtTokenService = new JwtTokenService(jwtProperties, objectMapper);
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         ReflectionTestUtils.setField(user, "id", 1L);
 
         String token = jwtTokenService.createAccessToken(user);
@@ -37,7 +37,7 @@ class JwtTokenServiceTest {
     void createRefreshTokenShouldUseRefreshType() {
         JwtProperties jwtProperties = jwtProperties("test-secret");
         JwtTokenService jwtTokenService = new JwtTokenService(jwtProperties, objectMapper);
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         ReflectionTestUtils.setField(user, "id", 1L);
 
         String token = jwtTokenService.createRefreshToken(user);
@@ -50,7 +50,7 @@ class JwtTokenServiceTest {
     void createAccessTokenShouldRequireSecret() {
         JwtProperties jwtProperties = jwtProperties("");
         JwtTokenService jwtTokenService = new JwtTokenService(jwtProperties, objectMapper);
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
 
         assertThatThrownBy(() -> jwtTokenService.createAccessToken(user))
                 .isInstanceOf(IllegalStateException.class)
@@ -61,7 +61,7 @@ class JwtTokenServiceTest {
     void verifyAccessTokenShouldReturnPayload() {
         JwtProperties jwtProperties = jwtProperties("test-secret");
         JwtTokenService jwtTokenService = new JwtTokenService(jwtProperties, objectMapper);
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         ReflectionTestUtils.setField(user, "id", 1L);
         String token = jwtTokenService.createAccessToken(user);
 
@@ -76,7 +76,7 @@ class JwtTokenServiceTest {
     void verifyAccessTokenShouldRejectRefreshToken() {
         JwtProperties jwtProperties = jwtProperties("test-secret");
         JwtTokenService jwtTokenService = new JwtTokenService(jwtProperties, objectMapper);
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         ReflectionTestUtils.setField(user, "id", 1L);
         String token = jwtTokenService.createRefreshToken(user);
 

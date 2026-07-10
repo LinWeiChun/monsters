@@ -15,6 +15,7 @@ class RegisterPage extends ConsumerStatefulWidget {
 
 class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
+  final _accountController = TextEditingController();
   final _emailController = TextEditingController();
   final _userNameController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -24,6 +25,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   @override
   void dispose() {
+    _accountController.dispose();
     _emailController.dispose();
     _userNameController.dispose();
     _passwordController.dispose();
@@ -62,6 +64,20 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xl),
+                    TextFormField(
+                      key: const Key('registerAccountField'),
+                      controller: _accountController,
+                      keyboardType: TextInputType.text,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const [AutofillHints.username],
+                      decoration: const InputDecoration(
+                        labelText: '帳號',
+                        hintText: '英文開頭，可用英文、數字、底線',
+                        prefixIcon: Icon(Icons.badge_outlined),
+                      ),
+                      validator: _validateAccount,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
                     TextFormField(
                       key: const Key('registerEmailField'),
                       controller: _emailController,
@@ -138,9 +154,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ),
                       ),
                       validator: _validateConfirmPassword,
-                      onFieldSubmitted: authState.isLoading
-                          ? null
-                          : (_) => _submit(),
+                      onFieldSubmitted:
+                          authState.isLoading ? null : (_) => _submit(),
                     ),
                     if (authState.errorMessage != null) ...[
                       const SizedBox(height: AppSpacing.md),
@@ -154,18 +169,22 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     FilledButton(
                       key: const Key('registerSubmitButton'),
                       onPressed: authState.isLoading ? null : _submit,
-                      child: authState.isLoading
-                          ? const SizedBox.square(
-                              dimension: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('註冊'),
+                      child:
+                          authState.isLoading
+                              ? const SizedBox.square(
+                                dimension: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : const Text('註冊'),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     TextButton(
-                      onPressed: authState.isLoading
-                          ? null
-                          : () => context.goNamed(AppRoute.login),
+                      onPressed:
+                          authState.isLoading
+                              ? null
+                              : () => context.goNamed(AppRoute.login),
                       child: const Text('已有帳號？前往登入'),
                     ),
                   ],
@@ -176,6 +195,23 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         ),
       ),
     );
+  }
+
+  String? _validateAccount(String? value) {
+    final account = value?.trim() ?? '';
+    if (account.isEmpty) {
+      return '請輸入帳號';
+    }
+    if (account.length < 4) {
+      return '帳號至少 4 個字';
+    }
+    if (account.length > 50) {
+      return '帳號最多 50 個字';
+    }
+    if (!RegExp(r'^[A-Za-z][A-Za-z0-9_]*$').hasMatch(account)) {
+      return '帳號需英文開頭，且只能使用英文、數字、底線';
+    }
+    return null;
   }
 
   String? _validateEmail(String? value) {
@@ -232,6 +268,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final success = await ref
         .read(authControllerProvider.notifier)
         .register(
+          account: _accountController.text,
           email: _emailController.text,
           password: _passwordController.text,
           userName: _userNameController.text,

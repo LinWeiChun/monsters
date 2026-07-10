@@ -157,6 +157,7 @@ class AuthController extends StateNotifier<AuthState> {
   }
 
   Future<bool> register({
+    required String account,
     required String email,
     required String password,
     required String userName,
@@ -165,6 +166,7 @@ class AuthController extends StateNotifier<AuthState> {
 
     try {
       final result = await _authRepository.register(
+        account: account.trim().toLowerCase(),
         email: email.trim(),
         password: password,
         userName: userName.trim(),

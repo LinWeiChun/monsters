@@ -67,8 +67,10 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] 更改頭貼 API（DONE）
 - [x] 密碼鎖 API（DONE）
 - [x] Flutter 登入頁（DONE）
+- [ ] 正式啟用帳號欄位（REVIEW：註冊 API / DB / Flutter 註冊頁與文件同步完成；待 GitHub push）
 - [ ] Flutter 30 天登入狀態保存（REVIEW：本地實作、測試、analyze 與 Web / Android / iOS build 完成；待 GitHub push）
 - [ ] Flutter Google 登入（REVIEW：方案一 google_sign_in / google_sign_in_web 整合、測試、analyze 與 Web / Android / iOS build 完成；待 GitHub push）
+- [ ] Flutter Web Google 登入固定本機 port（REVIEW：新增 macOS 本機 Web 啟動腳本與文件；待 GitHub push）
 - [x] Flutter 註冊頁（DONE）
 - [x] Flutter 個人資料頁（DONE）
 - [x] Flutter 密碼鎖頁（DONE）
