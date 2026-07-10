@@ -8,6 +8,82 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-10 08:00
+
+Task
+TASK-036 Flutter App Icon 三平台替換（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Replaced default Flutter launcher icons for Android, iOS, and Web with icons generated from root `icon/icon.png`.
+- Generated Android mipmap launcher icons for all existing densities.
+- Generated iOS AppIcon image set including the 1024px marketing icon without transparency.
+- Generated Web favicon, PWA icons, and maskable icons.
+- Updated Web manifest theme and background colors from Flutter default blue to the legacy warm yellow / brown palette.
+- Updated UI spec, frontend README, and task status for the shared app icon source and generation rules.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `frontend/android/app/src/main/res/mipmap-mdpi/ic_launcher.png`
+- `frontend/android/app/src/main/res/mipmap-hdpi/ic_launcher.png`
+- `frontend/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png`
+- `frontend/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png`
+- `frontend/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png`
+- `frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/*.png`
+- `frontend/web/favicon.png`
+- `frontend/web/icons/*.png`
+- `frontend/web/manifest.json`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `frontend/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- None
+
+### Database
+
+- None
+
+### Tests
+
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build web --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build apk --debug --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --no-codesign --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --simulator --no-pub`
+
+### Commit Message
+
+```text
+style(frontend): 替換三平台 app icon
+```
+
+### Notes
+
+- `system_data/` reference: checked available files. No direct old app icon implementation was needed for this asset-only task.
+- Used `icon/icon.png` as the icon source. `icon/標題.png` was not used because it is a title image with a non-square ratio.
+- Existing unrelated `backend/src/main/resources/application.yml` changes were left untouched and are not part of this task.
+
 ## 2026-07-10 07:28
 
 Task

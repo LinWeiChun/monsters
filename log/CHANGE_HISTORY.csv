@@ -474,3 +474,13 @@
 2026-07-10,07:28,TASK-035,Test,backend frontend,檢查,執行 Phase 2 後端測試 前端測試與三平台 build,Codex,否,否,是,否,全部通過；Android 有既有 Kotlin 版本提示
 2026-07-10,07:28,TASK-035,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-035 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-10,07:28,TASK-035,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-035 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,08:00,TASK-036,Frontend,frontend/android/app/src/main/res/mipmap-*/ic_launcher.png,修改,以根目錄 icon/icon.png 產生 Android launcher icons,Codex,否,否,是,否,替換 Flutter 預設 icon
+2026-07-10,08:00,TASK-036,Frontend,frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/*.png,修改,以根目錄 icon/icon.png 產生 iOS AppIcon 圖組,Codex,否,否,是,否,1024 icon 使用不透明背景
+2026-07-10,08:00,TASK-036,Frontend,frontend/web/favicon.png,修改,以根目錄 icon/icon.png 產生 Web favicon,Codex,否,否,是,否,替換 Flutter 預設 icon
+2026-07-10,08:00,TASK-036,Frontend,frontend/web/icons/*.png,修改,以根目錄 icon/icon.png 產生 Web PWA icons,Codex,否,否,是,否,含 maskable icon
+2026-07-10,08:00,TASK-036,Frontend,frontend/web/manifest.json,修改,Web manifest theme 與 background color 改為舊版暖色調,Codex,否,否,是,否,移除 Flutter 預設藍色
+2026-07-10,08:00,TASK-036,Documentation,docs/UI_SPEC.md,修改,補充三平台 App Icon 資產規範,Codex,否,否,是,否,文件同步
+2026-07-10,08:00,TASK-036,Documentation,docs/TASKS.md,修改,新增 App icon 三平台替換 REVIEW 狀態,Codex,否,否,否,否,待 GitHub push
+2026-07-10,08:00,TASK-036,Documentation,frontend/README.md,修改,補充 App Icons 產出位置與 manifest 色彩規範,Codex,否,否,否,否,文件同步
+2026-07-10,08:00,TASK-036,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-036 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,08:00,TASK-036,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-036 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
