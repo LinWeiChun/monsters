@@ -181,7 +181,9 @@ main
 
 develop
 
-feature/<module>
+feature/phase<n>
+
+feature/phase<n>-<module>
 
 fix/<module>
 
@@ -278,17 +280,26 @@ cd monsters
 git checkout develop
 ```
 
-依照 Git 規範，開發前請從 `develop` 建立對應分支：
+依照 Git 規範，每個 Phase 開始前先從 `develop` 建立 Phase 整合分支：
 
 ```bash
-git checkout -b feature/<module>
+git checkout -b feature/phase<n>
 ```
 
-文件修改請使用：
+Phase 內的每個 Task 再從對應 Phase 分支建立獨立分支：
 
 ```bash
-git checkout -b docs/<module>
+git checkout feature/phase<n>
+git checkout -b feature/phase<n>-<module>
 ```
+
+文件修改請使用同樣的 Phase 前綴：
+
+```bash
+git checkout -b docs/phase<n>-<module>
+```
+
+Task Pull Request 先合併至 `feature/phase<n>`；Phase 全部完成並通過整合測試後，再將 `feature/phase<n>` 合併至 `develop`。
 
 ## 前端執行
 

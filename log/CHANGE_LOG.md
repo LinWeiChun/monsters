@@ -8,6 +8,66 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-10 18:57
+
+Task
+DOC-012 建立 Phase 整合分支流程（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Adopted the Phase integration branch workflow for Phase 3 and all subsequent phases.
+- Defined `feature/phase<n>` as the integration branch created from `develop`.
+- Defined Phase Task branches as independent branches created from the corresponding Phase branch.
+- Defined Task PR targets as the corresponding Phase branch and the completed Phase PR target as `develop`.
+- Updated branch roles, naming, startup flow, merge restrictions, PR direction, issue flow, and cleanup rules.
+- Updated README Git instructions and recorded the decision in `docs/DECISIONS.md`.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `README.md`
+- `docs/GIT_RULE.md`
+- `docs/DECISIONS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Tests
+
+- Documentation-only change; compile and automated tests were not required.
+- `git diff --check` passed.
+- Git flow references were searched to confirm the previous direct `develop` Task flow was replaced in the updated sections.
+- `CHANGE_HISTORY.csv` was imported and inspected as a 13-column table; the header and all five new DOC-012 rows matched the expected structure.
+
+### system_data Reference
+
+- `system_data/` was not required and was not modified because this task only changes the repository branching policy.
+
+### API
+
+- None
+
+### Database
+
+- None
+
+### Notes
+
+- This documentation branch was created from `feature/phase3` and should be merged back into `feature/phase3`.
+- After this change is merged, all Phase 3 and later Task branches must use the corresponding Phase integration branch as their base.
+
+---
+
 ## 2026-07-10 18:48
 
 Task
