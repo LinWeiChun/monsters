@@ -2,7 +2,9 @@
 
 # system_data 參考資料盤點
 
-確認日期：2026-07-03
+初次確認日期：2026-07-03
+
+Phase 3 煩惱功能複核日期：2026-07-10
 
 本文件用於補齊 `docs/TASKS.md` 中先前尚未整理的 `system_data/` 相關任務，記錄舊系統資料範圍、可參考內容、不可沿用內容、初步安全檢查結果、舊功能與新版模組對照，以及共用模式轉換方向。
 
@@ -273,3 +275,98 @@
 - Phase 0：確認 `system_data/` 不包含金鑰、憑證、build artifact 或不必要雜檔
 
 處理方式：已依使用者指定的「遮罩敏感字串」方案完成清理，並重新掃描確認原始敏感值未殘留。
+
+---
+
+## 九、Phase 3 煩惱功能舊系統檢查
+
+### 9.1 檢查範圍
+
+本次僅檢查與記錄舊系統行為，不將舊程式直接視為新版規格，且未修改 `system_data/` 內任何內容。
+
+| 類型 | 檢查來源 | 重點 |
+|---|---|---|
+| 系統手冊 | `system_data/四技第111405組-貘nsters APP-系統手冊.pdf` 第 121 至 124 頁 | 煩惱聊天室、類別、記錄方式、畫心情、分數、分享與獲獎畫面 |
+| 系統簡介 | `system_data/四技第111405組-貘nsters APP-系統簡介.pdf` | 煩惱記錄、畫心情、歷史記錄、心的軌跡與社群的功能定位 |
+| 舊 Flutter 聊天室 | `lib/pages/annoyanceChat.dart` | 流程狀態、輸入驗證、媒體選擇、新增請求與怪獸獲獎 |
+| 舊 Flutter 畫板 | `lib/pages/chat_items/drawing_colors.dart` | 回復、清空、橡皮擦、畫筆粗細、畫筆顏色、畫布顏色與 PNG 輸出 |
+| 舊 Flutter 歷史畫面 | `lib/pages/history/history_annoyanceChat.dart` | 已解決狀態、分享／取消分享與煩惱詳細內容 |
+| 舊 Flutter 資料層 | `lib/model/annoyanceModel.dart`、`lib/repository/annoyanceRepo.dart`、`lib/API/annoyanceAPI.dart` | 舊欄位、舊 API path、舊 Response 與錯誤處理 |
+| 舊 Spring Boot | `AnnoyanceController`、`AnnoyanceServiceImpl`、`AnnoyanceDAOImpl`、`Annoyance`、`AnnoyanceType` | 新增、查詢、修改、分享條件、解決條件與舊資料欄位 |
+| 舊歷史／社群後端 | `HistoryController`、`SocialController` | 清單排序、分享資料只讀取 `share = 1`、社群顯示欄位 |
+| 舊素材 | `assets/image/mood/moodPoint_1.png` 至 `moodPoint_5.png`、`assets/image/present.png` | 1 至 5 分情緒圖示與怪獸獲獎視覺 |
+
+> 上表中 `lib/` 皆相對於 `system_data/front-end/monsters_front_end/`；Java class 皆相對於 `system_data/back-end/src/main/java/com/example/demo/`。
+
+### 9.2 舊煩惱建立流程
+
+| 順序 | 舊系統行為 | 舊資料表現 |
+|---:|---|---|
+| 1 | 依當下時段顯示問候語，並詢問煩惱類別 | 僅為前端聊天狀態 |
+| 2 | 從「課業、事業、愛情、友情、親情、其他」六類中擇一 | 舊 `type` 數字欄位；前端實作使用 0 至 5 |
+| 3 | 選擇文字或媒體來記錄煩惱 | 文字放入 `content`；圖片與錄音以 Base64 放入舊欄位 |
+| 4 | 詢問是否畫心情；選擇「是」則開啟畫板 | 完成圖以 PNG 輸出，再轉 Base64 存入舊 `mood` |
+| 5 | 以五張表情圖選擇 1 至 5 分，1 為最低煩惱程度、5 為最高 | 存入舊 `index` 欄位 |
+| 6 | 詢問是否分享至社群 | 存入舊 `share` 整數 0／1 |
+| 7 | 後端建立煩惱並抽取怪獸；若是新怪獸則顯示獲獎視窗 | 舊 Response 額外回傳 `newMonster` 與 `newMonsterGroup` |
+| 8 | 完成後可前往歷史記錄 | 歷史畫面可將 `solve` 改為 1，並隨時切換 `share` |
+
+舊版媒體來源在程式中包含相機拍照、相簿圖片、錄影、相簿影片與錄音；但錄影、影片匯入與錄音選單在舊 `annoyanceChat.dart` 中被註解，不能視為當時可穩定使用的完成功能。
+
+### 9.3 可參考的業務意圖與 UI 語彙
+
+- 聊天式引導是煩惱建立流程的核心體驗，每次只要求一項輸入。
+- 煩惱類別與是／否問題有明確的可用選項，輸入不符時重複提示當前問題。
+- 畫心情是可選步驟；舊畫板提供復原、清空、橡皮擦、畫筆粗細、畫筆顏色、畫布顏色與完成輸出。
+- 分數使用 1 至 5 的連續視覺，由綠色開心逐步轉為紅色難過，可作為新版 `MoodScoreSelector` 的視覺參考。
+- 分享預設應由使用者明確選擇，並可於歷史記錄中隨時取消或重新分享。
+- 將煩惱設為已解決時，舊版會顯示怪獸「吃掉煩惱」的短動畫，可參考其療癒性質，但不直接搬移實作。
+- 新增煩惱後的怪獸獲獎提供「查看圖鑑」與「關閉」兩種後續操作。
+
+### 9.4 舊資料欄位與新版概念對照
+
+| 舊欄位／概念 | 舊用途 | 新版概念 | 轉換注意事項 |
+|---|---|---|---|
+| `account` | 使用者關聯 | `entries.user_id` | 必須來自已驗證 JWT，不得由 Client 傳入 |
+| `type` | 煩惱類別數字 | `entries.annoyance_type_id` → `annoyance_types` | 舊前端使用 0 至 5，舊 enum 卻使用 1 至 6，不得直接沿用 ID |
+| `content` | 文字或媒體代替文案 | `entries.content` | 僅保存文字，不以「圖片煩惱」等假內容取代媒體 |
+| `image_content` / `audio_content` | Base64 媒體 | `entry_media.media_url` | 媒體應存雲端，MySQL 只存 URL |
+| `mood` | 「否」或心情圖 Base64 | `entry_media` 的 drawing 資產 | 繪圖與情緒分數必須分開，不再共用字串欄位 |
+| `index` | 1 至 5 分 | `entries.mood_id` → `moods.score` | 新版使用 lookup table，API 不應信任任意數字 |
+| `monster_id` | 新增時抽取的怪獸 | `entries.monster_id` | 舊版有權重抽取與分組邏輯，需由後續正式規格定案 |
+| `solve` | 0／1 解決狀態 | `entries.is_solved` | 僅 ANNOYANCE 可用，新增時預設 false |
+| `share` | 0／1 分享狀態 | `entries.is_shared` | 新增、分享與取消分享由後端驗證 owner |
+| `time` | 建立時間 | `entries.occurred_at` 與共用 audit 欄位 | 使用者記錄時間與系統建立時間不應混用 |
+
+### 9.5 不可沿用的舊實作
+
+- `annoyanceChat.dart` 使用單一大型 StatefulWidget、整數 `chatRound`、非型別化 `userAnswers` 與 `setState`，不符新版 Riverpod 與可測試狀態機規範。
+- 舊程式在 `build()` 內觸發聊天狀態與 `setState()`，容易重複執行或造成 build 期間狀態異動。
+- 分享驗證使用 `text != "是" || text != "否"`，條件永遠為 true，不能沿用。
+- 錄音方法的局部 `audioFile` 遮蔽同名欄位，導致建立請求未實際夾帶錄音資料。
+- 媒體以同步 `readAsBytesSync()` 後轉 Base64 放進 JSON，不符新版雲端檔案儲存與 URL 欄位設計。
+- 舊 Repository 硬編碼網域、使用 `http.Client`、吞掉例外後回傳 null，不符 `ApiClient` 與 `ApiException` 規範。
+- 舊 API 由 Client 傳入 `account`，並以 path 參數作 owner 條件，無法取代後端的 JWT owner 驗證。
+- 舊 Controller 直接組 ObjectNode、使用 `System.out.println`、吞掉 Exception 並無論成敗回傳 201，不符新版 DTO、`ApiResponse<T>` 與 `GlobalExceptionHandler`。
+- 舊建立請求的 null 驗證在 null 時仍呼叫 `.isEmpty()`，存在 NullPointerException 風險。
+- 舊類別前端索引為 0 至 5，Java enum 卻定義 1 至 6，說明舊資料 ID 不具可靠的跨層一致性。
+- 舊程式寫死本機 Windows 檔案路徑與怪獸 ID，不可搬入新版。
+
+### 9.6 與正式規格的差異與後續 DoR
+
+以下項目不影響本次「檢查舊系統」Task 完成，但在進入實作 Task 前必須定案：
+
+1. `PROJECT_SPEC.md` 與 `UI_SPEC.md` 說明煩惱可以使用影片，但 `DATABASE_SPEC.md` 與 `01_schema.sql` 的 `entry_media.media_type` 只允許 `image`、`audio`、`drawing`。
+2. `API_SPEC.md` 目前僅列出 Annoyance endpoint，尚未定義 Request／Response DTO、媒體上傳方式、分頁、owner 驗證、驗證錯誤與怪獸獲獎回應。
+3. 新版 `annoyance_types` 與 `moods` 已有 schema，但目前沒有 seed data，六種類別與 1 至 5 分的 code／label／display order 尚未定案。
+4. 舊版建立煩惱會同步抽取怪獸，但新版「怪獸抽取是否隸屬新增煩惱 transaction」、權重、重複怪獸處理與 Response 尚未定義。
+5. 心情圖、內容圖片、錄音與影片的數量、大小、MIME type、display order 與 R2 key prefix 尚未定義。
+
+下一個 Phase 3 Task「整理可參考的業務邏輯與 UI 互動」應以本節為輸入，產出可供使用者確認的選項與新版行為建議；在正式文件完成後才能開始 Annoyance 實作。
+
+### 9.7 本 Task 結論
+
+- 已完成舊煩惱、聊天室、心情繪圖、分數、分享、解決狀態與怪獸獲獎流程的源碼與手冊交叉檢查。
+- 舊系統可提供流程意圖、視覺語彙、六種煩惱類別與 1 至 5 分的參考。
+- 舊系統存在架構、資安、資料模型與實作錯誤，只能重新設計，不得複製。
+- 本 Task 沒有新增或修改 API、Database、UI 行為與第三方套件；上述正式規格缺口留待後續 Task 定案。
