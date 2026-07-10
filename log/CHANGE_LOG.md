@@ -8,6 +8,61 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-10 12:51
+
+Task
+TASK-039 修正 Web Google 登入按鈕 Getting ready（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Fixed Web Google Sign-In initialization so `serverClientId` is only passed on Android / iOS.
+- Updated README and specs to clarify Web local testing should pass only `GOOGLE_CLIENT_ID`.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `frontend/lib/services/google_sign_in_service.dart`
+- `docs/API_SPEC.md`
+- `docs/UI_SPEC.md`
+- `frontend/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- No API contract change.
+
+### Database
+
+- None
+
+### Tests
+
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build web --no-pub --dart-define=GOOGLE_CLIENT_ID=test-web-client.apps.googleusercontent.com`
+
+### Notes
+
+- `system_data/` reference: not needed for this SDK compatibility fix.
+- Cause: `google_sign_in_web` does not support `serverClientId`; passing it in debug mode can leave the Web official button at `Getting ready`.
+- Existing unrelated `backend/src/main/resources/application.yml` changes were left untouched and are not part of this task.
+
 ## 2026-07-10 12:20
 
 Task

@@ -74,12 +74,17 @@ Google 登入流程使用 `GoogleSignInService` 透過 `google_sign_in` / `googl
 Google 登入執行時需提供 dart-define，且後端 `GOOGLE_CLIENT_IDS` 必須包含對應 Client ID：
 
 ```bash
+# Web
+/Users/linweijun/fultter/flutter/bin/flutter run -d chrome \
+  --dart-define=GOOGLE_CLIENT_ID=your-web-client-id.apps.googleusercontent.com
+
+# Android / iOS
 /Users/linweijun/fultter/flutter/bin/flutter run \
-  --dart-define=GOOGLE_CLIENT_ID=your-web-or-platform-client-id.apps.googleusercontent.com \
+  --dart-define=GOOGLE_CLIENT_ID=your-platform-client-id.apps.googleusercontent.com \
   --dart-define=GOOGLE_SERVER_CLIENT_ID=your-web-client-id.apps.googleusercontent.com
 ```
 
-Web 版還需在 Google Cloud OAuth Client 設定 Authorized JavaScript origins；Android / iOS 需依 Google OAuth Client 設定 package name、bundle id 與簽章資訊。
+Web 版還需在 Google Cloud OAuth Client 設定 Authorized JavaScript origins，且 Web Google SDK 不支援 `serverClientId`，因此 Web 本機測試不要傳 `GOOGLE_SERVER_CLIENT_ID`。Android / iOS 需依 Google OAuth Client 設定 package name、bundle id 與簽章資訊。
 
 ## User Profile
 

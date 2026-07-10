@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../config/app_config.dart';
@@ -24,7 +25,8 @@ class GoogleSignInService {
   Future<void> initialize() {
     return _initializeFuture ??= _googleSignIn.initialize(
       clientId: _emptyToNull(_config.googleClientId),
-      serverClientId: _emptyToNull(_config.googleServerClientId),
+      serverClientId:
+          kIsWeb ? null : _emptyToNull(_config.googleServerClientId),
     );
   }
 
