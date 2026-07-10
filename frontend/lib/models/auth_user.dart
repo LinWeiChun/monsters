@@ -6,6 +6,7 @@ part 'auth_user.g.dart';
 class AuthUser {
   const AuthUser({
     required this.userId,
+    required this.account,
     required this.email,
     required this.userName,
     required this.avatarUrl,
@@ -15,6 +16,7 @@ class AuthUser {
       _$AuthUserFromJson(json);
 
   final int userId;
+  final String account;
   final String email;
   final String userName;
   final String? avatarUrl;

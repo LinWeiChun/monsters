@@ -52,6 +52,7 @@ const _loginResult = LoginResult(
   expiresIn: 3600,
   user: AuthUser(
     userId: 1,
+    account: 'wei_account',
     email: 'user@example.com',
     userName: 'Wei',
     avatarUrl: null,

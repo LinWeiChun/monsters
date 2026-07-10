@@ -354,6 +354,7 @@ REST API
 註冊頁支援：
 
 - Email 輸入與格式驗證
+- 帳號輸入與格式驗證
 - 暱稱輸入與長度驗證
 - 密碼輸入、確認密碼與一致性驗證
 - 呼叫 `POST /api/auth/register`
@@ -390,6 +391,7 @@ REST API
 - 註冊頁不得直接呼叫 Dio。
 - 註冊頁不得保存密碼或 token 至 SharedPreferences。
 - 註冊成功不自動登入；使用者需回登入頁登入取得 token。
+- 帳號為必填，需英文開頭，只能包含英文、數字、底線，長度 4 到 50；送出前需轉為小寫。
 ## Flutter Profile Page 實作規範
 
 個人資料頁位置：

@@ -92,18 +92,21 @@ class AuthServiceTest {
 
     @Test
     void registerShouldCreateUserAndCredential() {
-        RegisterRequest request = new RegisterRequest(" USER@example.COM ", "password123", " Wei ");
+        RegisterRequest request = new RegisterRequest(" Wei_Account ", " USER@example.COM ", "password123", " Wei ");
+        when(userRepository.existsByAccount("wei_account")).thenReturn(false);
         when(userRepository.existsByEmail("user@example.com")).thenReturn(false);
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(passwordEncoder.encode("password123")).thenReturn("encoded-password");
 
         RegisterResponse response = authService.register(request);
 
+        assertThat(response.account()).isEqualTo("wei_account");
         assertThat(response.email()).isEqualTo("user@example.com");
         assertThat(response.userName()).isEqualTo("Wei");
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
+        assertThat(userCaptor.getValue().getAccount()).isEqualTo("wei_account");
         assertThat(userCaptor.getValue().getEmail()).isEqualTo("user@example.com");
         assertThat(userCaptor.getValue().getUserName()).isEqualTo("Wei");
 
@@ -114,7 +117,8 @@ class AuthServiceTest {
 
     @Test
     void registerShouldRejectDuplicateEmail() {
-        RegisterRequest request = new RegisterRequest("user@example.com", "password123", "Wei");
+        RegisterRequest request = new RegisterRequest("wei_account", "user@example.com", "password123", "Wei");
+        when(userRepository.existsByAccount("wei_account")).thenReturn(false);
         when(userRepository.existsByEmail("user@example.com")).thenReturn(true);
 
         assertThatThrownBy(() -> authService.register(request))
@@ -123,9 +127,22 @@ class AuthServiceTest {
     }
 
     @Test
+    void registerShouldRejectDuplicateAccount() {
+        RegisterRequest request = new RegisterRequest("Wei_Account", "user@example.com", "password123", "Wei");
+        when(userRepository.existsByAccount("wei_account")).thenReturn(true);
+
+        assertThatThrownBy(() -> authService.register(request))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("Account already registered");
+
+        verify(userRepository, never()).existsByEmail("user@example.com");
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
     void loginShouldReturnTokensAndUser() {
         LoginRequest request = new LoginRequest(" USER@example.COM ", "password123");
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         ReflectionTestUtils.setField(user, "id", 1L);
         UserCredential credential = new UserCredential(user, "encoded-password");
 
@@ -143,6 +160,7 @@ class AuthServiceTest {
         assertThat(response.tokenType()).isEqualTo("Bearer");
         assertThat(response.expiresIn()).isEqualTo(3600);
         assertThat(response.user().userId()).isEqualTo(1);
+        assertThat(response.user().account()).isEqualTo("wei_account");
         assertThat(response.user().email()).isEqualTo("user@example.com");
         assertThat(response.user().userName()).isEqualTo("Wei");
     }
@@ -160,7 +178,7 @@ class AuthServiceTest {
     @Test
     void loginShouldRejectWrongPassword() {
         LoginRequest request = new LoginRequest("user@example.com", "wrong-password");
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         UserCredential credential = new UserCredential(user, "encoded-password");
 
         when(userRepository.findByEmailAndDeletedFalse("user@example.com")).thenReturn(Optional.of(user));
@@ -181,13 +199,14 @@ class AuthServiceTest {
                 " Wei ",
                 "https://example.com/avatar.png"
         );
-        User savedUser = new User("user@example.com", "Wei");
+        User savedUser = new User("wei_account", "user@example.com", "Wei");
         ReflectionTestUtils.setField(savedUser, "id", 1L);
 
         when(googleIdTokenVerifier.verify("google-id-token")).thenReturn(googleUser);
         when(userOAuthAccountRepository.findByProviderAndProviderUserId("google", "google-sub"))
                 .thenReturn(Optional.empty());
         when(userRepository.findByEmailAndDeletedFalse("user@example.com")).thenReturn(Optional.empty());
+        when(userRepository.existsByAccount("user")).thenReturn(false);
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
         when(jwtTokenService.createAccessToken(savedUser)).thenReturn("access-token");
         when(jwtTokenService.createRefreshToken(savedUser)).thenReturn("refresh-token");
@@ -197,6 +216,10 @@ class AuthServiceTest {
 
         assertThat(response.accessToken()).isEqualTo("access-token");
         assertThat(response.user().email()).isEqualTo("user@example.com");
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        assertThat(userCaptor.getValue().getAccount()).isEqualTo("user");
 
         ArgumentCaptor<UserOAuthAccount> oauthCaptor = ArgumentCaptor.forClass(UserOAuthAccount.class);
         verify(userOAuthAccountRepository).save(oauthCaptor.capture());
@@ -209,7 +232,7 @@ class AuthServiceTest {
     void googleLoginShouldUseExistingOAuthAccount() {
         GoogleLoginRequest request = new GoogleLoginRequest("google-id-token");
         GoogleUserInfo googleUser = new GoogleUserInfo("google-sub", "user@example.com", "Wei", null);
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         ReflectionTestUtils.setField(user, "id", 1L);
         UserOAuthAccount oauthAccount = new UserOAuthAccount(user, "google", "google-sub");
 
@@ -230,7 +253,7 @@ class AuthServiceTest {
     void googleLoginShouldLinkExistingEmailUser() {
         GoogleLoginRequest request = new GoogleLoginRequest("google-id-token");
         GoogleUserInfo googleUser = new GoogleUserInfo("google-sub", "user@example.com", "Wei", null);
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         ReflectionTestUtils.setField(user, "id", 1L);
 
         when(googleIdTokenVerifier.verify("google-id-token")).thenReturn(googleUser);
@@ -250,7 +273,7 @@ class AuthServiceTest {
     @Test
     void forgotPasswordShouldCreateResetTokenForExistingUser() {
         ForgotPasswordRequest request = new ForgotPasswordRequest(" USER@example.COM ");
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         when(userRepository.findByEmailAndDeletedFalse("user@example.com")).thenReturn(Optional.of(user));
         when(passwordResetTokenService.createToken()).thenReturn("reset-token");
         when(passwordResetTokenService.hashToken("reset-token")).thenReturn("token-hash");
@@ -283,7 +306,7 @@ class AuthServiceTest {
     @Test
     void resetPasswordShouldUpdateExistingCredentialAndMarkTokenUsed() {
         ResetPasswordRequest request = new ResetPasswordRequest("reset-token", "password123");
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         UserCredential credential = new UserCredential(user, "old-password-hash");
         PasswordResetToken resetToken = new PasswordResetToken(
                 user,
@@ -306,7 +329,7 @@ class AuthServiceTest {
     @Test
     void resetPasswordShouldCreateCredentialForOAuthOnlyUser() {
         ResetPasswordRequest request = new ResetPasswordRequest("reset-token", "password123");
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         PasswordResetToken resetToken = new PasswordResetToken(
                 user,
                 "token-hash",
@@ -331,7 +354,7 @@ class AuthServiceTest {
     @Test
     void resetPasswordShouldRejectExpiredToken() {
         ResetPasswordRequest request = new ResetPasswordRequest("reset-token", "password123");
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         PasswordResetToken resetToken = new PasswordResetToken(
                 user,
                 "token-hash",

@@ -8,6 +8,95 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-10 13:19
+
+Task
+TASK-041 正式啟用帳號欄位（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Enabled `account` as a formal required unique user field for registration.
+- Added backend account validation, normalization, duplicate checking, and response fields.
+- Updated Google first-login user creation to generate a unique account from the email prefix.
+- Updated Flutter registration page to collect and validate account.
+- Updated Flutter auth models and session test data so login users include account.
+- Updated API, database, project, UI, task, and README documentation.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `backend/src/main/java/com/monsters/auth/dto/AuthUserResponse.java`
+- `backend/src/main/java/com/monsters/auth/dto/RegisterRequest.java`
+- `backend/src/main/java/com/monsters/auth/dto/RegisterResponse.java`
+- `backend/src/main/java/com/monsters/auth/service/AuthService.java`
+- `backend/src/main/java/com/monsters/user/entity/User.java`
+- `backend/src/main/java/com/monsters/user/repository/UserRepository.java`
+- `backend/src/test/java/com/monsters/auth/controller/AuthControllerTest.java`
+- `backend/src/test/java/com/monsters/auth/service/AuthServiceTest.java`
+- `backend/src/test/java/com/monsters/common/security/JwtTokenServiceTest.java`
+- `backend/src/test/java/com/monsters/common/security/SecurityConfigTest.java`
+- `backend/src/test/java/com/monsters/user/service/UserServiceTest.java`
+- `database/init/01_schema.sql`
+- `frontend/lib/models/auth_user.dart`
+- `frontend/lib/models/auth_user.g.dart`
+- `frontend/lib/models/register_result.dart`
+- `frontend/lib/pages/register_page.dart`
+- `frontend/lib/providers/auth_provider.dart`
+- `frontend/lib/repositories/auth_repository.dart`
+- `frontend/test/auth_session_store_test.dart`
+- `frontend/test/login_page_test.dart`
+- `frontend/test/register_page_test.dart`
+- `docs/PROJECT_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/API_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `frontend/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- `database/init/01_schema.sql` now creates `users.account` as `NOT NULL`.
+- Existing local databases created before this change may need manual migration if they contain users with null account.
+
+### API
+
+- `POST /api/auth/register` request now requires `account`.
+- Register response includes `account`.
+- Login and Google login user response includes `account`.
+
+### Database
+
+- `users.account` changed from compatibility-only nullable field to formal required unique field.
+
+### Tests
+
+- `./gradlew test`
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build web --no-pub --dart-define=GOOGLE_CLIENT_ID=test-web-client.apps.googleusercontent.com`
+- `/Users/linweijun/fultter/flutter/bin/flutter build apk --debug --no-pub --dart-define=GOOGLE_CLIENT_ID=test-android-client.apps.googleusercontent.com --dart-define=GOOGLE_SERVER_CLIENT_ID=test-server-client.apps.googleusercontent.com`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --debug --no-codesign --no-pub --dart-define=GOOGLE_CLIENT_ID=test-ios-client.apps.googleusercontent.com --dart-define=GOOGLE_SERVER_CLIENT_ID=test-server-client.apps.googleusercontent.com`
+
+### Notes
+
+- `system_data/` reference: checked old account-based login and account-linked data flow.
+- Reused only the intent of a stable user account identifier.
+- Not reused: old account-as-cross-table-foreign-key pattern, old API paths, and page-level persistence.
+- Existing unrelated `backend/src/main/resources/application.yml` changes were left untouched and are not part of this task.
+
 ## 2026-07-10 13:03
 
 Task

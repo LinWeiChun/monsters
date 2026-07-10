@@ -92,7 +92,7 @@ class SecurityConfigTest {
 
     @Test
     void protectedApiShouldPermitValidAccessToken() throws Exception {
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         ReflectionTestUtils.setField(user, "id", 1L);
         String token = jwtTokenService.createAccessToken(user);
         when(revokedTokenRepository.existsByTokenHash(jwtTokenService.hashToken(token))).thenReturn(false);
@@ -106,7 +106,7 @@ class SecurityConfigTest {
 
     @Test
     void protectedApiShouldRejectRevokedAccessToken() throws Exception {
-        User user = new User("user@example.com", "Wei");
+        User user = new User("wei_account", "user@example.com", "Wei");
         ReflectionTestUtils.setField(user, "id", 1L);
         String token = jwtTokenService.createAccessToken(user);
         when(revokedTokenRepository.existsByTokenHash(jwtTokenService.hashToken(token))).thenReturn(true);

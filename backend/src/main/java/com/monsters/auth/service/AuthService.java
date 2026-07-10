@@ -28,6 +28,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private static final long PASSWORD_RESET_TOKEN_EXPIRATION_SECONDS = 900;
+    private static final int ACCOUNT_MAX_LENGTH = 50;
+    private static final Pattern INVALID_ACCOUNT_CHARACTER_PATTERN = Pattern.compile("[^a-z0-9_]");
 
     private final UserRepository userRepository;
     private final UserCredentialRepository userCredentialRepository;
@@ -101,18 +104,28 @@ public class AuthService {
 
     @Transactional
     public RegisterResponse register(RegisterRequest request) {
+        String account = normalizeAccount(request.account());
+        if (userRepository.existsByAccount(account)) {
+            throw new ConflictException("Account already registered");
+        }
+
         String email = normalizeEmail(request.email());
         if (userRepository.existsByEmail(email)) {
             throw new ConflictException("Email already registered");
         }
 
-        User user = new User(email, request.userName().trim());
+        User user = new User(account, email, request.userName().trim());
         User savedUser = userRepository.save(user);
 
         String passwordHash = passwordEncoder.encode(request.password());
         userCredentialRepository.save(new UserCredential(savedUser, passwordHash));
 
-        return new RegisterResponse(savedUser.getId(), savedUser.getEmail(), savedUser.getUserName());
+        return new RegisterResponse(
+                savedUser.getId(),
+                savedUser.getAccount(),
+                savedUser.getEmail(),
+                savedUser.getUserName()
+        );
     }
 
     @Transactional(readOnly = true)
@@ -186,7 +199,11 @@ public class AuthService {
     private User findOrCreateGoogleUser(GoogleUserInfo googleUser) {
         String email = normalizeEmail(googleUser.email());
         User user = userRepository.findByEmailAndDeletedFalse(email)
-                .orElseGet(() -> userRepository.save(new User(email, displayName(googleUser))));
+                .orElseGet(() -> userRepository.save(new User(
+                        uniqueGoogleAccount(email),
+                        email,
+                        displayName(googleUser)
+                )));
 
         userOAuthAccountRepository.save(new UserOAuthAccount(
                 user,
@@ -200,6 +217,7 @@ public class AuthService {
     private LoginResponse createLoginResponse(User user) {
         AuthUserResponse authUser = new AuthUserResponse(
                 user.getId(),
+                user.getAccount(),
                 user.getEmail(),
                 user.getUserName(),
                 user.getAvatarUrl()
@@ -222,6 +240,39 @@ public class AuthService {
 
     private String normalizeEmail(String email) {
         return email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String normalizeAccount(String account) {
+        return account.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String uniqueGoogleAccount(String email) {
+        String baseAccount = googleAccountBase(email);
+        String account = baseAccount;
+        int suffix = 1;
+        while (userRepository.existsByAccount(account)) {
+            String suffixText = "_" + suffix;
+            int baseMaxLength = ACCOUNT_MAX_LENGTH - suffixText.length();
+            account = baseAccount.substring(0, Math.min(baseAccount.length(), baseMaxLength)) + suffixText;
+            suffix++;
+        }
+        return account;
+    }
+
+    private String googleAccountBase(String email) {
+        String localPart = email.split("@")[0].toLowerCase(Locale.ROOT);
+        String sanitized = INVALID_ACCOUNT_CHARACTER_PATTERN.matcher(localPart).replaceAll("_");
+        sanitized = sanitized.replaceAll("_+", "_").replaceAll("^_+", "").replaceAll("_+$", "");
+        if (sanitized.isBlank() || !Character.isLetter(sanitized.charAt(0))) {
+            sanitized = "user_" + sanitized;
+        }
+        if (sanitized.length() < 4) {
+            sanitized = (sanitized + "_user").substring(0, 4);
+        }
+        if (sanitized.length() > ACCOUNT_MAX_LENGTH) {
+            sanitized = sanitized.substring(0, ACCOUNT_MAX_LENGTH);
+        }
+        return sanitized;
     }
 
     private LocalDateTime now() {
