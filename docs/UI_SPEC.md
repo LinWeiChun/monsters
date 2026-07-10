@@ -523,6 +523,24 @@ Theme 色票需承接舊版暖黃色與棕色視覺語彙：
 | `legacyWarmOpacity` | `#E6A0522D` | `BackgroundColorWarmOpacity` |
 
 頁面不得自行 hard code 共用顏色、字體、圓角與間距；應優先使用 `Theme.of(context)` 與 theme token。
+## Flutter App Icon 資產規範
+
+三平台 App Icon 以根目錄 `icon/icon.png` 作為正式來源素材，產生 Android、iOS 與 Web 所需尺寸。`icon/標題.png` 為標題圖，不作為 square App Icon 來源。
+
+App Icon 規範：
+
+| 平台 | 產出位置 | 規範 |
+|---|---|---|
+| Android | `frontend/android/app/src/main/res/mipmap-*/ic_launcher.png` | 需替換所有 mipmap density 預設 Flutter 圖示 |
+| iOS | `frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/*.png` | 需替換全部 `Contents.json` 宣告尺寸，1024 icon 不得含透明背景 |
+| Web | `frontend/web/favicon.png`、`frontend/web/icons/*.png`、`frontend/web/manifest.json` | 需替換 favicon、PWA icon、maskable icon，manifest theme/background color 需對齊舊版暖黃色與棕色 |
+
+產圖原則：
+
+- 背景使用舊版主要背景色 `#FFFED4`。
+- 主圖置中並保留安全邊界，避免 Android / iOS / Web 安裝圖示裁切主視覺。
+- 不得保留 Flutter 預設藍色 icon 或 manifest theme color。
+- 若來源圖尺寸不足或比例不適合，需重新產生可用平台圖示並於 Log 紀錄。
 ## Flutter Common State Widgets
 
 前端共用狀態元件位置：
