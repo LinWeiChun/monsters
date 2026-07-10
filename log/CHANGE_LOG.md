@@ -8,10 +8,56 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-10 18:40
+
+Task
+TASK-042 Phase 2 狀態收尾（DONE）
+
+Agent
+Codex
+
+### Completed
+
+- Confirmed Phase 0 and Phase 1 are fully marked DONE.
+- Confirmed Phase 2 review items have been merged into `develop`.
+- Updated Phase 2 account, 30-day login persistence, Flutter Google login, fixed Web Google local port, and test tasks from REVIEW to DONE.
+- Corrected previous Phase 2 log headings from REVIEW to DONE where the corresponding work is now merged.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Tests
+
+- Documentation/status-only change; compile and automated tests were not rerun.
+- Git history was checked locally to verify the Phase 2 commits are present in `develop`.
+
+### system_data Reference
+
+- Confirmed `system_data/` exists and was not modified.
+- No old system behavior was needed because this task only corrected task status metadata.
+
+### Notes
+
+- `backend/src/main/resources/application.yml` remains an unrelated local configuration change and was not modified.
+
+---
+
 ## 2026-07-10 13:19
 
 Task
-TASK-041 正式啟用帳號欄位（REVIEW）
+TASK-041 正式啟用帳號欄位（DONE）
 
 Agent
 Codex
@@ -100,7 +146,7 @@ Codex
 ## 2026-07-10 13:03
 
 Task
-TASK-040 Flutter Web Google 登入固定本機 port（REVIEW）
+TASK-040 Flutter Web Google 登入固定本機 port（DONE）
 
 Agent
 Codex
@@ -156,7 +202,7 @@ Codex
 ## 2026-07-10 12:51
 
 Task
-TASK-039 修正 Web Google 登入按鈕 Getting ready（REVIEW）
+TASK-039 修正 Web Google 登入按鈕 Getting ready（DONE）
 
 Agent
 Codex
@@ -211,7 +257,7 @@ Codex
 ## 2026-07-10 12:20
 
 Task
-TASK-038 Flutter Google 登入（REVIEW）
+TASK-038 Flutter Google 登入（DONE）
 
 Agent
 Codex
@@ -295,7 +341,7 @@ feat(frontend): 完成 Google 登入
 ## 2026-07-10 08:17
 
 Task
-TASK-037 Flutter 30 天登入狀態保存（REVIEW）
+TASK-037 Flutter 30 天登入狀態保存（DONE）
 
 Agent
 Codex
@@ -457,7 +503,7 @@ style(frontend): 替換三平台 app icon
 ## 2026-07-10 07:28
 
 Task
-TASK-035 Phase 2 測試與 Task 標示整理（REVIEW）
+TASK-035 Phase 2 測試與 Task 標示整理（DONE）
 
 Agent
 Codex
