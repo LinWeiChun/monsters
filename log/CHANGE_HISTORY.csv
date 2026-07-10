@@ -1,4 +1,9 @@
 日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
+2026-07-10,18:57,DOC-012,Documentation,docs/GIT_RULE.md,修改,建立適用 Phase 3 與後續 Phase 的整合分支與 Task PR 流程,Codex,否,否,否,否,版本更新為 v1.1
+2026-07-10,18:57,DOC-012,Documentation,docs/DECISIONS.md,修改,記錄 Phase 整合分支流程已定案,Codex,否,否,否,否,使用者確認採用新方案
+2026-07-10,18:57,DOC-012,Documentation,README.md,修改,更新 Phase 整合分支與 Task 分支建立說明,Codex,否,否,否,否,適用所有後續 Phase
+2026-07-10,18:57,DOC-012,Documentation,log/CHANGE_LOG.md,修改,新增 DOC-012 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,18:57,DOC-012,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-012 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-10,18:48,TASK-043,Frontend,frontend/assets/images/app_icon.png,新增,新增 Flutter 內部 app icon asset,Codex,否,否,是,否,來源為根目錄 icon/icon.png
 2026-07-10,18:48,TASK-043,Frontend,frontend/assets/images/app_logo.png,新增,新增 Flutter 內部品牌 logo asset,Codex,否,否,是,否,來源為根目錄 icon/標題.png
 2026-07-10,18:48,TASK-043,Frontend,frontend/android/app/src/main/res/mipmap-*/ic_launcher.png,修改,重新產生 Android launcher icons,Codex,否,否,是,否,來源為根目錄 icon/icon.png
