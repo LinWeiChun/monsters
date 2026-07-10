@@ -33,6 +33,22 @@ class AuthRepository {
     return response.data;
   }
 
+  Future<LoginResult> googleLogin({required String idToken}) async {
+    final response = await _apiClient.post<LoginResult>(
+      '/auth/google-login',
+      data: {'idToken': idToken},
+      fromJsonT: (json) => LoginResult.fromJson(json! as Map<String, dynamic>),
+    );
+
+    if (!response.success) {
+      throw ApiException(type: ApiErrorType.unknown, message: response.message);
+    }
+
+    _apiClient.setAccessToken(response.data.accessToken);
+    await _sessionStore.saveSession(response.data);
+    return response.data;
+  }
+
   Future<LoginResult?> restoreSession({DateTime? now}) async {
     final loginResult = await _sessionStore.restoreValidSession(now: now);
     if (loginResult == null) {

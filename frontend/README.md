@@ -65,9 +65,22 @@ UI 不得直接呼叫 Dio，後續功能需透過 Provider / Repository 使用 `
 
 登入流程使用 `AuthRepository` 呼叫 `POST /api/auth/login`，成功後由 `ApiClient.setAccessToken()` 將 access token 套用到目前執行階段的 Authorization header，並透過 `AuthSessionStore` 保存 `LoginResult` 與最後開啟時間。使用者未登出且 30 天內再次開啟 App 時，`SplashPage` 會恢復 session 並直接導向首頁；超過 30 天、session 無效或使用者登出時，會清除本地 session 並要求重新登入。
 
+Google 登入流程使用 `GoogleSignInService` 透過 `google_sign_in` / `google_sign_in_web` 取得 Google ID Token，再由 `AuthRepository` 呼叫 `POST /api/auth/google-login` 交給後端驗證並換發本系統 JWT。Web 版使用 Google Identity Services 官方按鈕，Android / iOS 使用共用 Flutter 登入按鈕；成功後同樣由 `AuthSessionStore` 保存 30 天登入狀態。
+
 註冊流程使用 `AuthRepository` 呼叫 `POST /api/auth/register`，成功後導回登入頁，不自動登入，也不保存密碼或 token。
 
-密碼不得寫入 SharedPreferences；登入 session 僅由 `AuthSessionStore` 集中管理，頁面不得直接讀寫 token。Google 登入入口已保留，但需後續 Google Sign-In SDK 與 ID Token 流程完成後才能正式啟用。
+密碼不得寫入 SharedPreferences；登入 session 僅由 `AuthSessionStore` 集中管理，頁面不得直接讀寫 token。Google 登入不得假造 ID Token 或沿用舊系統空密碼登入流程。
+
+Google 登入執行時需提供 dart-define，且後端 `GOOGLE_CLIENT_IDS` 必須包含對應 Client ID：
+
+```bash
+/Users/linweijun/fultter/flutter/bin/flutter run \
+  --dart-define=GOOGLE_CLIENT_ID=your-web-or-platform-client-id.apps.googleusercontent.com \
+  --dart-define=GOOGLE_SERVER_CLIENT_ID=your-web-client-id.apps.googleusercontent.com
+```
+
+Web 版還需在 Google Cloud OAuth Client 設定 Authorized JavaScript origins；Android / iOS 需依 Google OAuth Client 設定 package name、bundle id 與簽章資訊。
+
 ## User Profile
 
 個人資料頁與資料流：

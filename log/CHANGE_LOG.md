@@ -8,6 +8,90 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-10 12:20
+
+Task
+TASK-038 Flutter Google 登入（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Implemented approved option 1 for Flutter Google login using `google_sign_in` and `google_sign_in_web`.
+- Added a Google Sign-In service that initializes SDK client IDs from dart-define values and returns Google ID Tokens.
+- Updated login UI so Web uses the Google Identity Services official button, while Android and iOS use the shared Flutter Google login action.
+- Updated Auth repository and controller to call existing `POST /api/auth/google-login`, save the returned session, and navigate to home.
+- Updated logout to clear local session and attempt Google SDK sign-out.
+- Added widget tests for Google ID Token login, Google backend error handling, Web authentication-event login, and Google sign-out during logout.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `frontend/lib/services/google_sign_in_service.dart`
+- `frontend/lib/widgets/auth/google_sign_in_web_button.dart`
+- `frontend/lib/widgets/auth/google_sign_in_web_button_stub.dart`
+- `frontend/lib/widgets/auth/google_sign_in_web_button_web.dart`
+
+### Modified
+
+- `frontend/lib/config/app_config.dart`
+- `frontend/lib/pages/login_page.dart`
+- `frontend/lib/providers/auth_provider.dart`
+- `frontend/lib/repositories/auth_repository.dart`
+- `frontend/test/login_page_test.dart`
+- `frontend/pubspec.yaml`
+- `frontend/pubspec.lock`
+- `frontend/ios/Runner.xcodeproj/project.pbxproj`
+- `docs/DECISIONS.md`
+- `docs/PROJECT_SPEC.md`
+- `docs/API_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `frontend/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- Uses existing `POST /api/auth/google-login`.
+- No backend endpoint contract change.
+
+### Database
+
+- None
+
+### Tests
+
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter build web --no-pub --dart-define=GOOGLE_CLIENT_ID=test-web-client.apps.googleusercontent.com --dart-define=GOOGLE_SERVER_CLIENT_ID=test-server-client.apps.googleusercontent.com`
+- `/Users/linweijun/fultter/flutter/bin/flutter build apk --debug --no-pub --dart-define=GOOGLE_CLIENT_ID=test-android-client.apps.googleusercontent.com --dart-define=GOOGLE_SERVER_CLIENT_ID=test-server-client.apps.googleusercontent.com`
+- `/Users/linweijun/fultter/flutter/bin/flutter build ios --debug --no-codesign --no-pub --dart-define=GOOGLE_CLIENT_ID=test-ios-client.apps.googleusercontent.com --dart-define=GOOGLE_SERVER_CLIENT_ID=test-server-client.apps.googleusercontent.com`
+
+### Commit Message
+
+```text
+feat(frontend): 完成 Google 登入
+```
+
+### Notes
+
+- `system_data/` reference: checked old Flutter login code and `google_sign_in_API.dart`.
+- Reused only the intent of using Google Sign-In as the entry point.
+- Not reused: old empty-password API login flow, direct Google user-data trust, direct page-level API code, and old global navigation/state patterns.
+- Real Google OAuth Client IDs are intentionally not committed. Runtime must provide `GOOGLE_CLIENT_ID` and `GOOGLE_SERVER_CLIENT_ID`; backend `GOOGLE_CLIENT_IDS` must include the accepted audiences.
+- iOS CocoaPods added the Google Sign-In resources copy build phase to the Runner Xcode project.
+- Existing unrelated `backend/src/main/resources/application.yml` changes were left untouched and are not part of this task.
+
 ## 2026-07-10 08:17
 
 Task
