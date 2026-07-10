@@ -8,6 +8,62 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-10 13:03
+
+Task
+TASK-040 Flutter Web Google 登入固定本機 port（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Added a macOS-friendly Flutter Web local launch script that fixes the local origin at `http://localhost:5050`.
+- Updated Google login local testing documentation so Google Cloud OAuth only needs `http://localhost:5050` in Authorized JavaScript origins.
+- Kept Google Web local testing on `GOOGLE_CLIENT_ID` only; no real Client ID is committed.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `frontend/tool/run_web_local.sh`
+
+### Modified
+
+- `frontend/README.md`
+- `docs/API_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Migration
+
+- None
+
+### API
+
+- No API contract change.
+
+### Database
+
+- None
+
+### Tests
+
+- `bash -n frontend/tool/run_web_local.sh`
+- `/Users/linweijun/fultter/flutter/bin/flutter analyze --no-pub`
+- `/Users/linweijun/fultter/flutter/bin/flutter test --no-pub`
+
+### Notes
+
+- `system_data/` reference: not needed for this local development startup fix.
+- Google Cloud OAuth Client should add `http://localhost:5050` to Authorized JavaScript origins.
+- Existing unrelated `backend/src/main/resources/application.yml` changes were left untouched and are not part of this task.
+
 ## 2026-07-10 12:51
 
 Task

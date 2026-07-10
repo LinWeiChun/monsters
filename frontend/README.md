@@ -75,13 +75,19 @@ Google 登入執行時需提供 dart-define，且後端 `GOOGLE_CLIENT_IDS` 必�
 
 ```bash
 # Web
-/Users/linweijun/fultter/flutter/bin/flutter run -d chrome \
-  --dart-define=GOOGLE_CLIENT_ID=your-web-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_ID=your-web-client-id.apps.googleusercontent.com \
+  ./tool/run_web_local.sh
 
 # Android / iOS
 /Users/linweijun/fultter/flutter/bin/flutter run \
   --dart-define=GOOGLE_CLIENT_ID=your-platform-client-id.apps.googleusercontent.com \
   --dart-define=GOOGLE_SERVER_CLIENT_ID=your-web-client-id.apps.googleusercontent.com
+```
+
+`tool/run_web_local.sh` 會固定 Web 本機網址為 `http://localhost:5050`，避免 Flutter Web 每次啟動改用不同 port 而被 Google OAuth 擋下。Google Cloud OAuth Client 的 Authorized JavaScript origins 請加入：
+
+```text
+http://localhost:5050
 ```
 
 Web 版還需在 Google Cloud OAuth Client 設定 Authorized JavaScript origins，且 Web Google SDK 不支援 `serverClientId`，因此 Web 本機測試不要傳 `GOOGLE_SERVER_CLIENT_ID`。Android / iOS 需依 Google OAuth Client 設定 package name、bundle id 與簽章資訊。
