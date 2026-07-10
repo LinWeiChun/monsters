@@ -153,13 +153,20 @@ App 入口在 `lib/app.dart` 套用 `AppTheme.light()`、`AppTheme.dark()` 與 `
 - `#A0522D`：品牌主棕色與 Theme seed
 
 頁面不得自行 hard code 共用顏色、圓角與間距；應優先使用 `Theme.of(context)`、`AppColors`、`AppSpacing`、`AppRadius`。
-## App Icons
+## App Icons / Logo
 
 三平台 App Icon 來源為根目錄 `../icon/icon.png`，產出至：
 
 - Android：`android/app/src/main/res/mipmap-*/ic_launcher.png`
 - iOS：`ios/Runner/Assets.xcassets/AppIcon.appiconset/*.png`
 - Web：`web/favicon.png`、`web/icons/*.png`
+
+Flutter 內部品牌圖來源為根目錄 `../icon/標題.png`，匯入至：
+
+- Logo：`assets/images/app_logo.png`
+- Icon：`assets/images/app_icon.png`
+
+Logo 目前套用於 splash、login、register 三個頁面。
 
 Web manifest 的 `background_color` 與 `theme_color` 需維持舊版暖黃色 / 棕色視覺，不使用 Flutter 預設藍色。
 ## Common State Widgets

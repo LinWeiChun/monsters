@@ -1,4 +1,19 @@
 日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
+2026-07-10,18:48,TASK-043,Frontend,frontend/assets/images/app_icon.png,新增,新增 Flutter 內部 app icon asset,Codex,否,否,是,否,來源為根目錄 icon/icon.png
+2026-07-10,18:48,TASK-043,Frontend,frontend/assets/images/app_logo.png,新增,新增 Flutter 內部品牌 logo asset,Codex,否,否,是,否,來源為根目錄 icon/標題.png
+2026-07-10,18:48,TASK-043,Frontend,frontend/android/app/src/main/res/mipmap-*/ic_launcher.png,修改,重新產生 Android launcher icons,Codex,否,否,是,否,來源為根目錄 icon/icon.png
+2026-07-10,18:48,TASK-043,Frontend,frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/*.png,修改,重新產生 iOS AppIcon 圖組,Codex,否,否,是,否,1024 icon 不含透明
+2026-07-10,18:48,TASK-043,Frontend,frontend/web/favicon.png,修改,重新產生 Web favicon,Codex,否,否,是,否,來源為根目錄 icon/icon.png
+2026-07-10,18:48,TASK-043,Frontend,frontend/web/icons/*.png,修改,重新產生 Web PWA icons,Codex,否,否,是,否,含 maskable icon
+2026-07-10,18:48,TASK-043,Frontend,frontend/lib/pages/splash_page.dart,修改,啟動畫面套用品牌 logo,Codex,否,否,是,否,
+2026-07-10,18:48,TASK-043,Frontend,frontend/lib/pages/login_page.dart,修改,登入頁套用品牌 logo,Codex,否,否,是,否,
+2026-07-10,18:48,TASK-043,Frontend,frontend/lib/pages/register_page.dart,修改,註冊頁套用品牌 logo,Codex,否,否,是,否,
+2026-07-10,18:48,TASK-043,Frontend,frontend/pubspec.yaml,修改,加入 app icon 與 logo asset 宣告,Codex,否,否,是,否,
+2026-07-10,18:48,TASK-043,Documentation,docs/UI_SPEC.md,修改,補充 App Icon 與 Logo 資產規範,Codex,否,否,是,否,文件同步
+2026-07-10,18:48,TASK-043,Documentation,docs/TASKS.md,修改,更新 App icon / Logo 任務 REVIEW 說明,Codex,否,否,否,否,待測試與 GitHub push
+2026-07-10,18:48,TASK-043,Documentation,frontend/README.md,修改,補充 Logo asset 路徑與套用頁面,Codex,否,否,否,否,文件同步
+2026-07-10,18:48,TASK-043,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-043 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-10,18:48,TASK-043,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-043 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-10,18:40,TASK-042,Documentation,docs/TASKS.md,修改,將 Phase 2 REVIEW 項目依 develop 合併狀態標記為 DONE,Codex,否,否,否,否,Phase 0 與 Phase 1 已全數 DONE；Phase 2 已收尾
 2026-07-10,18:40,TASK-042,Documentation,log/CHANGE_LOG.md,修改,新增 Phase 2 狀態收尾紀錄並修正相關 log 標題,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-10,18:40,TASK-042,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-042 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log

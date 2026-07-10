@@ -52,9 +52,10 @@ class _SplashPageState extends ConsumerState<SplashPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  '貘nsters',
-                  style: Theme.of(context).textTheme.displaySmall,
+                Image.asset(
+                  'assets/images/app_logo.png',
+                  width: 220,
+                  semanticLabel: '貘nsters',
                 ),
                 const SizedBox(height: 24),
                 FilledButton(

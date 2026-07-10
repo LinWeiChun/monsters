@@ -209,7 +209,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [ ] 排除舊系統金鑰、憑證、jar、metadata 與 build artifact
 - [ ] 依新版環境變數、部署與 Git 規範重新整理
 
-- [ ] App icon 三平台替換（REVIEW：本地產圖、文件同步、測試與 commit 完成；待 GitHub push）
+- [ ] App icon / Logo 三平台替換（REVIEW：本地產圖、登入 / 註冊 / 啟動畫面 logo 套用與文件同步完成；待測試與 GitHub push）
 - [ ] Android 測試
 - [ ] iOS 測試
 - [ ] Web 測試

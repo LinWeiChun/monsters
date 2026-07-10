@@ -8,6 +8,69 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-10 18:48
+
+Task
+TASK-043 App icon / Logo 圖片套用（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Regenerated Android, iOS, and Web app icon images from root `icon/icon.png`.
+- Added Flutter image assets from root icon/logo sources.
+- Added `app_logo.png` to splash, login, and register pages.
+- Added Flutter asset declarations for `app_icon.png` and `app_logo.png`.
+- Updated UI spec, frontend README, task status, and logs for the logo asset usage.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `frontend/assets/images/app_icon.png`
+- `frontend/assets/images/app_logo.png`
+
+### Modified
+
+- `frontend/android/app/src/main/res/mipmap-hdpi/ic_launcher.png`
+- `frontend/android/app/src/main/res/mipmap-mdpi/ic_launcher.png`
+- `frontend/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png`
+- `frontend/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png`
+- `frontend/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png`
+- `frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/*.png`
+- `frontend/web/favicon.png`
+- `frontend/web/icons/*.png`
+- `frontend/lib/pages/splash_page.dart`
+- `frontend/lib/pages/login_page.dart`
+- `frontend/lib/pages/register_page.dart`
+- `frontend/pubspec.yaml`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `frontend/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Tests
+
+- Not run by request. Image dimensions were checked locally with `sips`.
+- Dart format was run for the touched Flutter page files.
+
+### system_data Reference
+
+- No `system_data/` code was needed for this image-only task.
+- Root `icon/icon.png` and `icon/標題.png` were used as the source images.
+
+### Notes
+
+- `backend/src/main/resources/application.yml` remains an unrelated local configuration change and was not modified.
+- Task remains in REVIEW until tests and GitHub push are completed.
+
+---
+
 ## 2026-07-10 18:40
 
 Task
