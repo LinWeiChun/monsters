@@ -46,4 +46,16 @@ class EntryMediaRepositoryTest {
         assertThat(returnType.getRawType()).isEqualTo(Optional.class);
         assertThat(returnType.getActualTypeArguments()).containsExactly(EntryMedia.class);
     }
+
+    @Test
+    void shouldBatchQueryActiveMediaInEntryAndDisplayOrder() throws NoSuchMethodException {
+        Method method = EntryMediaRepository.class.getMethod(
+                "findAllByEntryIdInAndDeletedFalseOrderByEntryIdAscDisplayOrderAsc",
+                List.class
+        );
+        ParameterizedType returnType = (ParameterizedType) method.getGenericReturnType();
+
+        assertThat(returnType.getRawType()).isEqualTo(List.class);
+        assertThat(returnType.getActualTypeArguments()).containsExactly(EntryMedia.class);
+    }
 }

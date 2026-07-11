@@ -8,6 +8,93 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-12 00:05
+
+Task
+TASK-051 查詢煩惱 API（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Confirmed TASK-050 was merged into `feature/phase3` through PR #31 and marked it DONE.
+- Created `feature/phase3-annoyance-query` from the synchronized Phase 3 integration branch.
+- Added authenticated owner-scoped `GET /api/annoyances` and `GET /api/annoyances/{id}` endpoints.
+- Implemented zero-based pagination with default size 20, maximum size 100, total metadata, optional solved/shared filters, and occurredAt/createdAt/score sorting.
+- Kept page and size as query controls only; no page-number or score column was added to the Database.
+- Added deterministic entry-id descending tie-breaking and excluded deleted entries and deleted users.
+- Batch-loaded annoyance types, moods, and media for list responses to avoid per-entry lookup queries.
+- Returned 404 for missing, deleted, or non-owned single entries and 400 for invalid pagination, sort, or query-parameter types.
+- Added page response, Repository contract, Service, Controller, and exception-handler tests.
+- Updated the formal API contract and moved this Task from IN PROGRESS to REVIEW.
+- Checked log retention before adding this entry. The oldest record is 2026-06-29, so no record older than one month exists and none was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/dto/common/PageResponse.java`
+- `backend/src/test/java/com/monsters/dto/common/PageResponseTest.java`
+
+### Modified
+
+- `backend/src/main/java/com/monsters/controller/annoyance/AnnoyanceController.java`
+- `backend/src/main/java/com/monsters/exception/common/GlobalExceptionHandler.java`
+- `backend/src/main/java/com/monsters/repository/entry/EntryMediaRepository.java`
+- `backend/src/main/java/com/monsters/repository/entry/EntryRepository.java`
+- `backend/src/main/java/com/monsters/service/annoyance/AnnoyanceService.java`
+- `backend/src/test/java/com/monsters/controller/annoyance/AnnoyanceControllerTest.java`
+- `backend/src/test/java/com/monsters/exception/common/GlobalExceptionHandlerTest.java`
+- `backend/src/test/java/com/monsters/repository/entry/EntryMediaRepositoryTest.java`
+- `backend/src/test/java/com/monsters/repository/entry/EntryRepositoryTest.java`
+- `backend/src/test/java/com/monsters/service/annoyance/AnnoyanceServiceTest.java`
+- `docs/API_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None.
+
+### Tests
+
+- `./gradlew test` passed: 171 tests, 0 failures, 0 errors.
+- Spring application context and Spring Data Repository query validation passed.
+- Pagination boundary, default sort, score sort, boolean filters, empty pages, owner scope, soft delete, batch lookup, single query, and invalid parameter handling are covered.
+- `git diff --check` passed.
+- `CHANGE_HISTORY.csv` was imported, inspected, and rendered as a 13-column table with the spreadsheet runtime.
+
+### system_data Reference
+
+- Rechecked the old annoyance account search, solved search, history list, and shared-query flows.
+- Retained the useful intent of owner history and solved filtering.
+- Did not reuse account-in-path authorization, unpaginated list loading, the separate legacy annoyance table, unrestricted shared queries, or legacy response models.
+- `system_data/` was not modified.
+
+### API
+
+- Added `GET /api/annoyances` with `page`, `size`, `sort`, `isSolved`, and `isShared` query parameters.
+- Added owner-only `GET /api/annoyances/{id}`.
+- Added the common page response metadata contract and 400 handling for invalid query-parameter types.
+
+### Database
+
+- No schema, seed, index, or migration change.
+- Pagination uses Spring Data Pageable and generated LIMIT/OFFSET behavior; no page field was added.
+- Score sorting joins the existing `moods.score`; no score field was duplicated in entries.
+
+### UI
+
+- No Flutter file was changed.
+- The paginated response contract is ready for the later Flutter history integration Task.
+
+### Pending
+
+- Review and merge the Task PR into `feature/phase3`.
+- Database execution-plan tuning can be revisited with production-volume metrics; no speculative index was added in this Task.
+
+---
+
 ## 2026-07-11 23:50
 
 Task

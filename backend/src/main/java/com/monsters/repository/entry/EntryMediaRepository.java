@@ -10,4 +10,8 @@ public interface EntryMediaRepository extends JpaRepository<EntryMedia, Long> {
     List<EntryMedia> findAllByEntryIdAndDeletedFalseOrderByDisplayOrderAsc(Long entryId);
 
     Optional<EntryMedia> findByIdAndEntryIdAndDeletedFalse(Long id, Long entryId);
+
+    List<EntryMedia> findAllByEntryIdInAndDeletedFalseOrderByEntryIdAscDisplayOrderAsc(
+            List<Long> entryIds
+    );
 }

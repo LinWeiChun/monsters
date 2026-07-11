@@ -809,6 +809,8 @@ Query：
 | `isShared` | 否 | 全部 | boolean filter |
 
 後端以 `LIMIT`／`OFFSET` 與排序查詢；`page` 是 request 參數，不是 Database 欄位。
+只查詢目前登入使用者未刪除的 ANNOYANCE entry；相同排序值以 entry id 由大至小作為穩定的次排序。
+無效的 page、size、sort 或 boolean query parameter 回傳 400。
 
 Response data：
 
