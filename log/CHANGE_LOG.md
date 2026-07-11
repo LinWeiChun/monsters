@@ -8,6 +8,96 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-11 23:50
+
+Task
+TASK-050 Backend layer-first package layout refactor（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Confirmed TASK-049 was merged into `feature/phase3` through PR #30 and marked it DONE.
+- Created `refactor/phase3-backend-package-layout` from the synchronized Phase 3 integration branch.
+- Reorganized Backend production and test packages from `com.monsters.<module>.<layer>` to `com.monsters.<layer>.<module>` as explicitly requested.
+- Moved Controller, DTO, Entity, Exception, Mapper, Repository, Security, Service, Storage, and Config packages while preserving module boundaries.
+- Mapped shared code to the `common` module under each layer, such as `com.monsters.entity.common` and `com.monsters.security.common`.
+- Kept `MonstersApplication` in root package `com.monsters` so Spring component, configuration, Entity, and Repository scanning still covers every layer.
+- Updated package declarations and imports in all affected production and test Java files.
+- Verified every one of the 120 named-package Java files has a package declaration matching its physical directory.
+- Removed empty feature-first directories and confirmed no old package reference remains outside historical Log and `system_data`.
+- Updated the formal package architecture rules and moved this extra task from IN PROGRESS to REVIEW.
+- Checked log retention before adding this entry. The oldest record is 2026-06-29, so no record older than one month exists and none was deleted.
+
+### Added
+
+- None; all Java changes are tracked as package moves and import updates.
+
+### Moved
+
+- `com.monsters.<module>.controller` → `com.monsters.controller.<module>`
+- `com.monsters.<module>.dto` → `com.monsters.dto.<module>`
+- `com.monsters.<module>.entity` → `com.monsters.entity.<module>`
+- `com.monsters.<module>.mapper` → `com.monsters.mapper.<module>`
+- `com.monsters.<module>.repository` → `com.monsters.repository.<module>`
+- `com.monsters.<module>.service` → `com.monsters.service.<module>`
+- `com.monsters.<module>.storage` → `com.monsters.storage.<module>`
+- `com.monsters.common.config` → `com.monsters.config.common`
+- `com.monsters.common.exception` → `com.monsters.exception.common`
+- `com.monsters.common.security` → `com.monsters.security.common`
+- Matching test packages under `backend/src/test/java/com/monsters/`
+
+### Modified
+
+- `backend/src/test/java/com/monsters/MonstersApplicationTests.java`
+- `backend/README.md`
+- `docs/API_SPEC.md`
+- `docs/CODING_STANDARD.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/DECISIONS.md`
+- `docs/PROJECT_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- No source file was deleted; only empty old package directories were removed.
+
+### Tests
+
+- `./gradlew clean test build` passed: 160 tests, 0 failures, 0 errors.
+- All Spring application context, Security, JWT, JPA Repository, Entity converter, R2 storage, and Annoyance tests passed after package relocation.
+- Physical path versus declared package check passed for all 120 named-package Java files.
+- Old feature-first package search passed with zero matches outside historical Log and `system_data`.
+- `git diff --check` passed.
+- `CHANGE_HISTORY.csv` was imported, inspected, and rendered as a 13-column table with the spreadsheet runtime.
+
+### system_data Reference
+
+- Checked the old Backend directory organization only as historical context.
+- Did not reuse old `com.example.demo` code, package names, framework patterns, business logic, or dependencies.
+- The refactor is based on the user's explicit layer-first requirement and current formal architecture, not the old implementation.
+- `system_data/` was not modified.
+
+### API
+
+- No endpoint, request, response, status code, authentication, or runtime behavior change.
+- API specification updates only replace Java implementation package references.
+
+### Database
+
+- No Entity mapping behavior, schema, seed, SQL, or migration change.
+- No migration required.
+
+### Notes
+
+- Future Backend code must use `com.monsters.<layer>.<module>`; feature-first packages are prohibited by the updated Coding Standard.
+- The next Phase 3 feature Task remains the query Annoyance API.
+
+---
+
 ## 2026-07-11 23:38
 
 Task

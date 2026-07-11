@@ -43,6 +43,7 @@
 | Phase 3 Annoyance Core 範圍 | Core Task 建立領域基礎、lookup、DTO、Mapper、Service 驗證與 Controller 骨架；實際 API endpoint 依後續 Task 逐一完成（D12-A） |
 | Phase 3 R2 規格用語 | Entry media 在 Database 只保存 private R2 object key，不保存 public URL（D13-A） |
 | Phase 3 Mood seed | Annoyance 與 Diary 共用中性分數 code `SCORE_1`～`SCORE_5`，label 為 `1分`～`5分`，不在 lookup 綁定好壞或程度語意（D14-A） |
+| Backend package layout | 全面採 layer-first `com.monsters.<layer>.<module>`；`common` 作為共用模組名，`MonstersApplication` 維持在 `com.monsters` |
 
 ## 二、已核准套件與工具
 

@@ -135,6 +135,7 @@ Phase 3 不發放怪獸獎勵；新增煩惱後的隨機怪獸或獎勵於 Phase
 
 - 前後端分離。
 - 模組化開發。
+- Backend package 使用 layer-first 結構 `com.monsters.<layer>.<module>`。
 - API 與資料結構需文件化。
 - 不得將商業邏輯混入 UI 或 Controller。
 

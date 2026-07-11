@@ -77,7 +77,7 @@ frontend/lib/core/network/ApiErrorType
 後端共用 Response DTO：
 
 ```text
-com.monsters.common.dto.ApiResponse<T>
+com.monsters.dto.common.ApiResponse<T>
 ```
 
 Controller 回傳資料時必須使用 `ApiResponse<T>` 包裝，欄位固定為：
@@ -97,7 +97,7 @@ Controller 回傳資料時必須使用 `ApiResponse<T>` 包裝，欄位固定為
 全域 Exception Handler：
 
 ```text
-com.monsters.common.exception.GlobalExceptionHandler
+com.monsters.exception.common.GlobalExceptionHandler
 ```
 
 Exception 回傳格式固定使用 `ApiResponse<Void>`：
@@ -131,7 +131,7 @@ Authorization: Bearer <token>
 CORS 設定：
 
 ```text
-com.monsters.common.config.CorsConfig
+com.monsters.config.common.CorsConfig
 ```
 
 CORS 僅套用於：
@@ -154,7 +154,7 @@ CORS 僅套用於：
 Security / JWT 基礎設定：
 
 ```text
-com.monsters.common.security.SecurityConfig
+com.monsters.security.common.SecurityConfig
 ```
 
 安全規則：

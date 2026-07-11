@@ -428,10 +428,18 @@ TOKEN_EXPIRE_TIME
 例如：
 
 ```text
-com.monsters.user.service
+com.monsters.service.user
 
-com.monsters.community.controller
+com.monsters.controller.community
 ```
+
+Backend package 固定使用 layer-first 結構：
+
+```text
+com.monsters.<layer>.<module>
+```
+
+不得使用 `com.monsters.<module>.<layer>`。
 
 ---
 
@@ -1102,26 +1110,34 @@ AI 應：
 建議：
 
 ```text
-controller/
-
-service/
-
-repository/
-
-entity/
-
-dto/
-
-mapper/
-
-config/
-
-exception/
-
-security/
-
-util/
+com/monsters/
+├── controller/
+│   ├── auth/
+│   ├── user/
+│   └── annoyance/
+├── service/
+│   └── <module>/
+├── repository/
+│   └── <module>/
+├── entity/
+│   ├── common/
+│   └── <module>/
+├── dto/
+│   ├── common/
+│   └── <module>/
+├── mapper/
+│   └── <module>/
+├── config/common/
+├── exception/common/
+├── security/common/
+├── storage/
+│   ├── common/
+│   └── <module>/
+└── util/
+    └── <module>/
 ```
+
+第一層以技術分層，第二層才是功能模組；共用程式使用 `common` 作為模組名。
 
 不得：
 

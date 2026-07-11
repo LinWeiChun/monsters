@@ -702,3 +702,24 @@
 2026-07-11,23:38,TASK-049,Documentation,docs/TASKS.md,修改,將 TASK-048 標記 DONE 並將 TASK-049 移至 REVIEW,Codex,否,否,否,否,
 2026-07-11,23:38,TASK-049,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-049 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
 2026-07-11,23:38,TASK-049,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-049 history 紀錄,Codex,否,否,否,否,artifact tool 驗證
+2026-07-11,23:50,TASK-050,Refactor,backend/src/main/java/com/monsters/controller,搬移,將 Controller 改為 layer first package,Codex,否,否,否,否,行為不變
+2026-07-11,23:50,TASK-050,Refactor,backend/src/main/java/com/monsters/dto,搬移,將 DTO 改為 layer first package,Codex,否,否,否,否,行為不變
+2026-07-11,23:50,TASK-050,Refactor,backend/src/main/java/com/monsters/entity,搬移,將 Entity 改為 layer first package,Codex,否,否,否,否,JPA mapping 不變
+2026-07-11,23:50,TASK-050,Refactor,backend/src/main/java/com/monsters/exception,搬移,將 Exception 改為 layer first package,Codex,否,否,否,否,錯誤行為不變
+2026-07-11,23:50,TASK-050,Refactor,backend/src/main/java/com/monsters/mapper,搬移,將 Mapper 改為 layer first package,Codex,否,否,否,否,行為不變
+2026-07-11,23:50,TASK-050,Refactor,backend/src/main/java/com/monsters/repository,搬移,將 Repository 改為 layer first package,Codex,否,否,否,否,查詢不變
+2026-07-11,23:50,TASK-050,Refactor,backend/src/main/java/com/monsters/security,搬移,將 Security 改為 layer first package,Codex,否,否,否,否,JWT 與權限不變
+2026-07-11,23:50,TASK-050,Refactor,backend/src/main/java/com/monsters/service,搬移,將 Service 改為 layer first package,Codex,否,否,否,否,transaction 不變
+2026-07-11,23:50,TASK-050,Refactor,backend/src/main/java/com/monsters/storage,搬移,將 Storage 改為 layer first package,Codex,否,否,否,否,R2 行為不變
+2026-07-11,23:50,TASK-050,Refactor,backend/src/main/java/com/monsters/config,搬移,將 Config 改為 layer first package,Codex,否,否,否,否,CORS 設定不變
+2026-07-11,23:50,TASK-050,Refactor,backend/src/test/java/com/monsters,搬移,同步所有測試 package 與 imports,Codex,否,否,否,否,160 tests
+2026-07-11,23:50,TASK-050,Test,backend/src/test/java/com/monsters/MonstersApplicationTests.java,修改,更新 root context test imports,Codex,否,否,否,否,Spring context 通過
+2026-07-11,23:50,TASK-050,Documentation,backend/README.md,修改,新增 layer first package 說明,Codex,否,否,否,否,
+2026-07-11,23:50,TASK-050,Documentation,docs/API_SPEC.md,修改,更新 Backend class package 引用,Codex,否,否,否,否,API 不變
+2026-07-11,23:50,TASK-050,Documentation,docs/CODING_STANDARD.md,修改,改為 layer first package 強制規範,Codex,否,否,否,否,
+2026-07-11,23:50,TASK-050,Documentation,docs/DATABASE_SPEC.md,修改,更新 Entity 與 BaseEntity package 規範,Codex,否,否,否,否,Database 不變
+2026-07-11,23:50,TASK-050,Documentation,docs/DECISIONS.md,修改,記錄 Backend layer first package 決策,Codex,否,否,否,否,
+2026-07-11,23:50,TASK-050,Documentation,docs/PROJECT_SPEC.md,修改,補充 Backend package 可維護性規則,Codex,否,否,否,否,
+2026-07-11,23:50,TASK-050,Documentation,docs/TASKS.md,修改,將 TASK-049 標記 DONE 並新增 TASK-050 REVIEW,Codex,否,否,否,否,
+2026-07-11,23:50,TASK-050,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-050 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
+2026-07-11,23:50,TASK-050,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-050 history 紀錄,Codex,否,否,否,否,artifact tool 驗證
