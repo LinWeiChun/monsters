@@ -167,13 +167,27 @@ CREATE TABLE IF NOT EXISTS user_active_monsters (
 
 CREATE TABLE IF NOT EXISTS annoyance_types (
   id BIGINT NOT NULL AUTO_INCREMENT,
+  code VARCHAR(50) NOT NULL,
   type_name VARCHAR(80) NOT NULL,
   display_order INT NOT NULL DEFAULT 0,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
+  UNIQUE KEY uk_annoyance_types_code (code),
   UNIQUE KEY uk_annoyance_types_type_name (type_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO annoyance_types (code, type_name, display_order)
+VALUES
+  ('ACADEMIC', '課業', 1),
+  ('CAREER', '事業', 2),
+  ('LOVE', '愛情', 3),
+  ('FRIENDSHIP', '友情', 4),
+  ('FAMILY', '親情', 5),
+  ('OTHER', '其他', 6)
+ON DUPLICATE KEY UPDATE
+  type_name = VALUES(type_name),
+  display_order = VALUES(display_order);
 
 CREATE TABLE IF NOT EXISTS moods (
   id BIGINT NOT NULL AUTO_INCREMENT,

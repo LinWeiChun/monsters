@@ -274,6 +274,15 @@ Unique：`user_id, monster_group_id`
 
 初始 code 固定為 `ACADEMIC`、`CAREER`、`LOVE`、`FRIENDSHIP`、`FAMILY`、`OTHER`，Client 不傳 Database ID。
 
+| code | type_name | display_order |
+|---|---|---:|
+| `ACADEMIC` | 課業 | 1 |
+| `CAREER` | 事業 | 2 |
+| `LOVE` | 愛情 | 3 |
+| `FRIENDSHIP` | 友情 | 4 |
+| `FAMILY` | 親情 | 5 |
+| `OTHER` | 其他 | 6 |
+
 ### 3.11 moods
 
 情緒 lookup table，取代舊系統 diary / annoyance 的 `mood` 字串與 `index` 欄位。
@@ -600,6 +609,8 @@ database/init/01_schema.sql
 - 正式進入資料保存階段後，資料庫結構異動應改用正式 migration 工具或手動 migration script，不得直接依賴 Docker init SQL。
 
 若需從 `system_data/` 舊資料庫匯入資料，應建立明確的 migration mapping，不得直接將舊表結構搬入新版資料庫。
+
+Phase 3 annoyance type migration：`database/migrations/20260711_01_add_annoyance_type_codes_and_seed.sql`。既有環境只執行一次；全新環境由 `database/init/01_schema.sql` 直接建立並 seed。
 
 Migration 應包含：
 
