@@ -15,22 +15,24 @@ import static org.mockito.Mockito.when;
 import com.monsters.dto.annoyance.AnnoyanceRecordMethod;
 import com.monsters.dto.annoyance.AnnoyanceResponse;
 import com.monsters.dto.annoyance.CreateAnnoyanceRequest;
+import com.monsters.dto.common.PageResponse;
 import com.monsters.entity.annoyance.AnnoyanceType;
-import com.monsters.mapper.annoyance.AnnoyanceMapper;
-import com.monsters.repository.annoyance.AnnoyanceTypeRepository;
-import com.monsters.exception.common.ResourceNotFoundException;
-import com.monsters.exception.common.ValidationException;
 import com.monsters.entity.entry.Entry;
+import com.monsters.entity.entry.EntryMedia;
 import com.monsters.entity.entry.EntryMediaType;
 import com.monsters.entity.entry.EntryType;
 import com.monsters.entity.entry.Mood;
+import com.monsters.entity.user.User;
+import com.monsters.exception.common.ResourceNotFoundException;
+import com.monsters.exception.common.ValidationException;
+import com.monsters.mapper.annoyance.AnnoyanceMapper;
+import com.monsters.repository.annoyance.AnnoyanceTypeRepository;
 import com.monsters.repository.entry.EntryMediaRepository;
 import com.monsters.repository.entry.EntryRepository;
 import com.monsters.repository.entry.MoodRepository;
+import com.monsters.repository.user.UserRepository;
 import com.monsters.storage.entry.EntryMediaStorageService;
 import com.monsters.storage.entry.StoredEntryMedia;
-import com.monsters.entity.user.User;
-import com.monsters.repository.user.UserRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -42,6 +44,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -312,6 +316,153 @@ class AnnoyanceServiceTest {
     }
 
     @Test
+    void findAllShouldApplyOwnerFiltersSortAndBatchMap() {
+        prepareUser();
+        Entry first = entry(10L, "first");
+        Entry second = entry(11L, "second");
+        AnnoyanceType category = category();
+        Mood mood = mood();
+        EntryMedia drawing = new EntryMedia(
+                10L,
+                EntryMediaType.DRAWING,
+                "entries/media/1/drawing/key.webp",
+                "image/webp",
+                1,
+                null,
+                1
+        );
+        AnnoyanceResponse firstResponse = response(first);
+        AnnoyanceResponse secondResponse = response(second);
+        PageRequest pageable = PageRequest.of(2, 2);
+        when(entryRepository.findAnnoyancePage(
+                1L,
+                EntryType.ANNOYANCE,
+                true,
+                false,
+                "score",
+                "asc",
+                pageable
+        )).thenReturn(new PageImpl<>(List.of(first, second), pageable, 6));
+        when(annoyanceTypeRepository.findAllById(any())).thenReturn(List.of(category));
+        when(moodRepository.findAllById(any())).thenReturn(List.of(mood));
+        when(entryMediaRepository.findAllByEntryIdInAndDeletedFalseOrderByEntryIdAscDisplayOrderAsc(
+                List.of(10L, 11L)
+        )).thenReturn(List.of(drawing));
+        when(annoyanceMapper.toResponse(first, category, mood, List.of(drawing)))
+                .thenReturn(firstResponse);
+        when(annoyanceMapper.toResponse(second, category, mood, List.of()))
+                .thenReturn(secondResponse);
+
+        PageResponse<AnnoyanceResponse> result = service().findAll(
+                1L,
+                2,
+                2,
+                "score,ASC",
+                true,
+                false
+        );
+
+        assertThat(result.content()).containsExactly(firstResponse, secondResponse);
+        assertThat(result.page()).isEqualTo(2);
+        assertThat(result.size()).isEqualTo(2);
+        assertThat(result.totalElements()).isEqualTo(6);
+        assertThat(result.totalPages()).isEqualTo(3);
+        assertThat(result.first()).isFalse();
+        assertThat(result.last()).isTrue();
+        verify(entryRepository).findAnnoyancePage(
+                1L,
+                EntryType.ANNOYANCE,
+                true,
+                false,
+                "score",
+                "asc",
+                pageable
+        );
+    }
+
+    @Test
+    void findAllShouldReturnEmptyPageWithoutLookupQueries() {
+        prepareUser();
+        PageRequest pageable = PageRequest.of(0, 20);
+        when(entryRepository.findAnnoyancePage(
+                1L,
+                EntryType.ANNOYANCE,
+                null,
+                null,
+                "occurredAt",
+                "desc",
+                pageable
+        )).thenReturn(new PageImpl<>(List.of(), pageable, 0));
+
+        PageResponse<AnnoyanceResponse> result = service().findAll(1L, 0, 20, " ", null, null);
+
+        assertThat(result.content()).isEmpty();
+        assertThat(result.totalElements()).isZero();
+        assertThat(result.totalPages()).isZero();
+        assertThat(result.first()).isTrue();
+        assertThat(result.last()).isTrue();
+        verify(annoyanceTypeRepository, never()).findAllById(any());
+        verify(moodRepository, never()).findAllById(any());
+        verify(entryMediaRepository, never())
+                .findAllByEntryIdInAndDeletedFalseOrderByEntryIdAscDisplayOrderAsc(anyList());
+    }
+
+    @Test
+    void findAllShouldRejectInvalidPaginationAndSort() {
+        prepareUser();
+        AnnoyanceService service = service();
+
+        assertThatThrownBy(() -> service.findAll(1L, -1, 20, null, null, null))
+                .isInstanceOf(ValidationException.class);
+        assertThatThrownBy(() -> service.findAll(1L, 0, 0, null, null, null))
+                .isInstanceOf(ValidationException.class);
+        assertThatThrownBy(() -> service.findAll(1L, 0, 101, null, null, null))
+                .isInstanceOf(ValidationException.class);
+        assertThatThrownBy(() -> service.findAll(1L, 0, 20, "id,asc", null, null))
+                .isInstanceOf(ValidationException.class);
+        assertThatThrownBy(() -> service.findAll(1L, 0, 20, "score,sideways", null, null))
+                .isInstanceOf(ValidationException.class);
+        assertThatThrownBy(() -> service.findAll(1L, 0, 20, "score,asc,extra", null, null))
+                .isInstanceOf(ValidationException.class);
+        verify(entryRepository, never()).findAnnoyancePage(
+                anyLong(), any(), any(), any(), anyString(), anyString(), any()
+        );
+    }
+
+    @Test
+    void findOneShouldReturnOwnerResponse() {
+        prepareUser();
+        Entry entry = entry();
+        AnnoyanceType category = category();
+        Mood mood = mood();
+        AnnoyanceResponse expected = response(entry);
+        when(entryRepository.findByIdAndUserIdAndEntryTypeAndDeletedFalse(
+                10L,
+                1L,
+                EntryType.ANNOYANCE
+        )).thenReturn(Optional.of(entry));
+        when(annoyanceTypeRepository.findById(2L)).thenReturn(Optional.of(category));
+        when(moodRepository.findById(3L)).thenReturn(Optional.of(mood));
+        when(entryMediaRepository.findAllByEntryIdAndDeletedFalseOrderByDisplayOrderAsc(10L))
+                .thenReturn(List.of());
+        when(annoyanceMapper.toResponse(entry, category, mood, List.of())).thenReturn(expected);
+
+        assertThat(service().findOne(1L, 10L)).isSameAs(expected);
+    }
+
+    @Test
+    void findOneShouldRejectDeletedUserBeforeEntryQuery() {
+        when(userRepository.findByIdAndDeletedFalse(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service().findOne(1L, 10L))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("User not found");
+        verify(entryRepository, never()).findByIdAndUserIdAndEntryTypeAndDeletedFalse(
+                anyLong(), anyLong(), any()
+        );
+    }
+
+    @Test
     void shouldValidateTextAndMediaRecordCombinations() {
         AnnoyanceService service = service();
         MockMultipartFile file = file();
@@ -358,15 +509,19 @@ class AnnoyanceServiceTest {
     }
 
     private Entry entry() {
+        return entry(10L, "content");
+    }
+
+    private Entry entry(Long id, String content) {
         Entry entry = Entry.annoyance(
                 1L,
                 2L,
                 3L,
-                "content",
+                content,
                 false,
                 LocalDateTime.of(2026, 7, 11, 12, 0)
         );
-        ReflectionTestUtils.setField(entry, "id", 10L);
+        ReflectionTestUtils.setField(entry, "id", id);
         return entry;
     }
 
@@ -391,10 +546,14 @@ class AnnoyanceServiceTest {
     }
 
     private void prepareLookups(AnnoyanceType category, Mood mood) {
-        when(userRepository.findByIdAndDeletedFalse(1L))
-                .thenReturn(Optional.of(new User("account", "user@example.com", "User")));
+        prepareUser();
         when(annoyanceTypeRepository.findByCode("ACADEMIC")).thenReturn(Optional.of(category));
         when(moodRepository.findByScore(4)).thenReturn(Optional.of(mood));
+    }
+
+    private void prepareUser() {
+        when(userRepository.findByIdAndDeletedFalse(1L))
+                .thenReturn(Optional.of(new User("account", "user@example.com", "User")));
     }
 
     private StoredEntryMedia stored(String objectKey, String contentType) {

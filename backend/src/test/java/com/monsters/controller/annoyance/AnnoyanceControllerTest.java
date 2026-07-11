@@ -6,9 +6,10 @@ import static org.mockito.Mockito.when;
 import com.monsters.dto.annoyance.AnnoyanceRecordMethod;
 import com.monsters.dto.annoyance.AnnoyanceResponse;
 import com.monsters.dto.annoyance.CreateAnnoyanceRequest;
-import com.monsters.service.annoyance.AnnoyanceService;
 import com.monsters.dto.common.ApiResponse;
+import com.monsters.dto.common.PageResponse;
 import com.monsters.security.common.AuthenticatedUser;
+import com.monsters.service.annoyance.AnnoyanceService;
 import java.time.OffsetDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -76,6 +77,65 @@ class AnnoyanceControllerTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().success()).isTrue();
         assertThat(response.getBody().message()).isEqualTo("Annoyance creation success");
+        assertThat(response.getBody().data()).isSameAs(annoyance);
+    }
+
+    @Test
+    void findAllShouldReturnPageForCurrentUser() {
+        AnnoyanceService service = org.mockito.Mockito.mock(AnnoyanceService.class);
+        AnnoyanceController controller = new AnnoyanceController(service);
+        PageResponse<AnnoyanceResponse> page = new PageResponse<>(
+                List.of(),
+                0,
+                20,
+                0,
+                0,
+                true,
+                true
+        );
+        when(service.findAll(1L, 0, 20, "occurredAt,desc", true, false)).thenReturn(page);
+
+        ResponseEntity<ApiResponse<PageResponse<AnnoyanceResponse>>> response = controller.findAll(
+                new AuthenticatedUser(1L, "user@example.com"),
+                0,
+                20,
+                "occurredAt,desc",
+                true,
+                false
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().message()).isEqualTo("Annoyance query success");
+        assertThat(response.getBody().data()).isSameAs(page);
+    }
+
+    @Test
+    void findOneShouldReturnOwnerAnnoyance() {
+        AnnoyanceService service = org.mockito.Mockito.mock(AnnoyanceService.class);
+        AnnoyanceController controller = new AnnoyanceController(service);
+        AnnoyanceResponse annoyance = new AnnoyanceResponse(
+                10L,
+                null,
+                AnnoyanceRecordMethod.TEXT,
+                "content",
+                4,
+                false,
+                false,
+                OffsetDateTime.parse("2026-07-11T12:00:00+08:00"),
+                List.of(),
+                null
+        );
+        when(service.findOne(1L, 10L)).thenReturn(annoyance);
+
+        ResponseEntity<ApiResponse<AnnoyanceResponse>> response = controller.findOne(
+                new AuthenticatedUser(1L, "user@example.com"),
+                10L
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().message()).isEqualTo("Annoyance query success");
         assertThat(response.getBody().data()).isSameAs(annoyance);
     }
 }

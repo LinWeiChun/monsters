@@ -88,8 +88,8 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] 建立 entry_media 圖片 / 錄音 / 影片 / 心情圖與 R2 上傳流程（DONE：PR #28 已合併至 `feature/phase3`）
 - [x] 建立 annoyance Entity / DTO / Repository / Service / Controller（DONE：PR #29 已合併至 `feature/phase3`）
 - [x] 新增煩惱 API（DONE：PR #30 已合併至 `feature/phase3`）
-- [ ] 重構 Backend package 為 `com.monsters.<layer>.<module>`（REVIEW）
-- [ ] 查詢煩惱 API
+- [x] 重構 Backend package 為 `com.monsters.<layer>.<module>`（DONE：PR #31 已合併至 `feature/phase3`）
+- [ ] 查詢煩惱 API（REVIEW）
 - [ ] 修改煩惱 API
 - [ ] 解決煩惱 API
 - [ ] 分享 / 取消分享煩惱 API

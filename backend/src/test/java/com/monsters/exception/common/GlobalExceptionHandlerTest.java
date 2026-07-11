@@ -13,6 +13,7 @@ import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 class GlobalExceptionHandlerTest {
 
@@ -115,6 +116,22 @@ class GlobalExceptionHandlerTest {
                 HttpStatus.BAD_REQUEST,
                 "Required multipart request part is missing"
         );
+    }
+
+    @Test
+    void invalidRequestParameterTypeShouldReturnBadRequest() {
+        MethodArgumentTypeMismatchException exception = new MethodArgumentTypeMismatchException(
+                "invalid",
+                Boolean.class,
+                "isSolved",
+                null,
+                new IllegalArgumentException("invalid boolean")
+        );
+
+        ResponseEntity<ApiResponse<Void>> response =
+                handler.handleMethodArgumentTypeMismatchException(exception);
+
+        assertErrorResponse(response, HttpStatus.BAD_REQUEST, "Request parameter is invalid");
     }
 
     private void assertErrorResponse(
