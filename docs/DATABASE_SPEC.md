@@ -298,6 +298,16 @@ Unique：`user_id, monster_group_id`
 | created_at | DATETIME | NOT NULL | 建立時間 |
 | updated_at | DATETIME | NOT NULL | 更新時間 |
 
+初始 seed 使用不綁定好壞或煩惱程度語意的共用分數 code，供 Annoyance 與 Diary 共用：
+
+| code | label | score | display_order |
+|---|---|---:|---:|
+| `SCORE_1` | 1分 | 1 | 1 |
+| `SCORE_2` | 2分 | 2 | 2 |
+| `SCORE_3` | 3分 | 3 | 3 |
+| `SCORE_4` | 4分 | 4 | 4 |
+| `SCORE_5` | 5分 | 5 | 5 |
+
 ### 3.12 entries
 
 使用者紀錄主表。Diary 與 Annoyance 共用此表，透過 `entry_type` 區分。
@@ -626,6 +636,8 @@ database/init/01_schema.sql
 Phase 3 annoyance type migration：`database/migrations/20260711_01_add_annoyance_type_codes_and_seed.sql`。既有環境只執行一次；全新環境由 `database/init/01_schema.sql` 直接建立並 seed。
 
 Phase 3 private entry media migration：`database/migrations/20260711_02_make_entry_media_private.sql`。此 migration 會在 `entry_media` 已有資料時主動中止；既有資料必須先匯出，另行建立經審查的 public URL → private R2 object key 資料 migration，不得直接將 public URL 原值當成 object key。
+
+Phase 3 mood score migration：`database/migrations/20260711_03_make_mood_score_unique.sql`。此 migration 建立 `moods.score` 唯一約束與 `SCORE_1`～`SCORE_5` seed；若既有分數重複或 code / score 對應衝突會主動中止，必須先審查與清理資料。
 
 Migration 應包含：
 

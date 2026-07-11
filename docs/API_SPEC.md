@@ -732,7 +732,7 @@ Response：
 | VIDEO 主要內容 | 1 | `video/mp4`、`video/quicktime`、`video/webm` | 50 MB／60 秒 |
 | drawing | 1 | `image/png`、`image/webp` | 5 MB |
 
-前後端皆需驗證數量、MIME type、檔案大小與可取得的媒體長度。檔案由後端上傳 Cloudflare R2，Database 只保存 URL；若 R2 成功但 Database transaction 失敗，後端需 best-effort 清理已上傳 object。
+前後端皆需驗證數量、MIME type、檔案大小與可取得的媒體長度。檔案由後端上傳 Cloudflare R2，Database 只保存 private object key；若 R2 成功但 Database transaction 失敗，後端需 best-effort 清理已上傳 object。
 
 ### 4.1 新增煩惱
 

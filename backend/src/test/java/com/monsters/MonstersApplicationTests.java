@@ -1,5 +1,9 @@
 package com.monsters;
 
+import com.monsters.annoyance.repository.AnnoyanceTypeRepository;
+import com.monsters.entry.repository.EntryMediaRepository;
+import com.monsters.entry.repository.EntryRepository;
+import com.monsters.entry.repository.MoodRepository;
 import com.monsters.user.repository.PasswordResetTokenRepository;
 import com.monsters.user.repository.RevokedTokenRepository;
 import com.monsters.user.repository.UserCredentialRepository;
@@ -34,6 +38,18 @@ class MonstersApplicationTests {
 
     @MockBean
     private UserPasswordLockRepository userPasswordLockRepository;
+
+    @MockBean
+    private EntryRepository entryRepository;
+
+    @MockBean
+    private EntryMediaRepository entryMediaRepository;
+
+    @MockBean
+    private MoodRepository moodRepository;
+
+    @MockBean
+    private AnnoyanceTypeRepository annoyanceTypeRepository;
 
     @Test
     void contextLoads() {

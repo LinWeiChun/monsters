@@ -200,8 +200,20 @@ CREATE TABLE IF NOT EXISTS moods (
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uk_moods_code (code),
-  KEY idx_moods_score (score)
+  UNIQUE KEY uk_moods_score (score)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO moods (code, label, score, image_url, display_order)
+VALUES
+  ('SCORE_1', '1分', 1, NULL, 1),
+  ('SCORE_2', '2分', 2, NULL, 2),
+  ('SCORE_3', '3分', 3, NULL, 3),
+  ('SCORE_4', '4分', 4, NULL, 4),
+  ('SCORE_5', '5分', 5, NULL, 5)
+ON DUPLICATE KEY UPDATE
+  label = VALUES(label),
+  image_url = VALUES(image_url),
+  display_order = VALUES(display_order);
 
 CREATE TABLE IF NOT EXISTS entries (
   id BIGINT NOT NULL AUTO_INCREMENT,

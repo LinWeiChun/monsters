@@ -39,6 +39,10 @@
 | Phase 3 媒體限制 | 圖片與心情圖 5 MB；錄音 10 MB／5 分鐘；影片 50 MB／60 秒；前後端使用相同 MIME type 白名單（D8-A） |
 | Phase 3 煩惱媒體存取 | 使用獨立且不可公開存取的 R2 entry media bucket，Database 只保存 object key；Backend 驗證 owner 或分享權限後串流，API 不回傳 object key（D9-A） |
 | Phase 3 媒體長度驗證 | Backend 使用 `ffprobe` 驗證錄音最多 5 分鐘、影片最多 60 秒；Backend runtime 必須安裝 FFmpeg（D10-A） |
+| Phase 3 Entry 領域模型 | Annoyance 與後續 Diary 共用 `Entry` Entity 與 Repository，Annoyance 模組使用獨立 DTO、Mapper、Service 與 Controller（D11-A） |
+| Phase 3 Annoyance Core 範圍 | Core Task 建立領域基礎、lookup、DTO、Mapper、Service 驗證與 Controller 骨架；實際 API endpoint 依後續 Task 逐一完成（D12-A） |
+| Phase 3 R2 規格用語 | Entry media 在 Database 只保存 private R2 object key，不保存 public URL（D13-A） |
+| Phase 3 Mood seed | Annoyance 與 Diary 共用中性分數 code `SCORE_1`～`SCORE_5`，label 為 `1分`～`5分`，不在 lookup 綁定好壞或程度語意（D14-A） |
 
 ## 二、已核准套件與工具
 
