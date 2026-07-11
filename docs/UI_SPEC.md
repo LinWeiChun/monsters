@@ -85,13 +85,20 @@
 流程：
 
 1. 怪獸引導對話
-2. 選擇煩惱類別
-3. 選擇文字、錄音、照片或影片
-4. 輸入內容
-5. 畫心情
-6. 記錄煩惱分數
-7. 選擇是否分享
-8. 顯示獎勵頁面
+2. 以結構化選擇元件選擇煩惱類別
+3. 選擇文字、錄音、照片或影片其中一種主要記錄方式
+4. 輸入文字或選取一個主要媒體，顯示預覽、移除與重選操作
+5. 選擇是否畫心情；選擇繪圖時最多附加一張心情圖
+6. 以結構化元件選擇 1 至 5 分
+7. 選擇是否分享，預設私人
+8. 檢視摘要並送出；送出中禁止重複操作，失敗時保留草稿
+9. 顯示建立完成頁面，可前往歷史記錄
+
+互動採聊天外觀搭配 `AnnoyanceCategorySelector`、`RecordMethodSelector`、`MediaPreviewCard`、`MoodDrawingCanvas`、`MoodScoreSelector`、`ShareChoiceCard` 與 `AnnoyanceReviewCard`，不得以自由文字比對選項。狀態依 `intro → category → recordMethod → content → drawingDecision → drawing（optional）→ score → sharing → review → submitting → completed` 推進。
+
+前後端媒體限制一致：圖片 jpeg/png/webp，最多 5 MB；錄音 mp4/aac/mpeg/wav，最多 10 MB 或 5 分鐘；影片 mp4/quicktime/webm，最多 50 MB 或 60 秒；心情圖 png/webp，最多 5 MB。Web、Android、iOS 的平台差異集中於媒體 Service／Adapter。
+
+Phase 3 完成頁不顯示假怪獸獎勵；真實獎勵與圖鑑導向於 Phase 6 串接。
 
 ### 2.8 新增日記聊天室
 

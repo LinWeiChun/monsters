@@ -714,29 +714,161 @@ Response：
 
 ## 四、Annoyance API
 
+共同規則：
+
+- 全部 endpoint 均需登入；`userId` 只取自 JWT principal，Client 不得傳入 owner 或 user id。
+- 分類使用穩定的 `categoryCode`，情緒使用 1 至 5 的 `score`，後端解析對應 lookup ID。
+- 一筆煩惱只能選擇 TEXT、IMAGE、AUDIO、VIDEO 其中一種主要記錄方式，另可選擇一張 drawing。
+- 預設 `isShared = false`、`isSolved = false`；建立時間未傳時由後端使用目前時間。
+- 不存在、已刪除或不屬於目前使用者的資料一律回傳 404，避免洩漏 owner 資訊。
+
+媒體限制：
+
+| 用途 | 數量 | MIME type | 大小／長度 |
+|---|---:|---|---|
+| IMAGE 主要內容 | 1 | `image/jpeg`、`image/png`、`image/webp` | 5 MB |
+| AUDIO 主要內容 | 1 | `audio/mp4`、`audio/aac`、`audio/mpeg`、`audio/wav` | 10 MB／5 分鐘 |
+| VIDEO 主要內容 | 1 | `video/mp4`、`video/quicktime`、`video/webm` | 50 MB／60 秒 |
+| drawing | 1 | `image/png`、`image/webp` | 5 MB |
+
+前後端皆需驗證數量、MIME type、檔案大小與可取得的媒體長度。檔案由後端上傳 Cloudflare R2，Database 只保存 URL；若 R2 成功但 Database transaction 失敗，後端需 best-effort 清理已上傳 object。
+
 ### 4.1 新增煩惱
 
 `POST /api/annoyances`
+
+Content-Type：`multipart/form-data`
+
+Parts：
+
+| Part | 型別 | 必填 | 說明 |
+|---|---|---|---|
+| `request` | `application/json` | 是 | 建立資料 |
+| `contentFile` | binary | 條件必填 | IMAGE／AUDIO／VIDEO 時必填；TEXT 時不得傳 |
+| `drawingFile` | binary | 否 | 可選心情圖 |
+
+`request`：
+
+```json
+{
+  "categoryCode": "ACADEMIC",
+  "recordMethod": "TEXT",
+  "content": "最近考試讓我很焦慮",
+  "score": 4,
+  "isShared": false,
+  "occurredAt": "2026-07-11T12:00:00+08:00"
+}
+```
+
+規則：
+
+- `categoryCode` 必須為已啟用的 annoyance type code。
+- `recordMethod = TEXT` 時 `content` 必填且不得傳 `contentFile`；其餘方式 `content` 必須為 null，並需傳入相符 MIME type 的 `contentFile`。
+- `score` 必須為 1 至 5；`isShared` 未傳時為 false；`occurredAt` 未傳時由後端設定。
+- Phase 3 建立成功不發放怪獸；`reward` 固定回傳 null，Phase 6 再串接真實獎勵。
+
+Response data：
+
+```json
+{
+  "id": 101,
+  "category": { "code": "ACADEMIC", "name": "課業" },
+  "recordMethod": "TEXT",
+  "content": "最近考試讓我很焦慮",
+  "score": 4,
+  "isShared": false,
+  "isSolved": false,
+  "occurredAt": "2026-07-11T12:00:00+08:00",
+  "media": [],
+  "reward": null
+}
+```
 
 ### 4.2 查詢煩惱列表
 
 `GET /api/annoyances`
 
+Query：
+
+| 參數 | 必填 | 預設 | 規則 |
+|---|---|---|---|
+| `page` | 否 | 0 | 從 0 開始 |
+| `size` | 否 | 20 | 1 至 100 |
+| `sort` | 否 | `occurredAt,desc` | 可排序欄位：`occurredAt`、`createdAt`、`score`；方向為 `asc` 或 `desc` |
+| `isSolved` | 否 | 全部 | boolean filter |
+| `isShared` | 否 | 全部 | boolean filter |
+
+後端以 `LIMIT`／`OFFSET` 與排序查詢；`page` 是 request 參數，不是 Database 欄位。
+
+Response data：
+
+```json
+{
+  "content": [],
+  "page": 0,
+  "size": 20,
+  "totalElements": 0,
+  "totalPages": 0,
+  "first": true,
+  "last": true
+}
+```
+
 ### 4.3 查詢單筆煩惱
 
 `GET /api/annoyances/{id}`
+
+回傳與新增成功相同的 Annoyance data；`reward` 在 Phase 3 為 null。
 
 ### 4.4 修改煩惱
 
 `PUT /api/annoyances/{id}`
 
+Content-Type 與驗證規則同新增 API。`request` 需傳完整可編輯資料，並可加上：
+
+```json
+{
+  "existingContentMediaId": 201,
+  "existingDrawingMediaId": 202
+}
+```
+
+- 保留既有主要媒體或心情圖時傳入對應 media id；id 必須屬於該 entry 且 media type 相符。
+- 傳入新檔案時不得同時傳同用途的 existing media id，新檔案成功後取代舊檔案。
+- 未傳新檔案與 existing drawing id 代表移除心情圖。
+- 修改成功回傳更新後 Annoyance data；R2 舊 object 僅在 transaction 成功後清理。
+
 ### 4.5 解決煩惱
 
 `PATCH /api/annoyances/{id}/solve`
 
+Request：
+
+```json
+{ "isSolved": true }
+```
+
+Phase 3 只允許未解決改為已解決；重複傳 true 應維持 idempotent success，傳 false 回傳 400。
+
 ### 4.6 分享或取消分享煩惱
 
 `PATCH /api/annoyances/{id}/share`
+
+Request：
+
+```json
+{ "isShared": true }
+```
+
+使用明確 boolean 目標狀態，不提供無參數 toggle；重複傳相同狀態應維持 idempotent success。
+
+### 4.7 Annoyance 錯誤處理
+
+- 400：欄位、主要記錄方式組合、分頁、MIME type、大小或長度驗證失敗。
+- 401：未登入或 token 無效。
+- 404：lookup 不存在，或 entry 不存在／不屬於目前使用者。
+- 413：上傳檔案超過限制。
+- 500：R2 或資料儲存失敗；不得回傳 bucket credential、內部 object key 或 stack trace。
 
 ---
 

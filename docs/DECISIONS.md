@@ -31,6 +31,12 @@
 | 舊 API 對照表 | 需要建立完整舊 API 對照表，比對 path、method、request、response 與錯誤情境 |
 | 舊 Flutter UI 對照清單 | 需要建立舊 Flutter UI 畫面對照清單，比對流程、元件、狀態與素材 |
 | Phase 分支流程 | 所有後續 Phase 均由 `develop` 建立 `feature/phase<n>` 整合分支；Phase 內 Task 由該 Phase 分支切出獨立分支，Task PR 先合併回 Phase 分支，Phase 完成後再由 Phase 分支 PR 至 `develop` |
+| Phase 3 煩惱記錄方式 | 支援文字、圖片、錄音與影片；每筆使用一種主要記錄方式，另可附一張心情圖（D1-A、D2-A） |
+| Phase 3 煩惱上傳契約 | 新增與修改採 `multipart/form-data`；Client 傳分類 code 與 1 至 5 分 score，由後端解析 lookup ID（D3-A、D4-A） |
+| Phase 3 怪獸獎勵 | Phase 3 只建立煩惱並顯示完成結果；新增煩惱後的真實怪獸獎勵延至 Phase 6 串接（D5-B） |
+| Phase 3 煩惱列表 | 使用 `page`、`size`、`sort` offset pagination；Database 不新增頁碼欄位（D6-A） |
+| Phase 3 聊天互動 | 採聊天外觀搭配結構化 selector Widget，不以自由文字解析類別、記錄方式、分數或分享選項（D7-A） |
+| Phase 3 媒體限制 | 圖片與心情圖 5 MB；錄音 10 MB／5 分鐘；影片 50 MB／60 秒；前後端使用相同 MIME type 白名單（D8-A） |
 
 ## 二、已核准套件與工具
 

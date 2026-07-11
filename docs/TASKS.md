@@ -80,11 +80,12 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ## Phase 3：煩惱功能
 
-- [ ] 檢查 `system_data/` 中舊煩惱、聊天室、心情繪圖、分數與分享流程（REVIEW：已完成手冊、程式、素材與正式規格交叉檢查，待合併至 `feature/phase3`）
-- [ ] 整理可參考的業務邏輯與 UI 互動
+- [x] 檢查 `system_data/` 中舊煩惱、聊天室、心情繪圖、分數與分享流程（DONE：PR #24 已合併至 `feature/phase3`）
+- [ ] 整理可參考的業務邏輯與 UI 互動（REVIEW：已核准 D1-A、D2-A、D3-A、D4-A、D5-B、D6-A、D7-A、D8-A）
 - [ ] 依新版 Entry 架構與 API 規格重新實作
 
 - [ ] 建立 annoyance_type
+- [ ] 建立 entry_media 圖片 / 錄音 / 影片 / 心情圖與 R2 上傳流程
 - [ ] 建立 annoyance Entity / DTO / Repository / Service / Controller
 - [ ] 新增煩惱 API
 - [ ] 查詢煩惱 API
@@ -92,6 +93,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [ ] 解決煩惱 API
 - [ ] 分享 / 取消分享煩惱 API
 - [ ] Flutter 新增煩惱聊天室
+- [ ] Flutter 文字 / 圖片 / 錄音 / 影片選取與預覽
 - [ ] Flutter 畫心情功能
 - [ ] Flutter 煩惱分數選擇
 - [ ] 測試
@@ -141,6 +143,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [ ] 查詢全部怪獸 API
 - [ ] 查詢我的怪獸 API
 - [ ] 隨機取得怪獸 API
+- [ ] 串接新增煩惱後的隨機怪獸獎勵與完成頁流程
 - [ ] 更改怪獸造型 API
 - [ ] Flutter 圖鑑頁
 - [ ] Flutter 怪獸詳細頁
