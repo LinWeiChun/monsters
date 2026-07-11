@@ -868,6 +868,7 @@ Request：
 ```
 
 Phase 3 只允許未解決改為已解決；重複傳 true 應維持 idempotent success，傳 false 回傳 400。
+修改成功回傳 200 與更新後 Annoyance data；不存在、已刪除或不屬於目前使用者的 entry 回傳 404。
 
 ### 4.6 分享或取消分享煩惱
 
@@ -880,6 +881,7 @@ Request：
 ```
 
 使用明確 boolean 目標狀態，不提供無參數 toggle；重複傳相同狀態應維持 idempotent success。
+分享與取消分享成功皆回傳 200 與更新後 Annoyance data；不存在、已刪除或不屬於目前使用者的 entry 回傳 404。
 
 ### 4.7 下載煩惱媒體
 

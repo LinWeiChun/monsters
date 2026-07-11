@@ -751,3 +751,23 @@
 2026-07-12,07:02,TASK-052,Documentation,docs/TASKS.md,修改,將 TASK-051 標記 DONE 並將 TASK-052 推進至 REVIEW,Codex,否,否,否,否,
 2026-07-12,07:02,TASK-052,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-052 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
 2026-07-12,07:02,TASK-052,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-052 history 紀錄,Codex,否,否,否,否,artifact tool 驗證
+2026-07-12,07:22,TASK-053,Backend,backend/src/main/java/com/monsters/dto/annoyance/SolveAnnoyanceRequest.java,新增,建立明確解決目標 request,Codex,是,否,否,否,只接受 true
+2026-07-12,07:22,TASK-053,Backend,backend/src/main/java/com/monsters/controller/annoyance/AnnoyanceController.java,修改,新增解決煩惱 PATCH endpoint,Codex,是,否,否,否,owner scoped
+2026-07-12,07:22,TASK-053,Backend,backend/src/main/java/com/monsters/service/annoyance/AnnoyanceService.java,修改,實作單向解決與 idempotent success,Codex,是,否,否,否,重複 true 不寫入
+2026-07-12,07:22,TASK-053,Test,backend/src/test/java/com/monsters/dto/annoyance/SolveAnnoyanceRequestTest.java,新增,驗證 solved state 必填,Codex,否,否,否,否,
+2026-07-12,07:22,TASK-053,Test,backend/src/test/java/com/monsters/controller/annoyance/AnnoyanceControllerTest.java,修改,驗證 solve endpoint 成功回應,Codex,否,否,否,否,
+2026-07-12,07:22,TASK-053,Test,backend/src/test/java/com/monsters/service/annoyance/AnnoyanceServiceTest.java,修改,驗證 owner 解決冪等與拒絕 false,Codex,否,否,否,否,188 tests
+2026-07-12,07:22,TASK-053,Documentation,docs/API_SPEC.md,修改,補充 solve 成功與錯誤回應,Codex,是,否,否,否,
+2026-07-12,07:22,TASK-053,Documentation,docs/TASKS.md,修改,將 TASK-052 標記 DONE 並將 TASK-053 推進至 REVIEW,Codex,否,否,否,否,
+2026-07-12,07:22,TASK-053,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-053 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
+2026-07-12,07:22,TASK-053,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-053 history 紀錄,Codex,否,否,否,否,artifact tool 驗證
+2026-07-12,07:27,TASK-054,Backend,backend/src/main/java/com/monsters/dto/annoyance/ShareAnnoyanceRequest.java,新增,建立明確分享目標 request,Codex,是,否,否,否,允許 true 與 false
+2026-07-12,07:27,TASK-054,Backend,backend/src/main/java/com/monsters/controller/annoyance/AnnoyanceController.java,修改,新增分享與取消分享 PATCH endpoint,Codex,是,否,否,否,owner scoped
+2026-07-12,07:27,TASK-054,Backend,backend/src/main/java/com/monsters/service/annoyance/AnnoyanceService.java,修改,實作分享取消與 idempotent success,Codex,是,否,否,否,同狀態不寫入
+2026-07-12,07:27,TASK-054,Test,backend/src/test/java/com/monsters/dto/annoyance/ShareAnnoyanceRequestTest.java,新增,驗證 shared state 必填且接受雙向狀態,Codex,否,否,否,否,
+2026-07-12,07:27,TASK-054,Test,backend/src/test/java/com/monsters/controller/annoyance/AnnoyanceControllerTest.java,修改,驗證 share endpoint 成功回應,Codex,否,否,否,否,
+2026-07-12,07:27,TASK-054,Test,backend/src/test/java/com/monsters/service/annoyance/AnnoyanceServiceTest.java,修改,驗證分享取消冪等與缺少目標,Codex,否,否,否,否,194 tests
+2026-07-12,07:27,TASK-054,Documentation,docs/API_SPEC.md,修改,補充 share 成功與錯誤回應,Codex,是,否,否,否,
+2026-07-12,07:27,TASK-054,Documentation,docs/TASKS.md,修改,將 TASK-054 推進至 REVIEW,Codex,否,否,否,否,
+2026-07-12,07:27,TASK-054,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-054 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
+2026-07-12,07:27,TASK-054,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-054 history 紀錄,Codex,否,否,否,否,artifact tool 驗證
