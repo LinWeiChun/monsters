@@ -8,6 +8,79 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-11 13:06
+
+Task
+TASK-046 Phase 3 建立 annoyance_type（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Confirmed TASK-045 was merged into `feature/phase3` through PR #26 and marked it DONE.
+- Created `feature/phase3-annoyance-type` from the synchronized Phase 3 integration branch.
+- Added the `AnnoyanceType` JPA Entity and `AnnoyanceTypeRepository` using stable code lookup and display-order sorting.
+- Added the six approved categories: ACADEMIC, CAREER, LOVE, FRIENDSHIP, FAMILY, and OTHER.
+- Updated the fresh-install schema and added a one-time manual migration for existing databases.
+- Added Entity and Repository contract tests and moved TASK-046 from TODO through IN PROGRESS to REVIEW.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/annoyance/entity/AnnoyanceType.java`
+- `backend/src/main/java/com/monsters/annoyance/repository/AnnoyanceTypeRepository.java`
+- `backend/src/test/java/com/monsters/annoyance/entity/AnnoyanceTypeTest.java`
+- `backend/src/test/java/com/monsters/annoyance/repository/AnnoyanceTypeRepositoryTest.java`
+- `database/migrations/20260711_01_add_annoyance_type_codes_and_seed.sql`
+
+### Modified
+
+- `database/init/01_schema.sql`
+- `database/init/README.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Tests
+
+- `./gradlew test` in `backend/` passed: 97 tests, 0 failures, 0 errors.
+- The four new Entity tests and three new Repository contract tests passed.
+- `git diff --check` passed.
+- Docker Desktop was not running, so the MySQL 8.4 container validation could not be executed.
+- A temporary local MySQL 9.7 server was attempted for SQL validation but crashed during startup in the sandbox; schema and migration received static consistency checks instead.
+- `CHANGE_HISTORY.csv` was imported and inspected as a 13-column table.
+
+### system_data Reference
+
+- Rechecked the system manual annoyance pages and the merged Phase 3 audit.
+- Referenced the old six category names and display sequence only.
+- Did not reuse the old numeric ID enum, singular table name, mutable Lombok Entity, or generic DAO hierarchy.
+- `system_data/` was not modified.
+
+### API
+
+- No endpoint or response change.
+- Repository lookup by stable category code prepares the approved Annoyance API contract.
+
+### Database
+
+- Added `annoyance_types.code VARCHAR(50) NOT NULL` with a unique constraint.
+- Added six ordered seed records to the fresh-install schema.
+- Added a one-time migration for existing databases; migration is required for environments whose schema predates TASK-046.
+
+### Notes
+
+- The migration must be run exactly once on an existing database and reviewed against any local custom annoyance type rows before execution.
+- The next Task is the entry_media image, audio, video, drawing, and R2 upload flow.
+
+---
+
 ## 2026-07-11 09:34
 
 Task
