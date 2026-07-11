@@ -1,6 +1,7 @@
 package com.monsters.entry.storage;
 
 import com.monsters.common.exception.BusinessException;
+import com.monsters.common.exception.PayloadTooLargeException;
 import com.monsters.common.exception.ResourceNotFoundException;
 import com.monsters.common.exception.ValidationException;
 import com.monsters.common.storage.R2Properties;
@@ -48,6 +49,18 @@ public class R2EntryMediaStorageService implements EntryMediaStorageService {
             Map.entry("video/mp4", ".mp4"),
             Map.entry("video/quicktime", ".mov"),
             Map.entry("video/webm", ".webm")
+    );
+    private static final Map<String, Set<String>> ALLOWED_FILE_EXTENSIONS = Map.ofEntries(
+            Map.entry("image/jpeg", Set.of(".jpg", ".jpeg")),
+            Map.entry("image/png", Set.of(".png")),
+            Map.entry("image/webp", Set.of(".webp")),
+            Map.entry("audio/mp4", Set.of(".m4a", ".mp4")),
+            Map.entry("audio/aac", Set.of(".aac")),
+            Map.entry("audio/mpeg", Set.of(".mp3")),
+            Map.entry("audio/wav", Set.of(".wav")),
+            Map.entry("video/mp4", Set.of(".mp4")),
+            Map.entry("video/quicktime", Set.of(".mov")),
+            Map.entry("video/webm", Set.of(".webm"))
     );
 
     private final S3Client s3Client;
@@ -176,7 +189,7 @@ public class R2EntryMediaStorageService implements EntryMediaStorageService {
             throw new ValidationException("Entry media file is required");
         }
         if (file.getSize() > maximumSize(mediaType)) {
-            throw new ValidationException("Entry media file is too large");
+            throw new PayloadTooLargeException("Entry media file is too large");
         }
         String contentType = file.getContentType();
         if (contentType == null) {
@@ -186,7 +199,21 @@ public class R2EntryMediaStorageService implements EntryMediaStorageService {
         if (!ALLOWED_CONTENT_TYPES.get(mediaType).contains(normalizedContentType)) {
             throw new ValidationException("Entry media file type is not supported");
         }
+        validateFileExtension(file.getOriginalFilename(), normalizedContentType);
         return normalizedContentType;
+    }
+
+    private void validateFileExtension(String originalFilename, String contentType) {
+        if (isBlank(originalFilename)) {
+            throw new ValidationException("Entry media file extension is not supported");
+        }
+        String normalizedFilename = originalFilename.toLowerCase(Locale.ROOT);
+        boolean supported = ALLOWED_FILE_EXTENSIONS.get(contentType)
+                .stream()
+                .anyMatch(normalizedFilename::endsWith);
+        if (!supported) {
+            throw new ValidationException("Entry media file extension is not supported");
+        }
     }
 
     private BigDecimal validateDuration(EntryMediaType mediaType, MultipartFile file) {

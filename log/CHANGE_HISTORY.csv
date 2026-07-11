@@ -679,3 +679,26 @@
 2026-07-11,17:33,TASK-048,Documentation,docs/TASKS.md,修改,將 TASK-047 標記 DONE 並將 TASK-048 移至 REVIEW,Codex,否,否,否,否,
 2026-07-11,17:33,TASK-048,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-048 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
 2026-07-11,17:33,TASK-048,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-048 history 紀錄,Codex,否,否,否,否,artifact tool 驗證
+2026-07-11,23:38,TASK-049,Backend,backend/src/main/java/com/monsters/annoyance/dto/CreateAnnoyanceRequest.java,新增,建立 multipart JSON request DTO 與欄位驗證,Codex,是,否,否,否,
+2026-07-11,23:38,TASK-049,Backend,backend/src/main/java/com/monsters/annoyance/controller/AnnoyanceController.java,修改,實作 authenticated POST multipart endpoint,Codex,是,否,否,否,201 response
+2026-07-11,23:38,TASK-049,Backend,backend/src/main/java/com/monsters/annoyance/service/AnnoyanceService.java,修改,實作 create orchestration lookup R2 upload 與 rollback cleanup,Codex,是,是,否,否,不記錄 object key
+2026-07-11,23:38,TASK-049,Backend,backend/src/main/java/com/monsters/annoyance/service/AnnoyancePersistenceService.java,新增,建立 Entry 與 EntryMedia transaction boundary,Codex,是,是,否,否,
+2026-07-11,23:38,TASK-049,Backend,backend/src/main/java/com/monsters/annoyance/service/CreatedAnnoyance.java,新增,建立 immutable persistence result,Codex,否,是,否,否,
+2026-07-11,23:38,TASK-049,Backend,backend/src/main/java/com/monsters/annoyance/service/NewEntryMedia.java,新增,建立 R2 metadata 與 media type command,Codex,否,是,否,否,
+2026-07-11,23:38,TASK-049,Backend,backend/src/main/java/com/monsters/common/exception/PayloadTooLargeException.java,新增,建立 413 business exception,Codex,是,否,否,否,
+2026-07-11,23:38,TASK-049,Backend,backend/src/main/java/com/monsters/common/exception/GlobalExceptionHandler.java,修改,新增 JSON multipart missing part 與 413 錯誤回應,Codex,是,否,否,否,
+2026-07-11,23:38,TASK-049,Backend,backend/src/main/java/com/monsters/entry/storage/R2EntryMediaStorageService.java,修改,新增 MIME 與副檔名對應驗證,Codex,是,否,否,否,超過限制回傳 413
+2026-07-11,23:38,TASK-049,Configuration,backend/src/main/resources/application.yml,修改,新增 multipart 單檔與 request 全域上限,Codex,是,否,否,否,50MB 60MB
+2026-07-11,23:38,TASK-049,Configuration,docker-compose.yml,修改,傳遞 multipart 環境變數,Codex,是,否,否,否,
+2026-07-11,23:38,TASK-049,Test,backend/src/test/java/com/monsters/annoyance/dto/CreateAnnoyanceRequestTest.java,新增,驗證 required field score 與 default sharing,Codex,是,否,否,否,
+2026-07-11,23:38,TASK-049,Test,backend/src/test/java/com/monsters/annoyance/controller/AnnoyanceControllerTest.java,修改,驗證 current user 與 201 response,Codex,是,否,否,否,
+2026-07-11,23:38,TASK-049,Test,backend/src/test/java/com/monsters/annoyance/service/AnnoyanceServiceTest.java,修改,驗證 create media cleanup lookup 與 timestamp,Codex,是,是,否,否,
+2026-07-11,23:38,TASK-049,Test,backend/src/test/java/com/monsters/annoyance/service/AnnoyancePersistenceServiceTest.java,新增,驗證 transaction boundary 與 media persistence,Codex,否,是,否,否,
+2026-07-11,23:38,TASK-049,Test,backend/src/test/java/com/monsters/common/exception/GlobalExceptionHandlerTest.java,修改,驗證 multipart 400 與 413,Codex,是,否,否,否,
+2026-07-11,23:38,TASK-049,Test,backend/src/test/java/com/monsters/entry/storage/R2EntryMediaStorageServiceTest.java,修改,驗證 extension variants mismatch 與 413,Codex,是,否,否,否,
+2026-07-11,23:38,TASK-049,Documentation,README.md,修改,補充 multipart 環境變數,Codex,否,否,否,否,
+2026-07-11,23:38,TASK-049,Documentation,backend/README.md,修改,補充 upload validation 與 cleanup 行為,Codex,否,否,否,否,
+2026-07-11,23:38,TASK-049,Documentation,docs/API_SPEC.md,修改,補充副檔名白名單與 cleanup 規則,Codex,是,否,否,否,
+2026-07-11,23:38,TASK-049,Documentation,docs/TASKS.md,修改,將 TASK-048 標記 DONE 並將 TASK-049 移至 REVIEW,Codex,否,否,否,否,
+2026-07-11,23:38,TASK-049,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-049 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
+2026-07-11,23:38,TASK-049,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-049 history 紀錄,Codex,否,否,否,否,artifact tool 驗證

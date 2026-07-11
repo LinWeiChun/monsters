@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.monsters.common.exception.BusinessException;
+import com.monsters.common.exception.PayloadTooLargeException;
 import com.monsters.common.exception.ValidationException;
 import com.monsters.common.storage.R2Properties;
 import com.monsters.entry.entity.EntryMediaType;
@@ -89,6 +90,51 @@ class R2EntryMediaStorageServiceTest {
     }
 
     @Test
+    void uploadShouldRejectExtensionThatDoesNotMatchMimeType() {
+        S3Client s3Client = mock(S3Client.class);
+        R2EntryMediaStorageService service = service(
+                s3Client,
+                mock(MediaDurationProbe.class),
+                configuredProperties()
+        );
+
+        assertThatThrownBy(() -> service.upload(
+                7L,
+                EntryMediaType.IMAGE,
+                file("image.mp4", "image/png")
+        ))
+                .isInstanceOf(ValidationException.class)
+                .hasMessage("Entry media file extension is not supported");
+        verify(s3Client, never()).putObject(any(PutObjectRequest.class), any(RequestBody.class));
+    }
+
+    @Test
+    void uploadShouldAcceptJpegAndAudioMp4ExtensionVariants() {
+        S3Client s3Client = mock(S3Client.class);
+        MediaDurationProbe durationProbe = mock(MediaDurationProbe.class);
+        when(durationProbe.probe(any())).thenReturn(new BigDecimal("1.000"));
+        R2EntryMediaStorageService service = service(
+                s3Client,
+                durationProbe,
+                configuredProperties()
+        );
+
+        StoredEntryMedia jpeg = service.upload(
+                7L,
+                EntryMediaType.IMAGE,
+                file("image.jpeg", "image/jpeg")
+        );
+        StoredEntryMedia audio = service.upload(
+                7L,
+                EntryMediaType.AUDIO,
+                file("audio.mp4", "audio/mp4")
+        );
+
+        assertThat(jpeg.objectKey()).endsWith(".jpg");
+        assertThat(audio.objectKey()).endsWith(".m4a");
+    }
+
+    @Test
     void uploadShouldRejectOversizedFile() {
         R2Properties properties = configuredProperties();
         properties.setMaxEntryImageSizeBytes(2);
@@ -103,7 +149,7 @@ class R2EntryMediaStorageServiceTest {
                 EntryMediaType.IMAGE,
                 file("image.png", "image/png")
         ))
-                .isInstanceOf(ValidationException.class)
+                .isInstanceOf(PayloadTooLargeException.class)
                 .hasMessage("Entry media file is too large");
     }
 

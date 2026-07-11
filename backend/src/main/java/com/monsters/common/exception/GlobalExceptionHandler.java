@@ -8,6 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -54,6 +58,38 @@ public class GlobalExceptionHandler {
 
         log.error("Constraint validation failed", exception);
         return buildErrorResponse(HttpStatus.BAD_REQUEST, message);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException exception
+    ) {
+        log.error("Request body is not readable", exception);
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Request body is not readable");
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMaxUploadSizeExceededException(
+            MaxUploadSizeExceededException exception
+    ) {
+        log.error("Upload exceeds request size limit", exception);
+        return buildErrorResponse(HttpStatus.PAYLOAD_TOO_LARGE, "Uploaded file is too large");
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMultipartException(
+            MultipartException exception
+    ) {
+        log.error("Multipart request is invalid", exception);
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Multipart request is invalid");
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingServletRequestPartException(
+            MissingServletRequestPartException exception
+    ) {
+        log.error("Required multipart request part is missing", exception);
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Required multipart request part is missing");
     }
 
     @ExceptionHandler(Exception.class)

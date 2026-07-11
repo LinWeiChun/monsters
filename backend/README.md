@@ -398,6 +398,13 @@ R2 settings:
 | app.storage.r2.ffprobe-path | FFPROBE_PATH |
 | app.storage.r2.ffprobe-timeout-seconds | FFPROBE_TIMEOUT_SECONDS |
 
+Spring multipart settings:
+
+| Setting | Environment variable | Default |
+|---|---|---|
+| spring.servlet.multipart.max-file-size | MULTIPART_MAX_FILE_SIZE | 50MB |
+| spring.servlet.multipart.max-request-size | MULTIPART_MAX_REQUEST_SIZE | 60MB |
+
 The R2 token used by Backend requires Object Read & Write permission scoped only to the required avatar and private entry media buckets. Bucket administration permission is not required.
 
 Audio and video duration validation requires `ffprobe`:
@@ -405,6 +412,7 @@ Audio and video duration validation requires `ffprobe`:
 - The Backend Docker runtime installs FFmpeg automatically.
 - Local non-Docker development must install FFmpeg and ensure `ffprobe` is available on `PATH`, or set `FFPROBE_PATH` to the executable path.
 - Do not log uploaded content, object keys, probe output, or temporary file paths.
+- Entry media validates both MIME type and filename extension. If R2 upload succeeds but the Database transaction fails, Backend attempts to delete every object uploaded by that request without replacing the original error when cleanup also fails.
 
 ### Set My Password Lock
 

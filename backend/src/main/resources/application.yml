@@ -8,6 +8,10 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+  servlet:
+    multipart:
+      max-file-size: ${MULTIPART_MAX_FILE_SIZE:50MB}
+      max-request-size: ${MULTIPART_MAX_REQUEST_SIZE:60MB}
 
 server:
   port: 8080
