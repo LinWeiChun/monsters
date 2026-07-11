@@ -199,6 +199,20 @@ public class AnnoyanceService {
         );
     }
 
+    @Transactional
+    public AnnoyanceResponse solve(Long userId, Long entryId, Boolean solved) {
+        if (!Boolean.TRUE.equals(solved)) {
+            throw new ValidationException("Solved state must be true");
+        }
+        requireUser(userId);
+        Entry entry = requireOwnedEntry(userId, entryId);
+        if (!entry.isSolved()) {
+            entry.solve();
+            entryRepository.saveAndFlush(entry);
+        }
+        return toResponse(entry);
+    }
+
     @Transactional(readOnly = true)
     public AnnoyanceResponse findOne(Long userId, Long entryId) {
         requireUser(userId);

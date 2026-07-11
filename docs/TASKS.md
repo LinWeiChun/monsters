@@ -90,8 +90,8 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] 新增煩惱 API（DONE：PR #30 已合併至 `feature/phase3`）
 - [x] 重構 Backend package 為 `com.monsters.<layer>.<module>`（DONE：PR #31 已合併至 `feature/phase3`）
 - [x] 查詢煩惱 API（DONE：PR #32 已合併至 `feature/phase3`）
-- [ ] 修改煩惱 API（REVIEW）
-- [ ] 解決煩惱 API
+- [x] 修改煩惱 API（DONE：PR #33 已合併至 `feature/phase3`）
+- [ ] 解決煩惱 API（REVIEW）
 - [ ] 分享 / 取消分享煩惱 API
 - [ ] Flutter 新增煩惱聊天室
 - [ ] Flutter 文字 / 圖片 / 錄音 / 影片選取與預覽

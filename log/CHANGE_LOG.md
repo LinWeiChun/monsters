@@ -8,6 +8,73 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-12 07:22
+
+Task
+TASK-053 解決煩惱 API（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Confirmed TASK-052 was merged into `feature/phase3` through PR #33 and marked it DONE.
+- Created the user-approved combined `feature/phase3-annoyance-state` branch from the synchronized Phase 3 integration branch; TASK-053 and TASK-054 remain separate commits and Log entries.
+- Added authenticated owner-scoped `PATCH /api/annoyances/{id}/solve`.
+- Required an explicit `isSolved = true` target state; false or null is rejected with 400.
+- Preserved one-way Phase 3 solve semantics and returned idempotent success without an unnecessary write when the annoyance is already solved.
+- Returned the updated Annoyance response and kept missing, deleted, or non-owned entries hidden as 404.
+- Moved TASK-053 from TODO through IN PROGRESS to REVIEW.
+- Checked log retention before adding this entry. The oldest record is 2026-06-29, so no record older than one month exists and none was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/dto/annoyance/SolveAnnoyanceRequest.java`
+- `backend/src/test/java/com/monsters/dto/annoyance/SolveAnnoyanceRequestTest.java`
+
+### Modified
+
+- `backend/src/main/java/com/monsters/controller/annoyance/AnnoyanceController.java`
+- `backend/src/main/java/com/monsters/service/annoyance/AnnoyanceService.java`
+- `backend/src/test/java/com/monsters/controller/annoyance/AnnoyanceControllerTest.java`
+- `backend/src/test/java/com/monsters/service/annoyance/AnnoyanceServiceTest.java`
+- `docs/API_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- `./gradlew test` passed: 188 tests, 0 failures, 0 errors.
+- Request validation, owner transition, repeated true idempotency, false/null rejection, Controller response, and existing Annoyance regression tests passed.
+- `git diff --check` passed.
+- `CHANGE_HISTORY.csv` was imported, inspected, and rendered as a 13-column table with the spreadsheet runtime.
+
+### system_data Reference
+
+- Rechecked the legacy history screen solve action and modify endpoint.
+- Retained only the one-way solve intent; did not reuse account-in-path authorization, integer flags, partial legacy object overwrite, or mixed solve/share mutation.
+- `system_data/` was not modified.
+
+### API
+
+- Added `PATCH /api/annoyances/{id}/solve` with explicit boolean target state.
+- Successful and repeated-true requests return 200 with Annoyance data; false/null returns 400.
+
+### Database
+
+- No schema, migration, or seed change; only the existing `entries.is_solved` field is updated.
+
+### UI
+
+- No Flutter file was changed.
+
+### Pending
+
+- TASK-054 share/unshare API will be completed as the second independent commit on the approved combined branch.
+
+---
+
 ## 2026-07-12 07:02
 
 Task

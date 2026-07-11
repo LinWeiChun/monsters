@@ -762,6 +762,70 @@ class AnnoyanceServiceTest {
     }
 
     @Test
+    void solveShouldTransitionOwnedAnnoyanceToSolved() {
+        Entry entry = entry();
+        AnnoyanceType category = category();
+        Mood mood = mood();
+        AnnoyanceResponse expected = response(entry);
+        prepareUser();
+        when(entryRepository.findByIdAndUserIdAndEntryTypeAndDeletedFalse(
+                10L,
+                1L,
+                EntryType.ANNOYANCE
+        )).thenReturn(Optional.of(entry));
+        when(entryRepository.saveAndFlush(entry)).thenReturn(entry);
+        when(annoyanceTypeRepository.findById(2L)).thenReturn(Optional.of(category));
+        when(moodRepository.findById(3L)).thenReturn(Optional.of(mood));
+        when(entryMediaRepository.findAllByEntryIdAndDeletedFalseOrderByDisplayOrderAsc(10L))
+                .thenReturn(List.of());
+        when(annoyanceMapper.toResponse(entry, category, mood, List.of())).thenReturn(expected);
+
+        assertThat(service().solve(1L, 10L, true)).isSameAs(expected);
+
+        assertThat(entry.isSolved()).isTrue();
+        verify(entryRepository).saveAndFlush(entry);
+    }
+
+    @Test
+    void solveShouldBeIdempotentWhenAlreadySolved() {
+        Entry entry = entry();
+        entry.solve();
+        AnnoyanceType category = category();
+        Mood mood = mood();
+        AnnoyanceResponse expected = response(entry);
+        prepareUser();
+        when(entryRepository.findByIdAndUserIdAndEntryTypeAndDeletedFalse(
+                10L,
+                1L,
+                EntryType.ANNOYANCE
+        )).thenReturn(Optional.of(entry));
+        when(annoyanceTypeRepository.findById(2L)).thenReturn(Optional.of(category));
+        when(moodRepository.findById(3L)).thenReturn(Optional.of(mood));
+        when(entryMediaRepository.findAllByEntryIdAndDeletedFalseOrderByDisplayOrderAsc(10L))
+                .thenReturn(List.of());
+        when(annoyanceMapper.toResponse(entry, category, mood, List.of())).thenReturn(expected);
+
+        assertThat(service().solve(1L, 10L, true)).isSameAs(expected);
+
+        verify(entryRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void solveShouldRejectFalseBeforeOwnerLookup() {
+        assertThatThrownBy(() -> service().solve(1L, 10L, false))
+                .isInstanceOf(ValidationException.class)
+                .hasMessage("Solved state must be true");
+        assertThatThrownBy(() -> service().solve(1L, 10L, null))
+                .isInstanceOf(ValidationException.class)
+                .hasMessage("Solved state must be true");
+
+        verify(userRepository, never()).findByIdAndDeletedFalse(anyLong());
+        verify(entryRepository, never()).findByIdAndUserIdAndEntryTypeAndDeletedFalse(
+                anyLong(), anyLong(), any()
+        );
+    }
+
+    @Test
     void shouldValidateTextAndMediaRecordCombinations() {
         AnnoyanceService service = service();
         MockMultipartFile file = file();
