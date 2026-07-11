@@ -826,6 +826,92 @@ class AnnoyanceServiceTest {
     }
 
     @Test
+    void updateSharingShouldApplyExplicitTargetState() {
+        Entry entry = entry();
+        AnnoyanceType category = category();
+        Mood mood = mood();
+        AnnoyanceResponse expected = response(entry);
+        prepareUser();
+        when(entryRepository.findByIdAndUserIdAndEntryTypeAndDeletedFalse(
+                10L,
+                1L,
+                EntryType.ANNOYANCE
+        )).thenReturn(Optional.of(entry));
+        when(entryRepository.saveAndFlush(entry)).thenReturn(entry);
+        when(annoyanceTypeRepository.findById(2L)).thenReturn(Optional.of(category));
+        when(moodRepository.findById(3L)).thenReturn(Optional.of(mood));
+        when(entryMediaRepository.findAllByEntryIdAndDeletedFalseOrderByDisplayOrderAsc(10L))
+                .thenReturn(List.of());
+        when(annoyanceMapper.toResponse(entry, category, mood, List.of())).thenReturn(expected);
+
+        assertThat(service().updateSharing(1L, 10L, true)).isSameAs(expected);
+
+        assertThat(entry.isShared()).isTrue();
+        verify(entryRepository).saveAndFlush(entry);
+    }
+
+    @Test
+    void updateSharingShouldRemoveExistingSharing() {
+        Entry entry = entry();
+        entry.updateShared(true);
+        AnnoyanceType category = category();
+        Mood mood = mood();
+        AnnoyanceResponse expected = response(entry);
+        prepareUser();
+        when(entryRepository.findByIdAndUserIdAndEntryTypeAndDeletedFalse(
+                10L,
+                1L,
+                EntryType.ANNOYANCE
+        )).thenReturn(Optional.of(entry));
+        when(entryRepository.saveAndFlush(entry)).thenReturn(entry);
+        when(annoyanceTypeRepository.findById(2L)).thenReturn(Optional.of(category));
+        when(moodRepository.findById(3L)).thenReturn(Optional.of(mood));
+        when(entryMediaRepository.findAllByEntryIdAndDeletedFalseOrderByDisplayOrderAsc(10L))
+                .thenReturn(List.of());
+        when(annoyanceMapper.toResponse(entry, category, mood, List.of())).thenReturn(expected);
+
+        assertThat(service().updateSharing(1L, 10L, false)).isSameAs(expected);
+
+        assertThat(entry.isShared()).isFalse();
+        verify(entryRepository).saveAndFlush(entry);
+    }
+
+    @Test
+    void updateSharingShouldBeIdempotentWhenStateMatches() {
+        Entry entry = entry();
+        AnnoyanceType category = category();
+        Mood mood = mood();
+        AnnoyanceResponse expected = response(entry);
+        prepareUser();
+        when(entryRepository.findByIdAndUserIdAndEntryTypeAndDeletedFalse(
+                10L,
+                1L,
+                EntryType.ANNOYANCE
+        )).thenReturn(Optional.of(entry));
+        when(annoyanceTypeRepository.findById(2L)).thenReturn(Optional.of(category));
+        when(moodRepository.findById(3L)).thenReturn(Optional.of(mood));
+        when(entryMediaRepository.findAllByEntryIdAndDeletedFalseOrderByDisplayOrderAsc(10L))
+                .thenReturn(List.of());
+        when(annoyanceMapper.toResponse(entry, category, mood, List.of())).thenReturn(expected);
+
+        assertThat(service().updateSharing(1L, 10L, false)).isSameAs(expected);
+
+        verify(entryRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void updateSharingShouldRejectMissingTargetBeforeOwnerLookup() {
+        assertThatThrownBy(() -> service().updateSharing(1L, 10L, null))
+                .isInstanceOf(ValidationException.class)
+                .hasMessage("Shared state is required");
+
+        verify(userRepository, never()).findByIdAndDeletedFalse(anyLong());
+        verify(entryRepository, never()).findByIdAndUserIdAndEntryTypeAndDeletedFalse(
+                anyLong(), anyLong(), any()
+        );
+    }
+
+    @Test
     void shouldValidateTextAndMediaRecordCombinations() {
         AnnoyanceService service = service();
         MockMultipartFile file = file();

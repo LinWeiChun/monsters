@@ -2,6 +2,7 @@ package com.monsters.controller.annoyance;
 
 import com.monsters.dto.annoyance.AnnoyanceResponse;
 import com.monsters.dto.annoyance.CreateAnnoyanceRequest;
+import com.monsters.dto.annoyance.ShareAnnoyanceRequest;
 import com.monsters.dto.annoyance.SolveAnnoyanceRequest;
 import com.monsters.dto.annoyance.UpdateAnnoyanceRequest;
 import com.monsters.dto.common.ApiResponse;
@@ -21,8 +22,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -112,5 +113,22 @@ public class AnnoyanceController {
                 request.isSolved()
         );
         return ResponseEntity.ok(ApiResponse.success("Annoyance solve success", response));
+    }
+
+    @PatchMapping("/{id}/share")
+    public ResponseEntity<ApiResponse<AnnoyanceResponse>> updateSharing(
+            @AuthenticationPrincipal AuthenticatedUser currentUser,
+            @PathVariable Long id,
+            @Valid @RequestBody ShareAnnoyanceRequest request
+    ) {
+        AnnoyanceResponse response = annoyanceService.updateSharing(
+                currentUser.userId(),
+                id,
+                request.isShared()
+        );
+        return ResponseEntity.ok(ApiResponse.success(
+                "Annoyance sharing update success",
+                response
+        ));
     }
 }
