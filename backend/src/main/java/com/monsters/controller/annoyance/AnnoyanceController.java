@@ -2,6 +2,7 @@ package com.monsters.controller.annoyance;
 
 import com.monsters.dto.annoyance.AnnoyanceResponse;
 import com.monsters.dto.annoyance.CreateAnnoyanceRequest;
+import com.monsters.dto.annoyance.UpdateAnnoyanceRequest;
 import com.monsters.dto.common.ApiResponse;
 import com.monsters.dto.common.PageResponse;
 import com.monsters.security.common.AuthenticatedUser;
@@ -14,6 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -75,5 +77,23 @@ public class AnnoyanceController {
     ) {
         AnnoyanceResponse response = annoyanceService.findOne(currentUser.userId(), id);
         return ResponseEntity.ok(ApiResponse.success("Annoyance query success", response));
+    }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<AnnoyanceResponse>> update(
+            @AuthenticationPrincipal AuthenticatedUser currentUser,
+            @PathVariable Long id,
+            @Valid @RequestPart("request") UpdateAnnoyanceRequest request,
+            @RequestPart(value = "contentFile", required = false) MultipartFile contentFile,
+            @RequestPart(value = "drawingFile", required = false) MultipartFile drawingFile
+    ) {
+        AnnoyanceResponse response = annoyanceService.update(
+                currentUser.userId(),
+                id,
+                request,
+                contentFile,
+                drawingFile
+        );
+        return ResponseEntity.ok(ApiResponse.success("Annoyance update success", response));
     }
 }
