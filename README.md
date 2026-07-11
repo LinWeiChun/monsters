@@ -389,6 +389,15 @@ docker compose down
 | `JWT_SECRET` | JWT 簽章密鑰 | 空字串，正式環境必須提供 |
 | `JWT_ACCESS_TOKEN_EXPIRATION_SECONDS` | Access token 有效秒數 | `3600` |
 | `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` | Refresh token 有效秒數 | `1209600` |
+| `R2_ACCOUNT_ID` | Cloudflare R2 Account ID | 空字串，使用 R2 前必須提供 |
+| `R2_ACCESS_KEY_ID` | R2 S3 Access Key ID | 空字串，使用 R2 前必須提供 |
+| `R2_SECRET_ACCESS_KEY` | R2 S3 Secret Access Key | 空字串，使用 R2 前必須提供 |
+| `R2_BUCKET` | Public avatar bucket | 空字串，頭貼上傳前必須提供 |
+| `R2_PUBLIC_BASE_URL` | Public avatar URL base | 空字串，頭貼上傳前必須提供 |
+| `R2_ENTRY_MEDIA_BUCKET` | Private entry media bucket | 空字串，煩惱媒體上傳前必須提供且不得開啟 public access |
+| `R2_ENTRY_MEDIA_KEY_PREFIX` | Private entry media object prefix | `entries/media` |
+| `FFPROBE_PATH` | ffprobe executable | `ffprobe` |
+| `FFPROBE_TIMEOUT_SECONDS` | 媒體時長檢查 timeout 秒數 | `10` |
 
 ## 測試與建置
 

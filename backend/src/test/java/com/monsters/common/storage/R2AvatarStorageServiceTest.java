@@ -117,6 +117,15 @@ class R2AvatarStorageServiceTest {
 
         assertThat(properties.avatarKeyPrefix()).isEqualTo("users/avatars");
         assertThat(properties.maxAvatarSizeBytes()).isEqualTo(5 * 1024 * 1024);
+        assertThat(properties.entryMediaBucket()).isEmpty();
+        assertThat(properties.entryMediaKeyPrefix()).isEqualTo("entries/media");
+        assertThat(properties.maxEntryImageSizeBytes()).isEqualTo(5 * 1024 * 1024);
+        assertThat(properties.maxEntryAudioSizeBytes()).isEqualTo(10 * 1024 * 1024);
+        assertThat(properties.maxEntryVideoSizeBytes()).isEqualTo(50 * 1024 * 1024);
+        assertThat(properties.maxEntryDrawingSizeBytes()).isEqualTo(5 * 1024 * 1024);
+        assertThat(properties.maxEntryAudioDurationSeconds()).isEqualTo(300);
+        assertThat(properties.maxEntryVideoDurationSeconds()).isEqualTo(60);
+        assertThat(properties.ffprobePath()).isEqualTo("ffprobe");
     }
 
     private R2Properties configuredProperties() {

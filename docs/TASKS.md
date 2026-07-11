@@ -84,8 +84,8 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] 整理可參考的業務邏輯與 UI 互動（DONE：PR #26 已合併至 `feature/phase3`；已核准 D1-A、D2-A、D3-A、D4-A、D5-B、D6-A、D7-A、D8-A）
 - [ ] 依新版 Entry 架構與 API 規格重新實作
 
-- [ ] 建立 annoyance_type（REVIEW）
-- [ ] 建立 entry_media 圖片 / 錄音 / 影片 / 心情圖與 R2 上傳流程
+- [x] 建立 annoyance_type（DONE：PR #27 已合併至 `feature/phase3`）
+- [ ] 建立 entry_media 圖片 / 錄音 / 影片 / 心情圖與 R2 上傳流程（REVIEW：D9-A、D10-A）
 - [ ] 建立 annoyance Entity / DTO / Repository / Service / Controller
 - [ ] 新增煩惱 API
 - [ ] 查詢煩惱 API

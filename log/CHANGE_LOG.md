@@ -8,6 +8,109 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-11 17:02
+
+Task
+TASK-047 Phase 3 entry_media 與 private R2 上傳流程（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Confirmed TASK-046 was merged into `feature/phase3` through PR #27 and marked it DONE.
+- Created `feature/phase3-entry-media-r2` from the synchronized Phase 3 integration branch.
+- Applied approved decisions D9-A and D10-A: private Backend-streamed media and ffprobe duration validation.
+- Added EntryMedia Entity, lowercase media type converter, Repository, private R2 upload/download/delete abstraction, and single-range support.
+- Added MIME type, size, audio duration, video duration, object key prefix, and R2 configuration validation.
+- Separated public avatar storage from a dedicated private entry media bucket so public bucket access cannot expose private annoyance media.
+- Updated the shared Java S3 client to Cloudflare's current `region=auto`, path-style, and chunked-encoding-disabled configuration.
+- Added FFmpeg to the Backend runtime image and documented local ffprobe and environment requirements.
+- Updated schema and a guarded one-time migration; the migration stops when legacy entry media rows exist and requires a separately reviewed data migration.
+- Added 28 tests and moved TASK-047 from TODO through IN PROGRESS to REVIEW.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/entry/entity/EntryMedia.java`
+- `backend/src/main/java/com/monsters/entry/entity/EntryMediaType.java`
+- `backend/src/main/java/com/monsters/entry/entity/EntryMediaTypeConverter.java`
+- `backend/src/main/java/com/monsters/entry/repository/EntryMediaRepository.java`
+- `backend/src/main/java/com/monsters/entry/storage/DownloadedEntryMedia.java`
+- `backend/src/main/java/com/monsters/entry/storage/EntryMediaStorageService.java`
+- `backend/src/main/java/com/monsters/entry/storage/FfprobeMediaDurationProbe.java`
+- `backend/src/main/java/com/monsters/entry/storage/MediaDurationProbe.java`
+- `backend/src/main/java/com/monsters/entry/storage/R2EntryMediaStorageService.java`
+- `backend/src/main/java/com/monsters/entry/storage/StoredEntryMedia.java`
+- `backend/src/test/java/com/monsters/common/storage/R2StorageConfigTest.java`
+- `backend/src/test/java/com/monsters/entry/entity/EntryMediaTest.java`
+- `backend/src/test/java/com/monsters/entry/entity/EntryMediaTypeConverterTest.java`
+- `backend/src/test/java/com/monsters/entry/repository/EntryMediaRepositoryTest.java`
+- `backend/src/test/java/com/monsters/entry/storage/FfprobeMediaDurationProbeTest.java`
+- `backend/src/test/java/com/monsters/entry/storage/R2EntryMediaStorageServiceTest.java`
+- `database/migrations/20260711_02_make_entry_media_private.sql`
+
+### Modified
+
+- `README.md`
+- `backend/Dockerfile`
+- `backend/README.md`
+- `backend/src/main/java/com/monsters/common/storage/R2Properties.java`
+- `backend/src/main/java/com/monsters/common/storage/R2StorageConfig.java`
+- `backend/src/main/resources/application.yml`
+- `backend/src/test/java/com/monsters/common/storage/R2AvatarStorageServiceTest.java`
+- `database/init/01_schema.sql`
+- `database/init/README.md`
+- `docker-compose.yml`
+- `docs/API_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `docs/UI_SPEC.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Tests
+
+- First `./gradlew test` run found and fixed an AWS SDK test import path error.
+- Final `./gradlew test` passed: 125 tests, 0 failures, 0 errors.
+- `./gradlew build` passed and produced the Backend artifacts.
+- `docker compose config --quiet` passed.
+- `git diff --check` passed.
+- Docker image build could not run because Docker Desktop was not running; the Dockerfile FFmpeg installation remains to be verified by CI or a running Docker daemon.
+- MySQL migration execution could not run without the Docker MySQL service; schema and migration received static consistency checks.
+- `CHANGE_HISTORY.csv` was imported and inspected as a 13-column table.
+
+### system_data Reference
+
+- Rechecked the old local FileUploadService, Annoyance Entity, Flutter media pickers, and Base64 media flow.
+- Reused only the intent to support image, audio, video, and drawing media.
+- Did not reuse original-filename local storage, Base64-in-Database fields, direct public media access, console output, destructive delete-all behavior, or exception messages that expose internal details.
+- `system_data/` was not modified.
+
+### API
+
+- Added private media metadata and authenticated Backend download URL semantics.
+- Added `GET /api/annoyances/{id}/media/{mediaId}` with owner/shared authorization and single HTTP Range behavior; Controller implementation remains in the Annoyance API Task.
+- Object key, bucket, credentials, temporary paths, and ffprobe output must never be returned.
+
+### Database
+
+- Replaced `media_url` with unique `object_key` and added content type, file size, duration, video, size, and duration constraints.
+- Added `20260711_02_make_entry_media_private.sql`; migration is required and intentionally stops on non-empty legacy media data.
+
+### Notes
+
+- `R2_ENTRY_MEDIA_BUCKET` must reference a dedicated private bucket; do not enable public access.
+- The Backend R2 token should use Object Read & Write scoped only to the required buckets; bucket administration permission is unnecessary.
+- The next Task is the Annoyance Entity / DTO / Repository / Service / Controller foundation.
+
+---
+
 ## 2026-07-11 13:06
 
 Task

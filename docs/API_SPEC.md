@@ -720,7 +720,8 @@ Response：
 - 分類使用穩定的 `categoryCode`，情緒使用 1 至 5 的 `score`，後端解析對應 lookup ID。
 - 一筆煩惱只能選擇 TEXT、IMAGE、AUDIO、VIDEO 其中一種主要記錄方式，另可選擇一張 drawing。
 - 預設 `isShared = false`、`isSolved = false`；建立時間未傳時由後端使用目前時間。
-- 不存在、已刪除或不屬於目前使用者的資料一律回傳 404，避免洩漏 owner 資訊。
+- 不存在、已刪除或不屬於目前使用者的資料一律回傳 404，避免洩漏 owner 資訊；媒體下載 endpoint 另允許目前為分享狀態的 entry。
+- Entry media 使用獨立且不可公開存取的 R2 bucket；Response 不得包含 bucket、object key 或 R2 credential。媒體只回傳需帶 JWT 的 Backend download URL。
 
 媒體限制：
 
@@ -779,7 +780,16 @@ Response data：
   "isShared": false,
   "isSolved": false,
   "occurredAt": "2026-07-11T12:00:00+08:00",
-  "media": [],
+  "media": [
+    {
+      "id": 201,
+      "type": "drawing",
+      "contentType": "image/png",
+      "sizeBytes": 20480,
+      "durationSeconds": null,
+      "downloadUrl": "/api/annoyances/101/media/201"
+    }
+  ],
   "reward": null
 }
 ```
@@ -862,13 +872,23 @@ Request：
 
 使用明確 boolean 目標狀態，不提供無參數 toggle；重複傳相同狀態應維持 idempotent success。
 
-### 4.7 Annoyance 錯誤處理
+### 4.7 下載煩惱媒體
+
+`GET /api/annoyances/{id}/media/{mediaId}`
+
+- 需登入；entry owner 可讀取，非 owner 僅能在 entry 目前為分享狀態時讀取，否則回傳 404。
+- `mediaId` 必須屬於 path 中的 entry 且未刪除。
+- Backend 驗證權限後從 private R2 串流，不以 redirect 洩漏 R2 URL 或 object key。
+- 支援單一 HTTP `Range` request 以供錄音／影片 seek；完整回應為 200，range 回應為 206，並回傳正確 `Content-Type`、`Content-Length`、`Accept-Ranges` 與 `Content-Range`。
+
+### 4.8 Annoyance 錯誤處理
 
 - 400：欄位、主要記錄方式組合、分頁、MIME type、大小或長度驗證失敗。
 - 401：未登入或 token 無效。
 - 404：lookup 不存在，或 entry 不存在／不屬於目前使用者。
 - 413：上傳檔案超過限制。
-- 500：R2 或資料儲存失敗；不得回傳 bucket credential、內部 object key 或 stack trace。
+- 416：媒體 `Range` 超出 object 範圍。
+- 500：R2、`ffprobe` 或資料儲存失敗；不得回傳 bucket credential、內部 object key、暫存檔路徑或 stack trace。
 
 ---
 
