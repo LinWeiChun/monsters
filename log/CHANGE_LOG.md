@@ -8,6 +8,97 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-11 23:38
+
+Task
+TASK-049 Phase 3 新增煩惱 API（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Confirmed TASK-048 was merged into `feature/phase3` through PR #29 and marked it DONE.
+- Created `feature/phase3-annoyance-create` from the synchronized Phase 3 integration branch.
+- Added authenticated `POST /api/annoyances` with the approved multipart JSON, primary media, and optional drawing contract.
+- Added request validation for category, record method, score, default private sharing, and the TEXT versus media combination.
+- Normalized category codes and converted request occurrence timestamps to `Asia/Taipei` before storing MySQL `DATETIME` values.
+- Kept R2 uploads outside the Database transaction and delegated Entry plus EntryMedia writes to a separate transactional Spring bean, allowing commit failures to propagate back to the upload orchestrator.
+- Added best-effort cleanup for every R2 object uploaded by a failed request; cleanup failures neither expose object keys nor replace the original failure.
+- Added MIME type plus filename extension validation and explicit 413 behavior for per-file and global multipart limits.
+- Added readable 400 responses for malformed JSON, invalid multipart data, and missing multipart parts.
+- Added 17 tests and moved TASK-049 from TODO through IN PROGRESS to REVIEW.
+- Checked log retention before adding this entry. The oldest record is 2026-06-29, so no record older than one month exists and none was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/annoyance/dto/CreateAnnoyanceRequest.java`
+- `backend/src/main/java/com/monsters/annoyance/service/AnnoyancePersistenceService.java`
+- `backend/src/main/java/com/monsters/annoyance/service/CreatedAnnoyance.java`
+- `backend/src/main/java/com/monsters/annoyance/service/NewEntryMedia.java`
+- `backend/src/main/java/com/monsters/common/exception/PayloadTooLargeException.java`
+- `backend/src/test/java/com/monsters/annoyance/dto/CreateAnnoyanceRequestTest.java`
+- `backend/src/test/java/com/monsters/annoyance/service/AnnoyancePersistenceServiceTest.java`
+
+### Modified
+
+- `README.md`
+- `backend/README.md`
+- `backend/src/main/java/com/monsters/annoyance/controller/AnnoyanceController.java`
+- `backend/src/main/java/com/monsters/annoyance/service/AnnoyanceService.java`
+- `backend/src/main/java/com/monsters/common/exception/GlobalExceptionHandler.java`
+- `backend/src/main/java/com/monsters/entry/storage/R2EntryMediaStorageService.java`
+- `backend/src/main/resources/application.yml`
+- `backend/src/test/java/com/monsters/annoyance/controller/AnnoyanceControllerTest.java`
+- `backend/src/test/java/com/monsters/annoyance/service/AnnoyanceServiceTest.java`
+- `backend/src/test/java/com/monsters/common/exception/GlobalExceptionHandlerTest.java`
+- `backend/src/test/java/com/monsters/entry/storage/R2EntryMediaStorageServiceTest.java`
+- `docker-compose.yml`
+- `docs/API_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Tests
+
+- `./gradlew clean test build` passed: 160 tests, 0 failures, 0 errors.
+- `docker compose config --quiet` passed.
+- `git diff --check` passed.
+- Static checks found no TODO, FIXME, console output, stack-trace printing, credential, or object-key logging in the new production flow.
+- `CHANGE_HISTORY.csv` was imported, inspected, and rendered as a 13-column table with the spreadsheet runtime.
+- Docker Desktop is not running, so a live R2 and MySQL end-to-end multipart request was not executed; upload, cleanup, transaction, Controller, validation, and exception behavior are covered by isolated tests.
+
+### system_data Reference
+
+- Rechecked the old Annoyance Controller, Service, Entity, Flutter model, and create chat flow.
+- Reused the intent for category, one primary record, optional drawing, score, sharing, and occurrence time.
+- Did not reuse Base64 payloads, account input from Client, local file paths, Controller business logic, integer booleans, console output, or random monster rewards.
+- `system_data/` was not modified.
+
+### API
+
+- Implemented `POST /api/annoyances` as authenticated `multipart/form-data` with `request`, optional `contentFile`, and optional `drawingFile` parts.
+- Added 201 success response through the shared `ApiResponse` envelope; Phase 3 reward remains null.
+- Added 400 handling for malformed or missing multipart input and 413 handling for oversized uploads.
+- Media responses contain Backend download paths and never contain R2 object keys or bucket details.
+
+### Database
+
+- No schema change and no migration required.
+- Entry and EntryMedia writes execute in one Database transaction after external uploads complete.
+
+### Notes
+
+- `MULTIPART_MAX_FILE_SIZE` defaults to 50MB and `MULTIPART_MAX_REQUEST_SIZE` defaults to 60MB; per-media limits remain stricter where applicable.
+- Every existing annoyance type row is treated as enabled because the approved Database schema has no `is_active` field.
+- The next Task is the query Annoyance API.
+
+---
+
 ## 2026-07-11 17:33
 
 Task

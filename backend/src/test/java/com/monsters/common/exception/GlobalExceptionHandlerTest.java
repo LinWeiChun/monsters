@@ -8,6 +8,11 @@ import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.mock.http.MockHttpInputMessage;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 class GlobalExceptionHandlerTest {
 
@@ -67,6 +72,49 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ApiResponse<Void>> response = handler.handleException(new RuntimeException("hidden"));
 
         assertErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+    }
+
+    @Test
+    void unreadableRequestShouldReturnBadRequest() {
+        ResponseEntity<ApiResponse<Void>> response = handler.handleHttpMessageNotReadableException(
+                new HttpMessageNotReadableException(
+                        "invalid json",
+                        new MockHttpInputMessage(new byte[0])
+                )
+        );
+
+        assertErrorResponse(response, HttpStatus.BAD_REQUEST, "Request body is not readable");
+    }
+
+    @Test
+    void oversizedUploadShouldReturnPayloadTooLarge() {
+        ResponseEntity<ApiResponse<Void>> response = handler.handleMaxUploadSizeExceededException(
+                new MaxUploadSizeExceededException(50)
+        );
+
+        assertErrorResponse(response, HttpStatus.PAYLOAD_TOO_LARGE, "Uploaded file is too large");
+    }
+
+    @Test
+    void invalidMultipartShouldReturnBadRequest() {
+        ResponseEntity<ApiResponse<Void>> response = handler.handleMultipartException(
+                new MultipartException("invalid multipart")
+        );
+
+        assertErrorResponse(response, HttpStatus.BAD_REQUEST, "Multipart request is invalid");
+    }
+
+    @Test
+    void missingMultipartPartShouldReturnBadRequest() {
+        ResponseEntity<ApiResponse<Void>> response = handler.handleMissingServletRequestPartException(
+                new MissingServletRequestPartException("request")
+        );
+
+        assertErrorResponse(
+                response,
+                HttpStatus.BAD_REQUEST,
+                "Required multipart request part is missing"
+        );
     }
 
     private void assertErrorResponse(

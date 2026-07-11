@@ -398,6 +398,8 @@ docker compose down
 | `R2_ENTRY_MEDIA_KEY_PREFIX` | Private entry media object prefix | `entries/media` |
 | `FFPROBE_PATH` | ffprobe executable | `ffprobe` |
 | `FFPROBE_TIMEOUT_SECONDS` | 媒體時長檢查 timeout 秒數 | `10` |
+| `MULTIPART_MAX_FILE_SIZE` | Backend 單檔 multipart 全域上限 | `50MB` |
+| `MULTIPART_MAX_REQUEST_SIZE` | Backend multipart request 全域上限 | `60MB` |
 
 ## 測試與建置
 
