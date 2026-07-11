@@ -1,15 +1,15 @@
 package com.monsters;
 
-import com.monsters.annoyance.repository.AnnoyanceTypeRepository;
-import com.monsters.entry.repository.EntryMediaRepository;
-import com.monsters.entry.repository.EntryRepository;
-import com.monsters.entry.repository.MoodRepository;
-import com.monsters.user.repository.PasswordResetTokenRepository;
-import com.monsters.user.repository.RevokedTokenRepository;
-import com.monsters.user.repository.UserCredentialRepository;
-import com.monsters.user.repository.UserOAuthAccountRepository;
-import com.monsters.user.repository.UserPasswordLockRepository;
-import com.monsters.user.repository.UserRepository;
+import com.monsters.repository.annoyance.AnnoyanceTypeRepository;
+import com.monsters.repository.entry.EntryMediaRepository;
+import com.monsters.repository.entry.EntryRepository;
+import com.monsters.repository.entry.MoodRepository;
+import com.monsters.repository.user.PasswordResetTokenRepository;
+import com.monsters.repository.user.RevokedTokenRepository;
+import com.monsters.repository.user.UserCredentialRepository;
+import com.monsters.repository.user.UserOAuthAccountRepository;
+import com.monsters.repository.user.UserPasswordLockRepository;
+import com.monsters.repository.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;

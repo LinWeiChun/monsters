@@ -655,8 +655,8 @@ Migration 應包含：
 
 後端 Entity 必須遵守：
 
-- package：`com.monsters.<module>.entity`
-- 共用欄位繼承 `com.monsters.common.entity.BaseEntity`
+- package：`com.monsters.entity.<module>`
+- 共用欄位繼承 `com.monsters.entity.common.BaseEntity`
 - API Response 不得直接回傳 Entity，必須使用 DTO
 - Service 負責 transaction
 - Repository 只負責資料存取

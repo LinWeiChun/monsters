@@ -9,6 +9,16 @@
 - Gradle
 - MySQL
 
+## Package 結構
+
+Backend 使用 layer-first package layout：
+
+```text
+com.monsters.<layer>.<module>
+```
+
+例如 `com.monsters.controller.annoyance`、`com.monsters.service.auth`、`com.monsters.entity.user` 與 `com.monsters.security.common`。新程式不得回到 `com.monsters.<module>.<layer>`。`MonstersApplication` 維持在 root package `com.monsters`，以保留 Spring component 與 JPA scan 範圍。
+
 ## Profile 設定
 
 後端使用 Spring Boot Profile：
