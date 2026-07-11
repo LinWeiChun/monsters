@@ -266,10 +266,13 @@ Unique：`user_id, monster_group_id`
 | 欄位 | 型別 | 約束 | 說明 |
 |---|---|---|---|
 | id | BIGINT | PK | 分類 ID |
+| code | VARCHAR(50) | UNIQUE NOT NULL | 穩定分類代碼，供 API 使用 |
 | type_name | VARCHAR(80) | UNIQUE NOT NULL | 分類名稱 |
 | display_order | INT | NOT NULL | 顯示順序 |
 | created_at | DATETIME | NOT NULL | 建立時間 |
 | updated_at | DATETIME | NOT NULL | 更新時間 |
+
+初始 code 固定為 `ACADEMIC`、`CAREER`、`LOVE`、`FRIENDSHIP`、`FAMILY`、`OTHER`，Client 不傳 Database ID。
 
 ### 3.11 moods
 
@@ -280,7 +283,7 @@ Unique：`user_id, monster_group_id`
 | id | BIGINT | PK | 情緒 ID |
 | code | VARCHAR(50) | UNIQUE NOT NULL | 情緒代碼 |
 | label | VARCHAR(80) | NOT NULL | 顯示名稱 |
-| score | TINYINT | NOT NULL | 分數，建議 1 到 5 |
+| score | TINYINT | UNIQUE NOT NULL | 分數，固定 1 到 5 |
 | image_url | VARCHAR(500) | NULL | 情緒圖片 URL |
 | display_order | INT | NOT NULL | 顯示順序 |
 | created_at | DATETIME | NOT NULL | 建立時間 |
@@ -311,6 +314,8 @@ Unique：`user_id, monster_group_id`
 
 - `entry_type = 'DIARY'` 時，`annoyance_type_id` 必須為 NULL，`is_solved` 固定為 false。
 - `entry_type = 'ANNOYANCE'` 時，`annoyance_type_id` 必須有值。
+- Annoyance Service 依 `annoyance_types.code` 與 `moods.score` 解析 FK；Client 不得傳 lookup ID。
+- 每筆 ANNOYANCE 使用一種主要記錄方式：文字存於 `entries.content`，或一筆 image／audio／video 媒體；另可有一筆 drawing。此組合由 Service 驗證。
 
 ### 3.13 entry_media
 
@@ -320,7 +325,7 @@ Unique：`user_id, monster_group_id`
 |---|---|---|---|
 | id | BIGINT | PK | 媒體 ID |
 | entry_id | BIGINT | FK NOT NULL | 紀錄 ID |
-| media_type | VARCHAR(30) | NOT NULL | image、audio、drawing |
+| media_type | VARCHAR(30) | NOT NULL | image、audio、video、drawing |
 | media_url | VARCHAR(500) | NOT NULL | 媒體 URL |
 | display_order | INT | NOT NULL | 顯示順序 |
 | created_at | DATETIME | NOT NULL | 建立時間 |
@@ -564,7 +569,9 @@ Unique：`user_id, answered_date`
 - `user_monsters(user_id, monster_id)`
 - `user_active_monsters(user_id, monster_group_id)`
 - `annoyance_types.type_name`
+- `annoyance_types.code`
 - `moods.code`
+- `moods.score`
 - `entry_likes(entry_id, user_id)`
 - `user_daily_test_answers(user_id, answered_date)`
 
@@ -575,6 +582,8 @@ Unique：`user_id, answered_date`
 - `entries(entry_type, is_shared, occurred_at)`
 - `entry_comments(entry_id, created_at)`
 - `daily_tests(active_date)`
+
+Annoyance 列表的 `page`、`size`、`sort` 由查詢的 `LIMIT`／`OFFSET` 與排序實作，不在任何資料表新增頁碼欄位。
 
 ## 七、Migration / Init SQL
 

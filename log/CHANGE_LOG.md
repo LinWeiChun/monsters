@@ -8,6 +8,75 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-11 09:34
+
+Task
+TASK-045 Phase 3 業務邏輯與 UI 互動整理（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Confirmed TASK-044 was merged into `feature/phase3` through PR #24 and marked it DONE.
+- Converted the legacy annoyance audit into a typed new-version business flow and Flutter UI state proposal.
+- Defined common owner validation, pagination, draft preservation, structured chat selection, and error-state principles.
+- Received approval for D1-A, D2-A, D3-A, D4-A, D5-B, D6-A, D7-A, and D8-A.
+- Finalized video support, one primary record method plus optional drawing, multipart upload, code/score lookup, page/size/sort pagination, structured chat selection, and consistent media limits.
+- Kept monster reward delivery out of Phase 3 and assigned the annoyance reward integration to Phase 6.
+- Documented at least two options with advantages, disadvantages, and risks for every decision.
+- Synchronized the approved decisions to Decision, Project, Database, API, UI, and Task specifications.
+- Moved TASK-045 from IN PROGRESS to REVIEW.
+- Checked log retention before adding this entry. No log older than one month was found, so no expired log was deleted.
+
+### Added
+
+- `docs/PHASE3_ANNOYANCE_DESIGN_PROPOSAL.md`
+
+### Modified
+
+- `docs/DECISIONS.md`
+- `docs/PROJECT_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/API_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Tests
+
+- Documentation-only change; backend and Flutter compilation were not required.
+- `git diff --check` passed.
+- Confirmed all eight approved decisions are represented consistently across formal specifications.
+- `CHANGE_HISTORY.csv` was imported and inspected as a 13-column table.
+
+### system_data Reference
+
+- Used the merged TASK-044 audit in `docs/SYSTEM_DATA_REFERENCE.md` as the source.
+- Reused only the chat flow, six categories, drawing interaction, 1-to-5 scale, sharing behavior, solved-state intent, and reward experience.
+- `system_data/` was not modified.
+
+### API
+
+- Defined multipart create/update, stable code/score inputs, owner validation, page/size/sort pagination, explicit solve/share target states, response shape, media limits, and R2 failure handling.
+
+### Database
+
+- Added stable annoyance category codes, unique mood scores, video media type, and one-primary-record-method rules to the specification.
+- Confirmed D6-A requires no page-number Database field; implementation uses query limit/offset.
+
+### Notes
+
+- Approved combination: D1-A, D2-A, D3-A, D4-A, D5-B, D6-A, D7-A, D8-A.
+- Per the user's explicit instruction, unrelated working-tree changes were excluded from this Task's staging and commit; sensitive R2 configuration was not staged.
+
+---
+
 ## 2026-07-10 19:08
 
 Task
