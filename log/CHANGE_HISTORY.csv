@@ -649,3 +649,33 @@
 2026-07-10,13:19,TASK-041,Documentation,frontend/README.md,修改,補充前端註冊帳號規則,Codex,否,否,否,否,文件同步
 2026-07-10,13:19,TASK-041,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-041 REVIEW 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-10,13:19,TASK-041,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-041 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
+2026-07-11,17:33,TASK-048,Backend,backend/src/main/java/com/monsters/entry/entity/Entry.java,新增,建立 Annoyance 與 Diary 共用 Entry aggregate,Codex,是,是,否,是,D11-A
+2026-07-11,17:33,TASK-048,Backend,backend/src/main/java/com/monsters/entry/entity/EntryType.java,新增,建立 DIARY 與 ANNOYANCE 共用類型,Codex,否,是,否,否,
+2026-07-11,17:33,TASK-048,Backend,backend/src/main/java/com/monsters/entry/entity/Mood.java,新增,建立共用 mood lookup Entity,Codex,是,是,否,是,D14-A
+2026-07-11,17:33,TASK-048,Backend,backend/src/main/java/com/monsters/entry/repository/EntryRepository.java,新增,建立 owner scoped soft delete Entry 查詢,Codex,否,是,否,否,
+2026-07-11,17:33,TASK-048,Backend,backend/src/main/java/com/monsters/entry/repository/MoodRepository.java,新增,建立唯一 score lookup,Codex,否,是,否,否,
+2026-07-11,17:33,TASK-048,Backend,backend/src/main/java/com/monsters/annoyance/controller/AnnoyanceController.java,新增,建立 Annoyance API Controller 骨架,Codex,是,否,否,否,D12-A 後續 Task 新增 endpoint
+2026-07-11,17:33,TASK-048,Backend,backend/src/main/java/com/monsters/annoyance/dto/AnnoyanceCategoryResponse.java,新增,建立分類 response DTO,Codex,是,否,否,否,
+2026-07-11,17:33,TASK-048,Backend,backend/src/main/java/com/monsters/annoyance/dto/AnnoyanceMediaResponse.java,新增,建立不暴露 object key 的媒體 DTO,Codex,是,否,否,否,D13-A
+2026-07-11,17:33,TASK-048,Backend,backend/src/main/java/com/monsters/annoyance/dto/AnnoyanceRecordMethod.java,新增,建立主要記錄方式 enum,Codex,是,否,否,否,
+2026-07-11,17:33,TASK-048,Backend,backend/src/main/java/com/monsters/annoyance/dto/AnnoyanceResponse.java,新增,建立 immutable Annoyance response,Codex,是,否,否,否,Phase 3 reward 為 null
+2026-07-11,17:33,TASK-048,Backend,backend/src/main/java/com/monsters/annoyance/mapper/AnnoyanceMapper.java,新增,建立 Entry 與 API DTO mapper,Codex,是,否,否,否,包含 Asia Taipei offset
+2026-07-11,17:33,TASK-048,Backend,backend/src/main/java/com/monsters/annoyance/service/AnnoyanceService.java,新增,建立 owner lookup 與主要記錄組合驗證,Codex,是,是,否,否,D11-A D12-A
+2026-07-11,17:33,TASK-048,Test,backend/src/test/java/com/monsters/MonstersApplicationTests.java,修改,補齊新 Repository Spring context mock,Codex,否,否,否,否,
+2026-07-11,17:33,TASK-048,Test,backend/src/test/java/com/monsters/annoyance/controller/AnnoyanceControllerTest.java,新增,驗證 Controller 路徑與 constructor injection,Codex,是,否,否,否,
+2026-07-11,17:33,TASK-048,Test,backend/src/test/java/com/monsters/annoyance/mapper/AnnoyanceMapperTest.java,新增,驗證媒體方式與 object key 隱藏,Codex,是,否,否,否,
+2026-07-11,17:33,TASK-048,Test,backend/src/test/java/com/monsters/annoyance/service/AnnoyanceServiceTest.java,新增,驗證 owner lookup lookup table 與 record 組合,Codex,是,否,否,否,
+2026-07-11,17:33,TASK-048,Test,backend/src/test/java/com/monsters/entry/entity/EntryTest.java,新增,驗證 Entry mapping defaults 與 lifecycle,Codex,否,是,否,否,
+2026-07-11,17:33,TASK-048,Test,backend/src/test/java/com/monsters/entry/entity/MoodTest.java,新增,驗證 Mood mapping 與 unique score,Codex,否,是,否,否,
+2026-07-11,17:33,TASK-048,Test,backend/src/test/java/com/monsters/entry/entity/MoodSchemaTest.java,新增,驗證 schema migration seed 與衝突防護,Codex,否,是,否,是,
+2026-07-11,17:33,TASK-048,Test,backend/src/test/java/com/monsters/entry/repository/EntryRepositoryTest.java,新增,驗證 owner scoped Repository contract,Codex,否,是,否,否,
+2026-07-11,17:33,TASK-048,Test,backend/src/test/java/com/monsters/entry/repository/MoodRepositoryTest.java,新增,驗證 score lookup Repository contract,Codex,否,是,否,否,
+2026-07-11,17:33,TASK-048,Database,database/init/01_schema.sql,修改,建立 unique mood score 與中性 seed,Codex,否,是,否,是,D14-A
+2026-07-11,17:33,TASK-048,Database,database/migrations/20260711_03_make_mood_score_unique.sql,新增,既有環境 mood constraint 與 seed migration,Codex,否,是,否,是,衝突時主動中止
+2026-07-11,17:33,TASK-048,Documentation,database/init/README.md,修改,補充 mood migration 執行說明,Codex,否,是,否,是,
+2026-07-11,17:33,TASK-048,Documentation,docs/API_SPEC.md,修改,修正 private object key 規格用語,Codex,是,否,否,否,D13-A
+2026-07-11,17:33,TASK-048,Documentation,docs/DATABASE_SPEC.md,修改,補充 mood seed 與 migration,Codex,否,是,否,是,D14-A
+2026-07-11,17:33,TASK-048,Documentation,docs/DECISIONS.md,修改,記錄 D11-A 至 D14-A,Codex,否,是,否,否,
+2026-07-11,17:33,TASK-048,Documentation,docs/TASKS.md,修改,將 TASK-047 標記 DONE 並將 TASK-048 移至 REVIEW,Codex,否,否,否,否,
+2026-07-11,17:33,TASK-048,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-048 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
+2026-07-11,17:33,TASK-048,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-048 history 紀錄,Codex,否,否,否,否,artifact tool 驗證

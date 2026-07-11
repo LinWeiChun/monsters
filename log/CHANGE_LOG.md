@@ -8,6 +8,105 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-11 17:33
+
+Task
+TASK-048 Phase 3 Annoyance Core（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Confirmed TASK-047 was merged into `feature/phase3` through PR #28 and marked it DONE.
+- Created `feature/phase3-annoyance-core` from the synchronized Phase 3 integration branch.
+- Applied D11-A and introduced the shared `Entry` aggregate and Repository for Annoyance and future Diary features.
+- Applied D12-A and added Annoyance DTOs, Mapper, Service lookup and primary-record validation, plus the `/api/annoyances` Controller skeleton; endpoint methods remain in later API Tasks.
+- Applied D13-A and corrected the API specification so private media persistence consistently says object key instead of URL.
+- Applied D14-A and added neutral `SCORE_1` through `SCORE_5` mood seeds for shared Annoyance and Diary use.
+- Added a guarded and rerunnable migration that rejects duplicate or conflicting mood rows before adding the unique score constraint and seeds.
+- Added owner-scoped soft-delete lookup foundations and ensured object keys are never included in Annoyance response DTOs.
+- Added explicit `Asia/Taipei` conversion from Database `DATETIME` to API `OffsetDateTime`.
+- Added 18 tests and moved TASK-048 from TODO through IN PROGRESS to REVIEW.
+- Checked log retention before adding this entry. The oldest record is 2026-06-29, so no record older than one month exists and none was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/entry/entity/Entry.java`
+- `backend/src/main/java/com/monsters/entry/entity/EntryType.java`
+- `backend/src/main/java/com/monsters/entry/entity/Mood.java`
+- `backend/src/main/java/com/monsters/entry/repository/EntryRepository.java`
+- `backend/src/main/java/com/monsters/entry/repository/MoodRepository.java`
+- `backend/src/main/java/com/monsters/annoyance/controller/AnnoyanceController.java`
+- `backend/src/main/java/com/monsters/annoyance/dto/AnnoyanceCategoryResponse.java`
+- `backend/src/main/java/com/monsters/annoyance/dto/AnnoyanceMediaResponse.java`
+- `backend/src/main/java/com/monsters/annoyance/dto/AnnoyanceRecordMethod.java`
+- `backend/src/main/java/com/monsters/annoyance/dto/AnnoyanceResponse.java`
+- `backend/src/main/java/com/monsters/annoyance/mapper/AnnoyanceMapper.java`
+- `backend/src/main/java/com/monsters/annoyance/service/AnnoyanceService.java`
+- `backend/src/test/java/com/monsters/annoyance/controller/AnnoyanceControllerTest.java`
+- `backend/src/test/java/com/monsters/annoyance/mapper/AnnoyanceMapperTest.java`
+- `backend/src/test/java/com/monsters/annoyance/service/AnnoyanceServiceTest.java`
+- `backend/src/test/java/com/monsters/entry/entity/EntryTest.java`
+- `backend/src/test/java/com/monsters/entry/entity/MoodSchemaTest.java`
+- `backend/src/test/java/com/monsters/entry/entity/MoodTest.java`
+- `backend/src/test/java/com/monsters/entry/repository/EntryRepositoryTest.java`
+- `backend/src/test/java/com/monsters/entry/repository/MoodRepositoryTest.java`
+- `database/migrations/20260711_03_make_mood_score_unique.sql`
+
+### Modified
+
+- `backend/src/test/java/com/monsters/MonstersApplicationTests.java`
+- `database/init/01_schema.sql`
+- `database/init/README.md`
+- `docs/API_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None
+
+### Tests
+
+- `./gradlew test` passed: 143 tests, 0 failures, 0 errors.
+- `./gradlew build` passed and produced the Backend artifacts.
+- `docker compose config --quiet` passed.
+- `git diff --check` passed.
+- Static checks found no TODO, FIXME, console output, or stack-trace printing in the new production code.
+- Docker Desktop is not running, so MySQL 8.4 could not execute the migration; fresh schema and migration behavior are covered by static contract tests.
+- `CHANGE_HISTORY.csv` was imported, inspected, and rendered with the spreadsheet runtime after this entry was added.
+
+### system_data Reference
+
+- Rechecked the old Annoyance Entity, Bean, Controller, Service, DAO, Flutter model, and chat score flow.
+- Reused the business intent for category, one primary record, drawing, score, solved state, shared state, and occurrence time.
+- Did not reuse account-string ownership, separate annoyance table, Base64 media columns, integer booleans, controller business logic, random monster rewards, local file paths, console output, or unrestricted shared queries.
+- Kept Phase 3 rewards null as specified; real reward integration remains in Phase 6.
+- `system_data/` was not modified.
+
+### API
+
+- Added response DTO and mapping foundations only; no new endpoint method is exposed in this Task.
+- Response media contains authenticated Backend download paths and never contains R2 bucket or object key values.
+- Corrected the media persistence wording to private object key and preserved `+08:00` response timestamps.
+
+### Database
+
+- Added shared `Entry` and `Mood` JPA mappings and owner-scoped Entry Repository lookup.
+- Changed the fresh schema mood score index to a unique constraint and seeded `SCORE_1` through `SCORE_5`.
+- Added `20260711_03_make_mood_score_unique.sql`; migration is required for existing databases and intentionally stops on duplicate or conflicting mood data.
+
+### Notes
+
+- Run the mood migration against a reviewed MySQL backup before enabling the later create API in an existing environment.
+- The next Task is the create Annoyance API and will reuse this core validation and mapping foundation.
+
+---
+
 ## 2026-07-11 17:02
 
 Task
