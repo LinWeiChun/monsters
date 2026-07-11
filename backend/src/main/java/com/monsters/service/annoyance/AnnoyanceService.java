@@ -3,6 +3,7 @@ package com.monsters.service.annoyance;
 import com.monsters.dto.annoyance.AnnoyanceRecordMethod;
 import com.monsters.dto.annoyance.AnnoyanceResponse;
 import com.monsters.dto.annoyance.CreateAnnoyanceRequest;
+import com.monsters.dto.annoyance.UpdateAnnoyanceRequest;
 import com.monsters.dto.common.PageResponse;
 import com.monsters.entity.annoyance.AnnoyanceType;
 import com.monsters.entity.entry.Entry;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -147,6 +149,56 @@ public class AnnoyanceService {
         );
     }
 
+    public AnnoyanceResponse update(
+            Long userId,
+            Long entryId,
+            UpdateAnnoyanceRequest request,
+            MultipartFile contentFile,
+            MultipartFile drawingFile
+    ) {
+        validateUpdateRecord(request, contentFile, drawingFile);
+        requireUser(userId);
+        Entry entry = requireOwnedEntry(userId, entryId);
+        AnnoyanceType category = requireCategory(normalizeCategoryCode(request.categoryCode()));
+        Mood mood = requireMood(request.score());
+        List<EntryMedia> activeMedia = entryMediaRepository
+                .findAllByEntryIdAndDeletedFalseOrderByDisplayOrderAsc(entryId);
+        Set<Long> retainedMediaIds = retainedMediaIds(request, activeMedia);
+        List<NewEntryMedia> newMedia = new ArrayList<>();
+
+        UpdatedAnnoyance updated;
+        try {
+            if (hasFile(contentFile)) {
+                uploadPrimaryMedia(userId, request.recordMethod(), contentFile, newMedia);
+            }
+            if (hasFile(drawingFile)) {
+                uploadDrawing(userId, drawingFile, newMedia);
+            }
+            updated = persistenceService.update(
+                    entry,
+                    category.getId(),
+                    mood.getId(),
+                    normalizedContent(request),
+                    request.sharedOrDefault(),
+                    resolveOccurredAt(request),
+                    activeMedia,
+                    retainedMediaIds,
+                    newMedia
+            );
+        } catch (RuntimeException exception) {
+            cleanupUploadedMedia(newMedia);
+            throw exception;
+        }
+
+        cleanupStoredObjects(updated.removedObjectKeys());
+        return annoyanceMapper.toResponse(
+                updated.entry(),
+                category,
+                mood,
+                updated.media()
+        );
+    }
+
     @Transactional(readOnly = true)
     public AnnoyanceResponse findOne(Long userId, Long entryId) {
         requireUser(userId);
@@ -227,7 +279,22 @@ public class AnnoyanceService {
                 .toLocalDateTime();
     }
 
+    private LocalDateTime resolveOccurredAt(UpdateAnnoyanceRequest request) {
+        if (request.occurredAt() == null) {
+            return LocalDateTime.now(APPLICATION_ZONE);
+        }
+        return request.occurredAt()
+                .atZoneSameInstant(APPLICATION_ZONE)
+                .toLocalDateTime();
+    }
+
     private String normalizedContent(CreateAnnoyanceRequest request) {
+        return request.recordMethod() == AnnoyanceRecordMethod.TEXT
+                ? request.content().trim()
+                : null;
+    }
+
+    private String normalizedContent(UpdateAnnoyanceRequest request) {
         return request.recordMethod() == AnnoyanceRecordMethod.TEXT
                 ? request.content().trim()
                 : null;
@@ -257,7 +324,7 @@ public class AnnoyanceService {
             MultipartFile drawingFile,
             List<NewEntryMedia> newMedia
     ) {
-        if (drawingFile == null) {
+        if (!hasFile(drawingFile)) {
             return;
         }
         StoredEntryMedia stored = entryMediaStorageService.upload(
@@ -273,9 +340,105 @@ public class AnnoyanceService {
             try {
                 entryMediaStorageService.delete(media.storedMedia().objectKey());
             } catch (RuntimeException cleanupException) {
-                log.warn("Failed to clean up entry media after annoyance creation failure");
+                log.warn("Failed to clean up newly uploaded entry media after persistence failure");
             }
         }
+    }
+
+    private void cleanupStoredObjects(List<String> objectKeys) {
+        for (String objectKey : objectKeys) {
+            try {
+                entryMediaStorageService.delete(objectKey);
+            } catch (RuntimeException cleanupException) {
+                log.warn("Failed to clean up replaced entry media after annoyance update");
+            }
+        }
+    }
+
+    private void validateUpdateRecord(
+            UpdateAnnoyanceRequest request,
+            MultipartFile contentFile,
+            MultipartFile drawingFile
+    ) {
+        AnnoyanceRecordMethod recordMethod = request.recordMethod();
+        if (recordMethod == null) {
+            throw new ValidationException("Record method is required");
+        }
+        boolean hasContentFile = hasFile(contentFile);
+        boolean keepsContentMedia = request.existingContentMediaId() != null;
+        if (recordMethod == AnnoyanceRecordMethod.TEXT) {
+            if (request.content() == null
+                    || request.content().isBlank()
+                    || hasContentFile
+                    || keepsContentMedia) {
+                throw new ValidationException(
+                        "TEXT requires content and must not include content media"
+                );
+            }
+        } else if (request.content() != null || hasContentFile == keepsContentMedia) {
+            throw new ValidationException(
+                    recordMethod + " requires exactly one new or existing content media"
+            );
+        }
+
+        if (hasFile(drawingFile) && request.existingDrawingMediaId() != null) {
+            throw new ValidationException(
+                    "Drawing requires either a new file or an existing media id, not both"
+            );
+        }
+    }
+
+    private Set<Long> retainedMediaIds(
+            UpdateAnnoyanceRequest request,
+            List<EntryMedia> activeMedia
+    ) {
+        Set<Long> retainedIds = new HashSet<>();
+        if (request.existingContentMediaId() != null) {
+            EntryMediaType expectedType = primaryMediaType(request.recordMethod());
+            requireRetainedMedia(
+                    activeMedia,
+                    request.existingContentMediaId(),
+                    expectedType,
+                    "content"
+            );
+            retainedIds.add(request.existingContentMediaId());
+        }
+        if (request.existingDrawingMediaId() != null) {
+            requireRetainedMedia(
+                    activeMedia,
+                    request.existingDrawingMediaId(),
+                    EntryMediaType.DRAWING,
+                    "drawing"
+            );
+            retainedIds.add(request.existingDrawingMediaId());
+        }
+        return Set.copyOf(retainedIds);
+    }
+
+    private void requireRetainedMedia(
+            List<EntryMedia> activeMedia,
+            Long mediaId,
+            EntryMediaType expectedType,
+            String purpose
+    ) {
+        boolean matches = activeMedia.stream().anyMatch(media -> mediaId.equals(media.getId())
+                && media.getMediaType() == expectedType);
+        if (!matches) {
+            throw new ValidationException("Existing " + purpose + " media is invalid");
+        }
+    }
+
+    private EntryMediaType primaryMediaType(AnnoyanceRecordMethod recordMethod) {
+        return switch (recordMethod) {
+            case IMAGE -> EntryMediaType.IMAGE;
+            case AUDIO -> EntryMediaType.AUDIO;
+            case VIDEO -> EntryMediaType.VIDEO;
+            case TEXT -> throw new ValidationException("TEXT does not use content media");
+        };
+    }
+
+    private boolean hasFile(MultipartFile file) {
+        return file != null && !file.isEmpty();
     }
 
     private void validatePage(int page, int size) {

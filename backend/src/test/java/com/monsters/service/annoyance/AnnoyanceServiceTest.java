@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -15,6 +16,7 @@ import static org.mockito.Mockito.when;
 import com.monsters.dto.annoyance.AnnoyanceRecordMethod;
 import com.monsters.dto.annoyance.AnnoyanceResponse;
 import com.monsters.dto.annoyance.CreateAnnoyanceRequest;
+import com.monsters.dto.annoyance.UpdateAnnoyanceRequest;
 import com.monsters.dto.common.PageResponse;
 import com.monsters.entity.annoyance.AnnoyanceType;
 import com.monsters.entity.entry.Entry;
@@ -40,6 +42,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -463,6 +466,302 @@ class AnnoyanceServiceTest {
     }
 
     @Test
+    void updateShouldReplacePrimaryMediaAndRetainDrawing() {
+        Entry entry = entry(10L, null);
+        EntryMedia oldImage = media(21L, EntryMediaType.IMAGE, "old-image.png", 0);
+        EntryMedia drawing = media(22L, EntryMediaType.DRAWING, "drawing.webp", 1);
+        EntryMedia newImage = media(23L, EntryMediaType.IMAGE, "new-image.png", 0);
+        List<EntryMedia> activeMedia = List.of(oldImage, drawing);
+        MockMultipartFile contentFile = file("new-image.png", "image/png");
+        StoredEntryMedia storedImage = stored("new-image.png", "image/png");
+        UpdateAnnoyanceRequest request = updateRequest(
+                AnnoyanceRecordMethod.IMAGE,
+                null,
+                true,
+                null,
+                22L
+        );
+        AnnoyanceResponse expected = response(entry);
+        prepareUpdateLookups(entry, activeMedia);
+        when(entryMediaStorageService.upload(1L, EntryMediaType.IMAGE, contentFile))
+                .thenReturn(storedImage);
+        when(persistenceService.update(
+                eq(entry),
+                eq(2L),
+                eq(3L),
+                org.mockito.ArgumentMatchers.isNull(),
+                eq(true),
+                eq(LocalDateTime.of(2026, 7, 12, 12, 0)),
+                eq(activeMedia),
+                eq(Set.of(22L)),
+                anyList()
+        )).thenReturn(new UpdatedAnnoyance(
+                entry,
+                List.of(newImage, drawing),
+                List.of("old-image.png")
+        ));
+        when(annoyanceMapper.toResponse(
+                eq(entry),
+                any(AnnoyanceType.class),
+                any(Mood.class),
+                eq(List.of(newImage, drawing))
+        ))
+                .thenReturn(expected);
+
+        AnnoyanceResponse actual = service().update(1L, 10L, request, contentFile, null);
+
+        assertThat(actual).isSameAs(expected);
+        verify(persistenceService).update(
+                entry,
+                2L,
+                3L,
+                null,
+                true,
+                LocalDateTime.of(2026, 7, 12, 12, 0),
+                activeMedia,
+                Set.of(22L),
+                List.of(new NewEntryMedia(EntryMediaType.IMAGE, storedImage, 0))
+        );
+        verify(entryMediaStorageService).delete("old-image.png");
+        verify(entryMediaStorageService, never()).delete("drawing.webp");
+    }
+
+    @Test
+    void updateShouldConvertMediaToTextAndRemoveAllOldMedia() {
+        Entry entry = entry(10L, null);
+        EntryMedia image = media(21L, EntryMediaType.IMAGE, "old-image.png", 0);
+        EntryMedia drawing = media(22L, EntryMediaType.DRAWING, "drawing.webp", 1);
+        List<EntryMedia> activeMedia = List.of(image, drawing);
+        UpdateAnnoyanceRequest request = updateRequest(
+                AnnoyanceRecordMethod.TEXT,
+                "  updated content  ",
+                false,
+                null,
+                null
+        );
+        AnnoyanceResponse expected = response(entry);
+        prepareUpdateLookups(entry, activeMedia);
+        when(persistenceService.update(
+                entry,
+                2L,
+                3L,
+                "updated content",
+                false,
+                LocalDateTime.of(2026, 7, 12, 12, 0),
+                activeMedia,
+                Set.of(),
+                List.of()
+        )).thenReturn(new UpdatedAnnoyance(
+                entry,
+                List.of(),
+                List.of("old-image.png", "drawing.webp")
+        ));
+        when(annoyanceMapper.toResponse(
+                eq(entry),
+                any(AnnoyanceType.class),
+                any(Mood.class),
+                eq(List.of())
+        ))
+                .thenReturn(expected);
+
+        assertThat(service().update(1L, 10L, request, null, null)).isSameAs(expected);
+
+        verify(entryMediaStorageService, never()).upload(anyLong(), any(), any());
+        verify(entryMediaStorageService).delete("old-image.png");
+        verify(entryMediaStorageService).delete("drawing.webp");
+    }
+
+    @Test
+    void updateShouldKeepExistingContentAndDrawingWithoutStorageChanges() {
+        Entry entry = entry(10L, null);
+        EntryMedia image = media(21L, EntryMediaType.IMAGE, "image.png", 0);
+        EntryMedia drawing = media(22L, EntryMediaType.DRAWING, "drawing.webp", 1);
+        List<EntryMedia> activeMedia = List.of(image, drawing);
+        UpdateAnnoyanceRequest request = updateRequest(
+                AnnoyanceRecordMethod.IMAGE,
+                null,
+                false,
+                21L,
+                22L
+        );
+        AnnoyanceResponse expected = response(entry);
+        prepareUpdateLookups(entry, activeMedia);
+        when(persistenceService.update(
+                entry,
+                2L,
+                3L,
+                null,
+                false,
+                LocalDateTime.of(2026, 7, 12, 12, 0),
+                activeMedia,
+                Set.of(21L, 22L),
+                List.of()
+        )).thenReturn(new UpdatedAnnoyance(entry, activeMedia, List.of()));
+        when(annoyanceMapper.toResponse(
+                eq(entry),
+                any(AnnoyanceType.class),
+                any(Mood.class),
+                eq(activeMedia)
+        ))
+                .thenReturn(expected);
+
+        assertThat(service().update(1L, 10L, request, null, null)).isSameAs(expected);
+
+        verify(entryMediaStorageService, never()).upload(anyLong(), any(), any());
+        verify(entryMediaStorageService, never()).delete(anyString());
+    }
+
+    @Test
+    void updateShouldRejectInvalidMediaCombinationsBeforeOwnerLookup() {
+        AnnoyanceService service = service();
+
+        assertThatThrownBy(() -> service.update(
+                1L,
+                10L,
+                updateRequest(AnnoyanceRecordMethod.TEXT, "content", false, 21L, null),
+                null,
+                null
+        )).isInstanceOf(ValidationException.class);
+        assertThatThrownBy(() -> service.update(
+                1L,
+                10L,
+                updateRequest(AnnoyanceRecordMethod.IMAGE, null, false, null, null),
+                null,
+                null
+        )).isInstanceOf(ValidationException.class);
+        assertThatThrownBy(() -> service.update(
+                1L,
+                10L,
+                updateRequest(AnnoyanceRecordMethod.IMAGE, null, false, 21L, null),
+                file(),
+                null
+        )).isInstanceOf(ValidationException.class);
+        assertThatThrownBy(() -> service.update(
+                1L,
+                10L,
+                updateRequest(AnnoyanceRecordMethod.IMAGE, null, false, 21L, 22L),
+                null,
+                file("drawing.webp", "image/webp")
+        )).isInstanceOf(ValidationException.class);
+
+        verify(userRepository, never()).findByIdAndDeletedFalse(anyLong());
+        verify(persistenceService, never()).update(
+                any(), anyLong(), anyLong(), any(), anyBoolean(), any(), anyList(), any(), anyList()
+        );
+    }
+
+    @Test
+    void updateShouldRejectExistingMediaWithWrongType() {
+        Entry entry = entry(10L, null);
+        EntryMedia image = media(21L, EntryMediaType.IMAGE, "image.png", 0);
+        prepareUpdateLookups(entry, List.of(image));
+        UpdateAnnoyanceRequest request = updateRequest(
+                AnnoyanceRecordMethod.AUDIO,
+                null,
+                false,
+                21L,
+                null
+        );
+
+        assertThatThrownBy(() -> service().update(1L, 10L, request, null, null))
+                .isInstanceOf(ValidationException.class)
+                .hasMessage("Existing content media is invalid");
+
+        verify(entryMediaStorageService, never()).upload(anyLong(), any(), any());
+        verify(persistenceService, never()).update(
+                any(), anyLong(), anyLong(), any(), anyBoolean(), any(), anyList(), any(), anyList()
+        );
+    }
+
+    @Test
+    void updateShouldCleanNewUploadsWhenDatabaseTransactionFails() {
+        Entry entry = entry(10L, null);
+        EntryMedia oldImage = media(21L, EntryMediaType.IMAGE, "old-image.png", 0);
+        MockMultipartFile contentFile = file("new-image.png", "image/png");
+        StoredEntryMedia storedImage = stored("new-image.png", "image/png");
+        prepareUpdateLookups(entry, List.of(oldImage));
+        when(entryMediaStorageService.upload(1L, EntryMediaType.IMAGE, contentFile))
+                .thenReturn(storedImage);
+        when(persistenceService.update(
+                any(), anyLong(), anyLong(), any(), anyBoolean(), any(), anyList(), any(), anyList()
+        )).thenThrow(new IllegalStateException("database failed"));
+
+        assertThatThrownBy(() -> service().update(
+                1L,
+                10L,
+                updateRequest(AnnoyanceRecordMethod.IMAGE, null, false, null, null),
+                contentFile,
+                null
+        )).isInstanceOf(IllegalStateException.class).hasMessage("database failed");
+
+        verify(entryMediaStorageService).delete("new-image.png");
+        verify(entryMediaStorageService, never()).delete("old-image.png");
+    }
+
+    @Test
+    void updateShouldPreserveSuccessWhenOldObjectCleanupFails() {
+        Entry entry = entry(10L, "old");
+        UpdateAnnoyanceRequest request = updateRequest(
+                AnnoyanceRecordMethod.TEXT,
+                "updated",
+                false,
+                null,
+                null
+        );
+        AnnoyanceResponse expected = response(entry);
+        prepareUpdateLookups(entry, List.of());
+        when(persistenceService.update(
+                entry,
+                2L,
+                3L,
+                "updated",
+                false,
+                LocalDateTime.of(2026, 7, 12, 12, 0),
+                List.of(),
+                Set.of(),
+                List.of()
+        )).thenReturn(new UpdatedAnnoyance(entry, List.of(), List.of("stale-object")));
+        when(annoyanceMapper.toResponse(
+                eq(entry),
+                any(AnnoyanceType.class),
+                any(Mood.class),
+                eq(List.of())
+        )).thenReturn(expected);
+        doThrow(new IllegalStateException("R2 unavailable"))
+                .when(entryMediaStorageService)
+                .delete("stale-object");
+
+        assertThat(service().update(1L, 10L, request, null, null)).isSameAs(expected);
+
+        verify(entryMediaStorageService).delete("stale-object");
+    }
+
+    @Test
+    void updateShouldRejectOwnershipMismatchBeforeUploading() {
+        prepareUser();
+        when(entryRepository.findByIdAndUserIdAndEntryTypeAndDeletedFalse(
+                10L,
+                1L,
+                EntryType.ANNOYANCE
+        )).thenReturn(Optional.empty());
+        MockMultipartFile contentFile = file();
+
+        assertThatThrownBy(() -> service().update(
+                1L,
+                10L,
+                updateRequest(AnnoyanceRecordMethod.IMAGE, null, false, null, null),
+                contentFile,
+                null
+        )).isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Annoyance not found");
+
+        verify(entryMediaStorageService, never()).upload(anyLong(), any(), any());
+        verify(persistenceService, never()).update(
+                any(), anyLong(), anyLong(), any(), anyBoolean(), any(), anyList(), any(), anyList()
+        );
+    }
+
+    @Test
     void shouldValidateTextAndMediaRecordCombinations() {
         AnnoyanceService service = service();
         MockMultipartFile file = file();
@@ -525,6 +824,25 @@ class AnnoyanceServiceTest {
         return entry;
     }
 
+    private EntryMedia media(
+            Long id,
+            EntryMediaType mediaType,
+            String objectKey,
+            int displayOrder
+    ) {
+        EntryMedia media = new EntryMedia(
+                10L,
+                mediaType,
+                objectKey,
+                mediaType == EntryMediaType.DRAWING ? "image/webp" : "image/png",
+                1,
+                null,
+                displayOrder
+        );
+        ReflectionTestUtils.setField(media, "id", id);
+        return media;
+    }
+
     private MockMultipartFile file() {
         return file("image.png", "image/png");
     }
@@ -556,6 +874,17 @@ class AnnoyanceServiceTest {
                 .thenReturn(Optional.of(new User("account", "user@example.com", "User")));
     }
 
+    private void prepareUpdateLookups(Entry entry, List<EntryMedia> activeMedia) {
+        prepareLookups(category(), mood());
+        when(entryRepository.findByIdAndUserIdAndEntryTypeAndDeletedFalse(
+                10L,
+                1L,
+                EntryType.ANNOYANCE
+        )).thenReturn(Optional.of(entry));
+        when(entryMediaRepository.findAllByEntryIdAndDeletedFalseOrderByDisplayOrderAsc(10L))
+                .thenReturn(activeMedia);
+    }
+
     private StoredEntryMedia stored(String objectKey, String contentType) {
         return new StoredEntryMedia(objectKey, contentType, 1, (BigDecimal) null);
     }
@@ -568,6 +897,25 @@ class AnnoyanceServiceTest {
                 4,
                 false,
                 OffsetDateTime.parse("2026-07-11T12:00:00+08:00")
+        );
+    }
+
+    private UpdateAnnoyanceRequest updateRequest(
+            AnnoyanceRecordMethod recordMethod,
+            String content,
+            boolean shared,
+            Long existingContentMediaId,
+            Long existingDrawingMediaId
+    ) {
+        return new UpdateAnnoyanceRequest(
+                "ACADEMIC",
+                recordMethod,
+                content,
+                4,
+                shared,
+                OffsetDateTime.parse("2026-07-12T12:00:00+08:00"),
+                existingContentMediaId,
+                existingDrawingMediaId
         );
     }
 

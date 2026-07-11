@@ -840,6 +840,12 @@ Content-Type 與驗證規則同新增 API。`request` 需傳完整可編輯資�
 
 ```json
 {
+  "categoryCode": "ACADEMIC",
+  "recordMethod": "IMAGE",
+  "content": null,
+  "score": 3,
+  "isShared": false,
+  "occurredAt": "2026-07-12T12:00:00+08:00",
   "existingContentMediaId": 201,
   "existingDrawingMediaId": 202
 }
@@ -848,7 +854,8 @@ Content-Type 與驗證規則同新增 API。`request` 需傳完整可編輯資�
 - 保留既有主要媒體或心情圖時傳入對應 media id；id 必須屬於該 entry 且 media type 相符。
 - 傳入新檔案時不得同時傳同用途的 existing media id，新檔案成功後取代舊檔案。
 - 未傳新檔案與 existing drawing id 代表移除心情圖。
-- 修改成功回傳更新後 Annoyance data；R2 舊 object 僅在 transaction 成功後清理。
+- `isSolved`、`monsterId` 與 `reward` 不屬於此完整內容修改 API 的可編輯欄位。
+- 修改成功回傳 200 與更新後 Annoyance data；R2 舊 object 僅在 transaction 成功後 best-effort 清理，清理失敗不得回滾已成功的 Database transaction。
 
 ### 4.5 解決煩惱
 

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import com.monsters.dto.annoyance.AnnoyanceRecordMethod;
 import com.monsters.dto.annoyance.AnnoyanceResponse;
 import com.monsters.dto.annoyance.CreateAnnoyanceRequest;
+import com.monsters.dto.annoyance.UpdateAnnoyanceRequest;
 import com.monsters.dto.common.ApiResponse;
 import com.monsters.dto.common.PageResponse;
 import com.monsters.security.common.AuthenticatedUser;
@@ -136,6 +137,48 @@ class AnnoyanceControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().message()).isEqualTo("Annoyance query success");
+        assertThat(response.getBody().data()).isSameAs(annoyance);
+    }
+
+    @Test
+    void updateShouldReturnUpdatedAnnoyanceForCurrentUser() {
+        AnnoyanceService service = org.mockito.Mockito.mock(AnnoyanceService.class);
+        AnnoyanceController controller = new AnnoyanceController(service);
+        UpdateAnnoyanceRequest request = new UpdateAnnoyanceRequest(
+                "ACADEMIC",
+                AnnoyanceRecordMethod.TEXT,
+                "updated",
+                3,
+                true,
+                OffsetDateTime.parse("2026-07-12T12:00:00+08:00"),
+                null,
+                null
+        );
+        AnnoyanceResponse annoyance = new AnnoyanceResponse(
+                10L,
+                null,
+                AnnoyanceRecordMethod.TEXT,
+                "updated",
+                3,
+                true,
+                false,
+                OffsetDateTime.parse("2026-07-12T12:00:00+08:00"),
+                List.of(),
+                null
+        );
+        when(service.update(1L, 10L, request, null, null)).thenReturn(annoyance);
+
+        ResponseEntity<ApiResponse<AnnoyanceResponse>> response = controller.update(
+                new AuthenticatedUser(1L, "user@example.com"),
+                10L,
+                request,
+                null,
+                null
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().message()).isEqualTo("Annoyance update success");
         assertThat(response.getBody().data()).isSameAs(annoyance);
     }
 }

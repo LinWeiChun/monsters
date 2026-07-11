@@ -8,6 +8,89 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-12 07:02
+
+Task
+TASK-052 修改煩惱 API（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Confirmed TASK-051 was merged into `feature/phase3` through PR #32 and marked it DONE.
+- Created `feature/phase3-annoyance-update` from the synchronized Phase 3 integration branch.
+- Added authenticated owner-scoped `PUT /api/annoyances/{id}` with the approved multipart full-replacement contract.
+- Added complete update validation for category, record method, content, score, sharing, occurred time, existing primary media, and existing drawing media.
+- Supported retaining, replacing, or removing the primary media and optional drawing while preserving the existing solved state.
+- Required retained media IDs to belong to the target entry and match the requested media purpose and type.
+- Persisted Entry updates, old-media soft deletion, and new-media metadata in one Database transaction.
+- Cleaned newly uploaded R2 objects when upload orchestration or Database persistence failed.
+- Deferred old R2 object deletion until after transaction success and treated cleanup as best effort so cleanup failure cannot roll back committed data.
+- Updated the API contract and moved this Task from TODO through IN PROGRESS to REVIEW.
+- Checked log retention before adding this entry. The oldest record is 2026-06-29, so no record older than one month exists and none was deleted.
+
+### Added
+
+- `backend/src/main/java/com/monsters/dto/annoyance/UpdateAnnoyanceRequest.java`
+- `backend/src/main/java/com/monsters/service/annoyance/UpdatedAnnoyance.java`
+- `backend/src/test/java/com/monsters/dto/annoyance/UpdateAnnoyanceRequestTest.java`
+
+### Modified
+
+- `backend/src/main/java/com/monsters/controller/annoyance/AnnoyanceController.java`
+- `backend/src/main/java/com/monsters/service/annoyance/AnnoyancePersistenceService.java`
+- `backend/src/main/java/com/monsters/service/annoyance/AnnoyanceService.java`
+- `backend/src/test/java/com/monsters/controller/annoyance/AnnoyanceControllerTest.java`
+- `backend/src/test/java/com/monsters/service/annoyance/AnnoyancePersistenceServiceTest.java`
+- `backend/src/test/java/com/monsters/service/annoyance/AnnoyanceServiceTest.java`
+- `docs/API_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Deleted
+
+- None.
+
+### Tests
+
+- `./gradlew clean test build` passed: 183 tests, 0 failures, 0 errors.
+- Update DTO validation, Controller response, owner scope, text/media conversion, retained-media type validation, media replacement, drawing retention, Database failure cleanup, post-commit old-object cleanup, and transaction boundaries are covered.
+- `git diff --check` passed.
+- `CHANGE_HISTORY.csv` was imported, inspected, and rendered as a 13-column table with the spreadsheet runtime.
+
+### system_data Reference
+
+- Rechecked the legacy account-scoped modify Controller, Service, Flutter Repository, and history screen calls.
+- Retained only the useful owner-update intent.
+- Did not reuse account-in-path authorization, partial object overwrites, Base64 media fields, PATCH semantics for full replacement, mixed solve/share updates, or legacy response handling.
+- `system_data/` was not modified.
+
+### API
+
+- Added `PUT /api/annoyances/{id}` using multipart `request`, optional `contentFile`, and optional `drawingFile` parts.
+- Added `existingContentMediaId` and `existingDrawingMediaId` retention fields to the complete update request.
+- Returns 200 with the updated Annoyance response; missing, deleted, or non-owned entries remain 404 and invalid media combinations return 400.
+- Solved state, monster assignment, and Phase 3 reward are not editable through this endpoint.
+
+### Database
+
+- No schema, seed, index, or migration change.
+- Existing Entry and EntryMedia columns are updated transactionally; replaced or removed media rows are soft deleted.
+
+### UI
+
+- No Flutter file was changed.
+- The API contract is ready for the later Flutter history-edit integration.
+
+### Pending
+
+- Review and merge the Task PR into `feature/phase3`.
+- The next Phase 3 Task is the solve Annoyance API.
+
+---
+
 ## 2026-07-12 00:05
 
 Task

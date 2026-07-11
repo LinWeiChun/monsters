@@ -738,3 +738,16 @@
 2026-07-12,00:05,TASK-051,Documentation,docs/TASKS.md,修改,將 TASK-050 標記 DONE 並將 TASK-051 推進至 REVIEW,Codex,否,否,否,否,
 2026-07-12,00:05,TASK-051,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-051 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
 2026-07-12,00:05,TASK-051,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-051 history 紀錄,Codex,否,否,否,否,artifact tool 驗證
+2026-07-12,07:02,TASK-052,Backend,backend/src/main/java/com/monsters/dto/annoyance/UpdateAnnoyanceRequest.java,新增,建立完整修改與既有媒體保留 request,Codex,是,否,否,否,
+2026-07-12,07:02,TASK-052,Backend,backend/src/main/java/com/monsters/service/annoyance/UpdatedAnnoyance.java,新增,封裝更新後媒體與待清理 object key,Codex,是,否,否,否,
+2026-07-12,07:02,TASK-052,Backend,backend/src/main/java/com/monsters/controller/annoyance/AnnoyanceController.java,修改,新增 PUT 煩惱完整修改 endpoint,Codex,是,否,否,否,owner scoped multipart
+2026-07-12,07:02,TASK-052,Backend,backend/src/main/java/com/monsters/service/annoyance/AnnoyancePersistenceService.java,修改,以單一 transaction 更新 Entry 與媒體 metadata,Codex,是,否,否,否,舊媒體 soft delete
+2026-07-12,07:02,TASK-052,Backend,backend/src/main/java/com/monsters/service/annoyance/AnnoyanceService.java,修改,實作媒體保留替換移除與 R2 清理流程,Codex,是,否,否,否,舊 object 於 commit 後清理
+2026-07-12,07:02,TASK-052,Test,backend/src/test/java/com/monsters/dto/annoyance/UpdateAnnoyanceRequestTest.java,新增,驗證修改 request 欄位與 Bean Validation,Codex,否,否,否,否,
+2026-07-12,07:02,TASK-052,Test,backend/src/test/java/com/monsters/controller/annoyance/AnnoyanceControllerTest.java,修改,驗證修改 endpoint 成功回應,Codex,否,否,否,否,
+2026-07-12,07:02,TASK-052,Test,backend/src/test/java/com/monsters/service/annoyance/AnnoyancePersistenceServiceTest.java,修改,驗證 transaction 更新與舊 object key 回傳,Codex,否,否,否,否,
+2026-07-12,07:02,TASK-052,Test,backend/src/test/java/com/monsters/service/annoyance/AnnoyanceServiceTest.java,修改,驗證 owner 媒體組合替換與失敗清理,Codex,否,否,否,否,183 tests
+2026-07-12,07:02,TASK-052,Documentation,docs/API_SPEC.md,修改,補充完整修改 request 與不可編輯欄位,Codex,是,否,否,否,
+2026-07-12,07:02,TASK-052,Documentation,docs/TASKS.md,修改,將 TASK-051 標記 DONE 並將 TASK-052 推進至 REVIEW,Codex,否,否,否,否,
+2026-07-12,07:02,TASK-052,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-052 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
+2026-07-12,07:02,TASK-052,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-052 history 紀錄,Codex,否,否,否,否,artifact tool 驗證
