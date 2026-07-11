@@ -335,12 +335,24 @@ Unique：`user_id, monster_group_id`
 | id | BIGINT | PK | 媒體 ID |
 | entry_id | BIGINT | FK NOT NULL | 紀錄 ID |
 | media_type | VARCHAR(30) | NOT NULL | image、audio、video、drawing |
-| media_url | VARCHAR(500) | NOT NULL | 媒體 URL |
+| object_key | VARCHAR(500) | UNIQUE NOT NULL | Private R2 object key，不得回傳 Client |
+| content_type | VARCHAR(100) | NOT NULL | 已驗證的 MIME type |
+| file_size_bytes | BIGINT | NOT NULL | 檔案大小 bytes |
+| duration_seconds | DECIMAL(10,3) | NULL | 錄音／影片秒數；圖片與心情圖為 NULL |
 | display_order | INT | NOT NULL | 顯示順序 |
 | created_at | DATETIME | NOT NULL | 建立時間 |
 | updated_at | DATETIME | NOT NULL | 更新時間 |
 | is_deleted | BOOLEAN | NOT NULL | 是否刪除 |
 | deleted_at | DATETIME | NULL | 刪除時間 |
+
+規則：
+
+- Entry media 使用與 public avatar 分離的 private R2 bucket；Database 不保存 public URL。
+- `object_key` 由 Backend 產生且必須唯一，Client 不得提供或取得此值。
+- `media_type` 僅允許 `image`、`audio`、`video`、`drawing`。
+- `file_size_bytes` 必須大於 0。
+- `audio` 與 `video` 必須保存經 `ffprobe` 驗證的正數 `duration_seconds`；其他類型必須為 NULL。
+- 媒體下載由 Backend 先驗證 entry owner 或分享狀態，再以 object key 向 R2 取回並串流。
 
 ### 3.14 entry_likes
 
@@ -581,6 +593,7 @@ Unique：`user_id, answered_date`
 - `annoyance_types.code`
 - `moods.code`
 - `moods.score`
+- `entry_media.object_key`
 - `entry_likes(entry_id, user_id)`
 - `user_daily_test_answers(user_id, answered_date)`
 
@@ -611,6 +624,8 @@ database/init/01_schema.sql
 若需從 `system_data/` 舊資料庫匯入資料，應建立明確的 migration mapping，不得直接將舊表結構搬入新版資料庫。
 
 Phase 3 annoyance type migration：`database/migrations/20260711_01_add_annoyance_type_codes_and_seed.sql`。既有環境只執行一次；全新環境由 `database/init/01_schema.sql` 直接建立並 seed。
+
+Phase 3 private entry media migration：`database/migrations/20260711_02_make_entry_media_private.sql`。此 migration 會在 `entry_media` 已有資料時主動中止；既有資料必須先匯出，另行建立經審查的 public URL → private R2 object key 資料 migration，不得直接將 public URL 原值當成 object key。
 
 Migration 應包含：
 

@@ -374,6 +374,8 @@ Response:
 
 Avatar upload stores the image in Cloudflare R2 and writes only the public URL to `users.avatar_url`.
 
+Entry media uses a separate private R2 bucket. Database records store only an internal object key, and clients must download media through an authenticated Backend endpoint after owner or sharing permission validation. Do not enable public access for the entry media bucket.
+
 R2 settings:
 
 | Setting | Environment variable |
@@ -385,6 +387,24 @@ R2 settings:
 | app.storage.r2.public-base-url | R2_PUBLIC_BASE_URL |
 | app.storage.r2.avatar-key-prefix | R2_AVATAR_KEY_PREFIX |
 | app.storage.r2.max-avatar-size-bytes | R2_MAX_AVATAR_SIZE_BYTES |
+| app.storage.r2.entry-media-bucket | R2_ENTRY_MEDIA_BUCKET |
+| app.storage.r2.entry-media-key-prefix | R2_ENTRY_MEDIA_KEY_PREFIX |
+| app.storage.r2.max-entry-image-size-bytes | R2_MAX_ENTRY_IMAGE_SIZE_BYTES |
+| app.storage.r2.max-entry-audio-size-bytes | R2_MAX_ENTRY_AUDIO_SIZE_BYTES |
+| app.storage.r2.max-entry-video-size-bytes | R2_MAX_ENTRY_VIDEO_SIZE_BYTES |
+| app.storage.r2.max-entry-drawing-size-bytes | R2_MAX_ENTRY_DRAWING_SIZE_BYTES |
+| app.storage.r2.max-entry-audio-duration-seconds | R2_MAX_ENTRY_AUDIO_DURATION_SECONDS |
+| app.storage.r2.max-entry-video-duration-seconds | R2_MAX_ENTRY_VIDEO_DURATION_SECONDS |
+| app.storage.r2.ffprobe-path | FFPROBE_PATH |
+| app.storage.r2.ffprobe-timeout-seconds | FFPROBE_TIMEOUT_SECONDS |
+
+The R2 token used by Backend requires Object Read & Write permission scoped only to the required avatar and private entry media buckets. Bucket administration permission is not required.
+
+Audio and video duration validation requires `ffprobe`:
+
+- The Backend Docker runtime installs FFmpeg automatically.
+- Local non-Docker development must install FFmpeg and ensure `ffprobe` is available on `PATH`, or set `FFPROBE_PATH` to the executable path.
+- Do not log uploaded content, object keys, probe output, or temporary file paths.
 
 ### Set My Password Lock
 

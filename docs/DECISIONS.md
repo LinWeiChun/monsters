@@ -22,7 +22,7 @@
 | Google 登入 Client ID | 後端透過 `GOOGLE_CLIENT_IDS` 設定允許的 Google Client ID，可用逗號支援 Web / App 多組 Client ID |
 | 忘記密碼流程 | 後端產生 15 分鐘短效 reset token，資料庫只保存 token hash；目前回傳 resetToken 供開發串接，正式寄信服務待後續定案 |
 | 登出流程 | 使用 JWT revocation；登出時只保存 access token hash 與原 token 過期時間，JWT 驗證需拒絕已撤銷 token |
-| 檔案上傳儲存方式 | 使用 Cloudflare R2 雲端儲存；以 S3-compatible API 上傳，環境變數使用 `R2_ACCOUNT_ID`、`R2_ACCESS_KEY_ID`、`R2_SECRET_ACCESS_KEY`、`R2_BUCKET`、`R2_PUBLIC_BASE_URL`、`R2_AVATAR_KEY_PREFIX`、`R2_MAX_AVATAR_SIZE_BYTES` |
+| 檔案上傳儲存方式 | 使用 Cloudflare R2 S3-compatible API；public avatar 與 private entry media 使用不同 bucket，環境變數包含 `R2_ACCOUNT_ID`、`R2_ACCESS_KEY_ID`、`R2_SECRET_ACCESS_KEY`、`R2_BUCKET`、`R2_PUBLIC_BASE_URL`、`R2_ENTRY_MEDIA_BUCKET` 與各類媒體限制 |
 | Web 管理後台 | 需要建立 Web 管理後台；實作範圍與權限模型於後續管理後台 Task 細化 |
 | 正式寄信服務 | 忘記密碼正式環境使用 SMTP 寄送 reset link |
 | 舊資料庫相容性 | 不直接沿用舊錯字表名；以新版 schema 為準，必要時以 mapping 文件將舊資料概念結合至新版資料庫 |
@@ -37,6 +37,8 @@
 | Phase 3 煩惱列表 | 使用 `page`、`size`、`sort` offset pagination；Database 不新增頁碼欄位（D6-A） |
 | Phase 3 聊天互動 | 採聊天外觀搭配結構化 selector Widget，不以自由文字解析類別、記錄方式、分數或分享選項（D7-A） |
 | Phase 3 媒體限制 | 圖片與心情圖 5 MB；錄音 10 MB／5 分鐘；影片 50 MB／60 秒；前後端使用相同 MIME type 白名單（D8-A） |
+| Phase 3 煩惱媒體存取 | 使用獨立且不可公開存取的 R2 entry media bucket，Database 只保存 object key；Backend 驗證 owner 或分享權限後串流，API 不回傳 object key（D9-A） |
+| Phase 3 媒體長度驗證 | Backend 使用 `ffprobe` 驗證錄音最多 5 分鐘、影片最多 60 秒；Backend runtime 必須安裝 FFmpeg（D10-A） |
 
 ## 二、已核准套件與工具
 

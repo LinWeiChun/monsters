@@ -8,6 +8,7 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
 
 @Configuration
 @EnableConfigurationProperties(R2Properties.class)
@@ -15,6 +16,11 @@ public class R2StorageConfig {
 
     @Bean
     public S3Client r2S3Client(R2Properties properties) {
+        S3Configuration serviceConfiguration = S3Configuration.builder()
+                .pathStyleAccessEnabled(true)
+                .chunkedEncodingEnabled(false)
+                .build();
+
         return S3Client.builder()
                 .endpointOverride(URI.create("https://" + valueOrDefault(
                         properties.accountId(),
@@ -26,7 +32,8 @@ public class R2StorageConfig {
                                 valueOrDefault(properties.secretAccessKey(), "unused")
                         )
                 ))
-                .region(Region.US_EAST_1)
+                .region(Region.of("auto"))
+                .serviceConfiguration(serviceConfiguration)
                 .build();
     }
 

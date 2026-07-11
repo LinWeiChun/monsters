@@ -1,4 +1,38 @@
 日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
+2026-07-11,17:02,TASK-047,Backend,backend/src/main/java/com/monsters/entry/entity/EntryMedia.java,新增,建立 private entry media Entity,Codex,是,是,否,是,保存 object key MIME 大小與時長
+2026-07-11,17:02,TASK-047,Backend,backend/src/main/java/com/monsters/entry/entity/EntryMediaType.java,新增,建立 image audio video drawing 類型,Codex,是,是,否,否,
+2026-07-11,17:02,TASK-047,Backend,backend/src/main/java/com/monsters/entry/entity/EntryMediaTypeConverter.java,新增,建立 lowercase media type JPA converter,Codex,否,是,否,否,
+2026-07-11,17:02,TASK-047,Backend,backend/src/main/java/com/monsters/entry/repository/EntryMediaRepository.java,新增,建立 entry media owner relation 查詢,Codex,否,是,否,否,
+2026-07-11,17:02,TASK-047,Backend,backend/src/main/java/com/monsters/entry/storage/DownloadedEntryMedia.java,新增,建立 private media streaming result,Codex,是,否,否,否,支援 content range
+2026-07-11,17:02,TASK-047,Backend,backend/src/main/java/com/monsters/entry/storage/EntryMediaStorageService.java,新增,定義上傳下載刪除 storage contract,Codex,是,否,否,否,
+2026-07-11,17:02,TASK-047,Backend,backend/src/main/java/com/monsters/entry/storage/FfprobeMediaDurationProbe.java,新增,使用 ffprobe 驗證媒體時長,Codex,否,否,否,否,D10-A
+2026-07-11,17:02,TASK-047,Backend,backend/src/main/java/com/monsters/entry/storage/MediaDurationProbe.java,新增,定義媒體時長檢查 contract,Codex,否,否,否,否,
+2026-07-11,17:02,TASK-047,Backend,backend/src/main/java/com/monsters/entry/storage/R2EntryMediaStorageService.java,新增,實作 private R2 媒體與 Range 流程,Codex,是,否,否,否,D9-A
+2026-07-11,17:02,TASK-047,Backend,backend/src/main/java/com/monsters/entry/storage/StoredEntryMedia.java,新增,建立 R2 upload metadata result,Codex,否,否,否,否,
+2026-07-11,17:02,TASK-047,Test,backend/src/test/java/com/monsters/common/storage/R2StorageConfigTest.java,新增,測試 Cloudflare auto region 設定,Codex,否,否,否,否,passed
+2026-07-11,17:02,TASK-047,Test,backend/src/test/java/com/monsters/entry/entity/EntryMediaTest.java,新增,測試 entry media mapping 與 soft delete,Codex,否,是,否,否,4 tests passed
+2026-07-11,17:02,TASK-047,Test,backend/src/test/java/com/monsters/entry/entity/EntryMediaTypeConverterTest.java,新增,測試 lowercase media type conversion,Codex,否,是,否,否,4 tests passed
+2026-07-11,17:02,TASK-047,Test,backend/src/test/java/com/monsters/entry/repository/EntryMediaRepositoryTest.java,新增,測試 Repository contract,Codex,否,是,否,否,3 tests passed
+2026-07-11,17:02,TASK-047,Test,backend/src/test/java/com/monsters/entry/storage/FfprobeMediaDurationProbeTest.java,新增,測試 ffprobe 成功與錯誤處理,Codex,否,否,否,否,4 tests passed
+2026-07-11,17:02,TASK-047,Test,backend/src/test/java/com/monsters/entry/storage/R2EntryMediaStorageServiceTest.java,新增,測試 private R2 validation upload Range delete,Codex,是,否,否,否,12 tests passed
+2026-07-11,17:02,TASK-047,Backend,backend/Dockerfile,修改,Backend runtime 安裝 FFmpeg,Codex,否,否,否,否,Docker daemon 未啟動故待 image build 驗證
+2026-07-11,17:02,TASK-047,Backend,backend/src/main/java/com/monsters/common/storage/R2Properties.java,修改,新增 private bucket 媒體限制與 ffprobe 設定,Codex,否,否,否,否,
+2026-07-11,17:02,TASK-047,Backend,backend/src/main/java/com/monsters/common/storage/R2StorageConfig.java,修改,套用 R2 auto region path style 與停用 chunked,Codex,否,否,否,否,依 Cloudflare Java SDK 文件
+2026-07-11,17:02,TASK-047,Configuration,backend/src/main/resources/application.yml,修改,新增 entry media 與 ffprobe 環境設定,Codex,否,否,否,否,不含 secret
+2026-07-11,17:02,TASK-047,Test,backend/src/test/java/com/monsters/common/storage/R2AvatarStorageServiceTest.java,修改,補充 entry media property defaults 測試,Codex,否,否,否,否,passed
+2026-07-11,17:02,TASK-047,Database,database/init/01_schema.sql,修改,entry media 改用 private object metadata 與 constraints,Codex,否,是,否,否,全新資料庫使用
+2026-07-11,17:02,TASK-047,Database,database/migrations/20260711_02_make_entry_media_private.sql,新增,既有空 entry media table migration,Codex,否,是,否,是,非空資料時主動中止
+2026-07-11,17:02,TASK-047,Configuration,docker-compose.yml,修改,傳入 R2 private bucket 媒體限制與 ffprobe 設定,Codex,否,否,否,否,compose config passed
+2026-07-11,17:02,TASK-047,Documentation,README.md,修改,補充 R2 entry media 與 ffprobe 環境變數,Codex,否,否,否,否,
+2026-07-11,17:02,TASK-047,Documentation,backend/README.md,修改,補充 private bucket token 與 FFmpeg 說明,Codex,否,否,否,否,
+2026-07-11,17:02,TASK-047,Documentation,database/init/README.md,修改,補充 private entry media migration 限制,Codex,否,是,否,是,
+2026-07-11,17:02,TASK-047,Documentation,docs/API_SPEC.md,修改,新增 private media response 與授權 Range endpoint,Codex,是,否,否,否,
+2026-07-11,17:02,TASK-047,Documentation,docs/DATABASE_SPEC.md,修改,同步 object key metadata constraints 與 migration,Codex,否,是,否,是,
+2026-07-11,17:02,TASK-047,Documentation,docs/DECISIONS.md,修改,記錄 D9-A D10-A 與 private bucket,Codex,是,是,是,是,
+2026-07-11,17:02,TASK-047,Documentation,docs/UI_SPEC.md,修改,Flutter 僅使用 authenticated Backend media URL,Codex,否,否,是,否,
+2026-07-11,17:02,TASK-047,Documentation,docs/TASKS.md,修改,將 TASK-046 標記 DONE 並將 TASK-047 標記 REVIEW,Codex,否,否,否,否,TASK-046 已由 PR 27 合併
+2026-07-11,17:02,TASK-047,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-047 REVIEW 工作紀錄,Codex,是,是,是,是,已檢查一個月保存期限且無過期 log
+2026-07-11,17:02,TASK-047,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-047 history 紀錄,Codex,是,是,是,是,已檢查一個月保存期限且無過期 log
 2026-07-11,13:06,TASK-046,Backend,backend/src/main/java/com/monsters/annoyance/entity/AnnoyanceType.java,新增,建立 annoyance type JPA Entity,Codex,否,是,否,是,使用穩定 code 與 display order
 2026-07-11,13:06,TASK-046,Backend,backend/src/main/java/com/monsters/annoyance/repository/AnnoyanceTypeRepository.java,新增,建立 code lookup 與 display order Repository,Codex,否,是,否,否,
 2026-07-11,13:06,TASK-046,Test,backend/src/test/java/com/monsters/annoyance/entity/AnnoyanceTypeTest.java,新增,新增 Entity mapping 與資料測試,Codex,否,是,否,否,4 tests passed
