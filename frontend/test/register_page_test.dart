@@ -68,6 +68,7 @@ void main() {
       find.byKey(const Key('registerConfirmPasswordField')),
       'password456',
     );
+    await tester.ensureVisible(find.byKey(const Key('registerSubmitButton')));
     await tester.tap(find.byKey(const Key('registerSubmitButton')));
     await tester.pumpAndSettle();
 
@@ -126,6 +127,7 @@ void main() {
       find.byKey(const Key('registerConfirmPasswordField')),
       'password123',
     );
+    await tester.ensureVisible(find.byKey(const Key('registerSubmitButton')));
     await tester.tap(find.byKey(const Key('registerSubmitButton')));
     await tester.pumpAndSettle();
 
@@ -169,6 +171,7 @@ void main() {
       find.byKey(const Key('registerConfirmPasswordField')),
       'password123',
     );
+    await tester.ensureVisible(find.byKey(const Key('registerSubmitButton')));
     await tester.tap(find.byKey(const Key('registerSubmitButton')));
     await tester.pumpAndSettle();
 
