@@ -8,6 +8,94 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-12 11:58
+
+Task
+TASK-055 Flutter 新增煩惱聊天室（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Confirmed TASK-053 and TASK-054 were merged into `feature/phase3` through PR #34 and marked both DONE.
+- Created `feature/phase3-annoyance-chat` from the synchronized Phase 3 integration branch.
+- Added the `/annoyances/new` go_router route and a Home Page entry for the Annoyance chat.
+- Added an auto-disposed Riverpod draft controller with the formal Phase 3 step enum and guarded structured transitions.
+- Implemented the chat foundation through `intro → category → recordMethod → content` while reserving later steps for their dedicated Tasks.
+- Added six stable category-code choices and TEXT／IMAGE／AUDIO／VIDEO record-method choices without free-text parsing.
+- Added responsive assistant/user chat bubbles, scroll-to-latest behavior, back, restart, and explicit return-to-home actions.
+- Added Controller, Widget, route, and Home entry tests.
+- Stabilized existing Splash, Register, and router tests so they target the current logo widget and scroll off-screen actions into the standard 800×600 test viewport; no existing production behavior was changed.
+- Updated the formal UI implementation boundary and moved this Task from TODO through IN PROGRESS to REVIEW.
+- Checked log retention before adding this entry. The oldest record is 2026-06-29, so no record older than one month exists and none was deleted.
+
+### Added
+
+- `frontend/lib/models/annoyance_draft.dart`
+- `frontend/lib/pages/annoyance_chat_page.dart`
+- `frontend/lib/providers/annoyance_chat_provider.dart`
+- `frontend/lib/widgets/annoyance/annoyance_category_selector.dart`
+- `frontend/lib/widgets/annoyance/annoyance_chat_bubble.dart`
+- `frontend/lib/widgets/annoyance/record_method_selector.dart`
+- `frontend/test/annoyance_chat_page_test.dart`
+- `frontend/test/providers/annoyance_chat_provider_test.dart`
+
+### Modified
+
+- `frontend/lib/pages/home_page.dart`
+- `frontend/lib/routes/app_router.dart`
+- `frontend/lib/routes/app_routes.dart`
+- `frontend/test/register_page_test.dart`
+- `frontend/test/routes/app_router_test.dart`
+- `frontend/test/widget_test.dart`
+- `docs/TASKS.md`
+- `docs/UI_SPEC.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- Flutter formatter passed for all Task files.
+- `flutter analyze --no-pub` passed with zero issues.
+- Targeted chat Controller, Widget, and router tests passed: 7 tests.
+- Full `flutter test --no-pub` passed: 52 tests.
+- Full `flutter test --no-pub --concurrency=1` also passed: 52 tests.
+- Flutter Web build passed.
+- Android debug APK build passed.
+- iOS device no-codesign build passed.
+- iOS simulator build passed.
+- `git diff --check` passed.
+- `CHANGE_HISTORY.csv` was imported, inspected, and rendered as a 13-column table with the spreadsheet runtime.
+
+### system_data Reference
+
+- Rechecked the legacy Annoyance chat greeting, six categories, record-method prompt, back-and-forth flow, and history entry intent.
+- Reused the companionship tone and six-category business meaning.
+- Replaced free-text option parsing, round integers, mutable answer arrays, console logging, and direct legacy repository coupling with typed enums, stable codes, structured Widgets, Riverpod state, and go_router.
+- `system_data/` was not modified.
+
+### API
+
+- No API request is sent in this Task; multipart submission is connected after the remaining draft inputs are implemented.
+- Category codes and record-method API values match the existing Backend contract.
+
+### Database
+
+- No Database or migration change.
+
+### UI
+
+- Added the cross-platform Annoyance chat foundation, Home entry, route, structured category selector, and record-method selector.
+- Media content, drawing, score, sharing, review, submit, and completed UI remain assigned to subsequent Tasks.
+
+### Pending
+
+- Review and merge the Task PR into `feature/phase3`.
+- The next Task is Flutter text/image/audio/video selection and preview.
+
+---
+
 ## 2026-07-12 07:27
 
 Task

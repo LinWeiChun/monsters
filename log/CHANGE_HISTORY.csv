@@ -771,3 +771,20 @@
 2026-07-12,07:27,TASK-054,Documentation,docs/TASKS.md,修改,將 TASK-054 推進至 REVIEW,Codex,否,否,否,否,
 2026-07-12,07:27,TASK-054,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-054 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
 2026-07-12,07:27,TASK-054,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-054 history 紀錄,Codex,否,否,否,否,artifact tool 驗證
+2026-07-12,11:58,TASK-055,Frontend,frontend/lib/models/annoyance_draft.dart,新增,建立聊天室步驟分類與記錄方式 typed model,Codex,否,否,是,否,六個穩定 category code
+2026-07-12,11:58,TASK-055,Frontend,frontend/lib/providers/annoyance_chat_provider.dart,新增,建立 Riverpod 草稿狀態與 guarded transition,Codex,否,否,是,否,auto dispose
+2026-07-12,11:58,TASK-055,Frontend,frontend/lib/pages/annoyance_chat_page.dart,新增,建立響應式怪獸聊天室基礎頁,Codex,否,否,是,否,intro 到 content
+2026-07-12,11:58,TASK-055,Frontend,frontend/lib/widgets/annoyance/annoyance_category_selector.dart,新增,建立六類煩惱結構化 selector,Codex,否,否,是,否,
+2026-07-12,11:58,TASK-055,Frontend,frontend/lib/widgets/annoyance/annoyance_chat_bubble.dart,新增,建立使用者與助理聊天泡泡,Codex,否,否,是,否,
+2026-07-12,11:58,TASK-055,Frontend,frontend/lib/widgets/annoyance/record_method_selector.dart,新增,建立四種記錄方式 selector,Codex,否,否,是,否,TEXT IMAGE AUDIO VIDEO
+2026-07-12,11:58,TASK-055,Frontend,frontend/lib/pages/home_page.dart,修改,新增煩惱聊天室入口,Codex,否,否,是,否,
+2026-07-12,11:58,TASK-055,Frontend,frontend/lib/routes,修改,新增 annoyance chat route 與 path,Codex,否,否,是,否,/annoyances/new
+2026-07-12,11:58,TASK-055,Test,frontend/test/annoyance_chat_page_test.dart,新增,驗證聊天室 selector back 與 restart,Codex,否,否,是,否,
+2026-07-12,11:58,TASK-055,Test,frontend/test/providers/annoyance_chat_provider_test.dart,新增,驗證 typed transition 與 out of order guard,Codex,否,否,是,否,
+2026-07-12,11:58,TASK-055,Test,frontend/test/routes/app_router_test.dart,修改,驗證首頁進入聊天室並穩定既有捲動,Codex,否,否,是,否,
+2026-07-12,11:58,TASK-055,Test,frontend/test/register_page_test.dart,修改,將既有提交操作捲動至測試視窗內,Codex,否,否,否,否,未改產品行為
+2026-07-12,11:58,TASK-055,Test,frontend/test/widget_test.dart,修改,以目前圖片 Widget 驗證 splash logo,Codex,否,否,否,否,未改產品行為
+2026-07-12,11:58,TASK-055,Documentation,docs/UI_SPEC.md,修改,記錄聊天室入口與本 Task 狀態機邊界,Codex,否,否,是,否,
+2026-07-12,11:58,TASK-055,Documentation,docs/TASKS.md,修改,將 TASK-053 與 TASK-054 標記 DONE 並將 TASK-055 推進至 REVIEW,Codex,否,否,否,否,
+2026-07-12,11:58,TASK-055,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-055 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
+2026-07-12,11:58,TASK-055,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-055 history 紀錄,Codex,否,否,否,否,artifact tool 驗證

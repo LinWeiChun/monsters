@@ -28,9 +28,28 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('已有帳號？前往登入'));
+    final loginLink = find.text('已有帳號？前往登入');
+    await tester.ensureVisible(loginLink);
+    await tester.tap(loginLink);
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
+  });
+
+  testWidgets('supports annoyance chat route and home entry', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp.router(
+          routerConfig: createAppRouter(initialLocation: AppPath.home),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('homeAnnoyanceChatButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('怪獸聊天室'), findsOneWidget);
+    expect(find.byKey(const Key('annoyanceChatStartButton')), findsOneWidget);
   });
 }

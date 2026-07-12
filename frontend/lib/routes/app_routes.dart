@@ -1,6 +1,7 @@
 class AppRoute {
   const AppRoute._();
 
+  static const annoyanceChat = 'annoyanceChat';
   static const splash = 'splash';
   static const home = 'home';
   static const login = 'login';
@@ -12,6 +13,7 @@ class AppRoute {
 class AppPath {
   const AppPath._();
 
+  static const annoyanceChat = '/annoyances/new';
   static const splash = '/';
   static const home = '/home';
   static const login = '/login';

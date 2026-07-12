@@ -1,0 +1,42 @@
+enum AnnoyanceChatStep {
+  intro,
+  category,
+  recordMethod,
+  content,
+  drawingDecision,
+  drawing,
+  score,
+  sharing,
+  review,
+  submitting,
+  completed,
+}
+
+enum AnnoyanceRecordMethod { text, image, audio, video }
+
+class AnnoyanceCategory {
+  const AnnoyanceCategory({required this.code, required this.name});
+
+  final String code;
+  final String name;
+}
+
+const annoyanceCategories = <AnnoyanceCategory>[
+  AnnoyanceCategory(code: 'ACADEMIC', name: '課業'),
+  AnnoyanceCategory(code: 'CAREER', name: '事業'),
+  AnnoyanceCategory(code: 'LOVE', name: '愛情'),
+  AnnoyanceCategory(code: 'FRIENDSHIP', name: '友情'),
+  AnnoyanceCategory(code: 'FAMILY', name: '親情'),
+  AnnoyanceCategory(code: 'OTHER', name: '其他'),
+];
+
+extension AnnoyanceRecordMethodLabel on AnnoyanceRecordMethod {
+  String get apiValue => name.toUpperCase();
+
+  String get label => switch (this) {
+    AnnoyanceRecordMethod.text => '文字',
+    AnnoyanceRecordMethod.image => '圖片',
+    AnnoyanceRecordMethod.audio => '錄音',
+    AnnoyanceRecordMethod.video => '影片',
+  };
+}
