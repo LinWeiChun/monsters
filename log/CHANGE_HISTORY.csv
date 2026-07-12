@@ -826,3 +826,14 @@
 2026-07-12,20:27,TASK-057,Documentation,docs/TASKS.md,修改,將 TASK-056 標記 DONE 並將 TASK-057 推進至 REVIEW,Codex,否,否,否,否,PR 36
 2026-07-12,20:27,TASK-057,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-057 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
 2026-07-12,20:27,TASK-057,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-057 history 紀錄,Codex,否,否,否,否,artifact tool 驗證
+2026-07-13,06:33,TASK-058,Frontend,frontend/lib/models/annoyance_draft.dart,修改,新增中性 1 至 5 分定義與顯示標籤,Codex,否,否,是,否,SCORE_1 至 SCORE_5
+2026-07-13,06:33,TASK-058,Frontend,frontend/lib/widgets/annoyance/mood_score_selector.dart,新增,建立中性分數選擇與已選狀態,Codex,否,否,是,否,accessible structured selector
+2026-07-13,06:33,TASK-058,Frontend,frontend/lib/pages/annoyance_chat_page.dart,修改,串接分數選擇聊天摘要與分享步驟,Codex,否,否,是,否,sharing placeholder
+2026-07-13,06:33,TASK-058,Frontend,frontend/lib/providers/annoyance_chat_provider.dart,修改,驗證保存修改與清除 1 至 5 分數,Codex,否,否,是,否,Riverpod immutable state
+2026-07-13,06:33,TASK-058,Test,frontend/test/widgets/mood_score_selector_test.dart,新增,驗證五個中性選項已選狀態與回呼,Codex,否,否,是,否,66 tests full suite
+2026-07-13,06:33,TASK-058,Test,frontend/test/annoyance_chat_page_test.dart,修改,驗證繪圖分數與分享步驟端到端流程,Codex,否,否,是,否,
+2026-07-13,06:33,TASK-058,Test,frontend/test/providers/annoyance_chat_provider_test.dart,修改,驗證分數範圍返回保留與修改,Codex,否,否,是,否,
+2026-07-13,06:33,TASK-058,Documentation,docs/UI_SPEC.md,修改,記錄中性分數 Selector 與狀態清理規範,Codex,否,否,是,否,D14-A
+2026-07-13,06:33,TASK-058,Documentation,docs/TASKS.md,修改,將 TASK-057 標記 DONE 並將 TASK-058 推進至 REVIEW,Codex,否,否,否,否,PR 37
+2026-07-13,06:33,TASK-058,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-058 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
+2026-07-13,06:33,TASK-058,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-058 history 紀錄,Codex,否,否,否,否,artifact tool 驗證

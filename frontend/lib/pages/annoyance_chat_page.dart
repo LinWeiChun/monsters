@@ -14,6 +14,7 @@ import '../widgets/annoyance/annoyance_content_input.dart';
 import '../widgets/annoyance/drawing_choice_card.dart';
 import '../widgets/annoyance/drawing_preview_card.dart';
 import '../widgets/annoyance/mood_drawing_canvas.dart';
+import '../widgets/annoyance/mood_score_selector.dart';
 import '../widgets/annoyance/record_method_selector.dart';
 
 class AnnoyanceChatPage extends ConsumerStatefulWidget {
@@ -153,10 +154,18 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
         AnnoyanceChatBubble(message: wantsDrawing ? '想畫' : '先不用', isUser: true),
       if (state.drawing case final drawing?)
         DrawingPreviewCard(drawing: drawing),
-      if (state.step == AnnoyanceChatStep.score)
+      if (state.step.index >= AnnoyanceChatStep.score.index)
         const AnnoyanceChatBubble(
           key: Key('annoyanceScorePrompt'),
           message: '謝謝你完成這一步。接下來記錄現在的煩惱分數。',
+          isUser: false,
+        ),
+      if (state.score case final score?)
+        AnnoyanceChatBubble(message: score.scoreLabel, isUser: true),
+      if (state.step == AnnoyanceChatStep.sharing)
+        const AnnoyanceChatBubble(
+          key: Key('annoyanceSharingPrompt'),
+          message: '分數記下來了。接下來再決定是否分享這筆煩惱。',
           isUser: false,
         ),
     ];
@@ -195,11 +204,15 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
       AnnoyanceChatStep.drawingDecision => DrawingChoiceCard(
         onSelected: controller.selectDrawingChoice,
       ),
-      AnnoyanceChatStep.score => const Card(
-        key: Key('annoyanceScoreStepPlaceholder'),
+      AnnoyanceChatStep.score => MoodScoreSelector(
+        selectedScore: state.score,
+        onSelected: controller.selectScore,
+      ),
+      AnnoyanceChatStep.sharing => const Card(
+        key: Key('annoyanceSharingStepPlaceholder'),
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.md),
-          child: Text('煩惱分數選擇會接續顯示在這裡。'),
+          child: Text('分享選擇會接續顯示在這裡。'),
         ),
       ),
       _ => const SizedBox.shrink(),
