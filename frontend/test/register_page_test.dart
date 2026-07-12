@@ -34,7 +34,9 @@ void main() {
     await tester.pumpWidget(_registerApp(_FakeAuthRepository()));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('registerSubmitButton')));
+    final submitButton = find.byKey(const Key('registerSubmitButton'));
+    await tester.ensureVisible(submitButton);
+    await tester.tap(submitButton);
     await tester.pumpAndSettle();
 
     expect(find.text('請輸入帳號'), findsOneWidget);

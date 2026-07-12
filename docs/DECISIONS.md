@@ -57,6 +57,9 @@
 | Routing | go_router |
 | Local Storage | SharedPreferences |
 | Google Sign-In | google_sign_in、google_sign_in_web |
+| 媒體選取 | image_picker；Android 實作固定 image_picker_android 0.8.12+24 以相容 AGP 8.7 |
+| 錄音 | record |
+| 影音預覽 | video_player、just_audio |
 
 ### Backend
 

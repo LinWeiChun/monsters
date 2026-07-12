@@ -8,6 +8,104 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-12 18:31
+
+Task
+TASK-056 Flutter 文字 / 圖片 / 錄音 / 影片選取與預覽（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Confirmed TASK-055 was merged into `feature/phase3` through PR #35 and marked it DONE.
+- Created `feature/phase3-annoyance-media` from the synchronized Phase 3 integration branch.
+- Added the user-approved `image_picker`, `record`, `video_player`, and `just_audio` dependencies for Web, Android, and iOS.
+- Pinned the official `image_picker` Android implementation to an AGP 8.7-compatible version after the current release pulled AndroidX libraries requiring AGP 8.9.1; avoided an unrelated Android toolchain upgrade.
+- Added a typed single-media draft model, Riverpod media service provider, platform adapters, and API-compatible MIME type, extension, size, and duration validation.
+- Added text input, image and video gallery/camera selection, WAV recording with automatic five-minute stop, preview, playback, loading, permission/error feedback, removal, and reselection.
+- Kept audio/video as `XFile` references and retained preview bytes only for validated images to avoid holding duplicate 50 MB video data in memory.
+- Added Android camera/microphone permissions and iOS photo library/camera/microphone usage descriptions.
+- Made the content panel independently scrollable so previews remain usable in the standard mobile and 800×600 test viewport.
+- Added Validator, Provider, image preview/removal, and audio recording Widget tests.
+- Stabilized one pre-existing Register validation test by scrolling its submit button into the test viewport; production behavior was not changed.
+- Updated the formal UI implementation, approved dependencies, and Task status from TODO through IN PROGRESS to REVIEW.
+- Checked log retention before adding this entry. The oldest record is 2026-06-29, so no record older than one month exists and none was deleted.
+
+### Added
+
+- `frontend/lib/models/annoyance_media.dart`
+- `frontend/lib/providers/annoyance_media_provider.dart`
+- `frontend/lib/services/annoyance_media_platform.dart`
+- `frontend/lib/services/annoyance_media_platform_factory.dart`
+- `frontend/lib/services/annoyance_media_platform_io.dart`
+- `frontend/lib/services/annoyance_media_platform_stub.dart`
+- `frontend/lib/services/annoyance_media_platform_web.dart`
+- `frontend/lib/services/annoyance_media_service.dart`
+- `frontend/lib/services/annoyance_media_validator.dart`
+- `frontend/lib/widgets/annoyance/annoyance_content_input.dart`
+- `frontend/lib/widgets/annoyance/media_preview_card.dart`
+- `frontend/test/services/annoyance_media_validator_test.dart`
+
+### Modified
+
+- `frontend/pubspec.yaml`
+- `frontend/pubspec.lock`
+- `frontend/android/app/src/main/AndroidManifest.xml`
+- `frontend/ios/Runner/Info.plist`
+- `frontend/lib/pages/annoyance_chat_page.dart`
+- `frontend/lib/providers/annoyance_chat_provider.dart`
+- `frontend/test/annoyance_chat_page_test.dart`
+- `frontend/test/providers/annoyance_chat_provider_test.dart`
+- `frontend/test/register_page_test.dart`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `docs/UI_SPEC.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- Flutter formatter passed for all Task files.
+- `flutter analyze --no-pub` passed with zero issues.
+- Targeted media Validator, Provider, and Widget tests passed: 12 tests.
+- Full `flutter test --no-pub` passed: 60 tests.
+- Flutter Web build passed; the existing optional Cupertino icon font warning remains non-blocking.
+- Android debug APK build passed after selecting the compatible official image picker implementation.
+- iOS device no-codesign build passed.
+- iOS simulator build passed.
+- `git diff --check` passed.
+- `CHANGE_HISTORY.csv` was imported, inspected, and rendered as a 13-column table with the spreadsheet runtime.
+
+### system_data Reference
+
+- Reviewed the legacy manual pages 121–124 and the old `annoyanceChat.dart`, audio recorder, and audio player flow.
+- Retained the chat-guided choice of text, photo, video, and recording plus visible media confirmation.
+- Replaced mutable `File` fields, direct `Navigator.push`, page-owned plugin calls, commented-out menu options, hard-coded 15-second recording, and legacy global state with typed `XFile` drafts, Riverpod, service/platform adapters, shared validation, and structured Widgets.
+- `system_data/` was not modified.
+
+### API
+
+- No API endpoint or request contract changed.
+- Frontend validation matches the existing multipart Annoyance API MIME, extension, size, and duration limits.
+
+### Database
+
+- No Database or migration change.
+
+### UI
+
+- Added cross-platform text input, single image/video selection, WAV recording, media metadata, playback/preview, removal, reselection, loading, and error states to the existing chat `content` step.
+- Drawing, score, sharing, review, submission, and completion remain assigned to subsequent Tasks.
+
+### Pending
+
+- Review and merge the Task PR into `feature/phase3`.
+- Camera, microphone, and gallery permission prompts should receive a physical-device smoke test during review.
+- The next Task is Flutter mood drawing.
+
+---
+
 ## 2026-07-12 11:58
 
 Task

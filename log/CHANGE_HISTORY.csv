@@ -788,3 +788,24 @@
 2026-07-12,11:58,TASK-055,Documentation,docs/TASKS.md,修改,將 TASK-053 與 TASK-054 標記 DONE 並將 TASK-055 推進至 REVIEW,Codex,否,否,否,否,
 2026-07-12,11:58,TASK-055,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-055 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
 2026-07-12,11:58,TASK-055,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-055 history 紀錄,Codex,否,否,否,否,artifact tool 驗證
+2026-07-12,18:31,TASK-056,Dependency,frontend/pubspec.yaml 與 frontend/pubspec.lock,修改,加入已核准跨平台媒體套件並固定 Android 相容版本,Codex,否,否,是,否,image_picker record video_player just_audio
+2026-07-12,18:31,TASK-056,Frontend,frontend/lib/models/annoyance_media.dart,新增,建立單一媒體草稿模型與限制常數,Codex,否,否,是,否,XFile typed draft
+2026-07-12,18:31,TASK-056,Frontend,frontend/lib/services/annoyance_media_platform*,新增,集中 IO Web 與 unsupported 平台影音來源差異,Codex,否,否,是,否,conditional adapter
+2026-07-12,18:31,TASK-056,Frontend,frontend/lib/services/annoyance_media_service.dart,新增,實作圖片影片選取與 WAV 錄音,Codex,否,否,是,否,Web Android iOS
+2026-07-12,18:31,TASK-056,Frontend,frontend/lib/services/annoyance_media_validator.dart,新增,驗證 MIME 副檔名大小與媒體長度,Codex,否,否,是,否,與 API 限制一致
+2026-07-12,18:31,TASK-056,Frontend,frontend/lib/providers/annoyance_media_provider.dart,新增,以 Riverpod 管理媒體 Service 生命週期,Codex,否,否,是,否,auto dispose
+2026-07-12,18:31,TASK-056,Frontend,frontend/lib/widgets/annoyance/annoyance_content_input.dart,新增,建立文字媒體選取錄音與錯誤互動,Codex,否,否,是,否,五分鐘自動停止
+2026-07-12,18:31,TASK-056,Frontend,frontend/lib/widgets/annoyance/media_preview_card.dart,新增,建立圖片錄音影片預覽移除與重選,Codex,否,否,是,否,顯示媒體 metadata
+2026-07-12,18:31,TASK-056,Frontend,frontend/lib/pages/annoyance_chat_page.dart,修改,將 content 步驟串接跨平台輸入與可捲動預覽,Codex,否,否,是,否,避免小螢幕 overflow
+2026-07-12,18:31,TASK-056,Frontend,frontend/lib/providers/annoyance_chat_provider.dart,修改,保存文字或相符單一媒體並於返回時清除,Codex,否,否,是,否,immutable draft
+2026-07-12,18:31,TASK-056,Platform,frontend/android/app/src/main/AndroidManifest.xml,修改,宣告相機與麥克風權限,Codex,否,否,是,否,Android
+2026-07-12,18:31,TASK-056,Platform,frontend/ios/Runner/Info.plist,修改,宣告相簿相機與麥克風用途,Codex,否,否,是,否,iOS
+2026-07-12,18:31,TASK-056,Test,frontend/test/annoyance_chat_page_test.dart,修改,驗證圖片預覽移除與錄音預覽,Codex,否,否,是,否,
+2026-07-12,18:31,TASK-056,Test,frontend/test/providers/annoyance_chat_provider_test.dart,修改,驗證媒體型別 guard 與文字 readiness,Codex,否,否,是,否,
+2026-07-12,18:31,TASK-056,Test,frontend/test/services/annoyance_media_validator_test.dart,新增,驗證格式大小長度與 MIME 推斷,Codex,否,否,是,否,60 tests full suite
+2026-07-12,18:31,TASK-056,Test,frontend/test/register_page_test.dart,修改,將既有必填驗證提交鈕捲入測試視窗,Codex,否,否,否,否,未改產品行為
+2026-07-12,18:31,TASK-056,Documentation,docs/DECISIONS.md,修改,記錄已核准媒體套件與 Android 相容版本,Codex,否,否,否,否,
+2026-07-12,18:31,TASK-056,Documentation,docs/UI_SPEC.md,修改,記錄媒體輸入預覽與平台 Adapter 規範,Codex,否,否,是,否,
+2026-07-12,18:31,TASK-056,Documentation,docs/TASKS.md,修改,將 TASK-055 標記 DONE 並將 TASK-056 推進至 REVIEW,Codex,否,否,否,否,
+2026-07-12,18:31,TASK-056,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-056 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
+2026-07-12,18:31,TASK-056,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-056 history 紀錄,Codex,否,否,否,否,artifact tool 驗證
