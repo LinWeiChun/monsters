@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/annoyance_drawing.dart';
 import '../models/annoyance_draft.dart';
 import '../models/annoyance_media.dart';
 
@@ -15,6 +16,8 @@ class AnnoyanceChatState {
     this.recordMethod,
     this.contentText = '',
     this.contentMedia,
+    this.wantsDrawing,
+    this.drawing,
   });
 
   final AnnoyanceChatStep step;
@@ -22,6 +25,8 @@ class AnnoyanceChatState {
   final AnnoyanceRecordMethod? recordMethod;
   final String contentText;
   final AnnoyanceMediaFile? contentMedia;
+  final bool? wantsDrawing;
+  final AnnoyanceDrawingFile? drawing;
 
   bool get isContentReady => switch (recordMethod) {
     AnnoyanceRecordMethod.text => contentText.trim().isNotEmpty,
@@ -41,6 +46,10 @@ class AnnoyanceChatState {
     bool clearContentText = false,
     AnnoyanceMediaFile? contentMedia,
     bool clearContentMedia = false,
+    bool? wantsDrawing,
+    bool clearDrawingChoice = false,
+    AnnoyanceDrawingFile? drawing,
+    bool clearDrawing = false,
   }) {
     return AnnoyanceChatState(
       step: step ?? this.step,
@@ -50,6 +59,9 @@ class AnnoyanceChatState {
       contentText: clearContentText ? '' : contentText ?? this.contentText,
       contentMedia:
           clearContentMedia ? null : contentMedia ?? this.contentMedia,
+      wantsDrawing:
+          clearDrawingChoice ? null : wantsDrawing ?? this.wantsDrawing,
+      drawing: clearDrawing ? null : drawing ?? this.drawing,
     );
   }
 }
@@ -74,6 +86,8 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
       clearRecordMethod: true,
       clearContentText: true,
       clearContentMedia: true,
+      clearDrawingChoice: true,
+      clearDrawing: true,
     );
   }
 
@@ -86,6 +100,8 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
       recordMethod: recordMethod,
       clearContentText: true,
       clearContentMedia: true,
+      clearDrawingChoice: true,
+      clearDrawing: true,
     );
   }
 
@@ -113,6 +129,53 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
     state = state.copyWith(clearContentText: true, clearContentMedia: true);
   }
 
+  void confirmContent() {
+    if (state.step != AnnoyanceChatStep.content || !state.isContentReady) {
+      return;
+    }
+    state = state.copyWith(
+      step: AnnoyanceChatStep.drawingDecision,
+      clearDrawingChoice: true,
+      clearDrawing: true,
+    );
+  }
+
+  void selectDrawingChoice(bool wantsDrawing) {
+    if (state.step != AnnoyanceChatStep.drawingDecision) {
+      return;
+    }
+    state = state.copyWith(
+      step: wantsDrawing ? AnnoyanceChatStep.drawing : AnnoyanceChatStep.score,
+      wantsDrawing: wantsDrawing,
+      clearDrawing: true,
+    );
+  }
+
+  void saveDrawing(AnnoyanceDrawingFile drawing) {
+    if (state.step != AnnoyanceChatStep.drawing ||
+        drawing.sizeBytes <= 0 ||
+        drawing.sizeBytes > AnnoyanceDrawingLimits.maxBytes ||
+        !AnnoyanceDrawingLimits.mimeTypes.contains(drawing.mimeType)) {
+      return;
+    }
+    state = state.copyWith(
+      step: AnnoyanceChatStep.score,
+      wantsDrawing: true,
+      drawing: drawing,
+    );
+  }
+
+  void cancelDrawing() {
+    if (state.step != AnnoyanceChatStep.drawing) {
+      return;
+    }
+    state = state.copyWith(
+      step: AnnoyanceChatStep.drawingDecision,
+      clearDrawingChoice: true,
+      clearDrawing: true,
+    );
+  }
+
   void goBack() {
     state = switch (state.step) {
       AnnoyanceChatStep.category => const AnnoyanceChatState(),
@@ -122,12 +185,31 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
         clearRecordMethod: true,
         clearContentText: true,
         clearContentMedia: true,
+        clearDrawingChoice: true,
+        clearDrawing: true,
       ),
       AnnoyanceChatStep.content => state.copyWith(
         step: AnnoyanceChatStep.recordMethod,
         clearRecordMethod: true,
         clearContentText: true,
         clearContentMedia: true,
+        clearDrawingChoice: true,
+        clearDrawing: true,
+      ),
+      AnnoyanceChatStep.drawingDecision => state.copyWith(
+        step: AnnoyanceChatStep.content,
+        clearDrawingChoice: true,
+        clearDrawing: true,
+      ),
+      AnnoyanceChatStep.drawing => state.copyWith(
+        step: AnnoyanceChatStep.drawingDecision,
+        clearDrawingChoice: true,
+        clearDrawing: true,
+      ),
+      AnnoyanceChatStep.score => state.copyWith(
+        step: AnnoyanceChatStep.drawingDecision,
+        clearDrawingChoice: true,
+        clearDrawing: true,
       ),
       _ => state,
     };

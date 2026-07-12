@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:monsters/models/annoyance_drawing.dart';
 import 'package:monsters/models/annoyance_draft.dart';
 import 'package:monsters/models/annoyance_media.dart';
 import 'package:monsters/pages/annoyance_chat_page.dart';
@@ -15,7 +17,11 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: AnnoyanceChatPage())),
+      const ProviderScope(
+        child: MaterialApp(
+          home: AnnoyanceChatPage(drawingExporter: _exportTestDrawing),
+        ),
+      ),
     );
 
     expect(find.byKey(const Key('annoyanceChatGreeting')), findsOneWidget);
@@ -55,7 +61,11 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: AnnoyanceChatPage())),
+      const ProviderScope(
+        child: MaterialApp(
+          home: AnnoyanceChatPage(drawingExporter: _exportTestDrawing),
+        ),
+      ),
     );
 
     await tester.tap(find.byKey(const Key('annoyanceChatStartButton')));
@@ -142,6 +152,65 @@ void main() {
     expect(find.byKey(const Key('annoyanceMediaPreviewCard')), findsOneWidget);
     expect(find.byKey(const Key('annoyanceAudioPreview')), findsOneWidget);
   });
+
+  testWidgets('confirms text, draws a mood image, and reaches score step', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(
+          home: AnnoyanceChatPage(drawingExporter: _exportTestDrawing),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('annoyanceChatStartButton')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('annoyanceCategoryLOVE')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('annoyanceRecordMethodTEXT')));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('annoyanceTextContentField')),
+      '想把現在的感受畫下來',
+    );
+    await tester.pump();
+    final continueButton = find.byKey(
+      const Key('annoyanceContentContinueButton'),
+    );
+    await tester.ensureVisible(continueButton);
+    await tester.tap(continueButton);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('annoyanceDrawingChoiceCard')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('annoyanceDrawingYesButton')));
+    await tester.pumpAndSettle();
+
+    final canvas = find.byKey(const Key('moodDrawingGestureArea'));
+    expect(canvas, findsOneWidget);
+    await tester.drag(canvas, const Offset(100, 60));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('moodDrawingDoneButton')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('annoyanceScoreStepPlaceholder')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('annoyanceDrawingPreviewCard')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('annoyanceScorePrompt')), findsOneWidget);
+  });
+}
+
+Future<Uint8List> _exportTestDrawing(List<MoodDrawingStroke> strokes) async {
+  return base64Decode(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwC'
+    'AAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+  );
 }
 
 class _FakeMediaService implements AnnoyanceMediaService {
