@@ -8,6 +8,89 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-12 20:27
+
+Task
+TASK-057 Flutter 畫心情功能（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Confirmed TASK-056 was merged into `feature/phase3` through PR #36 and marked it DONE.
+- Created `feature/phase3-annoyance-drawing` from the synchronized Phase 3 integration branch.
+- Added a structured drawing decision step that either opens the drawing canvas or proceeds directly to the score step.
+- Added an immutable drawing draft model with PNG/WebP and 5 MB validation compatible with the existing Annoyance API contract.
+- Added a responsive square `CustomPainter` canvas with normalized stroke coordinates, six pen colors, adjustable width, eraser, undo, clear, cancel, and completion controls.
+- Exported completed drawings to a white-background 1024×1024 PNG without adding a dependency or saving a duplicate file to the device gallery.
+- Added drawing preview, chat summary, back/restart cleanup, and `drawingDecision → drawing → score` state transitions to the existing Riverpod flow.
+- Split drawing controls from the canvas so each Widget remains below the 300-line Flutter Coding Standard limit.
+- Added Provider, drawing canvas, and end-to-end chat Widget tests.
+- Updated the formal UI implementation and Task status from TODO through IN PROGRESS to REVIEW.
+- Checked log retention before adding this entry. The oldest record is 2026-06-29, so no record older than one month exists and none was deleted.
+
+### Added
+
+- `frontend/lib/models/annoyance_drawing.dart`
+- `frontend/lib/widgets/annoyance/drawing_choice_card.dart`
+- `frontend/lib/widgets/annoyance/drawing_preview_card.dart`
+- `frontend/lib/widgets/annoyance/mood_drawing_canvas.dart`
+- `frontend/lib/widgets/annoyance/mood_drawing_controls.dart`
+- `frontend/lib/widgets/annoyance/mood_drawing_exporter.dart`
+- `frontend/lib/widgets/annoyance/mood_drawing_painter.dart`
+- `frontend/test/widgets/mood_drawing_canvas_test.dart`
+
+### Modified
+
+- `frontend/lib/pages/annoyance_chat_page.dart`
+- `frontend/lib/providers/annoyance_chat_provider.dart`
+- `frontend/lib/widgets/annoyance/annoyance_content_input.dart`
+- `frontend/test/annoyance_chat_page_test.dart`
+- `frontend/test/providers/annoyance_chat_provider_test.dart`
+- `docs/TASKS.md`
+- `docs/UI_SPEC.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- Flutter formatter passed for all Task files.
+- `flutter analyze` passed with zero issues.
+- Targeted Provider, drawing canvas, and chat flow tests passed: 12 tests.
+- Full `flutter test` passed: 64 tests.
+- Flutter Web build passed; the existing optional Cupertino icon font warning remains non-blocking.
+- Android debug APK build passed.
+- iOS device no-codesign build passed.
+- iOS simulator build passed.
+- `MoodDrawingCanvas` is 253 lines and `MoodDrawingControls` is 89 lines, both below the 300-line Widget limit.
+- `CHANGE_HISTORY.csv` was imported, inspected, and rendered as a 13-column table with the spreadsheet runtime.
+
+### system_data Reference
+
+- Reviewed legacy manual page 123 and the old `drawing_colors.dart` plus `annoyanceChat.dart` drawing flow.
+- Retained the interaction intent for cancel, undo, clear, completion, adjustable pen width, eraser, color selection, and a drawing preview in chat.
+- Replaced direct navigation, mutable page/global state, gallery file creation, plugin-based image saving, and legacy hard-coded screen coordinates with the existing Riverpod state machine, normalized strokes, `CustomPainter`, and in-memory API-ready PNG data.
+- `system_data/` was not modified.
+
+### API
+
+- No API endpoint or request contract changed.
+- The drawing draft remains compatible with the existing optional multipart `drawingFile` part.
+
+### Database
+
+- No Database or migration change.
+
+### UI
+
+- Added structured drawing choice, full drawing canvas controls, error/loading states, completed PNG preview, and transition to the score step.
+- Score selection, sharing, review, submission, and completion remain assigned to subsequent Tasks.
+
+### Pending
+
+- Physical-device touch and stylus smoke testing remains recommended before release.
+
 ## 2026-07-12 18:31
 
 Task

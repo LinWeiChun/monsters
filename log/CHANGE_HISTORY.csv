@@ -809,3 +809,20 @@
 2026-07-12,18:31,TASK-056,Documentation,docs/TASKS.md,修改,將 TASK-055 標記 DONE 並將 TASK-056 推進至 REVIEW,Codex,否,否,否,否,
 2026-07-12,18:31,TASK-056,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-056 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
 2026-07-12,18:31,TASK-056,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-056 history 紀錄,Codex,否,否,否,否,artifact tool 驗證
+2026-07-12,20:27,TASK-057,Frontend,frontend/lib/models/annoyance_drawing.dart,新增,建立心情圖檔案模型筆畫模型與 5 MB 限制,Codex,否,否,是,否,PNG WebP
+2026-07-12,20:27,TASK-057,Frontend,frontend/lib/widgets/annoyance/drawing_choice_card.dart,新增,建立想畫與先不用結構化選項,Codex,否,否,是,否,drawing decision
+2026-07-12,20:27,TASK-057,Frontend,frontend/lib/widgets/annoyance/drawing_preview_card.dart,新增,顯示完成心情圖與檔案大小,Codex,否,否,是,否,單一 drawing
+2026-07-12,20:27,TASK-057,Frontend,frontend/lib/widgets/annoyance/mood_drawing_canvas.dart,新增,建立正規化筆畫畫布與完成錯誤狀態,Codex,否,否,是,否,253 lines
+2026-07-12,20:27,TASK-057,Frontend,frontend/lib/widgets/annoyance/mood_drawing_controls.dart,新增,建立粗細橡皮擦與六色畫筆控制,Codex,否,否,是,否,89 lines
+2026-07-12,20:27,TASK-057,Frontend,frontend/lib/widgets/annoyance/mood_drawing_exporter.dart,新增,輸出白底 1024 乘 1024 PNG,Codex,否,否,是,否,無新增套件
+2026-07-12,20:27,TASK-057,Frontend,frontend/lib/widgets/annoyance/mood_drawing_painter.dart,新增,以 CustomPainter 繪製平滑筆畫與橡皮擦,Codex,否,否,是,否,normalized strokes
+2026-07-12,20:27,TASK-057,Frontend,frontend/lib/pages/annoyance_chat_page.dart,修改,串接繪圖選擇畫布預覽與分數步驟,Codex,否,否,是,否,chat flow
+2026-07-12,20:27,TASK-057,Frontend,frontend/lib/providers/annoyance_chat_provider.dart,修改,保存有效心情圖並管理返回與略過狀態,Codex,否,否,是,否,Riverpod immutable state
+2026-07-12,20:27,TASK-057,Frontend,frontend/lib/widgets/annoyance/annoyance_content_input.dart,修改,主要內容準備完成後提供繼續操作,Codex,否,否,是,否,進入 drawing decision
+2026-07-12,20:27,TASK-057,Test,frontend/test/widgets/mood_drawing_canvas_test.dart,新增,驗證繪圖復原清除工具完成與取消,Codex,否,否,是,否,64 tests full suite
+2026-07-12,20:27,TASK-057,Test,frontend/test/annoyance_chat_page_test.dart,修改,驗證文字至繪圖完成再進入分數流程,Codex,否,否,是,否,end to end widget flow
+2026-07-12,20:27,TASK-057,Test,frontend/test/providers/annoyance_chat_provider_test.dart,修改,驗證略過繪圖有效檔案與無效資料 guard,Codex,否,否,是,否,
+2026-07-12,20:27,TASK-057,Documentation,docs/UI_SPEC.md,修改,記錄畫心情互動工具輸出與狀態規範,Codex,否,否,是,否,
+2026-07-12,20:27,TASK-057,Documentation,docs/TASKS.md,修改,將 TASK-056 標記 DONE 並將 TASK-057 推進至 REVIEW,Codex,否,否,否,否,PR 36
+2026-07-12,20:27,TASK-057,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-057 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
+2026-07-12,20:27,TASK-057,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-057 history 紀錄,Codex,否,否,否,否,artifact tool 驗證

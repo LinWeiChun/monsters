@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:monsters/models/annoyance_drawing.dart';
 import 'package:monsters/models/annoyance_draft.dart';
 import 'package:monsters/models/annoyance_media.dart';
 import 'package:monsters/providers/annoyance_chat_provider.dart';
@@ -86,6 +87,51 @@ void main() {
     expect(controller.state.contentText, ' 想說的話 ');
     expect(controller.state.isContentReady, isTrue);
   });
+
+  test('guards content confirmation and supports skipping drawing', () {
+    final controller = AnnoyanceChatController();
+    addTearDown(controller.dispose);
+    controller.begin();
+    controller.selectCategory(annoyanceCategories.first);
+    controller.selectRecordMethod(AnnoyanceRecordMethod.text);
+
+    controller.confirmContent();
+    expect(controller.state.step, AnnoyanceChatStep.content);
+
+    controller.updateTextContent('最近有點累');
+    controller.confirmContent();
+    expect(controller.state.step, AnnoyanceChatStep.drawingDecision);
+
+    controller.selectDrawingChoice(false);
+    expect(controller.state.step, AnnoyanceChatStep.score);
+    expect(controller.state.wantsDrawing, isFalse);
+    expect(controller.state.drawing, isNull);
+
+    controller.goBack();
+    expect(controller.state.step, AnnoyanceChatStep.drawingDecision);
+    expect(controller.state.wantsDrawing, isNull);
+  });
+
+  test('stores one valid drawing and rejects invalid drawing data', () {
+    final controller = AnnoyanceChatController();
+    addTearDown(controller.dispose);
+    controller.begin();
+    controller.selectCategory(annoyanceCategories.first);
+    controller.selectRecordMethod(AnnoyanceRecordMethod.text);
+    controller.updateTextContent('想畫下現在的心情');
+    controller.confirmContent();
+    controller.selectDrawingChoice(true);
+
+    expect(controller.state.step, AnnoyanceChatStep.drawing);
+    controller.saveDrawing(_drawing(bytes: Uint8List(0)));
+    expect(controller.state.step, AnnoyanceChatStep.drawing);
+
+    final drawing = _drawing(bytes: Uint8List.fromList([1, 2, 3]));
+    controller.saveDrawing(drawing);
+    expect(controller.state.step, AnnoyanceChatStep.score);
+    expect(controller.state.wantsDrawing, isTrue);
+    expect(controller.state.drawing, same(drawing));
+  });
 }
 
 AnnoyanceMediaFile _media(AnnoyanceRecordMethod method) {
@@ -101,5 +147,13 @@ AnnoyanceMediaFile _media(AnnoyanceRecordMethod method) {
         method == AnnoyanceRecordMethod.video
             ? const Duration(seconds: 1)
             : null,
+  );
+}
+
+AnnoyanceDrawingFile _drawing({required Uint8List bytes}) {
+  return AnnoyanceDrawingFile(
+    file: XFile.fromData(bytes, name: 'mood.png', mimeType: 'image/png'),
+    bytes: bytes,
+    name: 'mood.png',
   );
 }

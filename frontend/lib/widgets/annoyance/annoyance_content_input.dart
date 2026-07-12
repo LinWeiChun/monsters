@@ -17,6 +17,8 @@ class AnnoyanceContentInput extends StatefulWidget {
     required this.onTextChanged,
     required this.onMediaSelected,
     required this.onClear,
+    required this.canContinue,
+    required this.onContinue,
     super.key,
   });
 
@@ -27,6 +29,8 @@ class AnnoyanceContentInput extends StatefulWidget {
   final ValueChanged<String> onTextChanged;
   final ValueChanged<AnnoyanceMediaFile> onMediaSelected;
   final VoidCallback onClear;
+  final bool canContinue;
+  final VoidCallback onContinue;
 
   @override
   State<AnnoyanceContentInput> createState() => _AnnoyanceContentInputState();
@@ -123,6 +127,16 @@ class _AnnoyanceContentInputState extends State<AnnoyanceContentInput> {
             Text(
               _limitDescription,
               style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            FilledButton.icon(
+              key: const Key('annoyanceContentContinueButton'),
+              onPressed:
+                  widget.canContinue && !_isBusy && !_isRecording
+                      ? widget.onContinue
+                      : null,
+              icon: const Icon(Icons.arrow_forward),
+              label: const Text('使用這個內容'),
             ),
           ],
         ),

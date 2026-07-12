@@ -11,10 +11,15 @@ import '../theme/app_spacing.dart';
 import '../widgets/annoyance/annoyance_category_selector.dart';
 import '../widgets/annoyance/annoyance_chat_bubble.dart';
 import '../widgets/annoyance/annoyance_content_input.dart';
+import '../widgets/annoyance/drawing_choice_card.dart';
+import '../widgets/annoyance/drawing_preview_card.dart';
+import '../widgets/annoyance/mood_drawing_canvas.dart';
 import '../widgets/annoyance/record_method_selector.dart';
 
 class AnnoyanceChatPage extends ConsumerStatefulWidget {
-  const AnnoyanceChatPage({super.key});
+  const AnnoyanceChatPage({this.drawingExporter, super.key});
+
+  final MoodDrawingExport? drawingExporter;
 
   @override
   ConsumerState<AnnoyanceChatPage> createState() => _AnnoyanceChatPageState();
@@ -61,36 +66,53 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 760),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: ListView(
-                      key: const Key('annoyanceChatMessages'),
-                      controller: _scrollController,
-                      children: _buildMessages(state),
+      body:
+          state.step == AnnoyanceChatStep.drawing
+              ? SafeArea(
+                child: MoodDrawingCanvas(
+                  onCompleted: controller.saveDrawing,
+                  onCancel: controller.cancelDrawing,
+                  exportPng: widget.drawingExporter,
+                ),
+              )
+              : _buildChatBody(state, controller, mediaService),
+    );
+  }
+
+  Widget _buildChatBody(
+    AnnoyanceChatState state,
+    AnnoyanceChatController controller,
+    AnnoyanceMediaService mediaService,
+  ) {
+    return SafeArea(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 760),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Column(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: ListView(
+                    key: const Key('annoyanceChatMessages'),
+                    controller: _scrollController,
+                    children: _buildMessages(state),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Flexible(
+                  flex: 3,
+                  fit: FlexFit.loose,
+                  child: SingleChildScrollView(
+                    child: _buildInteractionPanel(
+                      state,
+                      controller,
+                      mediaService,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Flexible(
-                    flex: 3,
-                    fit: FlexFit.loose,
-                    child: SingleChildScrollView(
-                      child: _buildInteractionPanel(
-                        state,
-                        controller,
-                        mediaService,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -119,6 +141,24 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
           isUser: false,
         ),
       ],
+      if (state.step.index > AnnoyanceChatStep.content.index) ...[
+        AnnoyanceChatBubble(message: _contentSummary(state), isUser: true),
+        const AnnoyanceChatBubble(
+          key: Key('annoyanceDrawingPrompt'),
+          message: '內容收到了。想畫一張心情圖，讓感受多一種表達嗎？',
+          isUser: false,
+        ),
+      ],
+      if (state.wantsDrawing case final wantsDrawing?)
+        AnnoyanceChatBubble(message: wantsDrawing ? '想畫' : '先不用', isUser: true),
+      if (state.drawing case final drawing?)
+        DrawingPreviewCard(drawing: drawing),
+      if (state.step == AnnoyanceChatStep.score)
+        const AnnoyanceChatBubble(
+          key: Key('annoyanceScorePrompt'),
+          message: '謝謝你完成這一步。接下來記錄現在的煩惱分數。',
+          isUser: false,
+        ),
     ];
   }
 
@@ -149,6 +189,18 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
         onTextChanged: controller.updateTextContent,
         onMediaSelected: controller.selectContentMedia,
         onClear: controller.clearContent,
+        canContinue: state.isContentReady,
+        onContinue: controller.confirmContent,
+      ),
+      AnnoyanceChatStep.drawingDecision => DrawingChoiceCard(
+        onSelected: controller.selectDrawingChoice,
+      ),
+      AnnoyanceChatStep.score => const Card(
+        key: Key('annoyanceScoreStepPlaceholder'),
+        child: Padding(
+          padding: EdgeInsets.all(AppSpacing.md),
+          child: Text('煩惱分數選擇會接續顯示在這裡。'),
+        ),
       ),
       _ => const SizedBox.shrink(),
     };
@@ -190,6 +242,13 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
       AnnoyanceRecordMethod.audio => '接下來可以錄下想說的話，不用急。',
       AnnoyanceRecordMethod.video => '接下來可以選一段影片來記錄這件事。',
     };
+  }
+
+  String _contentSummary(AnnoyanceChatState state) {
+    if (state.recordMethod == AnnoyanceRecordMethod.text) {
+      return state.contentText.trim();
+    }
+    return '已選擇${state.recordMethod?.label ?? '媒體'}內容';
   }
 
   void _scrollToBottom() {
