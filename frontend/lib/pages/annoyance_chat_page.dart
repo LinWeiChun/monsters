@@ -4,10 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import '../models/annoyance_draft.dart';
 import '../providers/annoyance_chat_provider.dart';
+import '../providers/annoyance_media_provider.dart';
 import '../routes/app_routes.dart';
+import '../services/annoyance_media_service.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/annoyance/annoyance_category_selector.dart';
 import '../widgets/annoyance/annoyance_chat_bubble.dart';
+import '../widgets/annoyance/annoyance_content_input.dart';
 import '../widgets/annoyance/record_method_selector.dart';
 
 class AnnoyanceChatPage extends ConsumerStatefulWidget {
@@ -29,6 +32,7 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(annoyanceChatControllerProvider);
+    final mediaService = ref.watch(annoyanceMediaServiceProvider);
     final controller = ref.read(annoyanceChatControllerProvider.notifier);
     ref.listen(annoyanceChatControllerProvider, (previous, next) {
       if (previous?.step != next.step) {
@@ -66,6 +70,7 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
               child: Column(
                 children: [
                   Expanded(
+                    flex: 2,
                     child: ListView(
                       key: const Key('annoyanceChatMessages'),
                       controller: _scrollController,
@@ -73,7 +78,17 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  _buildInteractionPanel(state, controller),
+                  Flexible(
+                    flex: 3,
+                    fit: FlexFit.loose,
+                    child: SingleChildScrollView(
+                      child: _buildInteractionPanel(
+                        state,
+                        controller,
+                        mediaService,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -110,6 +125,7 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
   Widget _buildInteractionPanel(
     AnnoyanceChatState state,
     AnnoyanceChatController controller,
+    AnnoyanceMediaService mediaService,
   ) {
     final selector = switch (state.step) {
       AnnoyanceChatStep.intro => FilledButton.icon(
@@ -124,12 +140,15 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
       AnnoyanceChatStep.recordMethod => RecordMethodSelector(
         onSelected: controller.selectRecordMethod,
       ),
-      AnnoyanceChatStep.content => const Card(
-        key: Key('annoyanceContentStep'),
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.md),
-          child: Text('內容輸入與預覽會接續顯示在這裡。'),
-        ),
+      AnnoyanceChatStep.content => AnnoyanceContentInput(
+        key: ValueKey(state.recordMethod),
+        method: state.recordMethod!,
+        textContent: state.contentText,
+        media: state.contentMedia,
+        mediaService: mediaService,
+        onTextChanged: controller.updateTextContent,
+        onMediaSelected: controller.selectContentMedia,
+        onClear: controller.clearContent,
       ),
       _ => const SizedBox.shrink(),
     };

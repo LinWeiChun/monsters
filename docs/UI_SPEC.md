@@ -104,6 +104,8 @@ Phase 3 完成頁不顯示假怪獸獎勵；真實獎勵與圖鑑導向於 Phase
 
 聊天室入口使用 `/annoyances/new`，由首頁「新增煩惱」進入。聊天室基礎 Task 建立聊天泡泡、不可變草稿狀態、上一步／重新開始操作，以及 `intro → category → recordMethod → content` 的結構化推進；content 之後的媒體選取、繪圖、分數、分享、摘要與送出依後續 Phase 3 Task 接續同一狀態機，不得另建平行流程。
 
+媒體內容 Task 在 `content` 步驟提供文字輸入、單一圖片或影片的相簿／相機來源、App 內 WAV 錄音，以及圖片、錄音、影片預覽。選取後需顯示檔名、MIME type、大小與可取得的長度，並提供移除及重新選擇；媒體處理集中於 `AnnoyanceMediaService` 與平台 Adapter。圖片只在通過 5 MB 限制後讀入預覽 bytes，錄音與影片保留 `XFile`，避免在草稿中長期複製大型檔案。Android 最低 SDK 依目前 Flutter 預設 24，iOS 必須宣告相簿、相機與麥克風用途；Web 不支援的相機來源需顯示可理解的失敗訊息並保留檔案選取替代操作。
+
 ### 2.8 新增日記聊天室
 
 流程：
