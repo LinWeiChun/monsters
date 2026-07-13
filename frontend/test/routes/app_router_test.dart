@@ -49,7 +49,7 @@ void main() {
     await tester.tap(find.byKey(const Key('homeAnnoyanceChatButton')));
     await tester.pumpAndSettle();
 
-    expect(find.text('怪獸聊天室'), findsOneWidget);
+    expect(find.text('新增煩惱'), findsOneWidget);
     expect(find.byKey(const Key('annoyanceChatStartButton')), findsOneWidget);
   });
 }

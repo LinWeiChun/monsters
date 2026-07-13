@@ -1,11 +1,18 @@
 import 'dart:typed_data';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:monsters/config/app_config.dart';
+import 'package:monsters/core/network/api_client.dart';
+import 'package:monsters/core/network/api_error_type.dart';
+import 'package:monsters/core/network/api_exception.dart';
 import 'package:monsters/models/annoyance_drawing.dart';
 import 'package:monsters/models/annoyance_draft.dart';
 import 'package:monsters/models/annoyance_media.dart';
+import 'package:monsters/models/annoyance_response.dart';
 import 'package:monsters/providers/annoyance_chat_provider.dart';
+import 'package:monsters/repositories/annoyance_repository.dart';
 
 void main() {
   test('advances through structured category and record method steps', () {
@@ -182,6 +189,44 @@ void main() {
     expect(controller.state.step, AnnoyanceChatStep.score);
     expect(controller.state.isShared, isNull);
   });
+
+  test('submits a complete draft and stores created annoyance', () async {
+    final repository = _FakeAnnoyanceRepository();
+    final controller = AnnoyanceChatController(repository);
+    addTearDown(controller.dispose);
+    _reachScoreStep(controller);
+    controller.selectScore(3);
+    controller.selectSharing(true);
+
+    await controller.submit();
+
+    expect(controller.state.step, AnnoyanceChatStep.completed);
+    expect(controller.state.createdAnnoyance?.id, 101);
+    expect(repository.createCount, 1);
+    expect(repository.lastIsShared, isTrue);
+    expect(repository.lastScore, 3);
+  });
+
+  test('returns to review with an error when submit fails', () async {
+    final controller = AnnoyanceChatController(
+      _FakeAnnoyanceRepository(
+        exception: const ApiException(
+          type: ApiErrorType.network,
+          message: 'Network failed.',
+        ),
+      ),
+    );
+    addTearDown(controller.dispose);
+    _reachScoreStep(controller);
+    controller.selectScore(3);
+    controller.selectSharing(false);
+
+    await controller.submit();
+
+    expect(controller.state.step, AnnoyanceChatStep.review);
+    expect(controller.state.submitError, 'Network failed.');
+    expect(controller.state.createdAnnoyance, isNull);
+  });
 }
 
 void _reachScoreStep(AnnoyanceChatController controller) {
@@ -214,5 +259,59 @@ AnnoyanceDrawingFile _drawing({required Uint8List bytes}) {
     file: XFile.fromData(bytes, name: 'mood.png', mimeType: 'image/png'),
     bytes: bytes,
     name: 'mood.png',
+  );
+}
+
+class _FakeAnnoyanceRepository extends AnnoyanceRepository {
+  _FakeAnnoyanceRepository({this.exception}) : super(_dummyClient());
+
+  final ApiException? exception;
+  int createCount = 0;
+  int? lastScore;
+  bool? lastIsShared;
+
+  @override
+  Future<AnnoyanceResponse> create({
+    required AnnoyanceCategory category,
+    required AnnoyanceRecordMethod recordMethod,
+    required String content,
+    required AnnoyanceMediaFile? contentMedia,
+    required AnnoyanceDrawingFile? drawing,
+    required int score,
+    required bool isShared,
+  }) async {
+    createCount += 1;
+    lastScore = score;
+    lastIsShared = isShared;
+    final error = exception;
+    if (error != null) {
+      throw error;
+    }
+    return AnnoyanceResponse(
+      id: 101,
+      category: AnnoyanceCategoryResponse(
+        code: category.code,
+        name: category.name,
+      ),
+      recordMethod: recordMethod.apiValue,
+      content: content,
+      score: score,
+      isShared: isShared,
+      isSolved: false,
+      occurredAt: '2026-07-13T10:00:00+08:00',
+      media: const [],
+    );
+  }
+}
+
+ApiClient _dummyClient() {
+  return ApiClient(
+    config: const AppConfig(
+      apiBaseUrl: 'http://example.com/api',
+      connectTimeout: Duration(seconds: 1),
+      receiveTimeout: Duration(seconds: 1),
+      sendTimeout: Duration(seconds: 1),
+    ),
+    dio: Dio(),
   );
 }

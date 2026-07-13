@@ -10,7 +10,9 @@ import '../services/annoyance_media_service.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/annoyance/annoyance_category_selector.dart';
 import '../widgets/annoyance/annoyance_chat_bubble.dart';
+import '../widgets/annoyance/annoyance_completed_card.dart';
 import '../widgets/annoyance/annoyance_content_input.dart';
+import '../widgets/annoyance/annoyance_review_card.dart';
 import '../widgets/annoyance/drawing_choice_card.dart';
 import '../widgets/annoyance/drawing_preview_card.dart';
 import '../widgets/annoyance/mood_drawing_canvas.dart';
@@ -51,11 +53,11 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
       appBar: AppBar(
         leading: IconButton(
           key: const Key('annoyanceChatHomeButton'),
-          tooltip: '返回首頁',
+          tooltip: '回首頁',
           onPressed: () => context.goNamed(AppRoute.home),
           icon: const Icon(Icons.arrow_back),
         ),
-        title: const Text('怪獸聊天室'),
+        title: const Text('新增煩惱'),
         actions: [
           IconButton(
             key: const Key('annoyanceChatRestartButton'),
@@ -126,14 +128,14 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
     return [
       const AnnoyanceChatBubble(
         key: Key('annoyanceChatGreeting'),
-        message: '嗨，我在這裡陪你。想說的時候，我們就慢慢開始。',
+        message: '我會陪你把這件煩惱記下來。準備好後就開始。',
         isUser: false,
       ),
       if (state.step != AnnoyanceChatStep.intro)
-        const AnnoyanceChatBubble(message: '今天想記錄哪一類煩惱呢？', isUser: false),
+        const AnnoyanceChatBubble(message: '先選一個煩惱類型。', isUser: false),
       if (state.category case final category?) ...[
         AnnoyanceChatBubble(message: category.name, isUser: true),
-        const AnnoyanceChatBubble(message: '謝謝你告訴我。想用什麼方式記錄？', isUser: false),
+        const AnnoyanceChatBubble(message: '接著選擇你想記錄的方式。', isUser: false),
       ],
       if (state.recordMethod case final recordMethod?) ...[
         AnnoyanceChatBubble(message: recordMethod.label, isUser: true),
@@ -147,7 +149,7 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
         AnnoyanceChatBubble(message: _contentSummary(state), isUser: true),
         const AnnoyanceChatBubble(
           key: Key('annoyanceDrawingPrompt'),
-          message: '內容收到了。想畫一張心情圖，讓感受多一種表達嗎？',
+          message: '主要內容記好了。要不要畫一張心情圖一起保存？',
           isUser: false,
         ),
       ],
@@ -158,7 +160,7 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
       if (state.step.index >= AnnoyanceChatStep.score.index)
         const AnnoyanceChatBubble(
           key: Key('annoyanceScorePrompt'),
-          message: '謝謝你完成這一步。接下來記錄現在的煩惱分數。',
+          message: '接著用 1 到 5 分記下這件事的煩惱程度。',
           isUser: false,
         ),
       if (state.score case final score?)
@@ -166,7 +168,7 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
       if (state.step.index >= AnnoyanceChatStep.sharing.index)
         const AnnoyanceChatBubble(
           key: Key('annoyanceSharingPrompt'),
-          message: '分數記下來了。接下來再決定是否分享這筆煩惱。',
+          message: '分數記下來了。接下來決定是否分享這筆煩惱。',
           isUser: false,
         ),
       if (state.isShared case final isShared?)
@@ -174,7 +176,19 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
       if (state.step == AnnoyanceChatStep.review)
         const AnnoyanceChatBubble(
           key: Key('annoyanceReviewPrompt'),
-          message: '分享狀態已記下來。下一步會檢視摘要後送出。',
+          message: '分享狀態已記下來。確認摘要後就可以送出。',
+          isUser: false,
+        ),
+      if (state.step == AnnoyanceChatStep.submitting)
+        const AnnoyanceChatBubble(
+          key: Key('annoyanceSubmittingPrompt'),
+          message: '正在送出這筆煩惱。',
+          isUser: false,
+        ),
+      if (state.step == AnnoyanceChatStep.completed)
+        const AnnoyanceChatBubble(
+          key: Key('annoyanceCompletedPrompt'),
+          message: '煩惱已經記錄完成。',
           isUser: false,
         ),
     ];
@@ -190,7 +204,7 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
         key: const Key('annoyanceChatStartButton'),
         onPressed: controller.begin,
         icon: const Icon(Icons.chat_bubble_outline),
-        label: const Text('開始聊聊'),
+        label: const Text('開始記錄'),
       ),
       AnnoyanceChatStep.category => AnnoyanceCategorySelector(
         onSelected: controller.selectCategory,
@@ -221,13 +235,32 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
         selectedValue: state.isShared,
         onSelected: controller.selectSharing,
       ),
-      AnnoyanceChatStep.review => const Card(
-        key: Key('annoyanceReviewStepPlaceholder'),
+      AnnoyanceChatStep.review => AnnoyanceReviewCard(
+        state: state,
+        onSubmit: controller.submit,
+      ),
+      AnnoyanceChatStep.submitting => const Card(
+        key: Key('annoyanceSubmittingCard'),
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.md),
-          child: Text('摘要與送出會接續顯示在這裡。'),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: AppSpacing.sm),
+              Text('送出中，請稍候。'),
+            ],
+          ),
         ),
       ),
+      AnnoyanceChatStep.completed =>
+        state.createdAnnoyance == null
+            ? const SizedBox.shrink()
+            : AnnoyanceCompletedCard(
+              annoyance: state.createdAnnoyance!,
+              onCreateAnother: controller.restart,
+              onGoHome: () => context.goNamed(AppRoute.home),
+            ),
       _ => const SizedBox.shrink(),
     };
 
@@ -246,7 +279,7 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
               duration: const Duration(milliseconds: 180),
               child: KeyedSubtree(key: ValueKey(state.step), child: selector),
             ),
-            if (state.step != AnnoyanceChatStep.intro) ...[
+            if (_canGoBack(state.step)) ...[
               const SizedBox(height: AppSpacing.sm),
               TextButton.icon(
                 key: const Key('annoyanceChatBackButton'),
@@ -261,12 +294,18 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
     );
   }
 
+  bool _canGoBack(AnnoyanceChatStep step) {
+    return step != AnnoyanceChatStep.intro &&
+        step != AnnoyanceChatStep.submitting &&
+        step != AnnoyanceChatStep.completed;
+  }
+
   String _contentPrompt(AnnoyanceRecordMethod method) {
     return switch (method) {
-      AnnoyanceRecordMethod.text => '慢慢來，接下來把想說的話寫下來就好。',
-      AnnoyanceRecordMethod.image => '接下來可以選一張圖片，讓我陪你看看。',
-      AnnoyanceRecordMethod.audio => '接下來可以錄下想說的話，不用急。',
-      AnnoyanceRecordMethod.video => '接下來可以選一段影片來記錄這件事。',
+      AnnoyanceRecordMethod.text => '請輸入想記錄的內容。',
+      AnnoyanceRecordMethod.image => '請選擇一張圖片來記錄這件事。',
+      AnnoyanceRecordMethod.audio => '請錄下一段聲音來記錄這件事。',
+      AnnoyanceRecordMethod.video => '請選擇一段影片來記錄這件事。',
     };
   }
 
