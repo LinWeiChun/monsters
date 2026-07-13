@@ -20,17 +20,17 @@
 AI 開始任何任務前，必須依序閱讀：
 
 1. `AGENTS.md`
-2. `docs/GIT_RULE.md`
-3. `docs/PROJECT_SPEC.md`
-4. `docs/DATABASE_SPEC.md`
-5. `docs/API_SPEC.md`
-6. `docs/UI_SPEC.md`
-7. `docs/CODING_STANDARD.md`
-8. `docs/DECISIONS.md`
-9. `docs/TASKS.md`
-10. `system_data/系統手冊`
-11. `system_data/系統簡介`
-12. `system_data/參考程式` 或 `system_data/` 內既有程式
+2. `system_data/系統手冊`
+3. `system_data/系統簡介`
+4. `system_data/參考程式` 或 `system_data/` 內既有程式
+5. `docs/GIT_RULE.md`
+6. `docs/PROJECT_SPEC.md`
+7. `docs/DATABASE_SPEC.md`
+8. `docs/API_SPEC.md`
+9. `docs/UI_SPEC.md`
+10. `docs/CODING_STANDARD.md`
+11. `docs/DECISIONS.md`
+12. `docs/TASKS.md`
 13. 使用者最新明確指示
 
 若內容互相衝突，AI 必須停止實作，說明衝突、提出方案，並等待使用者確認；不得自行推測。
