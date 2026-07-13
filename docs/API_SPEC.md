@@ -204,7 +204,7 @@ Web 本機 Google 登入測試固定使用：
 | 項目 | 值 |
 |---|---|
 | Local origin | http://localhost:5050 |
-| Frontend script | `frontend/tool/run_web_local.sh` |
+| Frontend script | `frontend/tool/run_web_local.sh`、`frontend/tool/run_web_local.ps1` |
 
 Google Cloud OAuth Client 的 Authorized JavaScript origins 必須加入 `http://localhost:5050`。
 

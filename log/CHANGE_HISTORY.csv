@@ -840,3 +840,9 @@
 2026-07-13,06:33,TASK-058,Documentation,docs/TASKS.md,修改,將 TASK-057 標記 DONE 並將 TASK-058 推進至 REVIEW,Codex,否,否,否,否,PR 37
 2026-07-13,06:33,TASK-058,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-058 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
 2026-07-13,06:33,TASK-058,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-058 history 紀錄,Codex,否,否,否,否,artifact tool 驗證
+2026-07-13,09:55,TASK-060,Frontend,frontend/tool/run_web_local.ps1,Added,Add Windows PowerShell launch wrapper,Codex,No,No,No,No,Fixed localhost 5050
+2026-07-13,09:55,TASK-060,Documentation,frontend/README.md,Modified,Document Windows PowerShell launch script,Codex,No,No,No,No,Google web local run helper
+2026-07-13,09:55,TASK-060,Documentation,docs/API_SPEC.md,Modified,Document Windows PowerShell launch script,Codex,No,No,No,No,Google web local run helper
+2026-07-13,09:55,TASK-060,Documentation,docs/UI_SPEC.md,Modified,Document Windows PowerShell launch script,Codex,No,No,No,No,Google web local run helper
+2026-07-13,09:55,TASK-060,Documentation,log/CHANGE_LOG.md,Modified,Add TASK-060 log entry,Codex,No,No,No,No,Retention checked no deletion
+2026-07-13,09:55,TASK-060,Documentation,log/CHANGE_HISTORY.csv,Modified,Add TASK-060 history rows,Codex,No,No,No,No,Retention checked no deletion

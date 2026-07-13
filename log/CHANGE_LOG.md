@@ -322,6 +322,58 @@ Codex
 
 ---
 
+## 2026-07-13 09:55
+
+Task
+TASK-060 Flutter Web Google 登入 Windows 啟動腳本
+Agent
+Codex
+
+### Completed
+
+- Added a Windows PowerShell script for launching Flutter Web on Chrome with fixed `localhost:5050`.
+- Centralized the repeated `flutter run -d chrome --web-port=5050 --dart-define=GOOGLE_CLIENT_ID=...` command into `frontend/tool/run_web_local.ps1`.
+- Kept Web Google Sign-In initialization limited to `GOOGLE_CLIENT_ID`; the script does not pass `GOOGLE_SERVER_CLIENT_ID`.
+- Updated frontend README and formal API / UI docs to mention the Windows script.
+- Checked log retention before adding this entry. The oldest record is 2026-06-29, so no record older than one month exists and none was deleted.
+
+### Added
+
+- `frontend/tool/run_web_local.ps1`
+
+### Modified
+
+- `frontend/README.md`
+- `docs/API_SPEC.md`
+- `docs/UI_SPEC.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- Not run. This change only adds a local launch wrapper and documentation.
+
+### system_data Reference
+
+- Checked that `system_data/` is present. No related legacy launcher script was needed, and no `system_data/` file was modified.
+
+### API
+
+- No API endpoint or request contract changed.
+
+### Database
+
+- No Database or migration change.
+
+### UI
+
+- No UI behavior changed.
+
+### Pending
+
+- Fill `frontend/tool/run_web_local.ps1` `$DefaultGoogleClientId` once, or pass `-GoogleClientId` when running the script.
+
+---
 ## 2026-07-12 11:58
 
 Task
