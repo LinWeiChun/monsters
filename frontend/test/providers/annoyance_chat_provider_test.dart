@@ -132,6 +132,37 @@ void main() {
     expect(controller.state.wantsDrawing, isTrue);
     expect(controller.state.drawing, same(drawing));
   });
+
+  test('stores only a score from 1 to 5 and supports revising it', () {
+    final controller = AnnoyanceChatController();
+    addTearDown(controller.dispose);
+    _reachScoreStep(controller);
+
+    controller.selectScore(0);
+    expect(controller.state.step, AnnoyanceChatStep.score);
+    expect(controller.state.score, isNull);
+
+    controller.selectScore(4);
+    expect(controller.state.step, AnnoyanceChatStep.sharing);
+    expect(controller.state.score, 4);
+
+    controller.goBack();
+    expect(controller.state.step, AnnoyanceChatStep.score);
+    expect(controller.state.score, 4);
+
+    controller.selectScore(2);
+    expect(controller.state.step, AnnoyanceChatStep.sharing);
+    expect(controller.state.score, 2);
+  });
+}
+
+void _reachScoreStep(AnnoyanceChatController controller) {
+  controller.begin();
+  controller.selectCategory(annoyanceCategories.first);
+  controller.selectRecordMethod(AnnoyanceRecordMethod.text);
+  controller.updateTextContent('最近有點累');
+  controller.confirmContent();
+  controller.selectDrawingChoice(false);
 }
 
 AnnoyanceMediaFile _media(AnnoyanceRecordMethod method) {

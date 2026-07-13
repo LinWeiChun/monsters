@@ -153,7 +153,7 @@ void main() {
     expect(find.byKey(const Key('annoyanceAudioPreview')), findsOneWidget);
   });
 
-  testWidgets('confirms text, draws a mood image, and reaches score step', (
+  testWidgets('draws a mood image, selects a score, and reaches sharing', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -194,15 +194,22 @@ void main() {
     await tester.tap(find.byKey(const Key('moodDrawingDoneButton')));
     await tester.pumpAndSettle();
 
-    expect(
-      find.byKey(const Key('annoyanceScoreStepPlaceholder')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('annoyanceMoodScoreSelector')), findsOneWidget);
     expect(
       find.byKey(const Key('annoyanceDrawingPreviewCard')),
       findsOneWidget,
     );
     expect(find.byKey(const Key('annoyanceScorePrompt')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('annoyanceScore4')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('annoyanceSharingStepPlaceholder')),
+      findsOneWidget,
+    );
+    expect(find.text('4分'), findsOneWidget);
+    expect(find.byKey(const Key('annoyanceSharingPrompt')), findsOneWidget);
   });
 }
 

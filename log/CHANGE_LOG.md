@@ -8,6 +8,83 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-13 06:33
+
+Task
+TASK-058 Flutter 煩惱分數選擇（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Confirmed TASK-057 was merged into `feature/phase3` through PR #37 and marked it DONE.
+- Created `feature/phase3-annoyance-score` from the synchronized Phase 3 integration branch while preserving the unrelated local `application.yml` change.
+- Added neutral `1分` through `5分` score definitions and labels without binding lookup values to positive or negative emotion semantics.
+- Added a responsive and accessible `MoodScoreSelector` with equal visual weight, structured keys, selected state, and tap handling.
+- Added an immutable nullable score to the Riverpod chat state, guarded selection to the approved 1-to-5 range, and advanced valid selections from `score` to `sharing`.
+- Preserved a selected score when returning from sharing so it can be revised, and cleared it when returning to upstream drawing/content choices or restarting.
+- Added chat bubbles for the selected score and next-step sharing prompt while leaving sharing implementation outside this Task.
+- Added Provider, selector Widget, and end-to-end chat flow tests.
+- Updated the formal UI implementation and Task status from TODO through IN PROGRESS to REVIEW.
+- Checked log retention before adding this entry. The oldest record is 2026-06-29, so no record older than one month exists and none was deleted.
+
+### Added
+
+- `frontend/lib/widgets/annoyance/mood_score_selector.dart`
+- `frontend/test/widgets/mood_score_selector_test.dart`
+
+### Modified
+
+- `frontend/lib/models/annoyance_draft.dart`
+- `frontend/lib/pages/annoyance_chat_page.dart`
+- `frontend/lib/providers/annoyance_chat_provider.dart`
+- `frontend/test/annoyance_chat_page_test.dart`
+- `frontend/test/providers/annoyance_chat_provider_test.dart`
+- `docs/TASKS.md`
+- `docs/UI_SPEC.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- Flutter formatter passed for all Task files.
+- `flutter analyze` passed with zero issues.
+- Targeted Provider, score selector, and chat flow tests passed: 13 tests.
+- Full `flutter test` passed: 66 tests.
+- Flutter Web build passed; the existing optional Cupertino icon font warning remains non-blocking.
+- Android debug APK build passed.
+- iOS device no-codesign build passed.
+- iOS simulator build passed.
+- `AnnoyanceChatPage` is 277 lines, `MoodScoreSelector` is 90 lines, and `AnnoyanceChatController` is 245 lines; all remain below the 300-line Flutter limit.
+- `CHANGE_HISTORY.csv` was imported, inspected, and rendered as a 13-column table with the spreadsheet runtime.
+
+### system_data Reference
+
+- Reviewed legacy manual pages 123–124, the system introduction, the old `annoyanceChat.dart` score flow, and the five `moodPoint` assets.
+- Retained the interaction intent for a structured 1-to-5 choice that immediately advances to the sharing question.
+- Did not reuse legacy free-text parsing, `chatRound`, mutable answer arrays, green-to-red emotion semantics, or score image assets because the approved D14-A lookup labels are neutral.
+- `system_data/` was not modified.
+
+### API
+
+- No API endpoint or request contract changed.
+- The saved integer remains compatible with the existing create/update `score` field, which accepts 1 through 5.
+
+### Database
+
+- No Database or migration change.
+- The selector matches the existing `SCORE_1` through `SCORE_5` mood seeds.
+
+### UI
+
+- Added neutral score selection, selected-state restoration, score chat summary, and transition to the sharing step.
+- Sharing, review, submission, and completion remain assigned to subsequent work.
+
+### Pending
+
+- The `sharing` panel remains an explicit placeholder until its dedicated implementation is scheduled.
+
 ## 2026-07-12 20:27
 
 Task

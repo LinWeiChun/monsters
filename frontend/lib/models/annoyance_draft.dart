@@ -30,6 +30,12 @@ const annoyanceCategories = <AnnoyanceCategory>[
   AnnoyanceCategory(code: 'OTHER', name: '其他'),
 ];
 
+const annoyanceScores = <int>[1, 2, 3, 4, 5];
+
+extension AnnoyanceScoreLabel on int {
+  String get scoreLabel => '$this分';
+}
+
 extension AnnoyanceRecordMethodLabel on AnnoyanceRecordMethod {
   String get apiValue => name.toUpperCase();
 
