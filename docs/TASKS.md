@@ -100,6 +100,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] Flutter 煩惱分享選擇（DONE：PR #40 已合併至 `feature/phase3`）
 - [x] Flutter 新增煩惱摘要送出與完成流程（DONE：PR #41 已合併至 `feature/phase3`）
 - [x] 測試（DONE：Flutter full test 與 Backend Gradle test 通過）
+- [ ] Flutter 陪伴式首頁與 Web 獨立桌面版型（REVIEW：TASK-066；Figma、Flutter 響應式實作與 targeted tests 完成）
 
 ---
 

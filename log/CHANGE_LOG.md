@@ -8,6 +8,81 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-13 14:50
+
+Task
+TASK-066 Flutter 陪伴式首頁與 Web 獨立桌面版型（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 依使用者核准的 A 方案完成陪伴式首頁。
+- 使用 Figma plugin 建立可編輯的 390px 手機版與 1440px Web 桌面版設計，並上傳既有怪獸圖示作為正式視覺素材。
+- 手機版保留怪獸陪伴區、單一主要行動、快捷操作、底部導覽與個人選單。
+- Web 版改為固定左側導覽、怪獸陪伴區與功能操作區並列，不直接放大手機畫面。
+- 以 900px breakpoint 切換手機與桌面版型，未完成模組顯示開發排程提示。
+- 保留既有 Riverpod、go_router、Theme 與登入登出流程，未新增第三方套件。
+- 檢查 Log 保存期限；最早紀錄為 2026-06-29，沒有超過一個月的紀錄，因此未刪除 Log。
+
+### Added
+
+- `frontend/lib/widgets/home/companion_hero.dart`
+- `frontend/lib/widgets/home/home_navigation.dart`
+- `frontend/lib/widgets/home/home_quick_action.dart`
+- `frontend/test/home_page_test.dart`
+
+### Modified
+
+- `frontend/lib/pages/home_page.dart`
+- `frontend/lib/theme/app_colors.dart`
+- `frontend/lib/theme/app_spacing.dart`
+- `frontend/lib/theme/app_theme.dart`
+- `frontend/test/login_page_test.dart`
+- `frontend/test/password_lock_page_test.dart`
+- `frontend/test/profile_page_test.dart`
+- `docs/PROJECT_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- Targeted `dart analyze`：通過，無 issue。
+- `flutter test test/home_page_test.dart test/routes/app_router_test.dart test/theme/app_theme_test.dart`：8 targeted tests passed。
+- 既有首頁個人資料、密碼鎖與登出導頁測試已改為操作新版個人選單。
+- `flutter test`：74 tests passed。
+- `flutter build web --no-wasm-dry-run`：通過並產生 `build/web`；建置顯示既有 CupertinoIcons 字型未納入警告，本次未使用 CupertinoIcons。
+- 完整 `flutter analyze` 在本機環境啟動逾時，已改以本次異動檔案 targeted analyze 驗證。
+
+### system_data Reference
+
+- 參考舊版 `system_data/front-end/monsters_front_end/lib/pages/home.dart` 的暖色背景、首頁怪獸、主要功能入口與底部導覽。
+- 參考 `system_data/front-end/monsters_front_end/lib/state/drawer.dart` 的個人資料、密碼鎖及登出資訊架構。
+- 未沿用 Adobe XD 固定座標、舊 Navigator、全域狀態、頁面內資料存取與浮動展開按鈕。
+
+### API
+
+- 無 API 異動。
+
+### Database
+
+- 無 Database 異動。
+
+### UI
+
+- Figma：[貘nsters 陪伴式首頁 UI - Mobile & Web](https://www.figma.com/design/bo3ooJWyoIThN9D7YqkY1x)
+- 手機與 Web 使用不同資訊架構，共用 Theme token 與首頁元件。
+
+### Pending
+
+- 待使用者進行 Figma 與實際 Web／手機畫面 review。
+- 待在實際瀏覽器與手機裝置進行視覺 review。
+
+---
+
 ## 2026-07-13 11:32
 
 Task

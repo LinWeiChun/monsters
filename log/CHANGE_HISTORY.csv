@@ -884,3 +884,20 @@
 2026-07-13,11:32,TASK-065,Documentation,docs/TASKS.md,修改,將 Phase 3 umbrella 分享與摘要送出項目標記 DONE,Codex,否,否,否,否,PR 40 41 42 已合併
 2026-07-13,11:32,TASK-065,Documentation,log/CHANGE_LOG.md,修改,新增 Phase 3 收尾整合驗證紀錄,Codex,否,否,否,否,無超過一個月的紀錄
 2026-07-13,11:32,TASK-065,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-065 history 紀錄,Codex,否,否,否,否,
+2026-07-13,14:50,TASK-066,Design,Figma,新增,建立手機與 Web 獨立陪伴式首頁設計,Codex,否,否,是,否,https://www.figma.com/design/bo3ooJWyoIThN9D7YqkY1x
+2026-07-13,14:50,TASK-066,Frontend,frontend/lib/pages/home_page.dart,修改,建立 900px breakpoint 手機與 Web 獨立首頁,Codex,否,否,是,否,保留既有路由與登出流程
+2026-07-13,14:50,TASK-066,Frontend,frontend/lib/widgets/home/companion_hero.dart,新增,建立怪獸陪伴與問候區,Codex,否,否,是,否,手機與 Web 共用
+2026-07-13,14:50,TASK-066,Frontend,frontend/lib/widgets/home/home_navigation.dart,新增,建立手機底部導覽與 Web 固定側邊導覽,Codex,否,否,是,否,未開放模組顯示排程提示
+2026-07-13,14:50,TASK-066,Frontend,frontend/lib/widgets/home/home_quick_action.dart,新增,建立首頁快捷操作元件,Codex,否,否,是,否,支援主要與停用狀態
+2026-07-13,14:50,TASK-066,Frontend,frontend/lib/theme/app_colors.dart,修改,新增暖色重點與陪伴怪獸色票,Codex,否,否,是,否,Figma 色票同步
+2026-07-13,14:50,TASK-066,Frontend,frontend/lib/theme/app_spacing.dart,修改,新增首頁使用的大間距與圓角 token,Codex,否,否,是,否,
+2026-07-13,14:50,TASK-066,Frontend,frontend/lib/theme/app_theme.dart,修改,將重點色與陪伴色加入 light ColorScheme,Codex,否,否,是,否,
+2026-07-13,14:50,TASK-066,Test,frontend/test/home_page_test.dart,新增,驗證手機版 Web 版與新增煩惱導頁,Codex,否,否,是,否,74 full tests passed
+2026-07-13,14:50,TASK-066,Test,frontend/test/profile_page_test.dart,修改,改由新版首頁個人選單進入個人資料,Codex,否,否,是,否,
+2026-07-13,14:50,TASK-066,Test,frontend/test/password_lock_page_test.dart,修改,改由新版首頁個人選單進入密碼鎖,Codex,否,否,是,否,
+2026-07-13,14:50,TASK-066,Test,frontend/test/login_page_test.dart,修改,改由新版首頁個人選單執行登出,Codex,否,否,是,否,
+2026-07-13,14:50,TASK-066,Documentation,docs/PROJECT_SPEC.md,修改,新增陪伴式首頁跨平台需求,Codex,否,否,是,否,
+2026-07-13,14:50,TASK-066,Documentation,docs/UI_SPEC.md,修改,同步 Figma 首頁與 Web 專用版型規格,Codex,否,否,是,否,
+2026-07-13,14:50,TASK-066,Documentation,docs/TASKS.md,修改,新增陪伴式首頁 REVIEW Task,Codex,否,否,否,否,
+2026-07-13,14:50,TASK-066,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-066 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 Log
+2026-07-13,14:50,TASK-066,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-066 history 紀錄,Codex,否,否,否,否,CSV 作為本次 history 來源

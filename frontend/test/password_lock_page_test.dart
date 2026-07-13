@@ -108,7 +108,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('homePasswordLockButton')));
+    await tester.tap(find.byKey(const Key('homeAccountMenu')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('密碼鎖'));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('passwordLockField')), findsOneWidget);
