@@ -8,6 +8,62 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-13 10:48
+
+Task
+TASK-063 Phase 3 annoyance type lookup seed 修復（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Investigated the submit-time `ResourceNotFoundException: Annoyance category not found` error.
+- Confirmed Flutter sends the approved `categoryCode` values and backend tests/specs also use the same codes.
+- Identified the likely runtime cause as an existing MySQL database missing the Phase 3 `annoyance_types` lookup seed.
+- Added an idempotent repair migration to seed the six approved annoyance type codes for existing databases.
+- Updated the database init README with the error symptom and required repair migration.
+- Checked log retention before adding this entry. The oldest record is 2026-06-29, so no record older than one month exists and none was deleted.
+
+### Added
+
+- `database/migrations/20260713_01_seed_missing_annoyance_lookups.sql`
+
+### Modified
+
+- `database/init/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- `docker compose config` passed.
+- Direct database verification was not run because Docker daemon was not available in this environment.
+
+### system_data Reference
+
+- Rechecked the legacy annoyance category enum names and confirmed they must not replace the approved Phase 3 category code contract.
+
+### API
+
+- No API endpoint changed.
+- Existing create-annoyance requests continue to use `categoryCode`.
+
+### Database
+
+- Added a repair migration that inserts or updates the approved `annoyance_types` seed rows: `ACADEMIC`, `CAREER`, `LOVE`, `FRIENDSHIP`, `FAMILY`, `OTHER`.
+
+### UI
+
+- No UI change.
+
+### Pending
+
+- Apply `database/migrations/20260713_01_seed_missing_annoyance_lookups.sql` to the affected local database, then retry submit.
+- `backend/src/main/resources/application.yml` and `frontend/tool/run_web_local.ps1` have unrelated local changes and were intentionally excluded from this Task.
+
+---
+
 ## 2026-07-13 10:35
 
 Task
