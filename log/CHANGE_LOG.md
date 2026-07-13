@@ -8,6 +8,75 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-13 10:11
+
+Task
+TASK-061 Flutter 煩惱分享選擇（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Re-read the Phase 3 task state, UI spec, API share contract, and legacy `system_data/` sharing flow before implementing.
+- Created `feature/phase3-annoyance-sharing` from the synchronized Phase 3 integration branch.
+- Added `ShareChoiceCard` with explicit `保持私人` and `分享到社群` choices instead of a toggle.
+- Stored the selected sharing state as nullable boolean `isShared` in `AnnoyanceChatState`.
+- Advanced valid sharing selection from `sharing` to `review`, preserved the choice when returning from review, and cleared it when returning to score/upstream steps or restarting.
+- Updated the chat page to show the sharing prompt, selected sharing bubble, and review placeholder for the next Task.
+- Added Provider, widget, and chat flow tests for sharing selection and revision.
+- Moved `Flutter 煩惱分享選擇` from TODO to REVIEW in `docs/TASKS.md`.
+- Checked log retention before adding this entry. The oldest record is 2026-06-29, so no record older than one month exists and none was deleted.
+
+### Added
+
+- `frontend/lib/widgets/annoyance/share_choice_card.dart`
+- `frontend/test/widgets/share_choice_card_test.dart`
+
+### Modified
+
+- `frontend/lib/pages/annoyance_chat_page.dart`
+- `frontend/lib/providers/annoyance_chat_provider.dart`
+- `frontend/test/annoyance_chat_page_test.dart`
+- `frontend/test/providers/annoyance_chat_provider_test.dart`
+- `docs/TASKS.md`
+- `docs/UI_SPEC.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- Flutter formatter passed for all Task files.
+- `flutter analyze` passed with zero issues.
+- Targeted sharing-related tests passed: `flutter test test/widgets/share_choice_card_test.dart test/providers/annoyance_chat_provider_test.dart test/annoyance_chat_page_test.dart` with 14 tests.
+- Full `flutter test` passed with 68 tests.
+- Flutter commands required elevated execution because the Flutter SDK cache is outside the repository sandbox.
+
+### system_data Reference
+
+- Reviewed the old annoyance chat and history chat sharing flow, including the legacy 0/1 share value and social query usage.
+- No legacy code, global state, hardcoded credentials, or old toggle behavior was copied.
+
+### API
+
+- No API endpoint changed.
+- The selected sharing value maps to the existing create-annoyance `isShared` boolean contract: `false` for private and `true` for social sharing.
+
+### Database
+
+- No Database or migration change.
+
+### UI
+
+- Added the Phase 3 sharing choice UI and kept review, submit, and completion UI for later Task work.
+
+### Pending
+
+- Review summary, create-annoyance submission, completion UI, and the Phase 3 umbrella `Entry` architecture/API consistency item remain pending.
+- `frontend/tool/run_web_local.ps1` has an unrelated local change and was intentionally excluded from this Task.
+
+---
+
 ## 2026-07-13 09:32
 
 Task

@@ -846,3 +846,13 @@
 2026-07-13,09:55,TASK-060,Documentation,docs/UI_SPEC.md,Modified,Document Windows PowerShell launch script,Codex,No,No,No,No,Google web local run helper
 2026-07-13,09:55,TASK-060,Documentation,log/CHANGE_LOG.md,Modified,Add TASK-060 log entry,Codex,No,No,No,No,Retention checked no deletion
 2026-07-13,09:55,TASK-060,Documentation,log/CHANGE_HISTORY.csv,Modified,Add TASK-060 history rows,Codex,No,No,No,No,Retention checked no deletion
+2026-07-13,10:11,TASK-061,Frontend,frontend/lib/widgets/annoyance/share_choice_card.dart,新增,建立煩惱分享結構化選擇元件,Codex,否,否,是,否,保持私人與分享到社群
+2026-07-13,10:11,TASK-061,Frontend,frontend/lib/providers/annoyance_chat_provider.dart,修改,保存 isShared 並管理 sharing 到 review 狀態,Codex,否,否,是,否,Riverpod immutable state
+2026-07-13,10:11,TASK-061,Frontend,frontend/lib/pages/annoyance_chat_page.dart,修改,串接分享選擇聊天訊息與 review placeholder,Codex,否,否,是,否,review summary 留待後續 Task
+2026-07-13,10:11,TASK-061,Test,frontend/test/widgets/share_choice_card_test.dart,新增,驗證保持私人與分享到社群選擇回呼,Codex,否,否,是,否,14 targeted tests
+2026-07-13,10:11,TASK-061,Test,frontend/test/providers/annoyance_chat_provider_test.dart,修改,驗證分享狀態保存修改與返回清除,Codex,否,否,是,否,
+2026-07-13,10:11,TASK-061,Test,frontend/test/annoyance_chat_page_test.dart,修改,驗證分數後選擇分享並進入 review,Codex,否,否,是,否,68 full tests
+2026-07-13,10:11,TASK-061,Documentation,docs/UI_SPEC.md,修改,記錄煩惱分享選擇 UI 與 isShared 狀態規範,Codex,否,否,是,否,對應既有 API boolean
+2026-07-13,10:11,TASK-061,Documentation,docs/TASKS.md,修改,將 Flutter 煩惱分享選擇推進至 REVIEW,Codex,否,否,否,否,
+2026-07-13,10:11,TASK-061,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-061 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
+2026-07-13,10:11,TASK-061,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-061 history 紀錄,Codex,否,否,否,否,artifact tool 驗證未執行

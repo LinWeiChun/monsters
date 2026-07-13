@@ -154,6 +154,34 @@ void main() {
     expect(controller.state.step, AnnoyanceChatStep.sharing);
     expect(controller.state.score, 2);
   });
+
+  test('stores explicit sharing choice and supports revising it', () {
+    final controller = AnnoyanceChatController();
+    addTearDown(controller.dispose);
+    _reachScoreStep(controller);
+
+    controller.selectSharing(true);
+    expect(controller.state.step, AnnoyanceChatStep.score);
+    expect(controller.state.isShared, isNull);
+
+    controller.selectScore(3);
+    controller.selectSharing(false);
+    expect(controller.state.step, AnnoyanceChatStep.review);
+    expect(controller.state.isShared, isFalse);
+
+    controller.goBack();
+    expect(controller.state.step, AnnoyanceChatStep.sharing);
+    expect(controller.state.isShared, isFalse);
+
+    controller.selectSharing(true);
+    expect(controller.state.step, AnnoyanceChatStep.review);
+    expect(controller.state.isShared, isTrue);
+
+    controller.goBack();
+    controller.goBack();
+    expect(controller.state.step, AnnoyanceChatStep.score);
+    expect(controller.state.isShared, isNull);
+  });
 }
 
 void _reachScoreStep(AnnoyanceChatController controller) {

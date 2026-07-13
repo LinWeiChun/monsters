@@ -16,6 +16,7 @@ import '../widgets/annoyance/drawing_preview_card.dart';
 import '../widgets/annoyance/mood_drawing_canvas.dart';
 import '../widgets/annoyance/mood_score_selector.dart';
 import '../widgets/annoyance/record_method_selector.dart';
+import '../widgets/annoyance/share_choice_card.dart';
 
 class AnnoyanceChatPage extends ConsumerStatefulWidget {
   const AnnoyanceChatPage({this.drawingExporter, super.key});
@@ -162,10 +163,18 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
         ),
       if (state.score case final score?)
         AnnoyanceChatBubble(message: score.scoreLabel, isUser: true),
-      if (state.step == AnnoyanceChatStep.sharing)
+      if (state.step.index >= AnnoyanceChatStep.sharing.index)
         const AnnoyanceChatBubble(
           key: Key('annoyanceSharingPrompt'),
           message: '分數記下來了。接下來再決定是否分享這筆煩惱。',
+          isUser: false,
+        ),
+      if (state.isShared case final isShared?)
+        AnnoyanceChatBubble(message: isShared ? '分享到社群' : '保持私人', isUser: true),
+      if (state.step == AnnoyanceChatStep.review)
+        const AnnoyanceChatBubble(
+          key: Key('annoyanceReviewPrompt'),
+          message: '分享狀態已記下來。下一步會檢視摘要後送出。',
           isUser: false,
         ),
     ];
@@ -208,11 +217,15 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
         selectedScore: state.score,
         onSelected: controller.selectScore,
       ),
-      AnnoyanceChatStep.sharing => const Card(
-        key: Key('annoyanceSharingStepPlaceholder'),
+      AnnoyanceChatStep.sharing => ShareChoiceCard(
+        selectedValue: state.isShared,
+        onSelected: controller.selectSharing,
+      ),
+      AnnoyanceChatStep.review => const Card(
+        key: Key('annoyanceReviewStepPlaceholder'),
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.md),
-          child: Text('分享選擇會接續顯示在這裡。'),
+          child: Text('摘要與送出會接續顯示在這裡。'),
         ),
       ),
       _ => const SizedBox.shrink(),

@@ -97,7 +97,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] Flutter 文字 / 圖片 / 錄音 / 影片選取與預覽（DONE：PR #36 已合併至 `feature/phase3`）
 - [x] Flutter 畫心情功能（DONE：PR #37 已合併至 `feature/phase3`）
 - [x] Flutter 煩惱分數選擇（DONE：PR #38 已合併至 `feature/phase3`，review 驗證通過）
-- [] Flutter 煩惱分享選擇
+- [ ] Flutter 煩惱分享選擇（REVIEW）
 - [x] 測試（DONE：Flutter full test 與 Backend Gradle test 通過）
 
 ---
