@@ -8,6 +8,62 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-13 09:32
+
+Task
+TASK-059 Phase 3 煩惱分數選擇 review 與測試收尾
+
+Agent
+Codex
+
+### Completed
+
+- Re-read AGENTS, Git, project, API, Database, UI, Coding Standard, Decisions, Tasks, and `system_data/` location status before continuing.
+- Synchronized `feature/phase3` and created `feature/phase3-annoyance-score-review` from the Phase 3 integration branch.
+- Reviewed the merged `MoodScoreSelector`, `AnnoyanceChatController.selectScore`, chat page score flow, and related Provider / Widget tests.
+- Confirmed the score selector uses neutral `1分` through `5分` options, preserves a selected score when returning from sharing, rejects out-of-range score values, and advances valid selections to the sharing step.
+- Marked Flutter annoyance score selection as DONE and marked Phase 3 testing as DONE in `docs/TASKS.md`.
+- Checked log retention before adding this entry. The oldest record is 2026-06-29, so no record older than one month exists and none was deleted.
+
+### Added
+
+- None
+
+### Modified
+
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- Targeted Flutter score-related tests passed: `flutter test test/widgets/mood_score_selector_test.dart test/providers/annoyance_chat_provider_test.dart test/annoyance_chat_page_test.dart`.
+- Full Flutter test suite passed: `flutter test` with 66 tests.
+- Backend Gradle test suite passed with JDK 18: `gradlew.bat test`.
+- Flutter commands required elevated execution because the Flutter SDK cache lockfile is outside the repository sandbox.
+- Backend Gradle test required elevated execution because Gradle wrapper dependency download was blocked by sandbox network restrictions.
+
+### system_data Reference
+
+- `system_data/` contains the old backend, old frontend, system manual PDF, and system introduction PDF.
+- No new legacy code was copied or modified in this review-only Task.
+
+### API
+
+- No API endpoint or request contract changed.
+
+### Database
+
+- No Database or migration change.
+
+### UI
+
+- No UI code changed. Existing score UI was reviewed against the approved neutral 1-to-5 score selector contract.
+
+### Pending
+
+- `docs/TASKS.md` still leaves the umbrella item `依新版 Entry 架構與 API 規格重新實作` unchecked. Sharing, review, submission, and completion UI remain represented as later work in the UI spec, while no dedicated rows exist for them in the current Phase 3 task list.
+
 ## 2026-07-13 06:33
 
 Task
