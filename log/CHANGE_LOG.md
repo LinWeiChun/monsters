@@ -8,6 +8,81 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-13 10:35
+
+Task
+TASK-062 Flutter 新增煩惱摘要送出與完成流程（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Re-read the governing Phase 3 specs, task state, API contract, and legacy `system_data/` annoyance flow before continuing implementation.
+- Created `feature/phase3-annoyance-submit` from the Phase 3 integration branch.
+- Added a Flutter `AnnoyanceRepository` that submits the completed draft to the existing multipart `POST /api/annoyances` endpoint.
+- Added typed `AnnoyanceResponse` parsing for the create-annoyance API response.
+- Replaced the review placeholder with a summary card, submit action, submitting state, completed card, retryable API error handling, and create-another restart flow.
+- Preserved the Phase 3 boundary by not adding fake monster rewards; the completed page only confirms creation and sharing state.
+- Updated Provider, repository, page, and route tests for the full local annoyance flow.
+- Added `Flutter 新增煩惱摘要送出與完成流程` to `docs/TASKS.md` as REVIEW.
+- Checked log retention before adding this entry. The oldest record is 2026-06-29, so no record older than one month exists and none was deleted.
+
+### Added
+
+- `frontend/lib/models/annoyance_response.dart`
+- `frontend/lib/repositories/annoyance_repository.dart`
+- `frontend/lib/widgets/annoyance/annoyance_review_card.dart`
+- `frontend/lib/widgets/annoyance/annoyance_completed_card.dart`
+- `frontend/test/repositories/annoyance_repository_test.dart`
+
+### Modified
+
+- `frontend/lib/models/annoyance_draft.dart`
+- `frontend/lib/pages/annoyance_chat_page.dart`
+- `frontend/lib/providers/annoyance_chat_provider.dart`
+- `frontend/test/annoyance_chat_page_test.dart`
+- `frontend/test/providers/annoyance_chat_provider_test.dart`
+- `frontend/test/routes/app_router_test.dart`
+- `docs/TASKS.md`
+- `docs/UI_SPEC.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- Flutter formatter passed for all Task files.
+- `flutter analyze` passed with zero issues.
+- Targeted submit-related tests passed: `flutter test test/repositories/annoyance_repository_test.dart test/providers/annoyance_chat_provider_test.dart test/annoyance_chat_page_test.dart`.
+- Full `flutter test` passed with 71 tests.
+- Flutter commands required elevated execution because the Flutter SDK cache is outside the repository sandbox.
+
+### system_data Reference
+
+- Reviewed the legacy annoyance content, drawing, score, sharing, review, and completion intent from `system_data/`.
+- Reused only the flow intent: pre-submit review, submission feedback, and completion confirmation.
+- Did not copy legacy random reward assignment, local file path handling, integer sharing flags, hardcoded values, or old backend structure.
+
+### API
+
+- No backend API endpoint changed.
+- Flutter now consumes the existing create-annoyance `POST /api/annoyances` multipart contract with `request`, optional `contentFile`, and optional `drawingFile`.
+
+### Database
+
+- No Database or migration change.
+
+### UI
+
+- Added the Phase 3 review, submitting, and completed UI for the existing `/annoyances/new` flow.
+
+### Pending
+
+- The Phase 3 umbrella `Entry` architecture/API consistency item remains pending until the integration branch is reviewed as a whole.
+- `frontend/tool/run_web_local.ps1` has an unrelated local change and was intentionally excluded from this Task.
+
+---
+
 ## 2026-07-13 10:11
 
 Task

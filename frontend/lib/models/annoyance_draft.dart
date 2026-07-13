@@ -22,11 +22,11 @@ class AnnoyanceCategory {
 }
 
 const annoyanceCategories = <AnnoyanceCategory>[
-  AnnoyanceCategory(code: 'ACADEMIC', name: '課業'),
-  AnnoyanceCategory(code: 'CAREER', name: '事業'),
-  AnnoyanceCategory(code: 'LOVE', name: '愛情'),
+  AnnoyanceCategory(code: 'ACADEMIC', name: '學業'),
+  AnnoyanceCategory(code: 'CAREER', name: '職涯'),
+  AnnoyanceCategory(code: 'LOVE', name: '感情'),
   AnnoyanceCategory(code: 'FRIENDSHIP', name: '友情'),
-  AnnoyanceCategory(code: 'FAMILY', name: '親情'),
+  AnnoyanceCategory(code: 'FAMILY', name: '家庭'),
   AnnoyanceCategory(code: 'OTHER', name: '其他'),
 ];
 

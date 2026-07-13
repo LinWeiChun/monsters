@@ -856,3 +856,18 @@
 2026-07-13,10:11,TASK-061,Documentation,docs/TASKS.md,修改,將 Flutter 煩惱分享選擇推進至 REVIEW,Codex,否,否,否,否,
 2026-07-13,10:11,TASK-061,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-061 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
 2026-07-13,10:11,TASK-061,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-061 history 紀錄,Codex,否,否,否,否,artifact tool 驗證未執行
+2026-07-13,10:35,TASK-062,Frontend,frontend/lib/models/annoyance_response.dart,新增,建立新增煩惱 API response 解析模型,Codex,否,否,是,否,manual fromJson
+2026-07-13,10:35,TASK-062,Frontend,frontend/lib/repositories/annoyance_repository.dart,新增,串接 POST annoyances multipart 建立流程,Codex,否,否,是,否,request contentFile drawingFile
+2026-07-13,10:35,TASK-062,Frontend,frontend/lib/widgets/annoyance/annoyance_review_card.dart,新增,建立送出前摘要與錯誤顯示卡,Codex,否,否,是,否,review submit
+2026-07-13,10:35,TASK-062,Frontend,frontend/lib/widgets/annoyance/annoyance_completed_card.dart,新增,建立建立完成與再新增操作卡,Codex,否,否,是,否,Phase 3 no reward
+2026-07-13,10:35,TASK-062,Frontend,frontend/lib/models/annoyance_draft.dart,修改,修正類別記錄方式與分數顯示標籤,Codex,否,否,是,否,繁體中文 UI
+2026-07-13,10:35,TASK-062,Frontend,frontend/lib/providers/annoyance_chat_provider.dart,修改,新增 submit submitting completed 與錯誤狀態,Codex,否,否,是,否,Riverpod repository injection
+2026-07-13,10:35,TASK-062,Frontend,frontend/lib/pages/annoyance_chat_page.dart,修改,串接摘要送出送出中與完成流程,Codex,否,否,是,否,/annoyances/new
+2026-07-13,10:35,TASK-062,Test,frontend/test/repositories/annoyance_repository_test.dart,新增,驗證 multipart request 與 response mapping,Codex,否,否,是,否,
+2026-07-13,10:35,TASK-062,Test,frontend/test/providers/annoyance_chat_provider_test.dart,修改,驗證 submit success 與 API failure 回到 review,Codex,否,否,是,否,
+2026-07-13,10:35,TASK-062,Test,frontend/test/annoyance_chat_page_test.dart,修改,驗證分享後送出並到完成頁,Codex,否,否,是,否,71 full tests
+2026-07-13,10:35,TASK-062,Test,frontend/test/routes/app_router_test.dart,修改,更新新增煩惱 route 標題期待,Codex,否,否,是,否,
+2026-07-13,10:35,TASK-062,Documentation,docs/UI_SPEC.md,修改,記錄摘要送出完成與錯誤處理規範,Codex,否,否,是,否,既有 create API
+2026-07-13,10:35,TASK-062,Documentation,docs/TASKS.md,修改,新增 Flutter 新增煩惱摘要送出與完成流程 REVIEW,Codex,否,否,否,否,
+2026-07-13,10:35,TASK-062,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-062 工作紀錄,Codex,否,否,否,否,無超過一個月的紀錄
+2026-07-13,10:35,TASK-062,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-062 history 紀錄,Codex,否,否,否,否,

@@ -1,15 +1,21 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:monsters/config/app_config.dart';
+import 'package:monsters/core/network/api_client.dart';
 import 'package:monsters/models/annoyance_drawing.dart';
 import 'package:monsters/models/annoyance_draft.dart';
 import 'package:monsters/models/annoyance_media.dart';
+import 'package:monsters/models/annoyance_response.dart';
 import 'package:monsters/pages/annoyance_chat_page.dart';
+import 'package:monsters/providers/annoyance_chat_provider.dart';
 import 'package:monsters/providers/annoyance_media_provider.dart';
+import 'package:monsters/repositories/annoyance_repository.dart';
 import 'package:monsters/services/annoyance_media_service.dart';
 
 void main() {
@@ -44,7 +50,7 @@ void main() {
     await tester.tap(find.byKey(const Key('annoyanceCategoryACADEMIC')));
     await tester.pumpAndSettle();
 
-    expect(find.text('課業'), findsOneWidget);
+    expect(find.text('學業'), findsOneWidget);
     for (final method in ['TEXT', 'IMAGE', 'AUDIO', 'VIDEO']) {
       expect(find.byKey(Key('annoyanceRecordMethod$method')), findsOneWidget);
     }
@@ -54,7 +60,7 @@ void main() {
 
     expect(find.byKey(const Key('annoyanceContentPrompt')), findsOneWidget);
     expect(find.byKey(const Key('annoyanceContentStep')), findsOneWidget);
-    expect(find.text('慢慢來，接下來把想說的話寫下來就好。'), findsOneWidget);
+    expect(find.text('請輸入想記錄的內容。'), findsOneWidget);
   });
 
   testWidgets('back and restart actions rebuild the draft flow', (
@@ -82,7 +88,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('annoyanceChatStartButton')), findsOneWidget);
-    expect(find.text('事業'), findsNothing);
+    expect(find.text('職涯'), findsNothing);
   });
 
   testWidgets('selects, previews, and removes one image', (tester) async {
@@ -143,7 +149,7 @@ void main() {
     await tester.tap(find.byKey(const Key('annoyanceRecordButton')));
     await tester.pump();
     expect(mediaService.audioStartCount, 1);
-    expect(find.text('停止錄音'), findsOneWidget);
+    expect(find.byKey(const Key('annoyanceRecordingDuration')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('annoyanceRecordButton')));
     await tester.pumpAndSettle();
@@ -153,12 +159,17 @@ void main() {
     expect(find.byKey(const Key('annoyanceAudioPreview')), findsOneWidget);
   });
 
-  testWidgets('draws a mood image, selects a score, and chooses sharing', (
+  testWidgets('draws, selects sharing, submits, and reaches completed', (
     tester,
   ) async {
     await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(
+      ProviderScope(
+        overrides: [
+          annoyanceRepositoryProvider.overrideWithValue(
+            _FakeAnnoyanceRepository(),
+          ),
+        ],
+        child: const MaterialApp(
           home: AnnoyanceChatPage(drawingExporter: _exportTestDrawing),
         ),
       ),
@@ -173,7 +184,7 @@ void main() {
 
     await tester.enterText(
       find.byKey(const Key('annoyanceTextContentField')),
-      '想把現在的感受畫下來',
+      '今天有一件事情讓我很煩惱',
     );
     await tester.pump();
     final continueButton = find.byKey(
@@ -211,12 +222,18 @@ void main() {
     await tester.tap(find.byKey(const Key('annoyanceSharePrivateButton')));
     await tester.pumpAndSettle();
 
-    expect(
-      find.byKey(const Key('annoyanceReviewStepPlaceholder')),
-      findsOneWidget,
-    );
-    expect(find.text('保持私人'), findsOneWidget);
+    expect(find.byKey(const Key('annoyanceReviewCard')), findsOneWidget);
+    expect(find.text('保持私人'), findsWidgets);
     expect(find.byKey(const Key('annoyanceReviewPrompt')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('annoyanceSubmitButton')));
+    await tester.pump();
+    expect(find.byKey(const Key('annoyanceSubmittingCard')), findsOneWidget);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('annoyanceCompletedCard')), findsOneWidget);
+    expect(find.textContaining('101'), findsOneWidget);
+    expect(find.byKey(const Key('annoyanceChatBackButton')), findsNothing);
   });
 }
 
@@ -280,4 +297,47 @@ class _FakeMediaService implements AnnoyanceMediaService {
 
   @override
   Future<void> dispose() async {}
+}
+
+class _FakeAnnoyanceRepository extends AnnoyanceRepository {
+  _FakeAnnoyanceRepository() : super(_dummyClient());
+
+  @override
+  Future<AnnoyanceResponse> create({
+    required AnnoyanceCategory category,
+    required AnnoyanceRecordMethod recordMethod,
+    required String content,
+    required AnnoyanceMediaFile? contentMedia,
+    required AnnoyanceDrawingFile? drawing,
+    required int score,
+    required bool isShared,
+  }) async {
+    await Future<void>.delayed(const Duration(milliseconds: 1));
+    return AnnoyanceResponse(
+      id: 101,
+      category: AnnoyanceCategoryResponse(
+        code: category.code,
+        name: category.name,
+      ),
+      recordMethod: recordMethod.apiValue,
+      content: content,
+      score: score,
+      isShared: isShared,
+      isSolved: false,
+      occurredAt: '2026-07-13T10:00:00+08:00',
+      media: const [],
+    );
+  }
+}
+
+ApiClient _dummyClient() {
+  return ApiClient(
+    config: const AppConfig(
+      apiBaseUrl: 'http://example.com/api',
+      connectTimeout: Duration(seconds: 1),
+      receiveTimeout: Duration(seconds: 1),
+      sendTimeout: Duration(seconds: 1),
+    ),
+    dio: Dio(),
+  );
 }

@@ -1,13 +1,21 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/network/api_exception.dart';
 import '../models/annoyance_drawing.dart';
 import '../models/annoyance_draft.dart';
 import '../models/annoyance_media.dart';
+import '../models/annoyance_response.dart';
+import '../repositories/annoyance_repository.dart';
+import 'api_client_provider.dart';
+
+final annoyanceRepositoryProvider = Provider<AnnoyanceRepository>((ref) {
+  return AnnoyanceRepository(ref.watch(apiClientProvider));
+});
 
 final annoyanceChatControllerProvider = StateNotifierProvider.autoDispose<
   AnnoyanceChatController,
   AnnoyanceChatState
->((ref) => AnnoyanceChatController());
+>((ref) => AnnoyanceChatController(ref.watch(annoyanceRepositoryProvider)));
 
 class AnnoyanceChatState {
   const AnnoyanceChatState({
@@ -20,6 +28,8 @@ class AnnoyanceChatState {
     this.drawing,
     this.score,
     this.isShared,
+    this.createdAnnoyance,
+    this.submitError,
   });
 
   final AnnoyanceChatStep step;
@@ -31,6 +41,8 @@ class AnnoyanceChatState {
   final AnnoyanceDrawingFile? drawing;
   final int? score;
   final bool? isShared;
+  final AnnoyanceResponse? createdAnnoyance;
+  final String? submitError;
 
   bool get isContentReady => switch (recordMethod) {
     AnnoyanceRecordMethod.text => contentText.trim().isNotEmpty,
@@ -39,6 +51,14 @@ class AnnoyanceChatState {
     AnnoyanceRecordMethod.video => contentMedia?.method == recordMethod,
     null => false,
   };
+
+  bool get canSubmit {
+    return category != null &&
+        recordMethod != null &&
+        isContentReady &&
+        score != null &&
+        isShared != null;
+  }
 
   AnnoyanceChatState copyWith({
     AnnoyanceChatStep? step,
@@ -58,6 +78,10 @@ class AnnoyanceChatState {
     bool clearScore = false,
     bool? isShared,
     bool clearSharing = false,
+    AnnoyanceResponse? createdAnnoyance,
+    bool clearCreatedAnnoyance = false,
+    String? submitError,
+    bool clearSubmitError = false,
   }) {
     return AnnoyanceChatState(
       step: step ?? this.step,
@@ -72,12 +96,20 @@ class AnnoyanceChatState {
       drawing: clearDrawing ? null : drawing ?? this.drawing,
       score: clearScore ? null : score ?? this.score,
       isShared: clearSharing ? null : isShared ?? this.isShared,
+      createdAnnoyance:
+          clearCreatedAnnoyance
+              ? null
+              : createdAnnoyance ?? this.createdAnnoyance,
+      submitError: clearSubmitError ? null : submitError ?? this.submitError,
     );
   }
 }
 
 class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
-  AnnoyanceChatController() : super(const AnnoyanceChatState());
+  AnnoyanceChatController([this._annoyanceRepository])
+    : super(const AnnoyanceChatState());
+
+  final AnnoyanceRepository? _annoyanceRepository;
 
   void begin() {
     if (state.step != AnnoyanceChatStep.intro) {
@@ -100,6 +132,8 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
       clearDrawing: true,
       clearScore: true,
       clearSharing: true,
+      clearCreatedAnnoyance: true,
+      clearSubmitError: true,
     );
   }
 
@@ -116,6 +150,8 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
       clearDrawing: true,
       clearScore: true,
       clearSharing: true,
+      clearCreatedAnnoyance: true,
+      clearSubmitError: true,
     );
   }
 
@@ -153,6 +189,8 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
       clearDrawing: true,
       clearScore: true,
       clearSharing: true,
+      clearCreatedAnnoyance: true,
+      clearSubmitError: true,
     );
   }
 
@@ -164,6 +202,8 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
       step: wantsDrawing ? AnnoyanceChatStep.drawing : AnnoyanceChatStep.score,
       wantsDrawing: wantsDrawing,
       clearDrawing: true,
+      clearCreatedAnnoyance: true,
+      clearSubmitError: true,
     );
   }
 
@@ -178,6 +218,8 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
       step: AnnoyanceChatStep.score,
       wantsDrawing: true,
       drawing: drawing,
+      clearCreatedAnnoyance: true,
+      clearSubmitError: true,
     );
   }
 
@@ -189,6 +231,8 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
       step: AnnoyanceChatStep.drawingDecision,
       clearDrawingChoice: true,
       clearDrawing: true,
+      clearCreatedAnnoyance: true,
+      clearSubmitError: true,
     );
   }
 
@@ -201,6 +245,8 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
       step: AnnoyanceChatStep.sharing,
       score: score,
       clearSharing: true,
+      clearCreatedAnnoyance: true,
+      clearSubmitError: true,
     );
   }
 
@@ -208,7 +254,48 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
     if (state.step != AnnoyanceChatStep.sharing) {
       return;
     }
-    state = state.copyWith(step: AnnoyanceChatStep.review, isShared: isShared);
+    state = state.copyWith(
+      step: AnnoyanceChatStep.review,
+      isShared: isShared,
+      clearCreatedAnnoyance: true,
+      clearSubmitError: true,
+    );
+  }
+
+  Future<void> submit() async {
+    final repository = _annoyanceRepository;
+    final draft = state;
+    if (repository == null ||
+        draft.step != AnnoyanceChatStep.review ||
+        !draft.canSubmit) {
+      return;
+    }
+
+    state = draft.copyWith(
+      step: AnnoyanceChatStep.submitting,
+      clearCreatedAnnoyance: true,
+      clearSubmitError: true,
+    );
+
+    try {
+      final response = await repository.create(
+        category: draft.category!,
+        recordMethod: draft.recordMethod!,
+        content: draft.contentText.trim(),
+        contentMedia: draft.contentMedia,
+        drawing: draft.drawing,
+        score: draft.score!,
+        isShared: draft.isShared!,
+      );
+      state = state.copyWith(
+        step: AnnoyanceChatStep.completed,
+        createdAnnoyance: response,
+      );
+    } on ApiException catch (error) {
+      state = draft.copyWith(submitError: error.message);
+    } catch (_) {
+      state = draft.copyWith(submitError: '送出失敗，請稍後再試。');
+    }
   }
 
   void goBack() {
@@ -224,6 +311,8 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
         clearDrawing: true,
         clearScore: true,
         clearSharing: true,
+        clearCreatedAnnoyance: true,
+        clearSubmitError: true,
       ),
       AnnoyanceChatStep.content => state.copyWith(
         step: AnnoyanceChatStep.recordMethod,
@@ -234,6 +323,8 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
         clearDrawing: true,
         clearScore: true,
         clearSharing: true,
+        clearCreatedAnnoyance: true,
+        clearSubmitError: true,
       ),
       AnnoyanceChatStep.drawingDecision => state.copyWith(
         step: AnnoyanceChatStep.content,
@@ -241,6 +332,8 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
         clearDrawing: true,
         clearScore: true,
         clearSharing: true,
+        clearCreatedAnnoyance: true,
+        clearSubmitError: true,
       ),
       AnnoyanceChatStep.drawing => state.copyWith(
         step: AnnoyanceChatStep.drawingDecision,
@@ -248,6 +341,8 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
         clearDrawing: true,
         clearScore: true,
         clearSharing: true,
+        clearCreatedAnnoyance: true,
+        clearSubmitError: true,
       ),
       AnnoyanceChatStep.score => state.copyWith(
         step: AnnoyanceChatStep.drawingDecision,
@@ -255,13 +350,18 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
         clearDrawing: true,
         clearScore: true,
         clearSharing: true,
+        clearCreatedAnnoyance: true,
+        clearSubmitError: true,
       ),
       AnnoyanceChatStep.sharing => state.copyWith(
         step: AnnoyanceChatStep.score,
         clearSharing: true,
+        clearCreatedAnnoyance: true,
+        clearSubmitError: true,
       ),
       AnnoyanceChatStep.review => state.copyWith(
         step: AnnoyanceChatStep.sharing,
+        clearSubmitError: true,
       ),
       _ => state,
     };
