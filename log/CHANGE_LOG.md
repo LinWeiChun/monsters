@@ -8,6 +8,58 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-13 15:18
+
+Task
+TASK-066 陪伴式首頁怪獸互動動畫補充（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 維持新版陪伴式首頁與 Web 獨立桌面版型。
+- 使用 Flutter `AnimationController` 為既有怪獸 PNG 加入有限次數的呼吸與上下漂浮動畫。
+- 點擊怪獸時播放彈跳、縮放與小幅擺動，不修改原始圖片且未新增第三方套件。
+- 支援系統「減少動態效果」，啟用時停止待機與點擊動畫。
+- 新增語意標籤、Tooltip 與可點擊區域。
+- 在既有 Figma 檔案新增怪獸待機、點擊與 Reduce Motion 動效規格區塊。
+- 檢查 Log 保存期限；最早紀錄為 2026-06-29，沒有超過一個月的紀錄，因此未刪除 Log。
+
+### Modified
+
+- `frontend/lib/widgets/home/companion_hero.dart`
+- `frontend/test/home_page_test.dart`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- `flutter analyze lib/widgets/home/companion_hero.dart test/home_page_test.dart`：通過，無問題。
+- `flutter test test/home_page_test.dart`：5 項測試全部通過。
+- `flutter test`：76 項測試全部通過。
+
+### system_data Reference
+
+- 延續舊版首頁怪獸具有生命感的設計意圖。
+- 未沿用舊版全畫面隨機位移、Timer 與固定座標動畫。
+
+### API
+
+- 無 API 異動。
+
+### Database
+
+- 無 Database 異動。
+
+### Pending
+
+- 待使用者進行動畫視覺 review。
+
+---
+
 ## 2026-07-13 14:50
 
 Task

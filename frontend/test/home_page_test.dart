@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:monsters/routes/app_router.dart';
 import 'package:monsters/routes/app_routes.dart';
 import 'package:monsters/theme/app_theme.dart';
+import 'package:monsters/widgets/home/companion_hero.dart';
 
 void main() {
   Future<void> pumpHome(WidgetTester tester, Size size) async {
@@ -17,6 +18,12 @@ void main() {
         child: MaterialApp.router(
           theme: AppTheme.light(),
           routerConfig: createAppRouter(initialLocation: AppPath.home),
+          builder: (context, child) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: false),
+              child: child!,
+            );
+          },
         ),
       ),
     );
@@ -53,5 +60,40 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('annoyanceChatStartButton')), findsOneWidget);
+  });
+
+  testWidgets('tapping companion monster runs reaction animation', (
+    tester,
+  ) async {
+    await pumpHome(tester, const Size(390, 844));
+
+    await tester.tap(find.byKey(const Key('homeAnimatedMonster')));
+    await tester.pump();
+
+    expect(
+      find.byKey(const Key('homeAnimatedMonsterReacting')),
+      findsOneWidget,
+    );
+
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('homeAnimatedMonsterIdle')), findsOneWidget);
+  });
+
+  testWidgets('reduced motion keeps companion monster static', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        home: const MediaQuery(
+          data: MediaQueryData(disableAnimations: true),
+          child: Scaffold(body: CompanionHero(greetingName: '小林')),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('homeAnimatedMonster')));
+    await tester.pump(const Duration(milliseconds: 600));
+
+    expect(find.byKey(const Key('homeAnimatedMonsterIdle')), findsOneWidget);
+    expect(find.byKey(const Key('homeAnimatedMonsterReacting')), findsNothing);
   });
 }

@@ -901,3 +901,9 @@
 2026-07-13,14:50,TASK-066,Documentation,docs/TASKS.md,修改,新增陪伴式首頁 REVIEW Task,Codex,否,否,否,否,
 2026-07-13,14:50,TASK-066,Documentation,log/CHANGE_LOG.md,修改,新增 TASK-066 工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 Log
 2026-07-13,14:50,TASK-066,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-066 history 紀錄,Codex,否,否,否,否,CSV 作為本次 history 來源
+2026-07-13,15:18,TASK-066,Frontend,frontend/lib/widgets/home/companion_hero.dart,修改,新增怪獸待機與點擊程式動畫,Codex,否,否,是,否,支援減少動態效果且不修改原始圖片
+2026-07-13,15:18,TASK-066,Test,frontend/test/home_page_test.dart,修改,新增點擊怪獸反應與減少動態效果測試,Codex,否,否,是,否,首頁 5 項與完整 76 項 Flutter 測試通過
+2026-07-13,15:18,TASK-066,Documentation,docs/UI_SPEC.md,修改,新增首頁怪獸動畫與減少動態效果規範,Codex,否,否,是,否,
+2026-07-13,15:18,TASK-066,Documentation,docs/TASKS.md,修改,同步 TASK-066 怪獸動畫 REVIEW 狀態,Codex,否,否,否,否,
+2026-07-13,15:18,TASK-066,Documentation,log/CHANGE_LOG.md,修改,新增怪獸互動動畫工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 Log
+2026-07-13,15:18,TASK-066,Documentation,log/CHANGE_HISTORY.csv,修改,新增怪獸互動動畫 history,Codex,否,否,否,否,
