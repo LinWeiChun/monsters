@@ -8,6 +8,64 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-13 10:52
+
+Task
+TASK-064 Phase 3 annoyance type migration 重跑修復（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- Investigated the Workbench error `Error Code: 1060. Duplicate column name 'code'` from `20260711_01_add_annoyance_type_codes_and_seed.sql`.
+- Updated the migration to check `information_schema.columns` before adding `annoyance_types.code`.
+- Updated the migration to check `information_schema.statistics` before adding `uk_annoyance_types_code`.
+- Reviewed the other SQL migration files and updated `20260711_02` to avoid rerun failures after `entry_media` has already been migrated to `object_key`.
+- Confirmed `20260711_03` already checks for the unique score index and added an explicit `USE monsters;` for Workbench execution consistency.
+- Kept the approved Phase 3 seed values unchanged.
+- Updated database documentation to state that `20260711_01` can be rerun in Workbench.
+- Checked log retention before adding this entry. The oldest record is 2026-06-29, so no record older than one month exists and none was deleted.
+
+### Modified
+
+- `database/migrations/20260711_01_add_annoyance_type_codes_and_seed.sql`
+- `database/migrations/20260711_02_make_entry_media_private.sql`
+- `database/migrations/20260711_03_make_mood_score_unique.sql`
+- `database/init/README.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- `docker compose config` passed in the previous migration fix; direct MySQL execution was not run because Docker daemon was unavailable in this environment.
+- SQL was made idempotent for the reported duplicate column case, the matching duplicate index case, and the already-migrated entry media schema case.
+
+### system_data Reference
+
+- No new legacy behavior was copied; the migration keeps the approved Phase 3 lookup code contract.
+
+### API
+
+- No API endpoint changed.
+
+### Database
+
+- `20260711_01` now safely skips existing `code` column and existing `uk_annoyance_types_code` index, then upserts the six approved category rows.
+- `20260711_02` now skips legacy column conversion when `media_url` is already gone, and conditionally adds missing private-media columns, index, and constraints.
+- `20260711_03` already had rerun guards for `moods.score` uniqueness and now explicitly selects the `monsters` schema.
+
+### UI
+
+- No UI change.
+
+### Pending
+
+- Re-run `database/migrations/20260711_01_add_annoyance_type_codes_and_seed.sql` in Workbench, then retry the annoyance submit flow.
+- `backend/src/main/resources/application.yml` and `frontend/tool/run_web_local.ps1` have unrelated local changes and were intentionally excluded from this Task.
+
+---
+
 ## 2026-07-13 10:48
 
 Task
