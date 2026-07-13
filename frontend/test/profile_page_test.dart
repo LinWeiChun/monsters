@@ -95,7 +95,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('homeProfileButton')));
+    await tester.tap(find.byKey(const Key('homeAccountMenu')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('個人資料'));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('profileUserNameField')), findsOneWidget);
