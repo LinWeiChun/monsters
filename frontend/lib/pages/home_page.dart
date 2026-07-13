@@ -37,6 +37,13 @@ class HomePage extends ConsumerWidget {
               const Text('首頁'),
               const SizedBox(height: AppSpacing.lg),
               FilledButton.icon(
+                key: const Key('homeAnnoyanceChatButton'),
+                onPressed: () => context.goNamed(AppRoute.annoyanceChat),
+                icon: const Icon(Icons.add_comment_outlined),
+                label: const Text('新增煩惱'),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              FilledButton.icon(
                 key: const Key('homeProfileButton'),
                 onPressed: () => context.goNamed(AppRoute.profile),
                 icon: const Icon(Icons.person_outline),

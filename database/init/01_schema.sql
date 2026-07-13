@@ -167,13 +167,27 @@ CREATE TABLE IF NOT EXISTS user_active_monsters (
 
 CREATE TABLE IF NOT EXISTS annoyance_types (
   id BIGINT NOT NULL AUTO_INCREMENT,
+  code VARCHAR(50) NOT NULL,
   type_name VARCHAR(80) NOT NULL,
   display_order INT NOT NULL DEFAULT 0,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
+  UNIQUE KEY uk_annoyance_types_code (code),
   UNIQUE KEY uk_annoyance_types_type_name (type_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO annoyance_types (code, type_name, display_order)
+VALUES
+  ('ACADEMIC', '課業', 1),
+  ('CAREER', '事業', 2),
+  ('LOVE', '愛情', 3),
+  ('FRIENDSHIP', '友情', 4),
+  ('FAMILY', '親情', 5),
+  ('OTHER', '其他', 6)
+ON DUPLICATE KEY UPDATE
+  type_name = VALUES(type_name),
+  display_order = VALUES(display_order);
 
 CREATE TABLE IF NOT EXISTS moods (
   id BIGINT NOT NULL AUTO_INCREMENT,
@@ -186,8 +200,20 @@ CREATE TABLE IF NOT EXISTS moods (
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uk_moods_code (code),
-  KEY idx_moods_score (score)
+  UNIQUE KEY uk_moods_score (score)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO moods (code, label, score, image_url, display_order)
+VALUES
+  ('SCORE_1', '1分', 1, NULL, 1),
+  ('SCORE_2', '2分', 2, NULL, 2),
+  ('SCORE_3', '3分', 3, NULL, 3),
+  ('SCORE_4', '4分', 4, NULL, 4),
+  ('SCORE_5', '5分', 5, NULL, 5)
+ON DUPLICATE KEY UPDATE
+  label = VALUES(label),
+  image_url = VALUES(image_url),
+  display_order = VALUES(display_order);
 
 CREATE TABLE IF NOT EXISTS entries (
   id BIGINT NOT NULL AUTO_INCREMENT,
@@ -231,18 +257,29 @@ CREATE TABLE IF NOT EXISTS entry_media (
   id BIGINT NOT NULL AUTO_INCREMENT,
   entry_id BIGINT NOT NULL,
   media_type VARCHAR(30) NOT NULL,
-  media_url VARCHAR(500) NOT NULL,
+  object_key VARCHAR(500) NOT NULL,
+  content_type VARCHAR(100) NOT NULL,
+  file_size_bytes BIGINT NOT NULL,
+  duration_seconds DECIMAL(10,3) NULL,
   display_order INT NOT NULL DEFAULT 0,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
   deleted_at DATETIME NULL,
   PRIMARY KEY (id),
+  UNIQUE KEY uk_entry_media_object_key (object_key),
   KEY idx_entry_media_entry_id (entry_id),
   CONSTRAINT fk_entry_media_entry
     FOREIGN KEY (entry_id) REFERENCES entries (id),
   CONSTRAINT chk_entry_media_type
-    CHECK (media_type IN ('image', 'audio', 'drawing'))
+    CHECK (media_type IN ('image', 'audio', 'video', 'drawing')),
+  CONSTRAINT chk_entry_media_size
+    CHECK (file_size_bytes > 0),
+  CONSTRAINT chk_entry_media_duration
+    CHECK (
+      (media_type IN ('audio', 'video') AND duration_seconds > 0)
+      OR (media_type IN ('image', 'drawing') AND duration_seconds IS NULL)
+    )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS entry_likes (

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../pages/annoyance_chat_page.dart';
 import '../pages/home_page.dart';
 import '../pages/login_page.dart';
 import '../pages/password_lock_page.dart';
@@ -46,6 +47,11 @@ GoRouter createAppRouter({String initialLocation = AppPath.splash}) {
         path: AppPath.passwordLock,
         name: AppRoute.passwordLock,
         builder: (context, state) => const PasswordLockPage(),
+      ),
+      GoRoute(
+        path: AppPath.annoyanceChat,
+        name: AppRoute.annoyanceChat,
+        builder: (context, state) => const AnnoyanceChatPage(),
       ),
     ],
   );

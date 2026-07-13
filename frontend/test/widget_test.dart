@@ -13,7 +13,7 @@ void main() {
     await tester.pumpWidget(const ProviderScope(child: MonstersApp()));
     await tester.pumpAndSettle();
 
-    expect(find.text('貘nsters'), findsOneWidget);
+    expect(find.byType(Image), findsOneWidget);
     expect(find.text('登入'), findsOneWidget);
     expect(find.text('註冊'), findsOneWidget);
   });

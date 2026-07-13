@@ -78,13 +78,17 @@ Google 登入執行時需提供 dart-define，且後端 `GOOGLE_CLIENT_IDS` 必�
 GOOGLE_CLIENT_ID=your-web-client-id.apps.googleusercontent.com \
   ./tool/run_web_local.sh
 
+
+# Windows PowerShell
+.\tool\run_web_local.ps1 -GoogleClientId your-web-client-id.apps.googleusercontent.com
 # Android / iOS
 /Users/linweijun/fultter/flutter/bin/flutter run \
   --dart-define=GOOGLE_CLIENT_ID=your-platform-client-id.apps.googleusercontent.com \
   --dart-define=GOOGLE_SERVER_CLIENT_ID=your-web-client-id.apps.googleusercontent.com
 ```
 
-`tool/run_web_local.sh` 會固定 Web 本機網址為 `http://localhost:5050`，避免 Flutter Web 每次啟動改用不同 port 而被 Google OAuth 擋下。Google Cloud OAuth Client 的 Authorized JavaScript origins 請加入：
+`tool/run_web_local.sh` 與 Windows `tool/run_web_local.ps1` 會固定 Web 本機網址為 `http://localhost:5050`，避免 Flutter Web 每次啟動改用不同 port 而被 Google OAuth 擋下。PowerShell 版本可將 Client ID 填入檔案內的 `$DefaultGoogleClientId`，之後只需執行 `./tool/run_web_local.ps1`。Google Cloud OAuth Client 的 Authorized JavaScript origins 請加入：
+un_web_local.ps1`。Google Cloud OAuth Client 的 Authorized JavaScript origins 請加入：
 
 ```text
 http://localhost:5050

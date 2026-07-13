@@ -85,13 +85,34 @@
 流程：
 
 1. 怪獸引導對話
-2. 選擇煩惱類別
-3. 選擇文字、錄音、照片或影片
-4. 輸入內容
-5. 畫心情
-6. 記錄煩惱分數
-7. 選擇是否分享
-8. 顯示獎勵頁面
+2. 以結構化選擇元件選擇煩惱類別
+3. 選擇文字、錄音、照片或影片其中一種主要記錄方式
+4. 輸入文字或選取一個主要媒體，顯示預覽、移除與重選操作
+5. 選擇是否畫心情；選擇繪圖時最多附加一張心情圖
+6. 以結構化元件選擇 1 至 5 分
+7. 選擇是否分享，預設私人
+8. 檢視摘要並送出；送出中禁止重複操作，失敗時保留草稿
+9. 顯示建立完成頁面，可前往歷史記錄
+
+互動採聊天外觀搭配 `AnnoyanceCategorySelector`、`RecordMethodSelector`、`MediaPreviewCard`、`MoodDrawingCanvas`、`MoodScoreSelector`、`ShareChoiceCard` 與 `AnnoyanceReviewCard`，不得以自由文字比對選項。狀態依 `intro → category → recordMethod → content → drawingDecision → drawing（optional）→ score → sharing → review → submitting → completed` 推進。
+
+前後端媒體限制一致：圖片 jpeg/png/webp，最多 5 MB；錄音 mp4/aac/mpeg/wav，最多 10 MB 或 5 分鐘；影片 mp4/quicktime/webm，最多 50 MB 或 60 秒；心情圖 png/webp，最多 5 MB。Web、Android、iOS 的平台差異集中於媒體 Service／Adapter。
+
+煩惱媒體存放於獨立的 private R2 bucket。Flutter 只能使用 API 回傳的 Backend download URL 並附帶 JWT 讀取，不得組合 R2 bucket URL 或保存 object key；錄音與影片播放器需支援 Backend 的 HTTP Range response。
+
+Phase 3 完成頁不顯示假怪獸獎勵；真實獎勵與圖鑑導向於 Phase 6 串接。
+
+聊天室入口使用 `/annoyances/new`，由首頁「新增煩惱」進入。聊天室基礎 Task 建立聊天泡泡、不可變草稿狀態、上一步／重新開始操作，以及 `intro → category → recordMethod → content` 的結構化推進；content 之後的媒體選取、繪圖、分數、分享、摘要與送出依後續 Phase 3 Task 接續同一狀態機，不得另建平行流程。
+
+媒體內容 Task 在 `content` 步驟提供文字輸入、單一圖片或影片的相簿／相機來源、App 內 WAV 錄音，以及圖片、錄音、影片預覽。選取後需顯示檔名、MIME type、大小與可取得的長度，並提供移除及重新選擇；媒體處理集中於 `AnnoyanceMediaService` 與平台 Adapter。圖片只在通過 5 MB 限制後讀入預覽 bytes，錄音與影片保留 `XFile`，避免在草稿中長期複製大型檔案。Android 最低 SDK 依目前 Flutter 預設 24，iOS 必須宣告相簿、相機與麥克風用途；Web 不支援的相機來源需顯示可理解的失敗訊息並保留檔案選取替代操作。
+
+畫心情 Task 在主要內容確認後顯示「想畫／先不用」結構化選項；選擇略過時直接進入分數步驟，選擇繪圖時顯示單一正方形畫布。`MoodDrawingCanvas` 使用正規化座標保存筆畫，提供六色畫筆、2 至 16 的線寬、橡皮擦、復原、清除、取消與完成操作；完成時以白色背景輸出固定 1024×1024 PNG，限制 5 MB，並在聊天紀錄顯示一張心情圖預覽後進入分數步驟。取消繪圖須返回是否繪圖選項，返回上一步或重新選擇主要內容時須清除未提交的繪圖草稿；心情圖不另存至相簿，後續由既有新增煩惱 multipart API 的 `drawingFile` 上傳。
+
+煩惱分數 Task 使用 `MoodScoreSelector` 顯示視覺權重一致的 `1分`～`5分` 結構化按鈕，不以顏色、表情或文案綁定正負情緒語意。使用者點選後，草稿保存整數 `score` 並進入 `sharing` 步驟；僅接受 1 至 5，與既有 API `score` contract 及 Database `SCORE_1`～`SCORE_5` lookup 一致。從分享步驟返回時保留原分數並標示選取狀態以便修改；返回繪圖選擇或重新開始時清除分數。分享、摘要、送出與完成 UI 由後續 Task 接續同一狀態機。
+
+煩惱分享 Task 使用 `ShareChoiceCard` 顯示「保持私人」與「分享到社群」兩個結構化選項，預設語意為私人，不使用無參數 toggle。使用者選擇後，草稿保存 boolean `isShared`，並進入 `review` 步驟；選擇「保持私人」對應既有 API `isShared = false`，選擇「分享到社群」對應 `isShared = true`。從摘要步驟返回分享步驟時保留原選擇並標示選取狀態；返回分數步驟、上游內容步驟或重新開始時清除分享選擇。
+
+煩惱摘要送出 Task 使用 `AnnoyanceReviewCard` 顯示類別、記錄方式、主要內容、心情圖、分數與分享狀態。送出時由 `AnnoyanceRepository` 呼叫既有 `POST /api/annoyances` multipart contract，`request` 為 JSON part，依草稿內容附加 optional `contentFile` 與 `drawingFile`；送出中進入 `submitting` 狀態並禁止上一步與重複送出。成功後保存 `AnnoyanceResponse` 並顯示 `AnnoyanceCompletedCard`，Phase 3 僅呈現建立成功與分享狀態，不顯示假怪獸獎勵；失敗時返回 `review`、保留草稿並顯示 API 錯誤訊息。
 
 ### 2.8 新增日記聊天室
 
@@ -342,7 +363,7 @@ REST API
 - Google 登入成功後需呼叫 `POST /api/auth/google-login`，由後端驗證 Google ID Token 並回傳本系統 `LoginResult`。
 - Web 版需使用 Google Identity Services 官方按鈕；Android / iOS 可使用共用 Flutter 按鈕觸發 Google SDK。
 - Web 版 Google SDK 初始化只傳 `GOOGLE_CLIENT_ID`，不得傳 `serverClientId`，避免官方按鈕停留在 `Getting ready` 狀態。
-- Web 本機測試需使用固定 origin `http://localhost:5050`，並透過 `frontend/tool/run_web_local.sh` 啟動，避免每次重啟隨機 port 造成 Google OAuth origin mismatch。
+- Web 本機測試需使用固定 origin `http://localhost:5050`，並透過 `frontend/tool/run_web_local.sh` 或 Windows `frontend/tool/run_web_local.ps1` 啟動，避免每次重啟隨機 port 造成 Google OAuth origin mismatch。
 - Google 登入成功後必須沿用 `AuthSessionStore` 保存 30 天登入狀態；登出時需同時清除本地 session 並嘗試執行 Google SDK sign-out。
 
 ## Flutter Register Page 實作規範
