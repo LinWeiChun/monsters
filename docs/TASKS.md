@@ -13,6 +13,16 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ---
 
+## 插隊任務：Penpot MCP 畫面排版同步
+
+- [ ] 使用 Penpot MCP 讀取指定畫面設計
+- [ ] 比對 Flutter 現有畫面與 Penpot 排版差異
+- [ ] 依 Penpot 設計調整畫面排版
+- [ ] 執行 Flutter Analyze、Test 與 Web 視覺驗證
+- [ ] 同步 UI 規格與 Log
+
+---
+
 ## Phase 0：專案初始化
 
 - [x] 建立 Monorepo 結構（DONE）
