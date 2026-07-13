@@ -110,6 +110,8 @@ Phase 3 完成頁不顯示假怪獸獎勵；真實獎勵與圖鑑導向於 Phase
 
 煩惱分數 Task 使用 `MoodScoreSelector` 顯示視覺權重一致的 `1分`～`5分` 結構化按鈕，不以顏色、表情或文案綁定正負情緒語意。使用者點選後，草稿保存整數 `score` 並進入 `sharing` 步驟；僅接受 1 至 5，與既有 API `score` contract 及 Database `SCORE_1`～`SCORE_5` lookup 一致。從分享步驟返回時保留原分數並標示選取狀態以便修改；返回繪圖選擇或重新開始時清除分數。分享、摘要、送出與完成 UI 由後續 Task 接續同一狀態機。
 
+煩惱分享 Task 使用 `ShareChoiceCard` 顯示「保持私人」與「分享到社群」兩個結構化選項，預設語意為私人，不使用無參數 toggle。使用者選擇後，草稿保存 boolean `isShared`，並進入 `review` 步驟；選擇「保持私人」對應既有 API `isShared = false`，選擇「分享到社群」對應 `isShared = true`。從摘要步驟返回分享步驟時保留原選擇並標示選取狀態；返回分數步驟、上游內容步驟或重新開始時清除分享選擇。摘要、送出與完成 UI 由後續 Task 接續同一狀態機。
+
 ### 2.8 新增日記聊天室
 
 流程：

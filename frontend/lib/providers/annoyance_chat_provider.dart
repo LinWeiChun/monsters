@@ -19,6 +19,7 @@ class AnnoyanceChatState {
     this.wantsDrawing,
     this.drawing,
     this.score,
+    this.isShared,
   });
 
   final AnnoyanceChatStep step;
@@ -29,6 +30,7 @@ class AnnoyanceChatState {
   final bool? wantsDrawing;
   final AnnoyanceDrawingFile? drawing;
   final int? score;
+  final bool? isShared;
 
   bool get isContentReady => switch (recordMethod) {
     AnnoyanceRecordMethod.text => contentText.trim().isNotEmpty,
@@ -54,6 +56,8 @@ class AnnoyanceChatState {
     bool clearDrawing = false,
     int? score,
     bool clearScore = false,
+    bool? isShared,
+    bool clearSharing = false,
   }) {
     return AnnoyanceChatState(
       step: step ?? this.step,
@@ -67,6 +71,7 @@ class AnnoyanceChatState {
           clearDrawingChoice ? null : wantsDrawing ?? this.wantsDrawing,
       drawing: clearDrawing ? null : drawing ?? this.drawing,
       score: clearScore ? null : score ?? this.score,
+      isShared: clearSharing ? null : isShared ?? this.isShared,
     );
   }
 }
@@ -94,6 +99,7 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
       clearDrawingChoice: true,
       clearDrawing: true,
       clearScore: true,
+      clearSharing: true,
     );
   }
 
@@ -109,6 +115,7 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
       clearDrawingChoice: true,
       clearDrawing: true,
       clearScore: true,
+      clearSharing: true,
     );
   }
 
@@ -145,6 +152,7 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
       clearDrawingChoice: true,
       clearDrawing: true,
       clearScore: true,
+      clearSharing: true,
     );
   }
 
@@ -189,7 +197,18 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
         !annoyanceScores.contains(score)) {
       return;
     }
-    state = state.copyWith(step: AnnoyanceChatStep.sharing, score: score);
+    state = state.copyWith(
+      step: AnnoyanceChatStep.sharing,
+      score: score,
+      clearSharing: true,
+    );
+  }
+
+  void selectSharing(bool isShared) {
+    if (state.step != AnnoyanceChatStep.sharing) {
+      return;
+    }
+    state = state.copyWith(step: AnnoyanceChatStep.review, isShared: isShared);
   }
 
   void goBack() {
@@ -204,6 +223,7 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
         clearDrawingChoice: true,
         clearDrawing: true,
         clearScore: true,
+        clearSharing: true,
       ),
       AnnoyanceChatStep.content => state.copyWith(
         step: AnnoyanceChatStep.recordMethod,
@@ -213,27 +233,35 @@ class AnnoyanceChatController extends StateNotifier<AnnoyanceChatState> {
         clearDrawingChoice: true,
         clearDrawing: true,
         clearScore: true,
+        clearSharing: true,
       ),
       AnnoyanceChatStep.drawingDecision => state.copyWith(
         step: AnnoyanceChatStep.content,
         clearDrawingChoice: true,
         clearDrawing: true,
         clearScore: true,
+        clearSharing: true,
       ),
       AnnoyanceChatStep.drawing => state.copyWith(
         step: AnnoyanceChatStep.drawingDecision,
         clearDrawingChoice: true,
         clearDrawing: true,
         clearScore: true,
+        clearSharing: true,
       ),
       AnnoyanceChatStep.score => state.copyWith(
         step: AnnoyanceChatStep.drawingDecision,
         clearDrawingChoice: true,
         clearDrawing: true,
         clearScore: true,
+        clearSharing: true,
       ),
       AnnoyanceChatStep.sharing => state.copyWith(
         step: AnnoyanceChatStep.score,
+        clearSharing: true,
+      ),
+      AnnoyanceChatStep.review => state.copyWith(
+        step: AnnoyanceChatStep.sharing,
       ),
       _ => state,
     };
