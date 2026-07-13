@@ -1,3 +1,5 @@
+USE monsters;
+
 DROP PROCEDURE IF EXISTS ensure_unique_mood_score;
 
 DELIMITER //

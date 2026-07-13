@@ -1,7 +1,23 @@
 USE monsters;
 
-ALTER TABLE annoyance_types
-  ADD COLUMN code VARCHAR(50) NULL AFTER id;
+DROP PROCEDURE IF EXISTS ensure_annoyance_type_code_column;
+DELIMITER $$
+CREATE PROCEDURE ensure_annoyance_type_code_column()
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = DATABASE()
+      AND table_name = 'annoyance_types'
+      AND column_name = 'code'
+  ) THEN
+    ALTER TABLE annoyance_types
+      ADD COLUMN code VARCHAR(50) NULL AFTER id;
+  END IF;
+END$$
+DELIMITER ;
+CALL ensure_annoyance_type_code_column();
+DROP PROCEDURE IF EXISTS ensure_annoyance_type_code_column;
 
 UPDATE annoyance_types SET code = 'ACADEMIC' WHERE type_name = '課業' AND code IS NULL;
 UPDATE annoyance_types SET code = 'CAREER' WHERE type_name = '事業' AND code IS NULL;
@@ -24,5 +40,23 @@ ON DUPLICATE KEY UPDATE
   display_order = VALUES(display_order);
 
 ALTER TABLE annoyance_types
-  MODIFY COLUMN code VARCHAR(50) NOT NULL,
-  ADD UNIQUE KEY uk_annoyance_types_code (code);
+  MODIFY COLUMN code VARCHAR(50) NOT NULL;
+
+DROP PROCEDURE IF EXISTS ensure_annoyance_type_code_index;
+DELIMITER $$
+CREATE PROCEDURE ensure_annoyance_type_code_index()
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.statistics
+    WHERE table_schema = DATABASE()
+      AND table_name = 'annoyance_types'
+      AND index_name = 'uk_annoyance_types_code'
+  ) THEN
+    ALTER TABLE annoyance_types
+      ADD UNIQUE KEY uk_annoyance_types_code (code);
+  END IF;
+END$$
+DELIMITER ;
+CALL ensure_annoyance_type_code_index();
+DROP PROCEDURE IF EXISTS ensure_annoyance_type_code_index;
