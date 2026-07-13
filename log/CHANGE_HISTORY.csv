@@ -907,3 +907,6 @@
 2026-07-13,15:18,TASK-066,Documentation,docs/TASKS.md,修改,同步 TASK-066 怪獸動畫 REVIEW 狀態,Codex,否,否,否,否,
 2026-07-13,15:18,TASK-066,Documentation,log/CHANGE_LOG.md,修改,新增怪獸互動動畫工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 Log
 2026-07-13,15:18,TASK-066,Documentation,log/CHANGE_HISTORY.csv,修改,新增怪獸互動動畫 history,Codex,否,否,否,否,
+2026-07-13,17:57,TASK-067,Documentation,docs/TASKS.md,修改,將 TASK-066 陪伴式首頁與 Web 獨立桌面版型標記 DONE,Codex,否,否,否,否,使用者確認可收尾
+2026-07-13,17:57,TASK-067,Documentation,log/CHANGE_LOG.md,修改,新增 Phase 3 TASK-066 視覺 review 收尾紀錄,Codex,否,否,否,否,無超過一個月的紀錄
+2026-07-13,17:57,TASK-067,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-067 history 紀錄,Codex,否,否,否,否,
