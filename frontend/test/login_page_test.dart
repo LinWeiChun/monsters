@@ -190,7 +190,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('homeLogoutButton')));
+    await tester.tap(find.byKey(const Key('homeAccountMenu')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('登出'));
     await tester.pumpAndSettle();
 
     expect(repository.didLogout, isTrue);

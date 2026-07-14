@@ -11,12 +11,13 @@ class AppTheme {
       seedColor: AppColors.seed,
       brightness: Brightness.light,
       surface: AppColors.lightSurface,
+    ).copyWith(
+      secondary: AppColors.legacyHighlight,
+      tertiary: AppColors.companionBlue,
     );
 
     return _buildTheme(
-      colorScheme: colorScheme.copyWith(
-        outline: AppColors.lightOutline,
-      ),
+      colorScheme: colorScheme.copyWith(outline: AppColors.lightOutline),
       scaffoldBackgroundColor: AppColors.lightBackground,
     );
   }
@@ -29,9 +30,7 @@ class AppTheme {
     );
 
     return _buildTheme(
-      colorScheme: colorScheme.copyWith(
-        outline: AppColors.darkOutline,
-      ),
+      colorScheme: colorScheme.copyWith(outline: AppColors.darkOutline),
       scaffoldBackgroundColor: AppColors.darkBackground,
     );
   }

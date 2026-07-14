@@ -13,6 +13,16 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ---
 
+## 插隊任務：Penpot MCP 畫面排版同步
+
+- [ ] 使用 Penpot MCP 讀取指定畫面設計
+- [ ] 比對 Flutter 現有畫面與 Penpot 排版差異
+- [ ] 依 Penpot 設計調整畫面排版
+- [ ] 執行 Flutter Analyze、Test 與 Web 視覺驗證
+- [ ] 同步 UI 規格與 Log
+
+---
+
 ## Phase 0：專案初始化
 
 - [x] 建立 Monorepo 結構（DONE）
@@ -80,21 +90,27 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ## Phase 3：煩惱功能
 
-- [ ] 檢查 `system_data/` 中舊煩惱、聊天室、心情繪圖、分數與分享流程
-- [ ] 整理可參考的業務邏輯與 UI 互動
-- [ ] 依新版 Entry 架構與 API 規格重新實作
+- [x] 檢查 `system_data/` 中舊煩惱、聊天室、心情繪圖、分數與分享流程（DONE：PR #24 已合併至 `feature/phase3`）
+- [x] 整理可參考的業務邏輯與 UI 互動（DONE：PR #26 已合併至 `feature/phase3`；已核准 D1-A、D2-A、D3-A、D4-A、D5-B、D6-A、D7-A、D8-A）
+- [x] 依新版 Entry 架構與 API 規格重新實作（DONE：Phase 3 整合驗證通過，PR #40、#41、#42 已合併至 `feature/phase3`）
 
-- [ ] 建立 annoyance_type
-- [ ] 建立 annoyance Entity / DTO / Repository / Service / Controller
-- [ ] 新增煩惱 API
-- [ ] 查詢煩惱 API
-- [ ] 修改煩惱 API
-- [ ] 解決煩惱 API
-- [ ] 分享 / 取消分享煩惱 API
-- [ ] Flutter 新增煩惱聊天室
-- [ ] Flutter 畫心情功能
-- [ ] Flutter 煩惱分數選擇
-- [ ] 測試
+- [x] 建立 annoyance_type（DONE：PR #27 已合併至 `feature/phase3`）
+- [x] 建立 entry_media 圖片 / 錄音 / 影片 / 心情圖與 R2 上傳流程（DONE：PR #28 已合併至 `feature/phase3`）
+- [x] 建立 annoyance Entity / DTO / Repository / Service / Controller（DONE：PR #29 已合併至 `feature/phase3`）
+- [x] 新增煩惱 API（DONE：PR #30 已合併至 `feature/phase3`）
+- [x] 重構 Backend package 為 `com.monsters.<layer>.<module>`（DONE：PR #31 已合併至 `feature/phase3`）
+- [x] 查詢煩惱 API（DONE：PR #32 已合併至 `feature/phase3`）
+- [x] 修改煩惱 API（DONE：PR #33 已合併至 `feature/phase3`）
+- [x] 解決煩惱 API（DONE：PR #34 已合併至 `feature/phase3`）
+- [x] 分享 / 取消分享煩惱 API（DONE：PR #34 已合併至 `feature/phase3`）
+- [x] Flutter 新增煩惱聊天室（DONE：PR #35 已合併至 `feature/phase3`）
+- [x] Flutter 文字 / 圖片 / 錄音 / 影片選取與預覽（DONE：PR #36 已合併至 `feature/phase3`）
+- [x] Flutter 畫心情功能（DONE：PR #37 已合併至 `feature/phase3`）
+- [x] Flutter 煩惱分數選擇（DONE：PR #38 已合併至 `feature/phase3`，review 驗證通過）
+- [x] Flutter 煩惱分享選擇（DONE：PR #40 已合併至 `feature/phase3`）
+- [x] Flutter 新增煩惱摘要送出與完成流程（DONE：PR #41 已合併至 `feature/phase3`）
+- [x] 測試（DONE：Flutter full test 與 Backend Gradle test 通過）
+- [x] Flutter 陪伴式首頁與 Web 獨立桌面版型（DONE：TASK-066 已合併至 `develop`，使用者確認可收尾）
 
 ---
 
@@ -141,6 +157,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [ ] 查詢全部怪獸 API
 - [ ] 查詢我的怪獸 API
 - [ ] 隨機取得怪獸 API
+- [ ] 串接新增煩惱後的隨機怪獸獎勵與完成頁流程
 - [ ] 更改怪獸造型 API
 - [ ] Flutter 圖鑑頁
 - [ ] Flutter 怪獸詳細頁

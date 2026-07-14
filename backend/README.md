@@ -9,6 +9,16 @@
 - Gradle
 - MySQL
 
+## Package 結構
+
+Backend 使用 layer-first package layout：
+
+```text
+com.monsters.<layer>.<module>
+```
+
+例如 `com.monsters.controller.annoyance`、`com.monsters.service.auth`、`com.monsters.entity.user` 與 `com.monsters.security.common`。新程式不得回到 `com.monsters.<module>.<layer>`。`MonstersApplication` 維持在 root package `com.monsters`，以保留 Spring component 與 JPA scan 範圍。
+
 ## Profile 設定
 
 後端使用 Spring Boot Profile：
@@ -374,6 +384,8 @@ Response:
 
 Avatar upload stores the image in Cloudflare R2 and writes only the public URL to `users.avatar_url`.
 
+Entry media uses a separate private R2 bucket. Database records store only an internal object key, and clients must download media through an authenticated Backend endpoint after owner or sharing permission validation. Do not enable public access for the entry media bucket.
+
 R2 settings:
 
 | Setting | Environment variable |
@@ -385,6 +397,32 @@ R2 settings:
 | app.storage.r2.public-base-url | R2_PUBLIC_BASE_URL |
 | app.storage.r2.avatar-key-prefix | R2_AVATAR_KEY_PREFIX |
 | app.storage.r2.max-avatar-size-bytes | R2_MAX_AVATAR_SIZE_BYTES |
+| app.storage.r2.entry-media-bucket | R2_ENTRY_MEDIA_BUCKET |
+| app.storage.r2.entry-media-key-prefix | R2_ENTRY_MEDIA_KEY_PREFIX |
+| app.storage.r2.max-entry-image-size-bytes | R2_MAX_ENTRY_IMAGE_SIZE_BYTES |
+| app.storage.r2.max-entry-audio-size-bytes | R2_MAX_ENTRY_AUDIO_SIZE_BYTES |
+| app.storage.r2.max-entry-video-size-bytes | R2_MAX_ENTRY_VIDEO_SIZE_BYTES |
+| app.storage.r2.max-entry-drawing-size-bytes | R2_MAX_ENTRY_DRAWING_SIZE_BYTES |
+| app.storage.r2.max-entry-audio-duration-seconds | R2_MAX_ENTRY_AUDIO_DURATION_SECONDS |
+| app.storage.r2.max-entry-video-duration-seconds | R2_MAX_ENTRY_VIDEO_DURATION_SECONDS |
+| app.storage.r2.ffprobe-path | FFPROBE_PATH |
+| app.storage.r2.ffprobe-timeout-seconds | FFPROBE_TIMEOUT_SECONDS |
+
+Spring multipart settings:
+
+| Setting | Environment variable | Default |
+|---|---|---|
+| spring.servlet.multipart.max-file-size | MULTIPART_MAX_FILE_SIZE | 50MB |
+| spring.servlet.multipart.max-request-size | MULTIPART_MAX_REQUEST_SIZE | 60MB |
+
+The R2 token used by Backend requires Object Read & Write permission scoped only to the required avatar and private entry media buckets. Bucket administration permission is not required.
+
+Audio and video duration validation requires `ffprobe`:
+
+- The Backend Docker runtime installs FFmpeg automatically.
+- Local non-Docker development must install FFmpeg and ensure `ffprobe` is available on `PATH`, or set `FFPROBE_PATH` to the executable path.
+- Do not log uploaded content, object keys, probe output, or temporary file paths.
+- Entry media validates both MIME type and filename extension. If R2 upload succeeds but the Database transaction fails, Backend attempts to delete every object uploaded by that request without replacing the original error when cleanup also fails.
 
 ### Set My Password Lock
 

@@ -7,6 +7,8 @@ class AppColors {
   static const legacyBackgroundSoft = Color(0xFFFFED97);
   static const legacyWarm = Color(0xFFA0522D);
   static const legacyWarmOpacity = Color(0xE6A0522D);
+  static const legacyHighlight = Color(0xFFFFBB00);
+  static const companionBlue = Color(0xFF9DD9DE);
 
   static const seed = legacyWarm;
 

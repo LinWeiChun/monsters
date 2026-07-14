@@ -22,7 +22,7 @@
 | Google 登入 Client ID | 後端透過 `GOOGLE_CLIENT_IDS` 設定允許的 Google Client ID，可用逗號支援 Web / App 多組 Client ID |
 | 忘記密碼流程 | 後端產生 15 分鐘短效 reset token，資料庫只保存 token hash；目前回傳 resetToken 供開發串接，正式寄信服務待後續定案 |
 | 登出流程 | 使用 JWT revocation；登出時只保存 access token hash 與原 token 過期時間，JWT 驗證需拒絕已撤銷 token |
-| 檔案上傳儲存方式 | 使用 Cloudflare R2 雲端儲存；以 S3-compatible API 上傳，環境變數使用 `R2_ACCOUNT_ID`、`R2_ACCESS_KEY_ID`、`R2_SECRET_ACCESS_KEY`、`R2_BUCKET`、`R2_PUBLIC_BASE_URL`、`R2_AVATAR_KEY_PREFIX`、`R2_MAX_AVATAR_SIZE_BYTES` |
+| 檔案上傳儲存方式 | 使用 Cloudflare R2 S3-compatible API；public avatar 與 private entry media 使用不同 bucket，環境變數包含 `R2_ACCOUNT_ID`、`R2_ACCESS_KEY_ID`、`R2_SECRET_ACCESS_KEY`、`R2_BUCKET`、`R2_PUBLIC_BASE_URL`、`R2_ENTRY_MEDIA_BUCKET` 與各類媒體限制 |
 | Web 管理後台 | 需要建立 Web 管理後台；實作範圍與權限模型於後續管理後台 Task 細化 |
 | 正式寄信服務 | 忘記密碼正式環境使用 SMTP 寄送 reset link |
 | 舊資料庫相容性 | 不直接沿用舊錯字表名；以新版 schema 為準，必要時以 mapping 文件將舊資料概念結合至新版資料庫 |
@@ -31,6 +31,19 @@
 | 舊 API 對照表 | 需要建立完整舊 API 對照表，比對 path、method、request、response 與錯誤情境 |
 | 舊 Flutter UI 對照清單 | 需要建立舊 Flutter UI 畫面對照清單，比對流程、元件、狀態與素材 |
 | Phase 分支流程 | 所有後續 Phase 均由 `develop` 建立 `feature/phase<n>` 整合分支；Phase 內 Task 由該 Phase 分支切出獨立分支，Task PR 先合併回 Phase 分支，Phase 完成後再由 Phase 分支 PR 至 `develop` |
+| Phase 3 煩惱記錄方式 | 支援文字、圖片、錄音與影片；每筆使用一種主要記錄方式，另可附一張心情圖（D1-A、D2-A） |
+| Phase 3 煩惱上傳契約 | 新增與修改採 `multipart/form-data`；Client 傳分類 code 與 1 至 5 分 score，由後端解析 lookup ID（D3-A、D4-A） |
+| Phase 3 怪獸獎勵 | Phase 3 只建立煩惱並顯示完成結果；新增煩惱後的真實怪獸獎勵延至 Phase 6 串接（D5-B） |
+| Phase 3 煩惱列表 | 使用 `page`、`size`、`sort` offset pagination；Database 不新增頁碼欄位（D6-A） |
+| Phase 3 聊天互動 | 採聊天外觀搭配結構化 selector Widget，不以自由文字解析類別、記錄方式、分數或分享選項（D7-A） |
+| Phase 3 媒體限制 | 圖片與心情圖 5 MB；錄音 10 MB／5 分鐘；影片 50 MB／60 秒；前後端使用相同 MIME type 白名單（D8-A） |
+| Phase 3 煩惱媒體存取 | 使用獨立且不可公開存取的 R2 entry media bucket，Database 只保存 object key；Backend 驗證 owner 或分享權限後串流，API 不回傳 object key（D9-A） |
+| Phase 3 媒體長度驗證 | Backend 使用 `ffprobe` 驗證錄音最多 5 分鐘、影片最多 60 秒；Backend runtime 必須安裝 FFmpeg（D10-A） |
+| Phase 3 Entry 領域模型 | Annoyance 與後續 Diary 共用 `Entry` Entity 與 Repository，Annoyance 模組使用獨立 DTO、Mapper、Service 與 Controller（D11-A） |
+| Phase 3 Annoyance Core 範圍 | Core Task 建立領域基礎、lookup、DTO、Mapper、Service 驗證與 Controller 骨架；實際 API endpoint 依後續 Task 逐一完成（D12-A） |
+| Phase 3 R2 規格用語 | Entry media 在 Database 只保存 private R2 object key，不保存 public URL（D13-A） |
+| Phase 3 Mood seed | Annoyance 與 Diary 共用中性分數 code `SCORE_1`～`SCORE_5`，label 為 `1分`～`5分`，不在 lookup 綁定好壞或程度語意（D14-A） |
+| Backend package layout | 全面採 layer-first `com.monsters.<layer>.<module>`；`common` 作為共用模組名，`MonstersApplication` 維持在 `com.monsters` |
 
 ## 二、已核准套件與工具
 
@@ -44,6 +57,9 @@
 | Routing | go_router |
 | Local Storage | SharedPreferences |
 | Google Sign-In | google_sign_in、google_sign_in_web |
+| 媒體選取 | image_picker；Android 實作固定 image_picker_android 0.8.12+24 以相容 AGP 8.7 |
+| 錄音 | record |
+| 影音預覽 | video_player、just_audio |
 
 ### Backend
 

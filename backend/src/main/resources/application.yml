@@ -8,6 +8,10 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+  servlet:
+    multipart:
+      max-file-size: ${MULTIPART_MAX_FILE_SIZE:50MB}
+      max-request-size: ${MULTIPART_MAX_REQUEST_SIZE:60MB}
 
 server:
   port: 8080
@@ -37,3 +41,13 @@ app:
       public-base-url: ${R2_PUBLIC_BASE_URL:}
       avatar-key-prefix: ${R2_AVATAR_KEY_PREFIX:users/avatars}
       max-avatar-size-bytes: ${R2_MAX_AVATAR_SIZE_BYTES:5242880}
+      entry-media-bucket: ${R2_ENTRY_MEDIA_BUCKET:}
+      entry-media-key-prefix: ${R2_ENTRY_MEDIA_KEY_PREFIX:entries/media}
+      max-entry-image-size-bytes: ${R2_MAX_ENTRY_IMAGE_SIZE_BYTES:5242880}
+      max-entry-audio-size-bytes: ${R2_MAX_ENTRY_AUDIO_SIZE_BYTES:10485760}
+      max-entry-video-size-bytes: ${R2_MAX_ENTRY_VIDEO_SIZE_BYTES:52428800}
+      max-entry-drawing-size-bytes: ${R2_MAX_ENTRY_DRAWING_SIZE_BYTES:5242880}
+      max-entry-audio-duration-seconds: ${R2_MAX_ENTRY_AUDIO_DURATION_SECONDS:300}
+      max-entry-video-duration-seconds: ${R2_MAX_ENTRY_VIDEO_DURATION_SECONDS:60}
+      ffprobe-path: ${FFPROBE_PATH:ffprobe}
+      ffprobe-timeout-seconds: ${FFPROBE_TIMEOUT_SECONDS:10}

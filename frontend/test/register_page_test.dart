@@ -34,7 +34,9 @@ void main() {
     await tester.pumpWidget(_registerApp(_FakeAuthRepository()));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('registerSubmitButton')));
+    final submitButton = find.byKey(const Key('registerSubmitButton'));
+    await tester.ensureVisible(submitButton);
+    await tester.tap(submitButton);
     await tester.pumpAndSettle();
 
     expect(find.text('請輸入帳號'), findsOneWidget);
@@ -68,6 +70,7 @@ void main() {
       find.byKey(const Key('registerConfirmPasswordField')),
       'password456',
     );
+    await tester.ensureVisible(find.byKey(const Key('registerSubmitButton')));
     await tester.tap(find.byKey(const Key('registerSubmitButton')));
     await tester.pumpAndSettle();
 
@@ -126,6 +129,7 @@ void main() {
       find.byKey(const Key('registerConfirmPasswordField')),
       'password123',
     );
+    await tester.ensureVisible(find.byKey(const Key('registerSubmitButton')));
     await tester.tap(find.byKey(const Key('registerSubmitButton')));
     await tester.pumpAndSettle();
 
@@ -169,6 +173,7 @@ void main() {
       find.byKey(const Key('registerConfirmPasswordField')),
       'password123',
     );
+    await tester.ensureVisible(find.byKey(const Key('registerSubmitButton')));
     await tester.tap(find.byKey(const Key('registerSubmitButton')));
     await tester.pumpAndSettle();
 
