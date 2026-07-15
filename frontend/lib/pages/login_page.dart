@@ -285,7 +285,7 @@ class _LoginForm extends StatelessWidget {
                 AutofillHints.username,
                 AutofillHints.email,
               ],
-              decoration: _inputDecoration(hintText: 'weicho_lin'),
+              decoration: _inputDecoration(hintText: ''),
               validator: (value) {
                 final account = value?.trim() ?? '';
                 if (account.isEmpty) {
@@ -307,7 +307,7 @@ class _LoginForm extends StatelessWidget {
               textInputAction: TextInputAction.done,
               autofillHints: const [AutofillHints.password],
               decoration: _inputDecoration(
-                hintText: '••••••••',
+                hintText: '',
                 suffixIcon: IconButton(
                   tooltip: obscurePassword ? '顯示密碼' : '隱藏密碼',
                   onPressed: onTogglePassword,
