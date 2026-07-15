@@ -16,6 +16,15 @@ class AppColors {
   static const lightSurface = Color(0xFFFFFFFF);
   static const lightOutline = Color(0xFFD8B08E);
 
+  static const loginBrandBackground = Color(0xFFFFFDD2);
+  static const loginFormBackground = Color(0xFFF7F1E8);
+  static const loginInk = Color(0xFF3B2017);
+  static const loginMuted = Color(0xFF8D6E63);
+  static const loginPrimary = Color(0xFFB45A2B);
+  static const loginFieldBorder = Color(0xFFE7C7B5);
+  static const loginSessionBackground = Color(0xFFDCEBDD);
+  static const loginSessionText = Color(0xFF4F7A5A);
+  static const googleInitial = Color(0xFF56758A);
   static const darkBackground = Color(0xFF21140F);
   static const darkSurface = Color(0xFF2B1B14);
   static const darkOutline = Color(0xFF76513C);

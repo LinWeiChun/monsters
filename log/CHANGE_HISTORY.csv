@@ -910,3 +910,13 @@
 2026-07-13,17:57,TASK-067,Documentation,docs/TASKS.md,修改,將 TASK-066 陪伴式首頁與 Web 獨立桌面版型標記 DONE,Codex,否,否,否,否,使用者確認可收尾
 2026-07-13,17:57,TASK-067,Documentation,log/CHANGE_LOG.md,修改,新增 Phase 3 TASK-066 視覺 review 收尾紀錄,Codex,否,否,否,否,無超過一個月的紀錄
 2026-07-13,17:57,TASK-067,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-067 history 紀錄,Codex,否,否,否,否,
+2026-07-15,15:19,PENPOT-LOGIN,Frontend,frontend/lib/pages/login_page.dart,修改,依 Penpot Web 與 Mobile 登入設計調整排版與圖片,Codex,否,否,是,否,本次僅登入頁
+2026-07-15,15:19,PENPOT-LOGIN,Frontend,frontend/lib/theme/app_colors.dart,修改,新增登入頁 Penpot 色票 token,Codex,否,否,是,否,避免 page 直接設定設計色票
+2026-07-15,15:19,PENPOT-LOGIN,Frontend,frontend/pubspec.yaml,修改,改為註冊 assets/images 目錄,Codex,否,否,是,否,使用者已放置登入圖片
+2026-07-15,15:19,PENPOT-LOGIN,Asset,frontend/assets/images/title.png,新增,登入頁 logo 圖片,Codex,否,否,是,否,由使用者提供
+2026-07-15,15:19,PENPOT-LOGIN,Asset,frontend/assets/images/icon.png,新增,登入頁 Web 品牌區怪獸圖片,Codex,否,否,是,否,由使用者提供
+2026-07-15,15:19,PENPOT-LOGIN,Test,frontend/test/login_page_test.dart,修改,更新登入頁測試文案與手機尺寸操作,Codex,否,否,是,否,10 tests passed
+2026-07-15,15:19,PENPOT-LOGIN,Documentation,docs/UI_SPEC.md,修改,新增 Penpot 登入頁 Web 與 Mobile 對齊規格,Codex,否,否,是,否,
+2026-07-15,15:19,PENPOT-LOGIN,Documentation,docs/TASKS.md,修改,更新插隊登入頁任務狀態,Codex,否,否,否,否,
+2026-07-15,15:19,PENPOT-LOGIN,Documentation,log/CHANGE_LOG.md,修改,新增 Penpot 登入頁工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 Log
+2026-07-15,15:19,PENPOT-LOGIN,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Penpot 登入頁 history 紀錄,Codex,否,否,否,否,

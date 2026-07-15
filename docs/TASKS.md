@@ -13,13 +13,13 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ---
 
-## 插隊任務：Penpot MCP 畫面排版同步
+## 插隊任務：Penpot MCP 登入畫面排版同步
 
-- [ ] 使用 Penpot MCP 讀取指定畫面設計
-- [ ] 比對 Flutter 現有畫面與 Penpot 排版差異
-- [ ] 依 Penpot 設計調整畫面排版
-- [ ] 執行 Flutter Analyze、Test 與 Web 視覺驗證
-- [ ] 同步 UI 規格與 Log
+- [x] 使用 Penpot MCP 讀取指定畫面設計（DONE：已讀取 Web `Account / Web / 02 Login / 登入` 與 APP `Account / Mobile / 02 Login / 登入`）
+- [x] 比對 Flutter 現有登入頁與 Penpot 排版差異（DONE：已確認桌面雙欄、手機 390x844、色票與圖片差異）
+- [x] 依 Penpot 設計調整登入頁排版（REVIEW：本次僅登入頁，未直接修改其他 APP 畫面）
+- [x] 執行 Flutter Analyze 與 Login Page Test（DONE：`flutter analyze`、`flutter test test/login_page_test.dart` 通過；Web 視覺驗證待使用者啟動 Chrome 流程確認）
+- [x] 同步 UI 規格與 Log（DONE）
 
 ---
 
