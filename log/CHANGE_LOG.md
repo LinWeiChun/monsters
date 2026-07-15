@@ -8,6 +8,69 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-15 15:19
+
+Task
+插隊任務 Penpot MCP 登入畫面排版同步（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 依 Penpot `Account / Web / 02 Login / 登入` 調整 Flutter Web 登入頁雙欄排版、品牌區、表單區、欄位與按鈕尺寸。
+- 依 Penpot `Account / Mobile / 02 Login / 登入` 調整 App / Mobile 登入頁 390x844 版型、logo 位置、欄位高度與登入操作區。
+- 將登入頁設計色票集中到 `AppColors`，登入頁不再直接宣告設計用 `Color(0x...)`。
+- 套用使用者放入 `frontend/assets/images/` 的 `title.png` 與 `icon.png`，並以 `assets/images/` 目錄註冊 Flutter assets。
+- 更新登入頁 widget tests，固定手機尺寸並以 key 操作 Google 登入按鈕。
+- 檢查 Log 保存期限；最早紀錄為 2026-06-29，未超過一個月，因此未刪除 Log。
+
+### Modified
+
+- `frontend/lib/pages/login_page.dart`
+- `frontend/lib/theme/app_colors.dart`
+- `frontend/pubspec.yaml`
+- `frontend/test/login_page_test.dart`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Added
+
+- `frontend/assets/images/bonus.png`
+- `frontend/assets/images/icon.png`
+- `frontend/assets/images/icon_main.png`
+- `frontend/assets/images/title.png`
+
+### Tests
+
+- `dart format lib/pages/login_page.dart lib/theme/app_colors.dart test/login_page_test.dart`
+- `flutter analyze`：通過
+- `flutter test test/login_page_test.dart`：10 tests passed
+
+### system_data Reference
+
+- 本次依 Penpot MCP 指定畫面與現有 Flutter 登入頁調整，未新增引用 `system_data/` 舊程式。
+
+### API
+
+- No API endpoint changed.
+
+### Database
+
+- No Database change.
+
+### UI
+
+- 登入頁 Web 與 Mobile 視覺排版、圖片與色票已同步至 Penpot 登入畫面規格。
+
+### Pending
+
+- Web Chrome 實機視覺驗證尚未在本次流程啟動；目前以 Flutter analyze 與登入頁 widget tests 作為驗證。
+
+---
+
 ## 2026-07-13 17:57
 
 Task

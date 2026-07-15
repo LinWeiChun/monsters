@@ -23,31 +23,35 @@ void main() {
   });
 
   testWidgets('shows login form actions', (tester) async {
+    await _setMobileSurface(tester);
     await tester.pumpWidget(_loginApp(_FakeAuthRepository()));
     await tester.pumpAndSettle();
 
-    expect(find.text('貘nsters'), findsOneWidget);
+    expect(find.text('歡迎回來'), findsOneWidget);
     expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
     expect(find.byKey(const Key('loginPasswordField')), findsOneWidget);
     expect(find.text('登入'), findsOneWidget);
     expect(find.text('使用 Google 登入'), findsOneWidget);
-    expect(find.text('還沒有帳號？前往註冊'), findsOneWidget);
+    expect(find.text('還沒有帳號？'), findsOneWidget);
+    expect(find.text('建立新帳號'), findsOneWidget);
   });
 
   testWidgets('validates required login fields', (tester) async {
+    await _setMobileSurface(tester);
     await tester.pumpWidget(_loginApp(_FakeAuthRepository()));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('loginSubmitButton')));
     await tester.pumpAndSettle();
 
-    expect(find.text('請輸入 Email'), findsOneWidget);
+    expect(find.text('請輸入帳號或 Email'), findsOneWidget);
     expect(find.text('請輸入密碼'), findsOneWidget);
   });
 
   testWidgets('submits credentials and navigates to home on success', (
     tester,
   ) async {
+    await _setMobileSurface(tester);
     final repository = _FakeAuthRepository();
     await tester.pumpWidget(_loginApp(repository));
     await tester.pumpAndSettle();
@@ -68,6 +72,7 @@ void main() {
   testWidgets('submits Google ID token and navigates to home on success', (
     tester,
   ) async {
+    await _setMobileSurface(tester);
     final repository = _FakeAuthRepository();
     final googleSignInService = _FakeGoogleSignInService();
     await tester.pumpWidget(
@@ -75,7 +80,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('使用 Google 登入'));
+    await tester.tap(find.byKey(const Key('loginGoogleButton')));
     await tester.pumpAndSettle();
 
     expect(repository.googleIdToken, 'google-id-token');
@@ -85,6 +90,7 @@ void main() {
   });
 
   testWidgets('handles Google web authentication event', (tester) async {
+    await _setMobileSurface(tester);
     final repository = _FakeAuthRepository();
     final googleSignInService = _FakeGoogleSignInService();
     await tester.pumpWidget(
@@ -102,6 +108,7 @@ void main() {
   });
 
   testWidgets('shows repository error message', (tester) async {
+    await _setMobileSurface(tester);
     await tester.pumpWidget(
       _loginApp(
         _FakeAuthRepository(
@@ -127,6 +134,7 @@ void main() {
   });
 
   testWidgets('shows Google repository error message', (tester) async {
+    await _setMobileSurface(tester);
     final googleSignInService = _FakeGoogleSignInService();
     await tester.pumpWidget(
       _loginApp(
@@ -141,7 +149,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('使用 Google 登入'));
+    await tester.tap(find.byKey(const Key('loginGoogleButton')));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('loginErrorMessage')), findsOneWidget);
@@ -200,6 +208,13 @@ void main() {
     expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
 
     await googleSignInService.dispose();
+  });
+}
+
+Future<void> _setMobileSurface(WidgetTester tester) async {
+  await tester.binding.setSurfaceSize(const Size(390, 844));
+  addTearDown(() async {
+    await tester.binding.setSurfaceSize(null);
   });
 }
 

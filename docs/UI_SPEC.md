@@ -332,6 +332,13 @@ AI 或開發者參考 `system_data/` 舊 UI 時，應檢查以下項目：
 - 忘記密碼入口提示
 - Google 登入：Android / iOS 由 `google_sign_in` 觸發登入，Web 使用 `google_sign_in_web` 官方按鈕
 
+登入頁 Penpot 對齊規格：
+
+- 本次插隊任務僅調整登入頁，不同步修改註冊、首頁或其他已完成頁面。
+- Web 參考 Penpot `PAGES WEB / Account & Access / Web` 的 `Account / Web / 02 Login / 登入`：左側品牌區為 `#FFFDD2`，右側表單區為 `#F7F1E8`，左側保留 logo、怪獸圖與歡迎文字，右側表單寬度 500px。
+- App / Mobile 參考 Penpot `PAGES APP / Account & Access / Mobile` 的 `Account / Mobile / 02 Login / 登入`：390x844 畫板、左右 36px 邊距、logo 150x46、欄位與按鈕寬 318px、高 54px。
+- 登入頁色票集中於 `frontend/lib/theme/app_colors.dart`，頁面不得直接宣告 `Color(0x...)` 作為設計色票。
+- 登入頁圖片使用 `frontend/assets/images/title.png` 作為 logo、`frontend/assets/images/icon.png` 作為 Web 品牌區怪獸圖；Flutter asset 以 `assets/images/` 目錄註冊。
 登入頁資料流程：
 
 ```text
