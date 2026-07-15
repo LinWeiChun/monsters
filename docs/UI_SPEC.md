@@ -399,6 +399,13 @@ REST API
 - 註冊成功後導向 `login` route
 - 前往登入頁
 
+註冊頁 Penpot 對齊規格：
+
+- 本次插隊任務僅調整註冊頁，延續 `Account & Access` 登入頁已建立的 Web / Mobile 排版語彙。
+- Web 版使用左側品牌區與右側表單區；品牌區使用 `title.png` 與 `icon.png`，表單最大寬度 500px。
+- App / Mobile 版以 390px 寬畫面為基準，左右 36px 邊距，logo 150px，欄位與主要按鈕高 54px。
+- 註冊頁色票集中於 `frontend/lib/theme/app_colors.dart`，頁面不得直接宣告 `Color(0x...)` 作為設計色票。
+- 註冊成功不自動登入；成功後仍依規格導向登入頁。
 註冊頁資料流程：
 
 ```text
