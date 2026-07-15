@@ -8,6 +8,63 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-15 16:41
+
+Task
+插隊任務 Penpot MCP 註冊畫面排版同步（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 將 Flutter 註冊頁從舊版置中表單調整為 Account & Access 系列版型。
+- Web 版使用左側品牌區與右側表單區；Mobile 版以 390px 寬、36px 邊距、54px 欄位高度調整。
+- 註冊頁圖片改用 `frontend/assets/images/title.png` 與 `frontend/assets/images/icon.png`。
+- 將註冊頁色票集中於 `AppColors`，頁面不直接宣告設計色票。
+- 更新註冊頁 widget tests，固定手機尺寸並同步新版文案。
+- 盤點目前已完成頁面與 Penpot MCP 差異：Splash、Home、Profile、Password Lock、Annoyance Chat 仍未完成 Penpot 精準對齊；Login 已完成；Register 本次完成。
+- 檢查 Log 保存期限；最早紀錄為 2026-06-29，未超過一個月，因此未刪除 Log。
+
+### Modified
+
+- `frontend/lib/pages/register_page.dart`
+- `frontend/lib/theme/app_colors.dart`
+- `frontend/test/register_page_test.dart`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- `dart format lib/pages/register_page.dart lib/theme/app_colors.dart test/register_page_test.dart`
+- `flutter analyze --no-pub`：通過
+- `flutter test --no-pub test/register_page_test.dart`：6 tests passed
+
+### system_data Reference
+
+- 本次依 Penpot MCP 與已完成登入頁 Account & Access 視覺系統調整，未新增引用 `system_data/` 舊程式。
+
+### API
+
+- No API endpoint changed.
+
+### Database
+
+- No Database change.
+
+### UI
+
+- 註冊頁 Web 與 Mobile 視覺排版、圖片與色票已調整為 Account & Access 系列規格。
+
+### Pending
+
+- Penpot MCP 目前 selection 為空，註冊頁未能直接讀取註冊畫板子節點；若使用者選取註冊畫板，可再做精準尺寸比對。
+- 已完成但仍需 Penpot 精準對齊的畫面：Splash、Home、Profile、Password Lock、Annoyance Chat。
+
+---
+
 ## 2026-07-15 15:19
 
 Task

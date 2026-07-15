@@ -23,6 +23,15 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ---
 
+## 插隊任務：Penpot MCP 註冊畫面排版同步
+
+- [x] 檢查 Penpot MCP 指定 Account & Access 畫面狀態（DONE：目前 selection 為空，註冊頁以已取得的 Account & Access 視覺系統與登入頁規格延伸）
+- [x] 比對 Flutter 現有註冊頁與 Account & Access 排版差異（DONE：已確認舊版置中表單、舊 logo 路徑與未使用 Penpot 版型）
+- [x] 依 Account & Access 視覺系統調整註冊頁排版（REVIEW：本次僅註冊頁）
+- [x] 執行 Flutter Analyze 與 Register Page Test（DONE：`flutter analyze --no-pub`、`flutter test --no-pub test/register_page_test.dart` 通過）
+- [x] 同步 UI 規格與 Log（DONE）
+
+---
 ## Phase 0：專案初始化
 
 - [x] 建立 Monorepo 結構（DONE）
