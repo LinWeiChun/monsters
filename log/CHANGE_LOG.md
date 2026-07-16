@@ -6092,3 +6092,62 @@ Codex
 ### 待確認事項
 
 - 無
+---
+
+## 2026-07-16 16:29
+
+Task
+PENPOT-SPLASH-EXACT SplashPage 精準修正至 Penpot Page
+
+執行者
+Codex
+
+### 完成內容
+
+- 重新讀取 Penpot Splash Web / Mobile shape 資訊。
+- 修正 SplashPage 與 Penpot 不一致處：文字改為 left align、Logo 改為 BoxFit.fill、Status card 移除圓角、Status dot/text/hint 改為絕對座標定位。
+- 補強 widget tests，新增 status dot、status text、status hint 的 Web / Mobile 座標驗證。
+
+### 新增
+
+- 無
+
+### 修改
+
+- rontend/lib/pages/splash_page.dart
+- rontend/test/splash_page_test.dart
+- docs/UI_SPEC.md
+- docs/TASKS.md
+- log/CHANGE_LOG.md
+- log/CHANGE_HISTORY.csv
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- lutter analyze --no-pub：通過，No issues found
+- lutter test --no-pub test/splash_page_test.dart：通過，3 tests passed
+
+### Log 保存期限檢查
+
+- 已檢查 CHANGE_LOG.md、CHANGE_HISTORY.csv 與 CHANGE_HISTORY.xlsx。
+- 截止日為 2026-06-16；CHANGE_LOG.md 最早日期為 2026-06-16，CHANGE_HISTORY.csv 最早日期為 2026-06-29。
+- 本次沒有超過一個月的 Log，未刪除既有紀錄。
+
+### 待確認事項
+
+- 無

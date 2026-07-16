@@ -280,3 +280,11 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] IN PROGRESS：調整 `restoreSession()` false 時直接導向 `login` route
 - [x] REVIEW：更新 SplashPage widget tests 並執行 analyze / test
 - [x] DONE：更新 `docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`
+---
+
+## 插隊任務：SplashPage 精準修正至 Penpot Page（2026-07-16）
+
+- [x] TODO：重新讀取 Penpot Splash Web / Mobile shape 與內部座標
+- [x] IN PROGRESS：修正 logo fill、文字對齊、status card 圓角與 status 內部元素座標
+- [x] REVIEW：補強 SplashPage widget tests，驗證 status dot / text / hint 座標
+- [x] DONE：執行 analyze / test 並同步文件與 Log

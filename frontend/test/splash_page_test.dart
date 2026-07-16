@@ -45,6 +45,24 @@ void main() {
       const Offset(54, 586),
       const Size(282, 82),
     );
+    _expectRect(
+      tester,
+      find.byKey(const Key('splashStatusDot')),
+      const Offset(76, 614),
+      const Size(16, 16),
+    );
+    _expectRect(
+      tester,
+      find.byKey(const Key('splashStatusText')),
+      const Offset(108, 608),
+      const Size(123, 17),
+    );
+    _expectRect(
+      tester,
+      find.byKey(const Key('splashStatusHint')),
+      const Offset(108, 634),
+      const Size(118, 14),
+    );
   });
 
   testWidgets('matches Penpot web splash layout while checking session', (
@@ -78,6 +96,24 @@ void main() {
       find.byKey(const Key('splashStatusCard')),
       const Offset(550, 724),
       const Size(340, 74),
+    );
+    _expectRect(
+      tester,
+      find.byKey(const Key('splashStatusDot')),
+      const Offset(576, 753),
+      const Size(16, 16),
+    );
+    _expectRect(
+      tester,
+      find.byKey(const Key('splashStatusText')),
+      const Offset(610, 746),
+      const Size(123, 17),
+    );
+    _expectRect(
+      tester,
+      find.byKey(const Key('splashStatusHint')),
+      const Offset(610, 770),
+      const Size(118, 14),
     );
   });
 
