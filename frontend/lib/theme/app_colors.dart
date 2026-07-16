@@ -38,6 +38,15 @@ class AppColors {
   static const registerOnPrimary = Color(0xFFFFFFFF);
   static const registerError = Color(0xFFFF5252);
   static const registerAccentText = Color(0xFF8D3D1D);
+  static const splashBackground = loginBrandBackground;
+  static const splashInk = loginInk;
+  static const splashMuted = loginMuted;
+  static const splashPrimary = loginPrimary;
+  static const splashAccentText = registerAccentText;
+  static const splashHalo = Color(0xFFF3D7C8);
+  static const splashStatusBackground = registerRuleBackground;
+  static const splashStatusBorder = registerFieldBorder;
+  static const splashOnPrimary = registerOnPrimary;
   static const darkBackground = Color(0xFF21140F);
   static const darkSurface = Color(0xFF2B1B14);
   static const darkOutline = Color(0xFF76513C);

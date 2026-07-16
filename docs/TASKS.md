@@ -263,3 +263,12 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [ ] MySQL 正式環境設定
 - [ ] 環境變數整理
 - [ ] 最終整合測試
+
+---
+
+## 插隊任務：Penpot SplashPage Web / App 畫面（2026-07-16）
+
+- [x] TODO：讀取 AGENTS.md、system_data、docs 與 Penpot SplashPage Web / App 畫板
+- [x] IN PROGRESS：依 Penpot `Account / Web / 01 Splash / 啟動` 與 `Account / Mobile / 01 Splash / 啟動` 調整 Flutter SplashPage responsive layout
+- [x] REVIEW：執行 `flutter analyze --no-pub` 與 `flutter test --no-pub test/splash_page_test.dart`
+- [x] DONE：更新 `docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`
