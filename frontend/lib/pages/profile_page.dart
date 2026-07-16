@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../models/user_profile.dart';
 import '../providers/user_profile_provider.dart';
-import '../theme/app_spacing.dart';
+import '../routes/app_routes.dart';
+import '../theme/app_colors.dart';
 import '../widgets/state/error_view.dart';
 import '../widgets/state/loading_view.dart';
+
+part '../widgets/profile/profile_penpot_canvas.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -15,6 +19,8 @@ class ProfilePage extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
+  static const double _desktopBreakpoint = 900;
+
   final _formKey = GlobalKey<FormState>();
   final _userNameController = TextEditingController();
   final _birthdayController = TextEditingController();
@@ -57,8 +63,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final profile = state.profile;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('個人資料')),
-      body: SafeArea(child: _buildBody(context, state, profile)),
+      backgroundColor: AppColors.profileMobileBackground,
+      body: _buildBody(context, state, profile),
     );
   }
 
@@ -68,7 +74,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     UserProfile? profile,
   ) {
     if (state.isLoading && profile == null) {
-      return const LoadingView(message: '正在載入個人資料');
+      return const LoadingView(message: '正在讀取個人資料');
     }
 
     if (profile == null) {
@@ -80,109 +86,60 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       );
     }
 
-    return RefreshIndicator(
-      onRefresh:
-          () => ref.read(userProfileControllerProvider.notifier).loadProfile(),
-      child: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        children: [
-          Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 520),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _ProfileHeader(profile: profile),
-                    const SizedBox(height: AppSpacing.lg),
-                    _ProfileInfo(profile: profile),
-                    const SizedBox(height: AppSpacing.lg),
-                    Text(
-                      '編輯資料',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    TextFormField(
-                      key: const Key('profileUserNameField'),
-                      controller: _userNameController,
-                      textInputAction: TextInputAction.next,
-                      autofillHints: const [AutofillHints.nickname],
-                      decoration: const InputDecoration(
-                        labelText: '暱稱',
-                        prefixIcon: Icon(Icons.person_outline),
-                      ),
-                      validator: _validateUserName,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    TextFormField(
-                      key: const Key('profileBirthdayField'),
-                      controller: _birthdayController,
-                      keyboardType: TextInputType.datetime,
-                      textInputAction: TextInputAction.done,
-                      decoration: InputDecoration(
-                        labelText: '生日',
-                        hintText: 'yyyy-MM-dd',
-                        prefixIcon: const Icon(Icons.cake_outlined),
-                        suffixIcon: IconButton(
-                          tooltip: '選擇生日',
-                          onPressed: state.isSaving ? null : _pickBirthday,
-                          icon: const Icon(Icons.calendar_month_outlined),
+    return Form(
+      key: _formKey,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isDesktop = constraints.maxWidth >= _desktopBreakpoint;
+          final size = isDesktop ? const Size(1440, 900) : const Size(390, 844);
+          return ClipRect(
+            child: FittedBox(
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+              child: SizedBox(
+                width: size.width,
+                height: size.height,
+                child:
+                    isDesktop
+                        ? _DesktopProfileCanvas(
+                          profile: profile,
+                          userNameController: _userNameController,
+                          birthdayController: _birthdayController,
+                          isSaving: state.isSaving,
+                          errorMessage: state.errorMessage,
+                          onSave: _submit,
+                          onUnavailable: () => _showUnavailableMessage(context),
+                        )
+                        : _MobileProfileCanvas(
+                          profile: profile,
+                          userNameController: _userNameController,
+                          birthdayController: _birthdayController,
+                          isSaving: state.isSaving,
+                          errorMessage: state.errorMessage,
+                          onSave: _submit,
+                          onBack: () => context.goNamed(AppRoute.home),
+                          onUnavailable: () => _showUnavailableMessage(context),
                         ),
-                      ),
-                      validator: _validateBirthday,
-                      onFieldSubmitted:
-                          state.isSaving ? null : (_) => _submit(),
-                    ),
-                    if (state.errorMessage != null) ...[
-                      const SizedBox(height: AppSpacing.md),
-                      Text(
-                        state.errorMessage!,
-                        key: const Key('profileErrorMessage'),
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: AppSpacing.lg),
-                    FilledButton.icon(
-                      key: const Key('profileSaveButton'),
-                      onPressed: state.isSaving ? null : _submit,
-                      icon:
-                          state.isSaving
-                              ? const SizedBox.square(
-                                dimension: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                              : const Icon(Icons.save_outlined),
-                      label: Text(state.isSaving ? '儲存中' : '儲存'),
-                    ),
-                  ],
-                ),
               ),
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
-  String? _validateUserName(String? value) {
+  static String? _validateUserName(String? value) {
     final userName = value?.trim() ?? '';
     if (userName.isEmpty) {
       return '請輸入暱稱';
     }
     if (userName.length > 80) {
-      return '暱稱最多 80 個字';
+      return '暱稱最多 80 字';
     }
     return null;
   }
 
-  String? _validateBirthday(String? value) {
+  static String? _validateBirthday(String? value) {
     final birthday = value?.trim() ?? '';
     if (birthday.isEmpty) {
       return null;
@@ -201,25 +158,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return null;
   }
 
-  Future<void> _pickBirthday() async {
-    final now = DateTime.now();
-    final initialDate =
-        DateTime.tryParse(_birthdayController.text.trim()) ??
-        DateTime(now.year - 18, now.month, now.day);
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
-      firstDate: DateTime(1900),
-      lastDate: now,
-    );
-
-    if (pickedDate == null) {
-      return;
-    }
-
-    _birthdayController.text = _formatDate(pickedDate);
-  }
-
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -233,124 +171,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         );
   }
 
-  String _formatDate(DateTime date) {
+  static String _formatDate(DateTime date) {
     final month = date.month.toString().padLeft(2, '0');
     final day = date.day.toString().padLeft(2, '0');
     return '${date.year}-$month-$day';
-  }
-}
-
-class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader({required this.profile});
-
-  final UserProfile profile;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Column(
-      children: [
-        CircleAvatar(
-          key: const Key('profileAvatar'),
-          radius: 48,
-          backgroundColor: colorScheme.primaryContainer,
-          foregroundImage:
-              profile.avatarUrl == null
-                  ? null
-                  : NetworkImage(profile.avatarUrl!),
-          child:
-              profile.avatarUrl == null
-                  ? Text(
-                    profile.userName.isEmpty
-                        ? '?'
-                        : profile.userName.characters.first,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      color: colorScheme.onPrimaryContainer,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  )
-                  : null,
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Text(
-          profile.userName,
-          key: const Key('profileDisplayName'),
-          textAlign: TextAlign.center,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          profile.email,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ProfileInfo extends StatelessWidget {
-  const _ProfileInfo({required this.profile});
-
-  final UserProfile profile;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          children: [
-            _ProfileInfoRow(label: 'Email', value: profile.email),
-            _ProfileInfoRow(label: '帳號', value: profile.account ?? '未設定'),
-            _ProfileInfoRow(label: '生日', value: profile.birthday ?? '未設定'),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ProfileInfoRow extends StatelessWidget {
-  const _ProfileInfoRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 72,
-            child: Text(
-              label,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              style: theme.textTheme.bodyLarge,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

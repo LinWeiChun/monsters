@@ -296,3 +296,11 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] IN PROGRESS：重寫 Flutter `HomePage` 為 Penpot Web / Mobile responsive canvas
 - [x] REVIEW：執行 `flutter analyze --no-pub`、`flutter test --no-pub test/home_page_test.dart` 與 Home 路由指定測試
 - [x] DONE：更新 `docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`
+---
+
+## 插隊任務：Penpot ProfilePage Web / App 對齊與 HomePage 滿版修正（2026-07-16）
+
+- [x] TODO：依 AGENTS.md 檢查文件、Task 狀態、`system_data/` 舊個人資料與首頁參考程式，並確認本次不異動 API / Database。
+- [x] IN PROGRESS：依 Penpot `Account / Web / 06 Profile / 個人資料` 與 `Account / Mobile / 06 Profile / 個人資料` 改寫 Profile responsive canvas，並將 HomePage `WEB / Web / Companion Home` canvas 改為滿版縮放。
+- [x] REVIEW：執行 `flutter analyze --no-pub`、`flutter test --no-pub test/profile_page_test.dart`、`flutter test --no-pub test/home_page_test.dart`。
+- [x] DONE：更新 `docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`。

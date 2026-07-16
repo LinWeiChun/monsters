@@ -26,9 +26,10 @@ class HomePage extends ConsumerWidget {
         builder: (context, constraints) {
           final isDesktop = constraints.maxWidth >= _desktopBreakpoint;
           final size = isDesktop ? const Size(1440, 900) : const Size(390, 844);
-          return Center(
+          return ClipRect(
             child: FittedBox(
-              fit: BoxFit.contain,
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
               child: SizedBox(
                 width: size.width,
                 height: size.height,

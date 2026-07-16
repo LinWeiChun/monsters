@@ -6214,3 +6214,72 @@ Codex
 ### 待確認事項
 
 - 	est/routes/app_router_test.dart 全檔仍有既有 Register 測試文字定位失敗；本次只驗證 Home route 指定測試。
+---
+
+## 2026-07-16 17:26 PENPOT-PROFILE-HOME-FULL
+
+Task
+Penpot ProfilePage Web / App 對齊與 HomePage 滿版修正
+
+執行者
+Codex
+
+### 完成內容
+
+- 依 Penpot Profile Web / Mobile 設計調整 Flutter ProfilePage。
+- 保留既有 UserProfileController / UserRepository / ApiClient 流程與表單驗證。
+- 新增 profile theme tokens，ProfilePage 不直接宣告色碼。
+- 將 Profile Penpot canvas widgets 拆至 rontend/lib/widgets/profile/profile_penpot_canvas.dart，避免 Page 檔案過長。
+- 將 HomePage WEB / Web / Companion Home canvas 外層縮放改為 BoxFit.cover，修正部署寬螢幕非滿版問題。
+
+### 新增
+
+- rontend/lib/widgets/profile/profile_penpot_canvas.dart
+
+### 修改
+
+- rontend/lib/pages/profile_page.dart
+- rontend/lib/pages/home_page.dart
+- rontend/lib/theme/app_colors.dart
+- docs/UI_SPEC.md
+- docs/TASKS.md
+- log/CHANGE_LOG.md
+- log/CHANGE_HISTORY.csv
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- lutter analyze --no-pub：通過，No issues found
+- lutter test --no-pub test/profile_page_test.dart：通過，5 tests passed
+- lutter test --no-pub test/home_page_test.dart：通過，5 tests passed
+
+### system_data 參考
+
+- 已檢查 system_data/front-end/monsters_front_end/lib/pages/drawer/edit_personalInfo.dart 與 system_data/front-end/monsters_front_end/lib/pages/home.dart。
+- 僅參考舊系統個人資料編輯與首頁怪獸互動意圖，未複製舊程式、未沿用舊硬編碼色碼或舊架構。
+
+### Log 保存期限檢查
+
+- 已檢查 CHANGE_LOG.md、CHANGE_HISTORY.csv 與 CHANGE_HISTORY.xlsx 是否存在。
+- 保存期限截止日：2026-06-16。
+- CHANGE_LOG.md 最早日期為 2026-06-16，CHANGE_HISTORY.csv 最早日期為 2026-06-29，未發現超過一個月紀錄。
+- 本次未刪除過期 Log。
+
+### 待確認事項
+
+- 若要進一步精準比對 HomePage，需由使用者在 Penpot 選取正確 WEB / Web / Companion Home board 後再執行尺寸比對。

@@ -769,3 +769,30 @@ Logo 規範：
 - 主要行動 `homeAnnoyanceChatButton` 保留既有路由：`context.goNamed(AppRoute.annoyanceChat)`。
 - 帳號按鈕導向 `profile`；尚未開放的 diary / history / collection / interaction / bottom nav 入口顯示即將開放訊息。
 - `homeAnimatedMonster`、`homeAnimatedMonsterIdle`、`homeAnimatedMonsterReacting` 測試 key 保留，降低既有測試與互動行為破壞。
+---
+
+## 2026-07-16 Penpot ProfilePage Web / App Alignment
+
+本次依 Penpot `Account / Web / 06 Profile / 個人資料` 與 `Account / Mobile / 06 Profile / 個人資料` 調整 Flutter `ProfilePage`，並保留既有 `UserProfileController -> UserRepository -> ApiClient -> REST API` 流程。
+
+### Penpot Boards
+
+| Target | Board | Size | Background |
+|---|---|---:|---|
+| Web | `Account / Web / 06 Profile / 個人資料` | 1440 x 900 | `#F7F1E8` |
+| App / Mobile | `Account / Mobile / 06 Profile / 個人資料` | 390 x 844 | `#FFFDD2` |
+
+### Implementation Notes
+
+- Profile Web / Mobile 採 `Stack + FittedBox(BoxFit.cover)` Penpot canvas，保持畫面滿版並以 top center 對齊。
+- Web 保留 1440x900 Profile canvas、上方導覽列、資料卡、avatar、基本資料欄位、唯讀 Email / 帳號欄位與儲存狀態卡。
+- Mobile 保留 390x844 Profile canvas、App bar、avatar、暱稱 / Email / 帳號 / 生日欄位、儲存狀態卡與底部導覽列。
+- 可編輯欄位維持 `profileUserNameField`、`profileBirthdayField`、`profileSaveButton` 測試 key 與原本驗證規則。
+- Profile 顏色 token 集中於 `frontend/lib/theme/app_colors.dart` 的 `profile*` token，Page 不直接宣告色碼。
+- Penpot canvas widgets 拆至 `frontend/lib/widgets/profile/profile_penpot_canvas.dart`，`ProfilePage` 僅保留狀態、驗證與提交流程。
+
+## 2026-07-16 HomePage Full-Bleed Correction
+
+- `HomePage` 仍使用 `WEB / Web / Companion Home` 與 `Mobile / Companion Home` 規格。
+- Web / Mobile canvas 外層縮放由 `BoxFit.contain` 改為 `BoxFit.cover`，避免寬螢幕部署畫面出現非滿版留白。
+- 修正僅影響縮放與裁切策略，不改變 HomePage 的 Penpot 元件座標、導覽、互動 key 或 API 行為。
