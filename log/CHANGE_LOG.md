@@ -5910,3 +5910,65 @@ docs(project): 新增異動紀錄檔並更新 README 使用指令
 ### 備註 / 待確認事項
 
 - 無
+
+---
+
+## 2026-07-16 15:49
+
+Task
+PENPOT-WEB-REGISTER Web 註冊頁依 Penpot 設計精準修正
+
+執行者
+Codex
+
+### 完成內容
+
+- 依 Penpot MCP 選取 board `Account / Web / 03 Register / 註冊` 修正 Web 註冊頁。
+- Web 版調整為 620px brand panel、520px 表單寬度，對齊 x=756 的表單起點。
+- 調整 Web 版返回登入、標題、副標、欄位提示、規則卡與 `完成註冊` 按鈕順序。
+- 新增註冊頁 Web widget test，驗證 Web copy 與主要元素。
+- 註冊頁新增顏色皆集中於 `AppColors`。
+
+### 新增
+
+- 無
+
+### 修改
+
+- `frontend/lib/pages/register_page.dart`
+- `frontend/lib/theme/app_colors.dart`
+- `frontend/test/register_page_test.dart`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- `flutter analyze --no-pub`：通過，No issues found。
+- `flutter test --no-pub test/register_page_test.dart`：通過，7 tests passed。
+
+### Log 保存期限檢查
+
+- 已於新增本次 Log 前檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx` 是否存在。
+- 目前最早紀錄為 2026-06-29，距 2026-07-16 未超過一個月，未刪除紀錄。
+
+### 待確認事項
+
+- 目前未執行瀏覽器截圖比對；本次以 Penpot MCP 座標與 Flutter widget/analyze 驗證為準。

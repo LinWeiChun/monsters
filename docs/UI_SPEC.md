@@ -635,3 +635,34 @@ Logo 規範：
 - data：顯示實際內容
 
 狀態元件必須使用 `Theme.of(context)` 與 `AppSpacing` / `AppRadius`，不得 hard code 共用顏色、間距或圓角。
+
+---
+
+## 2026-07-16 Penpot Web Register Alignment
+
+本次依 Penpot MCP 目前選取 board `Account / Web / 03 Register / 註冊` 修正 Web 註冊頁。
+
+### Penpot Board
+
+| 項目 | 規格 |
+|---|---|
+| Board | 1440 x 900 |
+| Brand panel | x=0, y=0, w=620, h=900, `#FFFDD2` |
+| Form area | x=620, y=0, w=820, h=900, `#F7F1E8` |
+| Logo | x=54, y=42, w=160, h=50, `assets/images/title.png` |
+| Monster | x=130, y=208, w=360, h=360, `assets/images/icon.png` |
+| Form left | x=756 |
+| Form width | 520 |
+| Back link | x=756, y=46, text `‹  返回登入` |
+| Heading | x=756, y=96, text `建立新帳號` |
+| Subheading | x=756, y=138, text `註冊完成後，請使用新帳號登入。` |
+| Fields | x=756, w=520, h=56; y=220 / 312 / 404 / 496 / 588 |
+| Rule card | x=756, y=662, w=520, h=64, `#FFFDFC` |
+| Submit button | x=756, y=758, w=520, h=56, text `完成註冊` |
+
+### Implementation Notes
+
+- Web 註冊頁維持 Flutter `RegisterPage -> AuthController -> AuthRepository -> ApiClient -> REST API` 流程。
+- Web 版使用 620px brand panel 與 520px 表單寬度，在 1440px viewport 對齊 Penpot 座標。
+- 顏色 token 必須集中於 `frontend/lib/theme/app_colors.dart`，Page 不得直接新增硬編碼 `Color(0x...)`。
+- Mobile 註冊頁不屬於本次 Web 精準修正範圍，僅沿用共用文字與驗證邏輯。

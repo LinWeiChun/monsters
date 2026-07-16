@@ -1,4 +1,14 @@
-# TASKS.md
+
+---
+
+## 插隊任務：Penpot MCP Web 註冊頁精準修正
+
+- [x] 確認 Penpot MCP 目前選取 `Account / Web / 03 Register / 註冊` board（1440 x 900）。
+- [x] 依 Web board 修正 Flutter 註冊頁雙欄、表單位置、欄位寬度、規則卡與完成註冊按鈕。
+- [x] 顏色維持集中於 `frontend/lib/theme/app_colors.dart`。
+- [x] 更新註冊頁 widget test，補上 Web 註冊頁文字驗證。
+- [x] 執行 `flutter analyze --no-pub` 與 `flutter test --no-pub test/register_page_test.dart`。
+- [x] 更新 UI_SPEC、CHANGE_LOG、CHANGE_HISTORY。# TASKS.md
 
 # 貘nsters AI 開發任務清單
 
