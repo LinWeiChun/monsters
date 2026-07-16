@@ -666,3 +666,42 @@ Logo 規範：
 - Web 版使用 620px brand panel 與 520px 表單寬度，在 1440px viewport 對齊 Penpot 座標。
 - 顏色 token 必須集中於 `frontend/lib/theme/app_colors.dart`，Page 不得直接新增硬編碼 `Color(0x...)`。
 - Mobile 註冊頁不屬於本次 Web 精準修正範圍，僅沿用共用文字與驗證邏輯。
+---
+
+## 2026-07-16 Penpot SplashPage Web / App Alignment
+
+本次依 Penpot MCP 讀取 `Account & Access / Web` 與 `Account & Access / Mobile` 的 Splash 畫板，更新 Flutter `SplashPage` 的 Web / App responsive layout。
+
+### Penpot Boards
+
+| Target | Board | Size | Background |
+|---|---|---:|---|
+| Web | `Account / Web / 01 Splash / 啟動` | 1440 x 900 | `#FFFDD2` |
+| App / Mobile | `Account / Mobile / 01 Splash / 啟動` | 390 x 844 | `#FFFDD2` |
+
+### Web Layout
+
+| Element | Position / Size | Note |
+|---|---|---|
+| Logo | x=570, y=120, w=300, h=92 | `assets/images/app_logo.png` |
+| Halo | x=555, y=270, w=330, h=330 | `AppColors.splashHalo` |
+| Monster | x=610, y=318, w=220, h=220 | `assets/images/icon.png` |
+| Quote | x=500, y=642, w=390, h=36 | `把心裡的重量，先放在這裡。` |
+| Status card | x=550, y=724, w=340, h=74 | 顯示登入狀態檢查與 30 天保存提示 |
+
+### App / Mobile Layout
+
+| Element | Position / Size | Note |
+|---|---|---|
+| Logo | x=92, y=94, w=206, h=64 | `assets/images/app_logo.png` |
+| Monster | x=78, y=224, w=234, h=234 | `assets/images/icon.png` |
+| Quote | x=68, y=496, w=270, h=24 | `把心裡的重量，先放在這裡。` |
+| Status card | x=54, y=586, w=282, h=82 | 顯示登入狀態檢查與 30 天保存提示 |
+| Brand note | x=79, y=774, w=162, h=15 | `貘nsters · 陪你整理每一種心情` |
+
+### Implementation Notes
+
+- `SplashPage` 保留 `AuthController.restoreSession()` 流程；有效 session 導向 `home`，無效 session 顯示登入 / 註冊行動。
+- Splash 顏色集中於 `frontend/lib/theme/app_colors.dart` 的 `splash*` token，page 不直接宣告色碼。
+- Web / App 尺寸以 `_SplashSpec` 分別記錄 Penpot 座標，並透過 `FittedBox` 支援不同螢幕比例縮放。
+- Splash 導向仍使用 `go_router` 的 `context.goNamed()`；Flutter 不直接存取 Database 或 Auth storage。

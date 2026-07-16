@@ -5972,3 +5972,64 @@ Codex
 ### 待確認事項
 
 - 目前未執行瀏覽器截圖比對；本次以 Penpot MCP 座標與 Flutter widget/analyze 驗證為準。
+---
+
+## 2026-07-16 16:12
+
+Task
+PENPOT-SPLASH Web / App SplashPage Penpot 畫面對齊
+
+執行者
+Codex
+
+### 完成內容
+
+- 使用 Penpot MCP 讀取 Account / Web / 01 Splash / 啟動 與 Account / Mobile / 01 Splash / 啟動。
+- 將 SplashPage 改為 Web 1440x900 與 Mobile 390x844 的 responsive layout。
+- 保留 AuthController.restoreSession()：有效 session 導向 home；無效 session 顯示登入 / 註冊行動。
+- 新增 Splash theme token，避免 page 直接宣告色碼。
+- 新增 SplashPage widget tests，驗證 Web / Mobile 位置尺寸與登入 / 註冊導向。
+
+### 新增
+
+- rontend/test/splash_page_test.dart
+
+### 修改
+
+- rontend/lib/pages/splash_page.dart
+- rontend/lib/theme/app_colors.dart
+- docs/UI_SPEC.md
+- docs/TASKS.md
+- log/CHANGE_LOG.md
+- log/CHANGE_HISTORY.csv
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- lutter analyze --no-pub：通過，No issues found
+- lutter test --no-pub test/splash_page_test.dart：通過，4 tests passed
+
+### Log 保存期限檢查
+
+- 已檢查 CHANGE_LOG.md、CHANGE_HISTORY.csv 與 CHANGE_HISTORY.xlsx。
+- 截止日為 2026-06-16；CHANGE_LOG.md 最早日期為 2026-06-16，CHANGE_HISTORY.csv 最早日期為 2026-06-29。
+- 本次沒有超過一個月的 Log，未刪除既有紀錄。
+
+### 待確認事項
+
+- 無

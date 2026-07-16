@@ -943,3 +943,11 @@
 2026-07-16,15:49,PENPOT-WEB-REGISTER,Documentation,docs/TASKS.md,修改,新增插隊任務完成狀態,Codex,任務已標記完成
 2026-07-16,15:49,PENPOT-WEB-REGISTER,Documentation,log/CHANGE_LOG.md,修改,新增本次工作紀錄並記錄 Log 保存期限檢查,Codex,未發現超過一個月紀錄
 2026-07-16,15:49,PENPOT-WEB-REGISTER,Documentation,log/CHANGE_HISTORY.csv,修改,新增本次 history 紀錄,Codex,CHANGE_HISTORY.csv 已更新
+
+2026-07-16,16:12,PENPOT-SPLASH,Frontend,frontend/lib/pages/splash_page.dart,修改,依 Penpot Web / Mobile Splash board 建立 responsive layout 並保留 session restore 導向,Codex,flutter analyze --no-pub passed; flutter test --no-pub test/splash_page_test.dart passed
+2026-07-16,16:12,PENPOT-SPLASH,Frontend,frontend/lib/theme/app_colors.dart,修改,新增 splash theme token 避免 page 直接宣告色碼,Codex,Theme token synchronized
+2026-07-16,16:12,PENPOT-SPLASH,Test,frontend/test/splash_page_test.dart,新增,新增 SplashPage Web / Mobile 尺寸與導向 widget tests,Codex,4 tests passed
+2026-07-16,16:12,PENPOT-SPLASH,Documentation,docs/UI_SPEC.md,修改,新增 Penpot SplashPage Web / App 畫面規格,Codex,文件已同步
+2026-07-16,16:12,PENPOT-SPLASH,Documentation,docs/TASKS.md,修改,新增並完成 SplashPage 插隊任務狀態,Codex,Task status DONE
+2026-07-16,16:12,PENPOT-SPLASH,Documentation,log/CHANGE_LOG.md,修改,新增 SplashPage 工作紀錄並完成 Log 保存期限檢查,Codex,無過期 Log 需刪除
+2026-07-16,16:12,PENPOT-SPLASH,Documentation,log/CHANGE_HISTORY.csv,修改,新增 SplashPage history rows,Codex,CHANGE_HISTORY.csv 已同步
