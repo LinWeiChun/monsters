@@ -31,8 +31,12 @@ class AppColors {
   static const registerMuted = loginMuted;
   static const registerPrimary = loginPrimary;
   static const registerFieldBorder = loginFieldBorder;
+  static const registerFieldFill = lightSurface;
   static const registerHintBackground = loginSessionBackground;
   static const registerHintText = loginSessionText;
+  static const registerRuleBackground = Color(0xFFFFFDFC);
+  static const registerOnPrimary = Color(0xFFFFFFFF);
+  static const registerError = Color(0xFFFF5252);
   static const registerAccentText = Color(0xFF8D3D1D);
   static const darkBackground = Color(0xFF21140F);
   static const darkSurface = Color(0xFF2B1B14);
