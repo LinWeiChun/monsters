@@ -970,3 +970,11 @@
 2026-07-16,16:46,PENPOT-HOME,Documentation,docs/TASKS.md,修改,新增並完成 HomePage 插隊任務狀態,Codex,Task status DONE
 2026-07-16,16:46,PENPOT-HOME,Documentation,log/CHANGE_LOG.md,修改,新增 HomePage 工作紀錄並完成 Log 保存期限檢查,Codex,無過期 Log 需刪除
 2026-07-16,16:46,PENPOT-HOME,Documentation,log/CHANGE_HISTORY.csv,修改,新增 HomePage history rows,Codex,CHANGE_HISTORY.csv 已同步
+2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Frontend,frontend/lib/pages/profile_page.dart,修改,改為 Penpot Profile Web Mobile responsive canvas 並保留既有 UserProfile 流程,Codex,flutter analyze --no-pub passed; profile_page_test passed
+2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Frontend,frontend/lib/widgets/profile/profile_penpot_canvas.dart,新增,拆出 Profile Penpot canvas widgets 與 Profile 專用畫面元件,Codex,profile_page_test passed
+2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Frontend,frontend/lib/pages/home_page.dart,修改,將 Web Companion Home canvas 外層縮放改為 BoxFit.cover 修正寬螢幕非滿版,Codex,home_page_test passed
+2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Frontend,frontend/lib/theme/app_colors.dart,修改,新增 profile theme tokens 集中管理 ProfilePage 顏色,Codex,Theme token synchronized
+2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Documentation,docs/UI_SPEC.md,修改,新增 Penpot ProfilePage 規格與 HomePage full-bleed 修正說明,Codex,文件已更新
+2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Documentation,docs/TASKS.md,修改,新增插隊任務並標記 TODO IN PROGRESS REVIEW DONE,Codex,Task status DONE
+2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Documentation,log/CHANGE_LOG.md,修改,新增本次工作紀錄與 Log 保存期限檢查結果,Codex,未刪除過期 Log
+2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Documentation,log/CHANGE_HISTORY.csv,修改,新增本次 change history rows,Codex,CHANGE_HISTORY.csv 已更新
