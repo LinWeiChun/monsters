@@ -6151,3 +6151,66 @@ Codex
 ### 待確認事項
 
 - 無
+---
+
+## 2026-07-16 16:46
+
+Task
+PENPOT-HOME HomePage Web / App Penpot 畫面對齊
+
+執行者
+Codex
+
+### 完成內容
+
+- 使用 Penpot MCP 讀取 Web / Companion Home 與 Mobile / Companion Home。
+- 重寫 HomePage 為 Web 1440x900 與 Mobile 390x844 的 Penpot canvas。
+- 移除 HomePage 對 Material AppBar / NavigationBar / 舊 quick action layout 的依賴，改為 Penpot 自訂版面。
+- 保留主按鈕導向 nnoyanceChat、帳號按鈕導向 profile、怪獸點擊動畫 key 與 reduced motion 行為。
+- 新增 Home theme token，避免 page 直接宣告色碼。
+
+### 新增
+
+- 無
+
+### 修改
+
+- rontend/lib/pages/home_page.dart
+- rontend/lib/theme/app_colors.dart
+- rontend/test/home_page_test.dart
+- docs/UI_SPEC.md
+- docs/TASKS.md
+- log/CHANGE_LOG.md
+- log/CHANGE_HISTORY.csv
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- lutter analyze --no-pub：通過，No issues found
+- lutter test --no-pub test/home_page_test.dart：通過，5 tests passed
+- lutter test --no-pub test/routes/app_router_test.dart --plain-name "supports annoyance chat route and home entry"：通過，1 test passed
+
+### Log 保存期限檢查
+
+- 已檢查 CHANGE_LOG.md、CHANGE_HISTORY.csv 與 CHANGE_HISTORY.xlsx。
+- 截止日為 2026-06-16；CHANGE_LOG.md 最早日期為 2026-06-16，CHANGE_HISTORY.csv 最早日期為 2026-06-29。
+- 本次沒有超過一個月的 Log，未刪除既有紀錄。
+
+### 待確認事項
+
+- 	est/routes/app_router_test.dart 全檔仍有既有 Register 測試文字定位失敗；本次只驗證 Home route 指定測試。

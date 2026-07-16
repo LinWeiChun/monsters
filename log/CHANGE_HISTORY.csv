@@ -963,3 +963,10 @@
 2026-07-16,16:29,PENPOT-SPLASH-EXACT,Documentation,docs/TASKS.md,修改,新增並完成 SplashPage 精準修正插隊任務,Codex,Task status DONE
 2026-07-16,16:29,PENPOT-SPLASH-EXACT,Documentation,log/CHANGE_LOG.md,修改,新增 SplashPage exact 工作紀錄與 Log 保存期限檢查,Codex,無過期 Log 需刪除
 2026-07-16,16:29,PENPOT-SPLASH-EXACT,Documentation,log/CHANGE_HISTORY.csv,修改,新增 SplashPage exact history rows,Codex,CHANGE_HISTORY.csv 已同步
+2026-07-16,16:46,PENPOT-HOME,Frontend,frontend/lib/pages/home_page.dart,修改,重寫 HomePage 為 Penpot Web Companion Home 與 Mobile Companion Home responsive canvas,Codex,flutter analyze --no-pub passed; flutter test --no-pub test/home_page_test.dart passed
+2026-07-16,16:46,PENPOT-HOME,Frontend,frontend/lib/theme/app_colors.dart,修改,新增 home theme token 避免 page 直接宣告色碼,Codex,Theme token synchronized
+2026-07-16,16:46,PENPOT-HOME,Test,frontend/test/home_page_test.dart,修改,更新 HomePage 測試為 Penpot 結構與互動驗證,Codex,5 tests passed
+2026-07-16,16:46,PENPOT-HOME,Documentation,docs/UI_SPEC.md,修改,新增 Penpot HomePage Web App 畫面規格,Codex,文件已同步
+2026-07-16,16:46,PENPOT-HOME,Documentation,docs/TASKS.md,修改,新增並完成 HomePage 插隊任務狀態,Codex,Task status DONE
+2026-07-16,16:46,PENPOT-HOME,Documentation,log/CHANGE_LOG.md,修改,新增 HomePage 工作紀錄並完成 Log 保存期限檢查,Codex,無過期 Log 需刪除
+2026-07-16,16:46,PENPOT-HOME,Documentation,log/CHANGE_HISTORY.csv,修改,新增 HomePage history rows,Codex,CHANGE_HISTORY.csv 已同步

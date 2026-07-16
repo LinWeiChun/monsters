@@ -288,3 +288,11 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] IN PROGRESS：修正 logo fill、文字對齊、status card 圓角與 status 內部元素座標
 - [x] REVIEW：補強 SplashPage widget tests，驗證 status dot / text / hint 座標
 - [x] DONE：執行 analyze / test 並同步文件與 Log
+---
+
+## 插隊任務：Penpot HomePage Web / App 畫面（2026-07-16）
+
+- [x] TODO：讀取 Penpot `Web / Companion Home` 與 `Mobile / Companion Home` 節點資料
+- [x] IN PROGRESS：重寫 Flutter `HomePage` 為 Penpot Web / Mobile responsive canvas
+- [x] REVIEW：執行 `flutter analyze --no-pub`、`flutter test --no-pub test/home_page_test.dart` 與 Home 路由指定測試
+- [x] DONE：更新 `docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`
