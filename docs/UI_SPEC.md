@@ -323,7 +323,7 @@ AI 或開發者參考 `system_data/` 舊 UI 時，應檢查以下項目：
 
 登入頁支援：
 
-- Email / 密碼輸入與前端必填驗證
+- Account 或 Email / 密碼輸入與前端必填驗證
 - 呼叫 `POST /api/auth/login`
 - Loading 狀態
 - API 錯誤訊息呈現
@@ -367,6 +367,7 @@ REST API
 
 規則：
 
+- 登入識別欄位顯示「帳號或 Email」；前端沿用 `email` request key，後端接受已註冊的 Account 或 Email，並在查詢前去除前後空白及轉為小寫。
 - 登入頁不得直接呼叫 Dio。
 - 登入頁不得直接保存 JWT、Refresh Token 或密碼至 SharedPreferences；登入狀態保存必須集中由 `AuthRepository` 與 `AuthSessionStore` 管理。
 - 登入成功後，`AuthSessionStore` 可保存 `LoginResult` 與最後開啟時間，讓 Web、Android、iOS 在未登出且 30 天內再次開啟時自動恢復登入。

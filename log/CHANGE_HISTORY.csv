@@ -928,3 +928,11 @@
 2026-07-15,16:41,PENPOT-REGISTER,Documentation,docs/TASKS.md,修改,新增插隊註冊頁任務狀態,Codex,否,否,否,否,
 2026-07-15,16:41,PENPOT-REGISTER,Documentation,log/CHANGE_LOG.md,修改,新增 Penpot 註冊頁工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 Log
 2026-07-15,16:41,PENPOT-REGISTER,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Penpot 註冊頁 history 紀錄,Codex,否,否,否,否,
+2026-07-16,10:56,TASK-068,Backend,backend/src/main/java/com/monsters/dto/auth/LoginRequest.java,修改,移除 Email-only 驗證並允許登入識別值為 Account 或 Email,Codex,是,否,否,否,保留 email request key
+2026-07-16,10:56,TASK-068,Test,backend/src/test/java/com/monsters/controller/auth/AuthControllerTest.java,修改,新增 Account 登入 request validation 測試,Codex,是,否,否,否,登入相關測試通過
+2026-07-16,10:56,TASK-068,Test,backend/src/test/java/com/monsters/service/auth/AuthServiceTest.java,修改,同步 Account 或 Email repository 查詢並新增 Account 正規化測試,Codex,是,否,否,否,後端完整測試通過
+2026-07-16,10:56,TASK-068,Documentation,docs/API_SPEC.md,修改,登入規格改為 Account 或 Email 並保留 email 欄位名稱,Codex,是,否,否,否,
+2026-07-16,10:56,TASK-068,Documentation,docs/UI_SPEC.md,修改,登入輸入規格改為帳號或 Email,Codex,否,否,是,否,
+2026-07-16,10:56,TASK-068,Documentation,docs/TASKS.md,修改,新增插隊登入驗證修正任務並更新為 REVIEW,Codex,否,否,否,否,
+2026-07-16,10:56,TASK-068,Documentation,log/CHANGE_LOG.md,修改,新增登入驗證修正與測試紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 Log
+2026-07-16,10:56,TASK-068,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-068 history 紀錄,Codex,否,否,否,否,Flutter 登入頁測試逾時待重跑

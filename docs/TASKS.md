@@ -13,6 +13,15 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ---
 
+## 插隊任務：登入帳號或 Email 驗證修正
+
+- [x] 比對 `bec7bcf` 與 `0b3d265` 的登入欄位及後端查詢行為（DONE）
+- [x] 修正 LoginRequest 將 Account 誤判為非法 Email 的驗證限制（REVIEW：保留 `email` request key，相容既有前端）
+- [x] 補齊 Account / Email 登入測試（DONE：登入相關後端測試與後端完整測試通過）
+- [x] 同步 API、UI 規格與 Log（DONE）
+
+---
+
 ## 插隊任務：Penpot MCP 登入畫面排版同步
 
 - [x] 使用 Penpot MCP 讀取指定畫面設計（DONE：已讀取 Web `Account / Web / 02 Login / 登入` 與 APP `Account / Mobile / 02 Login / 登入`）
