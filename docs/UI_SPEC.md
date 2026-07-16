@@ -720,3 +720,52 @@ Logo 規範：
   - Web：dot `(576,753) 16x16`、text `(610,746) 123x17`、hint `(610,770) 118x14`。
   - Mobile：dot `(76,614) 16x16`、text `(108,608) 123x17`、hint `(108,634) 118x14`。
 - Widget test 已新增上述內部元素座標驗證，避免再次只檢查外層 card 而漏掉 Penpot 差異。
+---
+
+## 2026-07-16 Penpot HomePage Web / App Alignment
+
+本次依 Penpot MCP 讀取 `Web / Companion Home` 與 `Mobile / Companion Home`，重寫 Flutter `HomePage` 的 Web / App responsive layout。
+
+### Penpot Boards
+
+| Target | Board | Size | Background |
+|---|---|---:|---|
+| Web | `Web / Companion Home` | 1440 x 900 | `#FFFED4` |
+| App / Mobile | `Mobile / Companion Home` | 390 x 844 | `#FFFED4` |
+
+### Web Layout
+
+| Element | Position / Size | Note |
+|---|---|---|
+| Page title | x=168, y=52, w=270, h=36 | `陪你整理今天的心情` |
+| Subtitle | x=168, y=96, w=760, h=24 | `選一件現在最想做的事，不需要一次處理所有情緒。` |
+| Companion hero | x=168, y=152, w=630, h=520 | `#D9F1F2` |
+| Monster | x=208, y=208, w=260, h=260 | `assets/images/app_icon.png` |
+| Greeting card | x=494, y=218, w=264, h=150 | white card |
+| Primary action | x=830, y=152, w=414, h=154 | routes to `annoyanceChat` |
+| Diary action | x=830, y=322, w=414, h=154 | unavailable placeholder |
+| History action | x=830, y=492, w=414, h=82 | unavailable placeholder |
+| Collection panel | x=192, y=500, w=582, h=144 | monster collection summary |
+
+### App / Mobile Layout
+
+| Element | Position / Size | Note |
+|---|---|---|
+| App bar | x=0, y=0, w=390, h=72 | white |
+| Logo | x=20, y=12, w=96, h=48 | `assets/images/app_logo.png` |
+| Account button | x=338, y=18, w=38, h=38 | routes to profile |
+| Companion hero | x=16, y=92, w=358, h=294 | `#D9F1F2` |
+| Monster | x=119, y=102, w=152, h=152 | animated monster key preserved |
+| Greeting card | x=40, y=250, w=310, h=118 | white card |
+| Collection panel | x=16, y=402, w=358, h=118 | monster collection summary |
+| Primary action | x=16, y=536, w=358, h=54 | routes to `annoyanceChat` |
+| Quick actions | x=16 / 138 / 260, y=606, w=114, h=104 | diary / history / interaction |
+| Bottom navigation | x=0, y=774, w=390, h=70 | custom Penpot nav, not Material NavigationBar |
+
+### Implementation Notes
+
+- `HomePage` 改為 `Stack + FittedBox` 的 Web / Mobile Penpot canvas，避免 Material AppBar / NavigationBar 與 Penpot 結構不一致。
+- Home 色彩集中於 `frontend/lib/theme/app_colors.dart` 的 `home*` token，page 不直接宣告色碼。
+- 主要行動 `homeAnnoyanceChatButton` 保留既有路由：`context.goNamed(AppRoute.annoyanceChat)`。
+- 帳號按鈕導向 `profile`；尚未開放的 diary / history / collection / interaction / bottom nav 入口顯示即將開放訊息。
+- `homeAnimatedMonster`、`homeAnimatedMonsterIdle`、`homeAnimatedMonsterReacting` 測試 key 保留，降低既有測試與互動行為破壞。
