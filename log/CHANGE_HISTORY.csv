@@ -951,3 +951,15 @@
 2026-07-16,16:12,PENPOT-SPLASH,Documentation,docs/TASKS.md,修改,新增並完成 SplashPage 插隊任務狀態,Codex,Task status DONE
 2026-07-16,16:12,PENPOT-SPLASH,Documentation,log/CHANGE_LOG.md,修改,新增 SplashPage 工作紀錄並完成 Log 保存期限檢查,Codex,無過期 Log 需刪除
 2026-07-16,16:12,PENPOT-SPLASH,Documentation,log/CHANGE_HISTORY.csv,修改,新增 SplashPage history rows,Codex,CHANGE_HISTORY.csv 已同步
+2026-07-16,16:22,PENPOT-SPLASH-REDIRECT,Frontend,frontend/lib/pages/splash_page.dart,修改,session restore false 時直接導向 login route 並移除 Splash 登入註冊按鈕,Codex,flutter analyze --no-pub passed; flutter test --no-pub test/splash_page_test.dart passed
+2026-07-16,16:22,PENPOT-SPLASH-REDIRECT,Test,frontend/test/splash_page_test.dart,修改,更新 SplashPage 測試為檢查中對齊 Penpot 且失敗後自動導向 LoginPage,Codex,3 tests passed
+2026-07-16,16:22,PENPOT-SPLASH-REDIRECT,Documentation,docs/UI_SPEC.md,修改,補充 SplashPage session 失敗自動導向 LoginPage 規格,Codex,文件已同步
+2026-07-16,16:22,PENPOT-SPLASH-REDIRECT,Documentation,docs/TASKS.md,修改,新增並完成 SplashPage redirect 插隊任務,Codex,Task status DONE
+2026-07-16,16:22,PENPOT-SPLASH-REDIRECT,Documentation,log/CHANGE_LOG.md,修改,新增 SplashPage redirect 工作紀錄與 Log 保存期限檢查,Codex,無過期 Log 需刪除
+2026-07-16,16:22,PENPOT-SPLASH-REDIRECT,Documentation,log/CHANGE_HISTORY.csv,修改,新增 SplashPage redirect history rows,Codex,CHANGE_HISTORY.csv 已同步
+2026-07-16,16:29,PENPOT-SPLASH-EXACT,Frontend,frontend/lib/pages/splash_page.dart,修改,修正 SplashPage logo fill 文字對齊 status card 方角與內部元素絕對座標,Codex,flutter analyze --no-pub passed; flutter test --no-pub test/splash_page_test.dart passed
+2026-07-16,16:29,PENPOT-SPLASH-EXACT,Test,frontend/test/splash_page_test.dart,修改,新增 status dot text hint Web Mobile 座標驗證,Codex,3 tests passed
+2026-07-16,16:29,PENPOT-SPLASH-EXACT,Documentation,docs/UI_SPEC.md,修改,補充 SplashPage 精準 Penpot 修正細節,Codex,文件已同步
+2026-07-16,16:29,PENPOT-SPLASH-EXACT,Documentation,docs/TASKS.md,修改,新增並完成 SplashPage 精準修正插隊任務,Codex,Task status DONE
+2026-07-16,16:29,PENPOT-SPLASH-EXACT,Documentation,log/CHANGE_LOG.md,修改,新增 SplashPage exact 工作紀錄與 Log 保存期限檢查,Codex,無過期 Log 需刪除
+2026-07-16,16:29,PENPOT-SPLASH-EXACT,Documentation,log/CHANGE_HISTORY.csv,修改,新增 SplashPage exact history rows,Codex,CHANGE_HISTORY.csv 已同步

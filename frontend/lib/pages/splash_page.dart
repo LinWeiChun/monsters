@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
-import '../theme/app_spacing.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
@@ -15,8 +14,6 @@ class SplashPage extends ConsumerStatefulWidget {
 }
 
 class _SplashPageState extends ConsumerState<SplashPage> {
-  bool _checkedSession = false;
-
   @override
   void initState() {
     super.initState();
@@ -35,9 +32,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
       return;
     }
 
-    setState(() {
-      _checkedSession = true;
-    });
+    context.goNamed(AppRoute.login);
   }
 
   @override
@@ -56,12 +51,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
               child: SizedBox(
                 width: designSize.width,
                 height: designSize.height,
-                child: _SplashArtwork(
-                  isDesktop: isDesktop,
-                  showActions: _checkedSession,
-                  onLogin: () => context.goNamed(AppRoute.login),
-                  onRegister: () => context.goNamed(AppRoute.register),
-                ),
+                child: _SplashArtwork(isDesktop: isDesktop),
               ),
             ),
           );
@@ -72,17 +62,9 @@ class _SplashPageState extends ConsumerState<SplashPage> {
 }
 
 class _SplashArtwork extends StatelessWidget {
-  const _SplashArtwork({
-    required this.isDesktop,
-    required this.showActions,
-    required this.onLogin,
-    required this.onRegister,
-  });
+  const _SplashArtwork({required this.isDesktop});
 
   final bool isDesktop;
-  final bool showActions;
-  final VoidCallback onLogin;
-  final VoidCallback onRegister;
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +83,7 @@ class _SplashArtwork extends StatelessWidget {
           child: Image.asset(
             'assets/images/app_logo.png',
             key: const Key('splashLogo'),
-            fit: BoxFit.contain,
+            fit: BoxFit.fill,
             semanticLabel: 'monsters logo',
           ),
         ),
@@ -137,7 +119,7 @@ class _SplashArtwork extends StatelessWidget {
           height: spec.quoteHeight,
           child: Text(
             '把心裡的重量，先放在這裡。',
-            textAlign: TextAlign.center,
+            textAlign: TextAlign.left,
             style: TextStyle(
               color: AppColors.splashAccentText,
               fontSize: spec.quoteFontSize,
@@ -151,15 +133,8 @@ class _SplashArtwork extends StatelessWidget {
           top: spec.statusTop,
           width: spec.statusWidth,
           height: spec.statusHeight,
-          child: const _SplashStatusCard(),
+          child: _SplashStatusCard(spec: spec),
         ),
-        if (showActions)
-          Positioned(
-            left: spec.actionLeft,
-            top: spec.actionTop,
-            width: spec.actionWidth,
-            child: _SplashActions(onLogin: onLogin, onRegister: onRegister),
-          ),
         if (!isDesktop)
           Positioned(
             left: spec.noteLeft,
@@ -168,7 +143,7 @@ class _SplashArtwork extends StatelessWidget {
             height: spec.noteHeight,
             child: Text(
               '貘nsters · 陪你整理每一種心情',
-              textAlign: TextAlign.center,
+              textAlign: TextAlign.left,
               style: TextStyle(
                 color: AppColors.splashMuted,
                 fontSize: spec.noteFontSize,
@@ -183,7 +158,9 @@ class _SplashArtwork extends StatelessWidget {
 }
 
 class _SplashStatusCard extends StatelessWidget {
-  const _SplashStatusCard();
+  const _SplashStatusCard({required this.spec});
+
+  final _SplashSpec spec;
 
   @override
   Widget build(BuildContext context) {
@@ -192,92 +169,58 @@ class _SplashStatusCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.splashStatusBackground,
         border: Border.all(color: AppColors.splashStatusBorder),
-        borderRadius: BorderRadius.circular(AppRadius.md),
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 22),
-        child: Row(
-          children: [
-            Container(
-              width: 16,
-              height: 16,
-              decoration: const BoxDecoration(
+      child: Stack(
+        children: [
+          Positioned(
+            left: spec.statusDotLeft,
+            top: spec.statusDotTop,
+            width: 16,
+            height: 16,
+            child: const DecoratedBox(
+              key: Key('splashStatusDot'),
+              decoration: BoxDecoration(
                 color: AppColors.splashPrimary,
                 shape: BoxShape.circle,
               ),
             ),
-            const SizedBox(width: AppSpacing.md),
-            const Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '正在確認登入狀態…',
-                  style: TextStyle(
-                    color: AppColors.splashInk,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    height: 1.2,
-                  ),
-                ),
-                SizedBox(height: 6),
-                Text(
-                  '最長保留 30 天登入狀態',
-                  style: TextStyle(
-                    color: AppColors.splashMuted,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w400,
-                    height: 1.2,
-                  ),
-                ),
-              ],
+          ),
+          Positioned(
+            left: spec.statusTextLeft,
+            top: spec.statusTextTop,
+            width: 123,
+            height: 17,
+            child: const Text(
+              '正在確認登入狀態…',
+              key: Key('splashStatusText'),
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                color: AppColors.splashInk,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                height: 1.2,
+              ),
             ),
-          ],
-        ),
+          ),
+          Positioned(
+            left: spec.statusHintLeft,
+            top: spec.statusHintTop,
+            width: 118,
+            height: 14,
+            child: const Text(
+              '最長保留 30 天登入狀態',
+              key: Key('splashStatusHint'),
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                color: AppColors.splashMuted,
+                fontSize: 11,
+                fontWeight: FontWeight.w400,
+                height: 1.2,
+              ),
+            ),
+          ),
+        ],
       ),
-    );
-  }
-}
-
-class _SplashActions extends StatelessWidget {
-  const _SplashActions({required this.onLogin, required this.onRegister});
-
-  final VoidCallback onLogin;
-  final VoidCallback onRegister;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 128,
-          height: 44,
-          child: FilledButton(
-            key: const Key('splashLoginButton'),
-            onPressed: onLogin,
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.splashPrimary,
-              foregroundColor: AppColors.splashOnPrimary,
-            ),
-            child: const Text('登入'),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        SizedBox(
-          width: 128,
-          height: 44,
-          child: OutlinedButton(
-            key: const Key('splashRegisterButton'),
-            onPressed: onRegister,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.splashPrimary,
-              side: const BorderSide(color: AppColors.splashPrimary),
-            ),
-            child: const Text('註冊'),
-          ),
-        ),
-      ],
     );
   }
 }
@@ -304,9 +247,12 @@ class _SplashSpec {
     required this.statusTop,
     required this.statusWidth,
     required this.statusHeight,
-    required this.actionLeft,
-    required this.actionTop,
-    required this.actionWidth,
+    required this.statusDotLeft,
+    required this.statusDotTop,
+    required this.statusTextLeft,
+    required this.statusTextTop,
+    required this.statusHintLeft,
+    required this.statusHintTop,
     required this.noteLeft,
     required this.noteTop,
     required this.noteWidth,
@@ -336,9 +282,12 @@ class _SplashSpec {
       statusTop: 724,
       statusWidth: 340,
       statusHeight: 74,
-      actionLeft: 582,
-      actionTop: 814,
-      actionWidth: 276,
+      statusDotLeft: 26,
+      statusDotTop: 29,
+      statusTextLeft: 60,
+      statusTextTop: 22,
+      statusHintLeft: 60,
+      statusHintTop: 46,
       noteLeft: 0,
       noteTop: 0,
       noteWidth: 0,
@@ -369,9 +318,12 @@ class _SplashSpec {
       statusTop: 586,
       statusWidth: 282,
       statusHeight: 82,
-      actionLeft: 57,
-      actionTop: 698,
-      actionWidth: 276,
+      statusDotLeft: 22,
+      statusDotTop: 28,
+      statusTextLeft: 54,
+      statusTextTop: 22,
+      statusHintLeft: 54,
+      statusHintTop: 48,
       noteLeft: 79,
       noteTop: 774,
       noteWidth: 162,
@@ -400,9 +352,12 @@ class _SplashSpec {
   final double statusTop;
   final double statusWidth;
   final double statusHeight;
-  final double actionLeft;
-  final double actionTop;
-  final double actionWidth;
+  final double statusDotLeft;
+  final double statusDotTop;
+  final double statusTextLeft;
+  final double statusTextTop;
+  final double statusHintLeft;
+  final double statusHintTop;
   final double noteLeft;
   final double noteTop;
   final double noteWidth;

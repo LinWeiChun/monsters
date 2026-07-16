@@ -705,3 +705,18 @@ Logo 規範：
 - Splash 顏色集中於 `frontend/lib/theme/app_colors.dart` 的 `splash*` token，page 不直接宣告色碼。
 - Web / App 尺寸以 `_SplashSpec` 分別記錄 Penpot 座標，並透過 `FittedBox` 支援不同螢幕比例縮放。
 - Splash 導向仍使用 `go_router` 的 `context.goNamed()`；Flutter 不直接存取 Database 或 Auth storage。
+### 2026-07-16 SplashPage Redirect Update
+
+- `SplashPage` 僅在 `AuthController.restoreSession()` 檢查期間顯示 Penpot Splash 畫面。
+- 若 session 有效，導向 `home` route。
+- 若 session 無效、過期或格式錯誤，直接導向 `login` route，不在 Splash 畫面顯示登入 / 註冊按鈕。
+- 此行為讓 Splash Web / App 畫面與 Penpot 靜態畫板一致；登入與註冊行動由 LoginPage / RegisterPage 負責。
+### 2026-07-16 SplashPage Exact Penpot Correction
+
+- SplashPage Web / Mobile 文字對齊依 Penpot 設為 left，不再使用 center。
+- Logo image fill 依 Penpot rectangle fill 呈現，Flutter 改用 `BoxFit.fill`；Monster 保持 `BoxFit.contain`。
+- Status card 依 Penpot 移除圓角，維持 `#FFFDFC` fill 與 `#E7C7B5` stroke。
+- Status dot、status text、status hint 改為絕對座標定位：
+  - Web：dot `(576,753) 16x16`、text `(610,746) 123x17`、hint `(610,770) 118x14`。
+  - Mobile：dot `(76,614) 16x16`、text `(108,608) 123x17`、hint `(108,634) 118x14`。
+- Widget test 已新增上述內部元素座標驗證，避免再次只檢查外層 card 而漏掉 Penpot 差異。
