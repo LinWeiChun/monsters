@@ -15,8 +15,6 @@ class SplashPage extends ConsumerStatefulWidget {
 }
 
 class _SplashPageState extends ConsumerState<SplashPage> {
-  bool _checkedSession = false;
-
   @override
   void initState() {
     super.initState();
@@ -35,9 +33,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
       return;
     }
 
-    setState(() {
-      _checkedSession = true;
-    });
+    context.goNamed(AppRoute.login);
   }
 
   @override
@@ -56,12 +52,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
               child: SizedBox(
                 width: designSize.width,
                 height: designSize.height,
-                child: _SplashArtwork(
-                  isDesktop: isDesktop,
-                  showActions: _checkedSession,
-                  onLogin: () => context.goNamed(AppRoute.login),
-                  onRegister: () => context.goNamed(AppRoute.register),
-                ),
+                child: _SplashArtwork(isDesktop: isDesktop),
               ),
             ),
           );
@@ -72,17 +63,9 @@ class _SplashPageState extends ConsumerState<SplashPage> {
 }
 
 class _SplashArtwork extends StatelessWidget {
-  const _SplashArtwork({
-    required this.isDesktop,
-    required this.showActions,
-    required this.onLogin,
-    required this.onRegister,
-  });
+  const _SplashArtwork({required this.isDesktop});
 
   final bool isDesktop;
-  final bool showActions;
-  final VoidCallback onLogin;
-  final VoidCallback onRegister;
 
   @override
   Widget build(BuildContext context) {
@@ -153,13 +136,6 @@ class _SplashArtwork extends StatelessWidget {
           height: spec.statusHeight,
           child: const _SplashStatusCard(),
         ),
-        if (showActions)
-          Positioned(
-            left: spec.actionLeft,
-            top: spec.actionTop,
-            width: spec.actionWidth,
-            child: _SplashActions(onLogin: onLogin, onRegister: onRegister),
-          ),
         if (!isDesktop)
           Positioned(
             left: spec.noteLeft,
@@ -239,49 +215,6 @@ class _SplashStatusCard extends StatelessWidget {
   }
 }
 
-class _SplashActions extends StatelessWidget {
-  const _SplashActions({required this.onLogin, required this.onRegister});
-
-  final VoidCallback onLogin;
-  final VoidCallback onRegister;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 128,
-          height: 44,
-          child: FilledButton(
-            key: const Key('splashLoginButton'),
-            onPressed: onLogin,
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.splashPrimary,
-              foregroundColor: AppColors.splashOnPrimary,
-            ),
-            child: const Text('登入'),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        SizedBox(
-          width: 128,
-          height: 44,
-          child: OutlinedButton(
-            key: const Key('splashRegisterButton'),
-            onPressed: onRegister,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.splashPrimary,
-              side: const BorderSide(color: AppColors.splashPrimary),
-            ),
-            child: const Text('註冊'),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _SplashSpec {
   const _SplashSpec({
     required this.logoLeft,
@@ -304,9 +237,6 @@ class _SplashSpec {
     required this.statusTop,
     required this.statusWidth,
     required this.statusHeight,
-    required this.actionLeft,
-    required this.actionTop,
-    required this.actionWidth,
     required this.noteLeft,
     required this.noteTop,
     required this.noteWidth,
@@ -336,9 +266,6 @@ class _SplashSpec {
       statusTop: 724,
       statusWidth: 340,
       statusHeight: 74,
-      actionLeft: 582,
-      actionTop: 814,
-      actionWidth: 276,
       noteLeft: 0,
       noteTop: 0,
       noteWidth: 0,
@@ -369,9 +296,6 @@ class _SplashSpec {
       statusTop: 586,
       statusWidth: 282,
       statusHeight: 82,
-      actionLeft: 57,
-      actionTop: 698,
-      actionWidth: 276,
       noteLeft: 79,
       noteTop: 774,
       noteWidth: 162,
@@ -400,9 +324,6 @@ class _SplashSpec {
   final double statusTop;
   final double statusWidth;
   final double statusHeight;
-  final double actionLeft;
-  final double actionTop;
-  final double actionWidth;
   final double noteLeft;
   final double noteTop;
   final double noteWidth;

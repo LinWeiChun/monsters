@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,17 +13,19 @@ import 'package:monsters/routes/app_router.dart';
 import 'package:monsters/routes/app_routes.dart';
 
 void main() {
-  testWidgets('matches Penpot mobile splash layout', (tester) async {
+  testWidgets('matches Penpot mobile splash layout while checking session', (
+    tester,
+  ) async {
     await _setMobileSurface(tester);
-    await tester.pumpWidget(_splashApp(_FakeAuthRepository()));
-    await tester.pumpAndSettle();
+    await tester.pumpWidget(_splashApp(_PendingAuthRepository()));
+    await tester.pump();
 
     expect(find.text('把心裡的重量，先放在這裡。'), findsOneWidget);
     expect(find.text('正在確認登入狀態…'), findsOneWidget);
     expect(find.text('最長保留 30 天登入狀態'), findsOneWidget);
     expect(find.text('貘nsters · 陪你整理每一種心情'), findsOneWidget);
-    expect(find.byKey(const Key('splashLoginButton')), findsOneWidget);
-    expect(find.byKey(const Key('splashRegisterButton')), findsOneWidget);
+    expect(find.byKey(const Key('splashLoginButton')), findsNothing);
+    expect(find.byKey(const Key('splashRegisterButton')), findsNothing);
 
     _expectRect(
       tester,
@@ -43,17 +47,19 @@ void main() {
     );
   });
 
-  testWidgets('matches Penpot web splash layout', (tester) async {
+  testWidgets('matches Penpot web splash layout while checking session', (
+    tester,
+  ) async {
     await _setDesktopSurface(tester);
-    await tester.pumpWidget(_splashApp(_FakeAuthRepository()));
-    await tester.pumpAndSettle();
+    await tester.pumpWidget(_splashApp(_PendingAuthRepository()));
+    await tester.pump();
 
     expect(find.text('把心裡的重量，先放在這裡。'), findsOneWidget);
     expect(find.text('正在確認登入狀態…'), findsOneWidget);
     expect(find.text('最長保留 30 天登入狀態'), findsOneWidget);
     expect(find.text('貘nsters · 陪你整理每一種心情'), findsNothing);
-    expect(find.byKey(const Key('splashLoginButton')), findsOneWidget);
-    expect(find.byKey(const Key('splashRegisterButton')), findsOneWidget);
+    expect(find.byKey(const Key('splashLoginButton')), findsNothing);
+    expect(find.byKey(const Key('splashRegisterButton')), findsNothing);
 
     _expectRect(
       tester,
@@ -75,28 +81,14 @@ void main() {
     );
   });
 
-  testWidgets('navigates to login when login action is tapped', (tester) async {
+  testWidgets('redirects to login when session restore fails', (tester) async {
     await _setMobileSurface(tester);
     await tester.pumpWidget(_splashApp(_FakeAuthRepository()));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byKey(const Key('splashLoginButton')));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
-  });
-
-  testWidgets('navigates to register when register action is tapped', (
-    tester,
-  ) async {
-    await _setMobileSurface(tester);
-    await tester.pumpWidget(_splashApp(_FakeAuthRepository()));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byKey(const Key('splashRegisterButton')));
-    await tester.pumpAndSettle();
-
-    expect(find.byKey(const Key('registerAccountField')), findsOneWidget);
+    expect(find.byKey(const Key('splashLoginButton')), findsNothing);
+    expect(find.byKey(const Key('splashRegisterButton')), findsNothing);
   });
 }
 
@@ -141,6 +133,17 @@ class _FakeAuthRepository extends AuthRepository {
   @override
   Future<LoginResult?> restoreSession({DateTime? now}) async {
     return null;
+  }
+}
+
+class _PendingAuthRepository extends AuthRepository {
+  _PendingAuthRepository() : super(_dummyClient());
+
+  final Completer<LoginResult?> _sessionCompleter = Completer<LoginResult?>();
+
+  @override
+  Future<LoginResult?> restoreSession({DateTime? now}) {
+    return _sessionCompleter.future;
   }
 }
 

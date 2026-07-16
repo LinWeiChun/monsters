@@ -705,3 +705,9 @@ Logo 規範：
 - Splash 顏色集中於 `frontend/lib/theme/app_colors.dart` 的 `splash*` token，page 不直接宣告色碼。
 - Web / App 尺寸以 `_SplashSpec` 分別記錄 Penpot 座標，並透過 `FittedBox` 支援不同螢幕比例縮放。
 - Splash 導向仍使用 `go_router` 的 `context.goNamed()`；Flutter 不直接存取 Database 或 Auth storage。
+### 2026-07-16 SplashPage Redirect Update
+
+- `SplashPage` 僅在 `AuthController.restoreSession()` 檢查期間顯示 Penpot Splash 畫面。
+- 若 session 有效，導向 `home` route。
+- 若 session 無效、過期或格式錯誤，直接導向 `login` route，不在 Splash 畫面顯示登入 / 註冊按鈕。
+- 此行為讓 Splash Web / App 畫面與 Penpot 靜態畫板一致；登入與註冊行動由 LoginPage / RegisterPage 負責。
