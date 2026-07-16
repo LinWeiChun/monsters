@@ -120,11 +120,33 @@ class AuthControllerTest {
     }
 
     @Test
+    void loginShouldAcceptAccountIdentifier() throws Exception {
+        when(authService.login(any(LoginRequest.class)))
+                .thenReturn(new LoginResponse(
+                        "access-token",
+                        "refresh-token",
+                        "Bearer",
+                        3600,
+                        new AuthUserResponse(1L, "wei_account", "user@example.com", "Wei", null)
+                ));
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", "wei_account",
+                                "password", "password123"
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.user.account").value("wei_account"));
+    }
+
+    @Test
     void loginShouldValidateRequestBody() throws Exception {
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
-                                "email", "invalid",
+                                "email", " ",
                                 "password", "short"
                         ))))
                 .andExpect(status().isBadRequest())

@@ -8,6 +8,62 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-16 10:56
+
+Task
+TASK-068 登入帳號或 Email 驗證修正（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 比對 `bec7bcf` 的登入欄位調整與 `0b3d265` 的 Account / Email 後端查詢邏輯。
+- 確認登入 400 的原因為 `LoginRequest.email` 仍套用 `@Email`，使 Account 在進入 `AuthService` 前即被拒絕。
+- 保留既有 `email` request key，移除 Email-only 格式限制，改為必填且最大長度 255，讓後端可接收 Account 或 Email。
+- 更新登入 Controller 與 Service 測試，涵蓋 Account request validation、Account 正規化查詢、Email 查詢、未知使用者與錯誤密碼。
+- 檢查 Log 保存期限；最早紀錄為 2026-06-29，未早於 2026-06-16，因此未刪除 Log。
+
+### Modified
+
+- `backend/src/main/java/com/monsters/dto/auth/LoginRequest.java`
+- `backend/src/test/java/com/monsters/controller/auth/AuthControllerTest.java`
+- `backend/src/test/java/com/monsters/service/auth/AuthServiceTest.java`
+- `docs/API_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- `gradlew.bat test --tests "com.monsters.controller.auth.AuthControllerTest" --tests "com.monsters.service.auth.AuthServiceTest"`：通過。
+- `gradlew.bat test`：BUILD SUCCESSFUL。
+- `flutter test --no-pub test/login_page_test.dart`：180 秒內無輸出並逾時；本次未修改前端程式，保留為 REVIEW 待後續環境確認。
+
+### system_data Reference
+
+- 參考舊系統以 Account 登入的流程意圖；未沿用舊系統空密碼 Google 登入、全域狀態或不安全憑證處理方式。
+
+### API
+
+- `POST /api/auth/login` 的 `email` 欄位名稱不變，語意擴充為可輸入已註冊的 Account 或 Email。
+
+### Database
+
+- No Database change.
+
+### UI
+
+- No frontend code changed；UI 規格同步標示登入欄位為「帳號或 Email」。
+
+### Pending
+
+- 待 Code Review 與 Railway 部署後，以 Account 及 Email 各執行一次公開環境登入驗證。
+- Flutter 登入頁測試需在 Flutter test runner 可正常輸出的環境重跑。
+
+---
+
 ## 2026-07-15 16:41
 
 Task

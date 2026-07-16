@@ -340,9 +340,10 @@ Response：
 
 規則：
 
-- `email` 必須轉為小寫並去除前後空白後查詢。
+- `email` 為相容既有前端保留的欄位名稱，實際可傳入已註冊的 Account 或 Email，必填且最大長度 255。
+- Account 或 Email 必須轉為小寫並去除前後空白後查詢。
 - 密碼以 BCrypt `PasswordEncoder.matches` 比對，不得明文保存或寫入 log。
-- Email 不存在、帳號已刪除、憑證不存在或密碼錯誤時，回傳 401。
+- Account / Email 不存在、帳號已刪除、憑證不存在或密碼錯誤時，回傳 401。
 - `accessToken` 與 `refreshToken` 使用 HMAC-SHA256 JWT 產生。
 - `JWT_SECRET` 必須設定，否則不得產生 JWT。
 

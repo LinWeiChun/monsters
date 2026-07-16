@@ -146,7 +146,7 @@ class AuthServiceTest {
         ReflectionTestUtils.setField(user, "id", 1L);
         UserCredential credential = new UserCredential(user, "encoded-password");
 
-        when(userRepository.findByEmailAndDeletedFalse("user@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailOrAccountAndDeletedFalse("user@example.com")).thenReturn(Optional.of(user));
         when(userCredentialRepository.findByUser(user)).thenReturn(Optional.of(credential));
         when(passwordEncoder.matches("password123", "encoded-password")).thenReturn(true);
         when(jwtTokenService.createAccessToken(user)).thenReturn("access-token");
@@ -166,9 +166,29 @@ class AuthServiceTest {
     }
 
     @Test
+    void loginShouldFindUserByNormalizedAccount() {
+        LoginRequest request = new LoginRequest(" WEI_ACCOUNT ", "password123");
+        User user = new User("wei_account", "user@example.com", "Wei");
+        ReflectionTestUtils.setField(user, "id", 1L);
+        UserCredential credential = new UserCredential(user, "encoded-password");
+
+        when(userRepository.findByEmailOrAccountAndDeletedFalse("wei_account")).thenReturn(Optional.of(user));
+        when(userCredentialRepository.findByUser(user)).thenReturn(Optional.of(credential));
+        when(passwordEncoder.matches("password123", "encoded-password")).thenReturn(true);
+        when(jwtTokenService.createAccessToken(user)).thenReturn("access-token");
+        when(jwtTokenService.createRefreshToken(user)).thenReturn("refresh-token");
+        when(jwtProperties.accessTokenExpirationSeconds()).thenReturn(3600L);
+
+        LoginResponse response = authService.login(request);
+
+        assertThat(response.user().account()).isEqualTo("wei_account");
+        verify(userRepository).findByEmailOrAccountAndDeletedFalse("wei_account");
+    }
+
+    @Test
     void loginShouldRejectUnknownEmail() {
         LoginRequest request = new LoginRequest("user@example.com", "password123");
-        when(userRepository.findByEmailAndDeletedFalse("user@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmailOrAccountAndDeletedFalse("user@example.com")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.login(request))
                 .isInstanceOf(UnauthorizedException.class)
@@ -181,7 +201,7 @@ class AuthServiceTest {
         User user = new User("wei_account", "user@example.com", "Wei");
         UserCredential credential = new UserCredential(user, "encoded-password");
 
-        when(userRepository.findByEmailAndDeletedFalse("user@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailOrAccountAndDeletedFalse("user@example.com")).thenReturn(Optional.of(user));
         when(userCredentialRepository.findByUser(user)).thenReturn(Optional.of(credential));
         when(passwordEncoder.matches("wrong-password", "encoded-password")).thenReturn(false);
 
