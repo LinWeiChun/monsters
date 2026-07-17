@@ -735,18 +735,16 @@ Logo 規範：
 
 ### Web Layout
 
-| Element | Position / Size | Note |
+| Element | Relative Layout | Note |
 |---|---|---|
-| Page title | x=168, y=52, w=270, h=36 | `陪你整理今天的心情` |
-| Subtitle | x=168, y=96, w=760, h=24 | `選一件現在最想做的事，不需要一次處理所有情緒。` |
-| Companion hero | x=168, y=152, w=630, h=520 | `#D9F1F2` |
-| Monster | x=208, y=208, w=260, h=260 | `assets/images/app_icon.png` |
-| Greeting card | x=494, y=218, w=264, h=150 | white card |
-| Primary action | x=830, y=152, w=414, h=154 | routes to `annoyanceChat` |
-| Diary action | x=830, y=322, w=414, h=154 | unavailable placeholder |
-| History action | x=830, y=492, w=414, h=82 | unavailable placeholder |
-| Collection panel | x=192, y=500, w=582, h=144 | monster collection summary |
-
+| Page shell | `Column` with fixed-height top nav and flexible content area | Web does not use fixed 1440 x 900 canvas scaling |
+| Content width | centered `ConstrainedBox`, max width 1200 | horizontal padding derived from viewport width |
+| Header | vertical `Column` | title and subtitle use natural text flow |
+| Main content | `Row` with flex 19:10 | left companion / collection column, right action column |
+| Companion hero | responsive `Row` inside hero panel | monster and greeting card share available width proportionally |
+| Action cards | `Column` with responsive gaps | primary / diary / history / interaction use reusable tile widget |
+| Collection panel | `Column` + `Row` chips | chip spacing is based on layout flow, not absolute x/y offsets |
+| Navbar | `Row` with `Spacer` | menu, CTA, notification and profile buttons align by flex flow |
 ### App / Mobile Layout
 
 | Element | Position / Size | Note |
@@ -764,7 +762,7 @@ Logo 規範：
 
 ### Implementation Notes
 
-- `HomePage` 改為 `Stack + FittedBox` 的 Web / Mobile Penpot canvas，避免 Material AppBar / NavigationBar 與 Penpot 結構不一致。
+- `HomePage` Web 版改為 `LayoutBuilder + Column / Row / Expanded / ConstrainedBox` 的相對 layout；Mobile 版仍保留 390 x 844 Penpot canvas。
 - Home 色彩集中於 `frontend/lib/theme/app_colors.dart` 的 `home*` token，page 不直接宣告色碼。
 - 主要行動 `homeAnnoyanceChatButton` 保留既有路由：`context.goNamed(AppRoute.annoyanceChat)`。
 - 帳號按鈕導向 `profile`；尚未開放的 diary / history / collection / interaction / bottom nav 入口顯示即將開放訊息。
@@ -796,3 +794,10 @@ Logo 規範：
 - `HomePage` 仍使用 `WEB / Web / Companion Home` 與 `Mobile / Companion Home` 規格。
 - Web / Mobile canvas 外層縮放由 `BoxFit.contain` 改為 `BoxFit.cover`，避免寬螢幕部署畫面出現非滿版留白。
 - 修正僅影響縮放與裁切策略，不改變 HomePage 的 Penpot 元件座標、導覽、互動 key 或 API 行為。
+## 2026-07-16 HomePage Web Companion Home Refinement
+
+- 本次以 Penpot MCP 選取的 `WEB / Web / Companion Home` 為準，修正 Web HomePage 不應套用舊版 `Web / Companion Home` 近似版型的問題。
+- Web HomePage 改為相對 layout：內容最大寬度、水平 padding、區塊 gap 由 viewport 推導，避免使用固定 x/y 座標排列。
+- Web 版新增 Penpot navbar、右上 CTA、通知圓鈕與 profile 圓鈕；profile 入口導向 `profile` route，尚未開放入口維持 snackbar placeholder。
+- Web collection panel 改為 flow layout，保留 7 個怪獸 chip 與 `+1` more chip。
+- 本次僅調整 Web HomePage；Mobile HomePage 規格與座標未變更。
