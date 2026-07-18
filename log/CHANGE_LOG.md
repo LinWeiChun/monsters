@@ -6490,3 +6490,78 @@ Codex
 ### 待確認事項
 
 - 部署環境仍需確認未將 `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` 覆寫回舊值 1209600。
+
+---
+
+## 2026-07-18 15:03 PROFILE-ANNOYANCE-PENPOT-RWD
+
+Task
+同步 Profile 生日／登出與 Annoyance Penpot 畫面，並修正 Home／Profile Web 右側留白
+
+執行者
+Codex
+
+### 完成內容
+
+- Profile 生日欄位改用 Flutter 內建 `showDatePicker`，限制 1900-01-01 至當日並維持 `yyyy-MM-dd` API 格式；未新增第三方套件。
+- Profile Web、Tablet、Mobile 加入可見登出按鈕與確認對話框，確認後沿用 `AuthController.logout()` 清除登入狀態並返回登入頁。
+- Home／Profile Tablet 與 Desktop 最外層改為 stretch 的滿寬 flow layout，修正 674px 固定內容寬度造成的右側留白。
+- Annoyance Page 依 Penpot Web／Mobile Flow 同步導覽、進度、陪伴訊息與操作面板，保留原本結構化狀態機、媒體、繪圖、分數、分享與送出流程。
+- Penpot Profile Web／Mobile 個人首頁新增登出入口、編輯頁新增日曆生日欄位；匯出四張畫板完成視覺檢查。
+- 依正式規格未實作 Penpot 獎勵延伸畫面，Phase 3 建立成功後仍只顯示完成結果。
+
+### 新增
+
+- `frontend/lib/widgets/annoyance/annoyance_penpot_shell.dart`
+
+### 修改
+
+- `frontend/lib/pages/annoyance_chat_page.dart`
+- `frontend/lib/pages/home_page.dart`
+- `frontend/lib/pages/profile_page.dart`
+- `frontend/lib/theme/app_colors.dart`
+- `frontend/lib/widgets/profile/profile_penpot_canvas.dart`
+- `frontend/test/annoyance_chat_page_test.dart`
+- `frontend/test/home_page_test.dart`
+- `frontend/test/profile_page_test.dart`
+- `docs/PROJECT_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### system_data 參考
+
+- 參考 `四技第111405組-貘nsters APP-系統手冊.pdf`、系統簡介與舊 Flutter Profile／Home／Annoyance 流程，保留舊系統的個人資料顯示、抽屜登出及聊天式煩惱建立意圖。
+- 新版改用 Riverpod、go_router、REST API 與相對 RWD layout；未沿用舊全域狀態、固定 Web 座標、硬編碼登入資料或舊獎勵流程。
+- 未修改 `system_data/`。
+
+### API／Database
+
+- API 無異動；Profile 更新、登出與 Annoyance 建立沿用現有 contract。
+- Database 無異動，無 Migration。
+
+### 文件更新
+
+- PROJECT_SPEC 補上內建日曆生日輸入及個人資料頁登出需求。
+- UI_SPEC 補上滿寬 shell、Profile 日曆／登出、Annoyance Penpot 與 390 至 1920px RWD 規範。
+- DECISIONS 記錄使用者選定方案 A，不新增第三方日曆套件。
+- TASKS 完整記錄 TODO → IN PROGRESS → REVIEW → DONE。
+
+### 測試
+
+- `flutter analyze --no-pub`：通過，No issues found。
+- Home／Profile／Annoyance targeted widget tests：36 tests passed。
+- `flutter test --no-pub`：124 tests passed。
+- `flutter build web --no-pub`：通過，已產出 `frontend/build/web`。
+- Web build 僅顯示既有 Cupertino icon font 提示，不影響建置結果。
+
+### Log 保存期限檢查
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；保存期限截止日為 2026-06-18。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源，未修改。
+
+### 待確認事項
+
+- 無。

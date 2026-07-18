@@ -23,6 +23,7 @@
 | 忘記密碼流程 | 後端產生 15 分鐘短效 reset token，資料庫只保存 token hash；目前回傳 resetToken 供開發串接，正式寄信服務待後續定案 |
 | 登出流程 | 使用 JWT revocation；登出時保存 access token hash，前端提供 refresh token 時一併保存其 hash 與原 token 過期時間，JWT 驗證與 refresh rotation 需拒絕已撤銷 token |
 | Token Refresh | Refresh token 預設有效 30 天並採 rotation；啟動恢復 session 先換發新 Token，受保護 API 的並行 401 共用單一 refresh request，舊 refresh token hash 寫入 `revoked_tokens` 後不可重用 |
+| Profile 生日選擇器 | 採方案 A：使用 Flutter 內建 `showDatePicker`，不新增第三方套件；選擇範圍為 1900-01-01 至當日，送出格式維持 `yyyy-MM-dd` |
 | 檔案上傳儲存方式 | 使用 Cloudflare R2 S3-compatible API；public avatar 與 private entry media 使用不同 bucket，環境變數包含 `R2_ACCOUNT_ID`、`R2_ACCESS_KEY_ID`、`R2_SECRET_ACCESS_KEY`、`R2_BUCKET`、`R2_PUBLIC_BASE_URL`、`R2_ENTRY_MEDIA_BUCKET` 與各類媒體限制 |
 | Web 管理後台 | 需要建立 Web 管理後台；實作範圍與權限模型於後續管理後台 Task 細化 |
 | 正式寄信服務 | 忘記密碼正式環境使用 SMTP 寄送 reset link |

@@ -44,6 +44,11 @@ void main() {
       expect(find.byKey(const Key('profileUserNameField')), findsOneWidget);
       expect(find.byKey(const Key('profileBirthdayField')), findsOneWidget);
       expect(find.byKey(const Key('profileSaveButton')), findsOneWidget);
+      expect(find.byKey(const Key('profileLogoutButton')), findsOneWidget);
+      expect(
+        tester.getSize(find.byKey(const Key('profileResponsiveShell'))).width,
+        size.width,
+      );
       expect(find.byType(FittedBox), findsNothing);
       expect(tester.takeException(), isNull);
     });
@@ -54,15 +59,30 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byKey(const Key('profileUserNameField')), '');
-    await tester.enterText(
-      find.byKey(const Key('profileBirthdayField')),
-      '2000/01/02',
-    );
-    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.tap(find.byKey(const Key('profileSaveButton')));
     await tester.pumpAndSettle();
 
     expect(find.text('請輸入暱稱'), findsOneWidget);
-    expect(find.text('生日格式需為 yyyy-MM-dd'), findsOneWidget);
+  });
+
+  testWidgets('selects birthday from the calendar', (tester) async {
+    await _setSurface(tester, const Size(1024, 768));
+    await tester.pumpWidget(_profileApp(_FakeUserRepository()));
+    await tester.pumpAndSettle();
+
+    final birthdayField = find.byKey(const Key('profileBirthdayField'));
+    await tester.ensureVisible(birthdayField);
+    await tester.tap(birthdayField);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(DatePickerDialog), findsOneWidget);
+    expect(find.text('選擇生日'), findsOneWidget);
+    await tester.tap(find.text('15'));
+    await tester.tap(find.text('確定'));
+    await tester.pumpAndSettle();
+
+    final field = tester.widget<TextFormField>(birthdayField);
+    expect(field.controller?.text, '2000-01-15');
   });
 
   testWidgets('submits updated profile and shows success message', (
@@ -76,17 +96,28 @@ void main() {
       find.byKey(const Key('profileUserNameField')),
       ' Lin ',
     );
-    await tester.enterText(
-      find.byKey(const Key('profileBirthdayField')),
-      '2001-03-04',
-    );
-    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.tap(find.byKey(const Key('profileSaveButton')));
     await tester.pumpAndSettle();
 
     expect(repository.updatedUserName, 'Lin');
-    expect(repository.updatedBirthday, '2001-03-04');
+    expect(repository.updatedBirthday, '2000-01-02');
     expect(find.text('個人資料已更新'), findsOneWidget);
     expect(find.text('Lin'), findsWidgets);
+  });
+
+  testWidgets('shows logout confirmation from profile', (tester) async {
+    await _setSurface(tester, const Size(1024, 768));
+    await tester.pumpWidget(_profileApp(_FakeUserRepository()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('profileLogoutButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('確認登出'), findsOneWidget);
+    expect(find.byKey(const Key('profileConfirmLogoutButton')), findsOneWidget);
+    await tester.tap(find.text('取消'));
+    await tester.pumpAndSettle();
+    expect(find.text('確認登出'), findsNothing);
   });
 
   testWidgets('shows load error state with retry action', (tester) async {

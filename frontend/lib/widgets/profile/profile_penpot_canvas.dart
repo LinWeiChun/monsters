@@ -6,8 +6,11 @@ class _ResponsiveProfileCanvas extends StatelessWidget {
     required this.userNameController,
     required this.birthdayController,
     required this.isSaving,
+    required this.isLoggingOut,
     required this.errorMessage,
     required this.onSave,
+    required this.onSelectBirthday,
+    required this.onLogout,
     required this.onBack,
     required this.onUnavailable,
     this.compact = false,
@@ -17,8 +20,11 @@ class _ResponsiveProfileCanvas extends StatelessWidget {
   final TextEditingController userNameController;
   final TextEditingController birthdayController;
   final bool isSaving;
+  final bool isLoggingOut;
   final String? errorMessage;
   final VoidCallback onSave;
+  final VoidCallback onSelectBirthday;
+  final VoidCallback onLogout;
   final VoidCallback onBack;
   final VoidCallback onUnavailable;
   final bool compact;
@@ -26,13 +32,17 @@ class _ResponsiveProfileCanvas extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
+      key: const Key('profileResponsiveShell'),
       color: AppColors.profileBackground,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _ResponsiveProfileHeader(
             compact: compact,
             isSaving: isSaving,
+            isLoggingOut: isLoggingOut,
             onSave: onSave,
+            onLogout: onLogout,
             onBack: onBack,
             onUnavailable: onUnavailable,
           ),
@@ -50,6 +60,7 @@ class _ResponsiveProfileCanvas extends StatelessWidget {
                     isSaving: isSaving,
                     errorMessage: errorMessage,
                     onSave: onSave,
+                    onSelectBirthday: onSelectBirthday,
                     compact: compact,
                   ),
                 ),
@@ -66,14 +77,18 @@ class _ResponsiveProfileHeader extends StatelessWidget {
   const _ResponsiveProfileHeader({
     required this.compact,
     required this.isSaving,
+    required this.isLoggingOut,
     required this.onSave,
+    required this.onLogout,
     required this.onBack,
     required this.onUnavailable,
   });
 
   final bool compact;
   final bool isSaving;
+  final bool isLoggingOut;
   final VoidCallback onSave;
+  final VoidCallback onLogout;
   final VoidCallback onBack;
   final VoidCallback onUnavailable;
 
@@ -120,6 +135,13 @@ class _ResponsiveProfileHeader extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: AppSpacing.lg),
+                OutlinedButton.icon(
+                  key: const Key('profileLogoutButton'),
+                  onPressed: isLoggingOut ? null : onLogout,
+                  icon: const Icon(Icons.logout, size: 18),
+                  label: Text(isLoggingOut ? '登出中' : '登出'),
+                ),
+                const SizedBox(width: AppSpacing.md),
                 SizedBox(
                   height: 44,
                   child: FilledButton(
@@ -150,6 +172,7 @@ class _ResponsiveProfileCard extends StatelessWidget {
     required this.isSaving,
     required this.errorMessage,
     required this.onSave,
+    required this.onSelectBirthday,
     required this.compact,
   });
 
@@ -159,6 +182,7 @@ class _ResponsiveProfileCard extends StatelessWidget {
   final bool isSaving;
   final String? errorMessage;
   final VoidCallback onSave;
+  final VoidCallback onSelectBirthday;
   final bool compact;
 
   @override
@@ -202,6 +226,9 @@ class _ResponsiveProfileCard extends StatelessWidget {
                     validator: _ProfilePageState._validateBirthday,
                     keyboardType: TextInputType.datetime,
                     textInputAction: TextInputAction.done,
+                    readOnly: true,
+                    onTap: onSelectBirthday,
+                    suffixIcon: const Icon(Icons.calendar_month_outlined),
                     onSubmitted: (_) {
                       if (!isSaving) {
                         onSave();
@@ -413,6 +440,9 @@ class _FlowProfileEditableField extends StatelessWidget {
     required this.textInputAction,
     this.keyboardType,
     this.onSubmitted,
+    this.readOnly = false,
+    this.onTap,
+    this.suffixIcon,
   });
 
   final Key fieldKey;
@@ -422,6 +452,9 @@ class _FlowProfileEditableField extends StatelessWidget {
   final TextInputAction textInputAction;
   final TextInputType? keyboardType;
   final ValueChanged<String>? onSubmitted;
+  final bool readOnly;
+  final VoidCallback? onTap;
+  final Widget? suffixIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -437,7 +470,11 @@ class _FlowProfileEditableField extends StatelessWidget {
           keyboardType: keyboardType,
           textInputAction: textInputAction,
           onFieldSubmitted: onSubmitted,
-          decoration: _flowProfileInputDecoration(),
+          readOnly: readOnly,
+          onTap: onTap,
+          decoration: _flowProfileInputDecoration().copyWith(
+            suffixIcon: suffixIcon,
+          ),
         ),
       ],
     );
@@ -579,8 +616,11 @@ class _MobileProfileCanvas extends StatelessWidget {
     required this.userNameController,
     required this.birthdayController,
     required this.isSaving,
+    required this.isLoggingOut,
     required this.errorMessage,
     required this.onSave,
+    required this.onSelectBirthday,
+    required this.onLogout,
     required this.onBack,
     required this.onUnavailable,
   });
@@ -589,8 +629,11 @@ class _MobileProfileCanvas extends StatelessWidget {
   final TextEditingController userNameController;
   final TextEditingController birthdayController;
   final bool isSaving;
+  final bool isLoggingOut;
   final String? errorMessage;
   final VoidCallback onSave;
+  final VoidCallback onSelectBirthday;
+  final VoidCallback onLogout;
   final VoidCallback onBack;
   final VoidCallback onUnavailable;
 
@@ -638,6 +681,27 @@ class _MobileProfileCanvas extends StatelessWidget {
           fontWeight: FontWeight.w800,
         ),
         _SaveButton.mobile(isSaving: isSaving, onTap: onSave),
+        Positioned(
+          left: 230,
+          top: 15,
+          width: 72,
+          height: 40,
+          child: TextButton.icon(
+            key: const Key('profileLogoutButton'),
+            onPressed: isLoggingOut ? null : onLogout,
+            icon: const Icon(Icons.logout, size: 15),
+            label: Text(isLoggingOut ? '登出中' : '登出'),
+            style: TextButton.styleFrom(
+              minimumSize: Size.zero,
+              padding: EdgeInsets.zero,
+              foregroundColor: AppColors.profileError,
+              textStyle: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
         _ProfileAvatar(
           profile: profile,
           left: 125,
@@ -719,6 +783,13 @@ class _MobileProfileCanvas extends StatelessWidget {
           validator: _ProfilePageState._validateBirthday,
           textInputAction: TextInputAction.done,
           keyboardType: TextInputType.datetime,
+          readOnly: true,
+          onTap: onSelectBirthday,
+          suffixIcon: const Icon(
+            Icons.calendar_month_outlined,
+            color: AppColors.profilePrimary,
+            size: 20,
+          ),
           onSubmitted: (_) {
             if (!isSaving) {
               onSave();
@@ -764,6 +835,9 @@ class _ProfileEditableField extends StatelessWidget {
     required this.textInputAction,
     this.keyboardType,
     this.onSubmitted,
+    this.readOnly = false,
+    this.onTap,
+    this.suffixIcon,
   });
 
   final Key fieldKey;
@@ -779,6 +853,9 @@ class _ProfileEditableField extends StatelessWidget {
   final TextInputAction textInputAction;
   final TextInputType? keyboardType;
   final ValueChanged<String>? onSubmitted;
+  final bool readOnly;
+  final VoidCallback? onTap;
+  final Widget? suffixIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -806,32 +883,35 @@ class _ProfileEditableField extends StatelessWidget {
             keyboardType: keyboardType,
             textInputAction: textInputAction,
             onFieldSubmitted: onSubmitted,
+            readOnly: readOnly,
+            onTap: onTap,
             style: const TextStyle(
               color: AppColors.profileInk,
               fontSize: 14,
               fontWeight: FontWeight.w500,
               height: 1.2,
             ),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               filled: true,
               fillColor: AppColors.profileFieldFill,
-              contentPadding: EdgeInsets.symmetric(
+              suffixIcon: suffixIcon,
+              contentPadding: const EdgeInsets.symmetric(
                 horizontal: 18,
                 vertical: 18,
               ),
-              border: OutlineInputBorder(
+              border: const OutlineInputBorder(
                 borderRadius: BorderRadius.zero,
                 borderSide: BorderSide(color: AppColors.profileBorder),
               ),
-              enabledBorder: OutlineInputBorder(
+              enabledBorder: const OutlineInputBorder(
                 borderRadius: BorderRadius.zero,
                 borderSide: BorderSide(color: AppColors.profileBorder),
               ),
-              focusedBorder: OutlineInputBorder(
+              focusedBorder: const OutlineInputBorder(
                 borderRadius: BorderRadius.zero,
                 borderSide: BorderSide(color: AppColors.profilePrimary),
               ),
-              errorStyle: TextStyle(fontSize: 10, height: 0.8),
+              errorStyle: const TextStyle(fontSize: 10, height: 0.8),
             ),
           ),
         ),
