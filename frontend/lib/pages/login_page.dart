@@ -432,7 +432,7 @@ class _LoginForm extends StatelessWidget {
                 onPressed:
                     authState.isLoading
                         ? null
-                        : () => context.goNamed(AppRoute.register),
+                        : () => context.pushNamed(AppRoute.register),
                 style: TextButton.styleFrom(
                   minimumSize: Size.zero,
                   padding: EdgeInsets.zero,

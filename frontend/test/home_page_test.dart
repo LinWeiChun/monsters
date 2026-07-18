@@ -51,7 +51,7 @@ void main() {
     );
     _expectTopLeft(
       tester,
-      find.byKey(const Key('homeAccountMenu')),
+      find.byKey(const Key('homeNotificationButton')),
       const Offset(338, 18),
     );
     _expectTopLeft(
@@ -92,8 +92,8 @@ void main() {
     expect(find.text('我的怪獸'), findsOneWidget);
     expect(find.text('互動區'), findsNWidgets(2));
     expect(find.text('陪伴首頁'), findsOneWidget);
-    expect(find.byKey(const Key('homeDesktopLogo')), findsOneWidget);
-    expect(find.byKey(const Key('homeAccountMenu')), findsOneWidget);
+    expect(find.byKey(const Key('appTopNavLogo')), findsOneWidget);
+    expect(find.byKey(const Key('appTopNavProfile')), findsOneWidget);
   });
 
   for (final size in const [
@@ -139,7 +139,7 @@ void main() {
     await pumpHome(tester, const Size(1920, 1080));
 
     expect(find.byKey(const Key('desktopCompanionHero')), findsOneWidget);
-    expect(find.byKey(const Key('homeDesktopLogo')), findsOneWidget);
+    expect(find.byKey(const Key('appTopNavLogo')), findsOneWidget);
     expect(find.byKey(const Key('homeAnnoyanceChatButton')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -153,6 +153,16 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('annoyanceChatStartButton')), findsOneWidget);
+  });
+
+  testWidgets('mobile notification shows coming soon feedback', (tester) async {
+    await pumpHome(tester, const Size(390, 844));
+
+    await tester.tap(find.byKey(const Key('homeNotificationButton')));
+    await tester.pump();
+
+    expect(find.text('通知即將開放'), findsOneWidget);
+    expect(find.byKey(const Key('homeAccountMenu')), findsNothing);
   });
 
   testWidgets('tapping companion monster runs reaction animation', (

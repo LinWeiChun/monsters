@@ -355,9 +355,7 @@ class _RegisterForm extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: TextButton(
                 onPressed:
-                    authState.isLoading
-                        ? null
-                        : () => context.goNamed(AppRoute.login),
+                    authState.isLoading ? null : () => _returnToLogin(context),
                 style: TextButton.styleFrom(
                   minimumSize: Size.zero,
                   padding: EdgeInsets.zero,
@@ -559,7 +557,7 @@ class _RegisterForm extends StatelessWidget {
                   onPressed:
                       authState.isLoading
                           ? null
-                          : () => context.goNamed(AppRoute.login),
+                          : () => _returnToLogin(context),
                   style: TextButton.styleFrom(
                     minimumSize: Size.zero,
                     padding: EdgeInsets.zero,
@@ -694,4 +692,12 @@ class _RegisterValidators {
 
   String? confirmPassword(String? value) =>
       state._validateConfirmPassword(value);
+}
+
+void _returnToLogin(BuildContext context) {
+  if (context.canPop()) {
+    context.pop();
+    return;
+  }
+  context.goNamed(AppRoute.login);
 }

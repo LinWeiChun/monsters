@@ -11,7 +11,8 @@ class _ResponsiveProfileCanvas extends StatelessWidget {
     required this.onSave,
     required this.onSelectBirthday,
     required this.onLogout,
-    required this.onBack,
+    required this.onHome,
+    required this.onAddAnnoyance,
     required this.onUnavailable,
     this.compact = false,
   });
@@ -25,7 +26,8 @@ class _ResponsiveProfileCanvas extends StatelessWidget {
   final VoidCallback onSave;
   final VoidCallback onSelectBirthday;
   final VoidCallback onLogout;
-  final VoidCallback onBack;
+  final VoidCallback onHome;
+  final VoidCallback onAddAnnoyance;
   final VoidCallback onUnavailable;
   final bool compact;
 
@@ -37,15 +39,33 @@ class _ResponsiveProfileCanvas extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _ResponsiveProfileHeader(
-            compact: compact,
-            isSaving: isSaving,
-            isLoggingOut: isLoggingOut,
-            onSave: onSave,
-            onLogout: onLogout,
-            onBack: onBack,
-            onUnavailable: onUnavailable,
-          ),
+          if (compact)
+            _ResponsiveProfileHeader(
+              compact: true,
+              isSaving: isSaving,
+              isLoggingOut: isLoggingOut,
+              onSave: onSave,
+              onLogout: onLogout,
+              onBack: onHome,
+              onUnavailable: onUnavailable,
+            )
+          else ...[
+            AppTopNavigation(
+              activeDestination: AppNavigationDestination.profile,
+              profileInitial: profile.userName,
+              onHome: onHome,
+              onAddAnnoyance: onAddAnnoyance,
+              onNotification: onUnavailable,
+              onProfile: () {},
+              onUnavailable: (_) => onUnavailable(),
+            ),
+            _ProfileActionBar(
+              isSaving: isSaving,
+              isLoggingOut: isLoggingOut,
+              onSave: onSave,
+              onLogout: onLogout,
+            ),
+          ],
           Expanded(
             child: SingleChildScrollView(
               child: ResponsiveContent(
@@ -157,6 +177,63 @@ class _ResponsiveProfileHeader extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileActionBar extends StatelessWidget {
+  const _ProfileActionBar({
+    required this.isSaving,
+    required this.isLoggingOut,
+    required this.onSave,
+    required this.onLogout,
+  });
+
+  final bool isSaving;
+  final bool isLoggingOut;
+  final VoidCallback onSave;
+  final VoidCallback onLogout;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: AppColors.profileSurface,
+      child: ResponsiveContent(
+        maxWidth: 1088,
+        horizontalPadding: 48,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+          child: Row(
+            children: [
+              Text(
+                '個人資料',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: AppColors.profileInk,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const Spacer(),
+              OutlinedButton.icon(
+                key: const Key('profileLogoutButton'),
+                onPressed: isLoggingOut ? null : onLogout,
+                icon: const Icon(Icons.logout, size: 18),
+                label: Text(isLoggingOut ? '登出中' : '登出'),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              FilledButton(
+                key: const Key('profileSaveButton'),
+                onPressed: isSaving ? null : onSave,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.profilePrimary,
+                  foregroundColor: AppColors.profileOnPrimary,
+                  shape: const RoundedRectangleBorder(),
+                ),
+                child: Text(isSaving ? '儲存中' : '儲存變更'),
+              ),
+            ],
           ),
         ),
       ),
@@ -621,6 +698,7 @@ class _MobileProfileCanvas extends StatelessWidget {
     required this.onSave,
     required this.onSelectBirthday,
     required this.onLogout,
+    required this.onHome,
     required this.onBack,
     required this.onUnavailable,
   });
@@ -634,6 +712,7 @@ class _MobileProfileCanvas extends StatelessWidget {
   final VoidCallback onSave;
   final VoidCallback onSelectBirthday;
   final VoidCallback onLogout;
+  final VoidCallback onHome;
   final VoidCallback onBack;
   final VoidCallback onUnavailable;
 
@@ -658,6 +737,7 @@ class _MobileProfileCanvas extends StatelessWidget {
           width: 26,
           height: 36,
           child: GestureDetector(
+            key: const Key('profileBackButton'),
             onTap: onBack,
             child: const Text(
               '‹',
@@ -814,7 +894,12 @@ class _MobileProfileCanvas extends StatelessWidget {
           fontSize: 11,
           fontWeight: FontWeight.w500,
         ),
-        _ProfileBottomNav(onUnavailable: onUnavailable),
+        MobileAppBottomNavigation(
+          activeDestination: AppNavigationDestination.profile,
+          onHome: onHome,
+          onProfile: () {},
+          onUnavailable: (_) => onUnavailable(),
+        ),
       ],
     );
   }
@@ -1215,73 +1300,6 @@ class _SaveStateMessage extends StatelessWidget {
           fontWeight: FontWeight.w700,
         ),
       ],
-    );
-  }
-}
-
-class _ProfileBottomNav extends StatelessWidget {
-  const _ProfileBottomNav({required this.onUnavailable});
-
-  final VoidCallback onUnavailable;
-
-  @override
-  Widget build(BuildContext context) {
-    const labels = [
-      ('⌂', '首頁', AppColors.profileNavMuted, FontWeight.w400),
-      ('◇', '社群', AppColors.profileNavMuted, FontWeight.w400),
-      ('◆', '怪獸', AppColors.profileNavMuted, FontWeight.w400),
-      ('○', '互動', AppColors.profileNavMuted, FontWeight.w400),
-      ('●', '我的', AppColors.profilePrimary, FontWeight.w700),
-    ];
-    const lefts = [16.0, 90.0, 164.0, 238.0, 312.0];
-    return Positioned(
-      left: 0,
-      top: 774,
-      width: 390,
-      height: 70,
-      child: Stack(
-        children: [
-          const Positioned.fill(
-            child: ColoredBox(color: AppColors.profileSurface),
-          ),
-          for (var i = 0; i < labels.length; i++)
-            Positioned(
-              left: lefts[i],
-              top: 0,
-              width: 62,
-              height: 70,
-              child: GestureDetector(
-                onTap: i == 4 ? null : onUnavailable,
-                child: Stack(
-                  children: [
-                    _TextBlock(
-                      left: 0,
-                      top: 13,
-                      width: 62,
-                      height: 22,
-                      text: labels[i].$1,
-                      color: labels[i].$3,
-                      fontSize: 18,
-                      fontWeight: labels[i].$4,
-                      textAlign: TextAlign.center,
-                    ),
-                    _TextBlock(
-                      left: 0,
-                      top: 39,
-                      width: 62,
-                      height: 16,
-                      text: labels[i].$2,
-                      color: labels[i].$3,
-                      fontSize: 10,
-                      fontWeight: labels[i].$4,
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        ],
-      ),
     );
   }
 }

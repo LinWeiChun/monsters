@@ -47,6 +47,8 @@
 | Phase 3 Mood seed | Annoyance 與 Diary 共用中性分數 code `SCORE_1`～`SCORE_5`，label 為 `1分`～`5分`，不在 lookup 綁定好壞或程度語意（D14-A） |
 | Phase 3 煩惱分數 UI | 依 2026-07-18 使用者指示，前端 `MoodScoreSelector` 使用 `moodPoint_1.png`～`moodPoint_5.png` 的綠色笑臉至紅色難過圖片呈現 1 至 5 分；API 與 Database lookup 仍只保存中性整數分數 |
 | Backend package layout | 全面採 layer-first `com.monsters.<layer>.<module>`；`common` 作為共用模組名，`MonstersApplication` 維持在 `com.monsters` |
+| Web／Mobile 導覽 | 採使用者選定 Web 方案 A、Mobile 方案 1：Desktop Home／Profile／Annoyance 共用完整 Navbar；Mobile 保留共用底部選單，「我的」為 Profile 唯一主要入口，首頁右上角改為通知 |
+| 頁面切換效果 | 一般前進與導覽切換直接換頁、無左右位移；明確返回按鈕使用 navigation pop，當前頁面以 220ms 向右退出 |
 
 ## 二、已核准套件與工具
 

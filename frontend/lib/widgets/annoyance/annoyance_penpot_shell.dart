@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../layout/responsive_layout.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
+import '../navigation/app_navigation.dart';
 
 class AnnoyancePenpotShell extends StatelessWidget {
   const AnnoyancePenpotShell({
@@ -15,6 +16,10 @@ class AnnoyancePenpotShell extends StatelessWidget {
     required this.messages,
     required this.operation,
     required this.onHome,
+    required this.onBack,
+    required this.onProfile,
+    required this.onNotification,
+    required this.onUnavailable,
     required this.onRestart,
     required this.canRestart,
     super.key,
@@ -29,6 +34,10 @@ class AnnoyancePenpotShell extends StatelessWidget {
   final List<Widget> messages;
   final Widget operation;
   final VoidCallback onHome;
+  final VoidCallback onBack;
+  final VoidCallback onProfile;
+  final VoidCallback onNotification;
+  final ValueChanged<String> onUnavailable;
   final VoidCallback onRestart;
   final bool canRestart;
 
@@ -56,7 +65,14 @@ class _DesktopAnnoyanceShell extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _AnnoyanceDesktopNav(data: data),
+        AppTopNavigation(
+          activeDestination: AppNavigationDestination.annoyance,
+          onHome: data.onHome,
+          onAddAnnoyance: data.onRestart,
+          onNotification: data.onNotification,
+          onProfile: data.onProfile,
+          onUnavailable: data.onUnavailable,
+        ),
         _AnnoyanceProgress(data: data, horizontalPadding: 48),
         Expanded(
           child: SingleChildScrollView(
@@ -152,68 +168,6 @@ class _MobileAnnoyanceShell extends StatelessWidget {
   }
 }
 
-class _AnnoyanceDesktopNav extends StatelessWidget {
-  const _AnnoyanceDesktopNav({required this.data});
-
-  final AnnoyancePenpotShell data;
-
-  @override
-  Widget build(BuildContext context) {
-    return ColoredBox(
-      color: AppColors.annoyanceSurface,
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 44),
-          child: SizedBox(
-            height: 72,
-            child: Row(
-              children: [
-                InkWell(
-                  onTap: data.onHome,
-                  child: Image.asset(
-                    'assets/images/app_logo.png',
-                    width: 124,
-                    height: 42,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                const SizedBox(width: 40),
-                const _NavLabel('陪伴首頁', active: true),
-                const SizedBox(width: 36),
-                const _NavLabel('心的軌跡'),
-                const SizedBox(width: 36),
-                const _NavLabel('怪獸收藏'),
-                const SizedBox(width: 36),
-                const _NavLabel('匿名社群'),
-                const SizedBox(width: 36),
-                const _NavLabel('互動區'),
-                const Spacer(),
-                FilledButton(
-                  onPressed: data.onHome,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.annoyancePrimary,
-                    foregroundColor: AppColors.annoyanceOnPrimary,
-                    shape: const StadiumBorder(),
-                  ),
-                  child: const Text('＋ 記下現在的心情'),
-                ),
-                const SizedBox(width: 20),
-                const CircleAvatar(
-                  radius: 20,
-                  backgroundColor: AppColors.annoyanceSoft,
-                  foregroundColor: AppColors.annoyancePrimary,
-                  child: Text('W'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _AnnoyanceCompactHeader extends StatelessWidget {
   const _AnnoyanceCompactHeader({required this.data});
 
@@ -232,7 +186,7 @@ class _AnnoyanceCompactHeader extends StatelessWidget {
               IconButton(
                 key: const Key('annoyanceChatHomeButton'),
                 tooltip: '回首頁',
-                onPressed: data.onHome,
+                onPressed: data.onBack,
                 icon: const Icon(Icons.arrow_back),
               ),
               const Text(
@@ -282,7 +236,7 @@ class _AnnoyanceProgress extends StatelessWidget {
             if (horizontalPadding >= 48) ...[
               TextButton.icon(
                 key: const Key('annoyanceChatHomeButton'),
-                onPressed: data.onHome,
+                onPressed: data.onBack,
                 icon: const Icon(Icons.chevron_left, size: 18),
                 label: const Text('返回'),
               ),
@@ -466,25 +420,6 @@ class _OperationPanel extends StatelessWidget {
             data.operation,
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _NavLabel extends StatelessWidget {
-  const _NavLabel(this.label, {this.active = false});
-
-  final String label;
-  final bool active;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      label,
-      style: TextStyle(
-        color: active ? AppColors.annoyanceInk : AppColors.annoyanceMuted,
-        fontSize: 14,
-        fontWeight: active ? FontWeight.w700 : FontWeight.w500,
       ),
     );
   }

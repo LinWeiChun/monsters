@@ -44,6 +44,11 @@ void main() {
       );
       expect(find.byKey(const Key('annoyanceProgress')), findsOneWidget);
       expect(find.byKey(const Key('annoyanceOperationPanel')), findsOneWidget);
+      if (size.width >= 1200) {
+        expect(find.byKey(const Key('appTopNavigation')), findsOneWidget);
+        expect(find.byKey(const Key('appTopNavNotification')), findsOneWidget);
+        expect(find.byKey(const Key('appTopNavProfile')), findsOneWidget);
+      }
       expect(tester.takeException(), isNull);
     });
   }
