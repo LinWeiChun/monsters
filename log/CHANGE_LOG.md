@@ -6568,6 +6568,77 @@ Codex
 
 ---
 
+## 2026-07-18 22:21 PHASE4-DIARY-CONTRACT
+
+Task
+Phase 4 日記 contract-first、Penpot design-first 與 Web-first 準備
+
+執行者
+Codex
+
+### 完成內容
+
+- 完成 Phase 4 DoR 與舊系統 Diary 流程盤點，採用使用者核准的三項方案 A：獎勵延至 Phase 6、抽出 Entry 共用前端元件、心情繪圖可略過。
+- 將 Diary API 從 endpoint 清單補齊為可實作 contract，包含 multipart、新增、分頁查詢、單筆、完整修改、分享、private media download、HTTP Range 與錯誤處理。
+- 將 Phase 4 與後續含 UI 的 Phase 定義為 Penpot design-first，並明確採 Web-first 實作與驗收。
+- 以 Penpot `Diary Flow / Web` 作第一驗收來源，保留 `Diary Flow / Mobile`；將第 08 確認頁按鈕改為「儲存這篇日記」、Phase 4 完成頁移除假獎勵，未來獎勵畫板標示為 Phase 6。
+- 比對已完成的 Penpot `Web / Companion Home` 與 `Annoyance Flow / Web`，確認日記畫板沿用共用 Navbar、1440×900 Desktop 基準、1200px 內容區、雙欄、暖色卡片、字級、間距、圓角、陰影與按鈕層級。
+
+### 修改／新增／刪除檔案
+
+- 修改 `docs/PROJECT_SPEC.md`。
+- 修改 `docs/API_SPEC.md`。
+- 修改 `docs/UI_SPEC.md`。
+- 修改 `docs/DECISIONS.md`。
+- 修改 `docs/TASKS.md`。
+- 修改 `log/CHANGE_LOG.md`。
+- 修改 `log/CHANGE_HISTORY.csv`。
+- 無新增或刪除 Repository 檔案；另已更新連線中的 Penpot Web／Mobile Diary 畫板。
+
+### system_data 參考結果
+
+- 參考舊系統手冊與簡介中的日記流程，以及舊 Flutter `diaryChat.dart`、`diaryAPI.dart`、`diaryRepo.dart`、`diaryModel.dart` 和舊 Backend Diary Controller／Service／DAO／Model。
+- 保留日記記錄方式、optional 心情圖、分數與分享的業務意圖；未沿用 account path param、Base64 媒體、頁面直呼 HTTP、global state、自由文字 yes／no、硬編碼磁碟路徑、Controller 發獎與舊 DAO 錯誤作法。
+- 未修改 `system_data/`。
+
+### API 異動
+
+- 僅更新 Phase 4 Diary API 正式 contract，尚未修改 Backend 程式。
+- Diary 使用共用 Entry／EntryMedia，支援 TEXT／IMAGE／AUDIO／VIDEO 一種主要內容與一張 optional drawing；Phase 4 `reward = null`。
+
+### Database 異動
+
+- 無 Database schema 或 Migration 異動。
+- 正式規格沿用既有 `entries` 與 `entry_media`；Diary 為 `entry_type = DIARY`、`annoyance_type_id = NULL`、`is_solved = false`。
+
+### 文件更新
+
+- PROJECT_SPEC：補齊 Diary 流程、Phase 4 reward 邊界、Penpot design-first、Web-first 與既有頁面樣式基準。
+- API_SPEC：補齊 Diary multipart、response、分頁、更新、分享、媒體與錯誤 contract。
+- UI_SPEC：補齊 Penpot 全 Phase 規則、Diary Web／Mobile 畫板來源、狀態機、共用元件、RWD 與完成頁規格。
+- DECISIONS：記錄全部方案 A、Penpot design-first、Web-first 與既有樣式重用決策。
+- TASKS：記錄 contract-first 狀態與 Phase 4 至 Phase 10 的 Penpot／Web-first 檢查項目。
+
+### 測試方式與結果
+
+- Contract 修改前 Backend `./gradlew test`：BUILD SUCCESSFUL。
+- Contract 修改前 Flutter `flutter analyze --no-pub`：No issues found。
+- Contract 修改前 Flutter `flutter test --no-pub`：132 tests passed。
+- `flutter build web --no-pub`：通過，產出 `frontend/build/web`；僅顯示既有 Cupertino icon font 提示。
+- Penpot 已匯出並檢視 Diary Web／Mobile 確認頁與完成頁，以及已完成的 Companion Home／Annoyance Web 畫板；未發現溢位、遮擋或 Phase 4 假獎勵文案。
+- 本次僅修改文件與 Penpot，未修改 Backend、Frontend 或 Database 程式。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；保存期限截止日為 2026-06-18。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- 無；下一個實作 Task 依序為共用 Entry Diary domain／DTO／Service／Controller，再完成 Diary API，最後以 Penpot Web 畫板實作 Flutter Web 日記流程。
+
+---
+
 ## 2026-07-18 15:29 MOBILE-FULL-WIDTH-MOOD-SCORE
 
 Task

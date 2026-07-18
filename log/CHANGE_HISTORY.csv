@@ -1048,3 +1048,12 @@
 2026-07-18,18:38,PROFILE-ACTION-BACKGROUND,Frontend,frontend/lib/widgets/profile/profile_penpot_canvas.dart,修改,個人資料操作列套用新增煩惱相同底色,Codex,否,否,是,否,Navbar 與內容卡片不變
 2026-07-18,18:38,PROFILE-ACTION-BACKGROUND,Test,frontend/test/profile_page_test.dart,修改,驗證 Profile 與 Annoyance 背景色一致,Codex,否,否,是,否,完整 132 tests passed
 2026-07-18,18:38,PROFILE-ACTION-BACKGROUND,Documentation,docs,修改,同步 UI Task 與 Log,Codex,否,否,是,否,API Database 無異動
+2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Design,Penpot WEB Diary Flow,修改,確認頁改為儲存日記且完成頁移除假獎勵並標示 Future Reward 為 Phase 6,Codex,否,否,是,否,Web-first 第一驗收來源且參考已完成頁面樣式
+2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Design,Penpot APP Diary Flow,修改,同步 Mobile 儲存按鈕完成頁與未來獎勵 Phase 邊界,Codex,否,否,是,否,Mobile 畫板保留供 Web 驗收後適配
+2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Documentation,docs/PROJECT_SPEC.md,修改,補齊 Diary 流程 reward 邊界與 Penpot Web-first 原則,Codex,是,否,是,否,後續 UI Phase 均採 Penpot design-first
+2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Documentation,docs/API_SPEC.md,修改,補齊 Diary multipart 分頁更新分享媒體與錯誤 contract,Codex,是,否,否,否,Backend 尚未實作
+2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Documentation,docs/UI_SPEC.md,修改,補齊 Diary Penpot 畫板狀態機共用樣式與 RWD 驗收,Codex,否,否,是,否,Web 先於 Mobile
+2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Documentation,docs/DECISIONS.md,修改,記錄全部方案 A 與 Penpot design-first Web-first 決策,Codex,是,否,是,否,繪圖 optional 且 reward null
+2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Documentation,docs/TASKS.md,修改,更新 Phase 4 contract 任務與後續 Phase Penpot 檢查,Codex,否,否,是,否,TODO IN PROGRESS REVIEW DONE
+2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Documentation,log/CHANGE_LOG.md,修改,新增 Phase 4 準備工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
+2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Phase 4 contract 與 Penpot 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改
