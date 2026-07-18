@@ -44,6 +44,14 @@ public class JwtTokenService {
         return payload;
     }
 
+    public JwtTokenPayload verifyRefreshToken(String token) {
+        JwtTokenPayload payload = verify(token);
+        if (!TOKEN_TYPE_REFRESH.equals(payload.tokenType())) {
+            throw invalidToken();
+        }
+        return payload;
+    }
+
     public String hashToken(String token) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

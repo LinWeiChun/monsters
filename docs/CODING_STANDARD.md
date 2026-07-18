@@ -1039,19 +1039,15 @@ Build：
 
 ## 4.13 Responsive Design
 
-所有畫面：
+目前前端採 Web-first 開發與驗收，但所有畫面仍須支援 Android、iOS、Web。
 
-支援：
-
-- Android
-- iOS
-- Web
-
-避免：
-
-固定 Width。
-
-固定 Height。
+- 共用 breakpoint 只能由 `frontend/lib/layout/responsive_layout.dart` 定義：Mobile `< 600px`、Tablet `600px - 1199px`、Desktop `>= 1200px`。
+- 頁面使用 `ResponsiveLayout` 選擇 window class；內容容器優先使用 `ResponsiveContent` 集中最大寬度與水平 padding。
+- Tablet／Desktop 主版面優先使用 `LayoutBuilder`、`Row`、`Column`、`Wrap`、`Expanded`、`Flexible` 與 `ConstrainedBox`，避免以固定 x/y 座標排列。
+- `Stack`／`Positioned` 僅限 Mobile Penpot 精準畫布或元件內局部疊圖，不得用於整張 Web 頁面。
+- 可使用固定尺寸保存設計資產比例或觸控目標，但頁面寬高、主要欄位與區塊間距必須由 constraints 推導並設定合理上限。
+- 瀏覽器視窗跨越 breakpoint 時必須即時 reflow，不能依賴啟動時快取的 `MediaQuery.size`。
+- Widget test 至少驗證 breakpoint 邊界、900／1024px 常見平板寬度與 1440／1920px 桌面寬度，並確認沒有 overflow 或 layout exception。
 
 ---
 

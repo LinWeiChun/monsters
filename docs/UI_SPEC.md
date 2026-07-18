@@ -10,7 +10,7 @@
 - iOS
 - Web
 
-手機版優先，Web 版需以 Responsive Layout 呈現。
+目前開發與驗收以 Web-first 為主，Web 版需以 Responsive Layout 呈現；Mobile Penpot 畫面與 Android／iOS 相容性仍須保留。
 
 前端功能 Task 預設需以 Flutter 共用程式實作，並確認 Web、Android、iOS 三平台皆可使用。若功能涉及平台差異，例如檔案選取、通知、相機、外部連結或權限，必須在同一 Task 內補齊三平台處理或明確記錄平台限制與替代方案。
 
@@ -58,8 +58,8 @@
 - 顯示目前怪獸與陪伴問候語
 - 以「記下現在的心情」作為單一主要操作，進入新增煩惱聊天室
 - 日記與歷史記錄在對應 Phase 完成前顯示「即將開放」且不可操作
-- 手機版使用底部導覽列，個人資料、密碼鎖與登出收納於個人選單
-- Web 桌面版使用固定左側導覽與雙欄內容，不直接放大手機版面
+- 手機版使用共用底部導覽列，「我的」直接進入個人資料；首頁右上角為通知入口，密碼鎖與登出由個人資料頁提供
+- Web Desktop 使用 Home／Profile／Annoyance 共用完整導覽，頁面內容依 viewport 以相對 layout 重排
 
 導覽：
 
@@ -69,7 +69,7 @@
 - 社群
 - 圖鑑
 
-首頁以 900px 作為手機／桌面版型切換基準。手機內容最大寬度 560px；桌面主要內容最大寬度 1180px，怪獸陪伴區與操作區並列。設計來源為 Figma 檔案 [貘nsters 陪伴式首頁 UI - Mobile & Web](https://www.figma.com/design/bo3ooJWyoIThN9D7YqkY1x)。
+首頁使用共用 window class：Mobile `< 600px`、Tablet `600px - 1199px`、Desktop `>= 1200px`。Mobile 保留 390 x 844 Penpot 畫布；Tablet 使用 compact flow layout；Desktop 主要內容最大寬度 1200px，怪獸陪伴區與操作區並列。設計來源為 Penpot Web／Mobile 畫板與現行 Web RWD 規格。
 
 首頁怪獸使用 Flutter 程式動畫，不修改或拆分原始圖片。進入首頁時播放有限次數的輕微呼吸與上下漂浮，點擊怪獸時播放彈跳、縮放及小幅擺動；動畫只作用於怪獸區，不得遮擋或移動主要操作。系統啟用「減少動態效果」時必須停止待機與點擊動畫，並維持靜態圖片與完整操作功能。
 
@@ -114,7 +114,7 @@ Phase 3 完成頁不顯示假怪獸獎勵；真實獎勵與圖鑑導向於 Phase
 
 畫心情 Task 在主要內容確認後顯示「想畫／先不用」結構化選項；選擇略過時直接進入分數步驟，選擇繪圖時顯示單一正方形畫布。`MoodDrawingCanvas` 使用正規化座標保存筆畫，提供六色畫筆、2 至 16 的線寬、橡皮擦、復原、清除、取消與完成操作；完成時以白色背景輸出固定 1024×1024 PNG，限制 5 MB，並在聊天紀錄顯示一張心情圖預覽後進入分數步驟。取消繪圖須返回是否繪圖選項，返回上一步或重新選擇主要內容時須清除未提交的繪圖草稿；心情圖不另存至相簿，後續由既有新增煩惱 multipart API 的 `drawingFile` 上傳。
 
-煩惱分數 Task 使用 `MoodScoreSelector` 顯示視覺權重一致的 `1分`～`5分` 結構化按鈕，不以顏色、表情或文案綁定正負情緒語意。使用者點選後，草稿保存整數 `score` 並進入 `sharing` 步驟；僅接受 1 至 5，與既有 API `score` contract 及 Database `SCORE_1`～`SCORE_5` lookup 一致。從分享步驟返回時保留原分數並標示選取狀態以便修改；返回繪圖選擇或重新開始時清除分數。分享、摘要、送出與完成 UI 由後續 Task 接續同一狀態機。
+煩惱分數 Task 使用 `MoodScoreSelector` 顯示 `moodPoint_1.png`～`moodPoint_5.png` 與 `1分`～`5分` 結構化圖片卡片，圖片依綠色笑臉至紅色難過表情對應分數 1 至 5；選取卡片需以品牌色邊框、底色與陰影標示，窄螢幕可自動換行。使用者點選後，草稿保存整數 `score` 並進入 `sharing` 步驟；僅接受 1 至 5，與既有 API `score` contract 及 Database `SCORE_1`～`SCORE_5` lookup 一致。從分享步驟返回時保留原分數並標示選取狀態以便修改；返回繪圖選擇或重新開始時清除分數。
 
 煩惱分享 Task 使用 `ShareChoiceCard` 顯示「保持私人」與「分享到社群」兩個結構化選項，預設語意為私人，不使用無參數 toggle。使用者選擇後，草稿保存 boolean `isShared`，並進入 `review` 步驟；選擇「保持私人」對應既有 API `isShared = false`，選擇「分享到社群」對應 `isShared = true`。從摘要步驟返回分享步驟時保留原選擇並標示選取狀態；返回分數步驟、上游內容步驟或重新開始時清除分享選擇。
 
@@ -223,11 +223,16 @@ Phase 3 完成頁不顯示假怪獸獎勵；真實獎勵與圖鑑導向於 Phase
 
 Web 版規則：
 
+- 目前 UI 開發與驗收採 Web-first；共用功能仍需支援 Android 與 iOS。
+- 共用 breakpoint 固定為 Mobile `< 600px`、Tablet `600px - 1199px`、Desktop `>= 1200px`，由 `frontend/lib/layout/responsive_layout.dart` 集中管理。
+- 瀏覽器視窗跨越 breakpoint 時必須即時 reflow，不得要求重新整理或保存舊 viewport 狀態。
 - 表單、聊天室與單一內容流程最大內容寬度建議 480px 至 720px。
-- 首頁等資訊架構頁在 900px 以上需使用 Web 專用桌面版型，可採固定側邊導覽與多欄內容。
+- 首頁等資訊架構頁在 Tablet 使用 compact flow layout，Desktop 使用 Web 專用雙欄或多欄版型。
 - Web 專用版型不得直接放大或置中顯示完整手機畫面。
 - 桌面主要內容需設定最大寬度並置中，避免卡片與文字隨視窗無限延伸。
 - 不得讓聊天泡泡、卡片與按鈕過度拉伸。
+- Tablet／Desktop 主版面使用 `LayoutBuilder`、`Row`、`Column`、`Wrap`、`Expanded`、`Flexible` 與 `ConstrainedBox`；`Stack`／`Positioned` 僅限 Mobile Penpot 精準畫布或元件內局部疊圖。
+- RWD widget test 至少覆蓋 390、600、900、1024、1200、1440 與 1920px，並檢查沒有 overflow、裁切、負 padding 或例外。
 - Web 不支援的手機功能需提供替代提示。
 
 ## 四、共用元件
@@ -323,7 +328,7 @@ AI 或開發者參考 `system_data/` 舊 UI 時，應檢查以下項目：
 
 登入頁支援：
 
-- Email / 密碼輸入與前端必填驗證
+- Account 或 Email / 密碼輸入與前端必填驗證
 - 呼叫 `POST /api/auth/login`
 - Loading 狀態
 - API 錯誤訊息呈現
@@ -332,6 +337,13 @@ AI 或開發者參考 `system_data/` 舊 UI 時，應檢查以下項目：
 - 忘記密碼入口提示
 - Google 登入：Android / iOS 由 `google_sign_in` 觸發登入，Web 使用 `google_sign_in_web` 官方按鈕
 
+登入頁 Penpot 對齊規格：
+
+- 本次插隊任務僅調整登入頁，不同步修改註冊、首頁或其他已完成頁面。
+- Web 參考 Penpot `PAGES WEB / Account & Access / Web` 的 `Account / Web / 02 Login / 登入`：左側品牌區為 `#FFFDD2`，右側表單區為 `#F7F1E8`，左側保留 logo、怪獸圖與歡迎文字，右側表單寬度 500px。
+- App / Mobile 參考 Penpot `PAGES APP / Account & Access / Mobile` 的 `Account / Mobile / 02 Login / 登入`：390x844 畫板、左右 36px 邊距、logo 150x46、欄位與按鈕寬 318px、高 54px。
+- 登入頁色票集中於 `frontend/lib/theme/app_colors.dart`，頁面不得直接宣告 `Color(0x...)` 作為設計色票。
+- 登入頁圖片使用 `frontend/assets/images/title.png` 作為 logo、`frontend/assets/images/icon.png` 作為 Web 品牌區怪獸圖；Flutter asset 以 `assets/images/` 目錄註冊。
 登入頁資料流程：
 
 ```text
@@ -360,11 +372,13 @@ REST API
 
 規則：
 
+- 登入識別欄位顯示「帳號或 Email」；前端沿用 `email` request key，後端接受已註冊的 Account 或 Email，並在查詢前去除前後空白及轉為小寫。
 - 登入頁不得直接呼叫 Dio。
 - 登入頁不得直接保存 JWT、Refresh Token 或密碼至 SharedPreferences；登入狀態保存必須集中由 `AuthRepository` 與 `AuthSessionStore` 管理。
-- 登入成功後，`AuthSessionStore` 可保存 `LoginResult` 與最後開啟時間，讓 Web、Android、iOS 在未登出且 30 天內再次開啟時自動恢復登入。
-- App 啟動時由 `SplashPage` 透過 `AuthController.restoreSession()` 判斷登入狀態；若 session 有效，需套用 `ApiClient.setAccessToken()` 並導向 `home` route。
-- 若最後開啟時間超過 30 天、session 格式無效或使用者登出，必須清除本地登入狀態並要求重新登入。
+- 登入成功後，`AuthSessionStore` 保存 `LoginResult` 與最後開啟時間，讓 Web、Android、iOS 在未登出且 30 天內再次開啟時自動恢復登入。
+- App 啟動時由 `SplashPage` 透過 `AuthController.restoreSession()` 判斷登入狀態；若本地 session 有效，必須先以 refresh token 換發新 Token、覆蓋舊 session，再套用新 access token 並導向 `home` route。
+- 受保護 API 回傳 401 時，並行 request 必須共用單一 refresh request；換發成功後每個原 request 最多重試一次，refresh request 本身不得遞迴重試。
+- 若 refresh token 無效／過期／已 rotation、最後開啟時間超過 30 天、session 格式無效或使用者登出，必須清除本地登入狀態並導向登入頁；暫時性網路錯誤只顯示連線錯誤並保留 session。
 - 登出需呼叫 `AuthController.logout()`，由 Repository 呼叫登出 API、清除 `ApiClient` Authorization header 與本地 session。
 - 密碼不得保存至 SharedPreferences。`AuthUser` 與 `LoginResult` 必須使用 `json_serializable` 產生 JSON mapping。
 - Google 登入不得假造 Google ID Token、不得沿用舊系統空密碼登入流程、不得在前端自行驗證後傳入 Google 使用者資料。
@@ -392,6 +406,13 @@ REST API
 - 註冊成功後導向 `login` route
 - 前往登入頁
 
+註冊頁 Penpot 對齊規格：
+
+- 本次插隊任務僅調整註冊頁，延續 `Account & Access` 登入頁已建立的 Web / Mobile 排版語彙。
+- Web 版使用左側品牌區與右側表單區；品牌區使用 `title.png` 與 `icon.png`，表單最大寬度 500px。
+- App / Mobile 版以 390px 寬畫面為基準，左右 36px 邊距，logo 150px，欄位與主要按鈕高 54px。
+- 註冊頁色票集中於 `frontend/lib/theme/app_colors.dart`，頁面不得直接宣告 `Color(0x...)` 作為設計色票。
+- 註冊成功不自動登入；成功後仍依規格導向登入頁。
 註冊頁資料流程：
 
 ```text
@@ -432,7 +453,9 @@ REST API
 - 呼叫 `GET /api/users/me` 查詢目前登入使用者個人資料
 - 顯示頭貼、暱稱、Email、舊帳號與生日
 - 修改暱稱與生日
+- 生日欄位為唯讀文字輸入外觀，點擊後開啟 Flutter 內建日曆；不得要求使用者手動輸入日期格式
 - 呼叫 `PUT /api/users/me` 儲存個人資料
+- 顯示可見的登出按鈕；點擊後先顯示確認對話框，再由 `AuthController.logout()` 完成登出並導向登入頁
 - Loading 狀態
 - API 錯誤訊息與重試
 - 儲存成功提示
@@ -620,3 +643,222 @@ Logo 規範：
 - data：顯示實際內容
 
 狀態元件必須使用 `Theme.of(context)` 與 `AppSpacing` / `AppRadius`，不得 hard code 共用顏色、間距或圓角。
+
+---
+
+## 2026-07-16 Penpot Web Register Alignment
+
+本次依 Penpot MCP 目前選取 board `Account / Web / 03 Register / 註冊` 修正 Web 註冊頁。
+
+### Penpot Board
+
+| 項目 | 規格 |
+|---|---|
+| Board | 1440 x 900 |
+| Brand panel | x=0, y=0, w=620, h=900, `#FFFDD2` |
+| Form area | x=620, y=0, w=820, h=900, `#F7F1E8` |
+| Logo | x=54, y=42, w=160, h=50, `assets/images/title.png` |
+| Monster | x=130, y=208, w=360, h=360, `assets/images/icon.png` |
+| Form left | x=756 |
+| Form width | 520 |
+| Back link | x=756, y=46, text `‹  返回登入` |
+| Heading | x=756, y=96, text `建立新帳號` |
+| Subheading | x=756, y=138, text `註冊完成後，請使用新帳號登入。` |
+| Fields | x=756, w=520, h=56; y=220 / 312 / 404 / 496 / 588 |
+| Rule card | x=756, y=662, w=520, h=64, `#FFFDFC` |
+| Submit button | x=756, y=758, w=520, h=56, text `完成註冊` |
+
+### Implementation Notes
+
+- Web 註冊頁維持 Flutter `RegisterPage -> AuthController -> AuthRepository -> ApiClient -> REST API` 流程。
+- Web 版使用 620px brand panel 與 520px 表單寬度，在 1440px viewport 對齊 Penpot 座標。
+- 顏色 token 必須集中於 `frontend/lib/theme/app_colors.dart`，Page 不得直接新增硬編碼 `Color(0x...)`。
+- Mobile 註冊頁不屬於本次 Web 精準修正範圍，僅沿用共用文字與驗證邏輯。
+---
+
+## 2026-07-16 Penpot SplashPage Web / App Alignment
+
+本次依 Penpot MCP 讀取 `Account & Access / Web` 與 `Account & Access / Mobile` 的 Splash 畫板，更新 Flutter `SplashPage` 的 Web / App responsive layout。
+
+### Penpot Boards
+
+| Target | Board | Size | Background |
+|---|---|---:|---|
+| Web | `Account / Web / 01 Splash / 啟動` | 1440 x 900 | `#FFFDD2` |
+| App / Mobile | `Account / Mobile / 01 Splash / 啟動` | 390 x 844 | `#FFFDD2` |
+
+### Web Layout
+
+| Element | Position / Size | Note |
+|---|---|---|
+| Logo | x=570, y=120, w=300, h=92 | `assets/images/app_logo.png` |
+| Halo | x=555, y=270, w=330, h=330 | `AppColors.splashHalo` |
+| Monster | x=610, y=318, w=220, h=220 | `assets/images/icon.png` |
+| Quote | x=500, y=642, w=390, h=36 | `把心裡的重量，先放在這裡。` |
+| Status card | x=550, y=724, w=340, h=74 | 顯示登入狀態檢查與 30 天保存提示 |
+
+### App / Mobile Layout
+
+| Element | Position / Size | Note |
+|---|---|---|
+| Logo | x=92, y=94, w=206, h=64 | `assets/images/app_logo.png` |
+| Monster | x=78, y=224, w=234, h=234 | `assets/images/icon.png` |
+| Quote | x=68, y=496, w=270, h=24 | `把心裡的重量，先放在這裡。` |
+| Status card | x=54, y=586, w=282, h=82 | 顯示登入狀態檢查與 30 天保存提示 |
+| Brand note | x=79, y=774, w=162, h=15 | `貘nsters · 陪你整理每一種心情` |
+
+### Implementation Notes
+
+- `SplashPage` 保留 `AuthController.restoreSession()` 流程；有效 session 導向 `home`，無效 session 顯示登入 / 註冊行動。
+- Splash 顏色集中於 `frontend/lib/theme/app_colors.dart` 的 `splash*` token，page 不直接宣告色碼。
+- Mobile 尺寸以 `_SplashSpec` 記錄 390 x 844 Penpot 座標；Tablet／Desktop 改用置中的 flow layout，不縮放完整 1440 x 900 canvas。
+- Splash 導向仍使用 `go_router` 的 `context.goNamed()`；Flutter 不直接存取 Database 或 Auth storage。
+### 2026-07-16 SplashPage Redirect Update
+
+- `SplashPage` 僅在 `AuthController.restoreSession()` 檢查期間顯示 Penpot Splash 畫面。
+- 若 session 有效，導向 `home` route。
+- 若 session 無效、過期或格式錯誤，直接導向 `login` route，不在 Splash 畫面顯示登入 / 註冊按鈕。
+- 此行為讓 Splash Web / App 畫面與 Penpot 靜態畫板一致；登入與註冊行動由 LoginPage / RegisterPage 負責。
+### 2026-07-16 SplashPage Exact Penpot Correction
+
+- SplashPage Web / Mobile 文字對齊依 Penpot 設為 left，不再使用 center。
+- Logo image fill 依 Penpot rectangle fill 呈現，Flutter 改用 `BoxFit.fill`；Monster 保持 `BoxFit.contain`。
+- Status card 依 Penpot 移除圓角，維持 `#FFFDFC` fill 與 `#E7C7B5` stroke。
+- Status dot、status text、status hint 改為絕對座標定位：
+  - Web：dot `(576,753) 16x16`、text `(610,746) 123x17`、hint `(610,770) 118x14`。
+  - Mobile：dot `(76,614) 16x16`、text `(108,608) 123x17`、hint `(108,634) 118x14`。
+- Widget test 已新增上述內部元素座標驗證，避免再次只檢查外層 card 而漏掉 Penpot 差異。
+---
+
+## 2026-07-16 Penpot HomePage Web / App Alignment
+
+本次依 Penpot MCP 讀取 `Web / Companion Home` 與 `Mobile / Companion Home`，重寫 Flutter `HomePage` 的 Web / App responsive layout。
+
+### Penpot Boards
+
+| Target | Board | Size | Background |
+|---|---|---:|---|
+| Web | `Web / Companion Home` | 1440 x 900 | `#FFFED4` |
+| App / Mobile | `Mobile / Companion Home` | 390 x 844 | `#FFFED4` |
+
+### Web Layout
+
+| Element | Relative Layout | Note |
+|---|---|---|
+| Page shell | `Column` with fixed-height top nav and flexible content area | Web does not use fixed 1440 x 900 canvas scaling |
+| Content width | centered `ConstrainedBox`, max width 1200 | horizontal padding derived from viewport width |
+| Header | vertical `Column` | title and subtitle use natural text flow |
+| Main content | `Row` with flex 19:10 | left companion / collection column, right action column |
+| Companion hero | responsive `Row` inside hero panel | monster and greeting card share available width proportionally |
+| Action cards | `Column` with responsive gaps | primary / diary / history / interaction use reusable tile widget |
+| Collection panel | `Column` + `Row` chips | chip spacing is based on layout flow, not absolute x/y offsets |
+| Navbar | `Row` with `Spacer` | menu, CTA, notification and profile buttons align by flex flow |
+### App / Mobile Layout
+
+| Element | Position / Size | Note |
+|---|---|---|
+| App bar | x=0, y=0, w=390, h=72 | white |
+| Logo | x=20, y=12, w=96, h=48 | `assets/images/app_logo.png` |
+| Notification button | x=338, y=18, w=38, h=38 | 顯示通知；功能未完成前提供「即將開放」回饋 |
+| Companion hero | x=16, y=92, w=358, h=294 | `#D9F1F2` |
+| Monster | x=119, y=102, w=152, h=152 | animated monster key preserved |
+| Greeting card | x=40, y=250, w=310, h=118 | white card |
+| Collection panel | x=16, y=402, w=358, h=118 | monster collection summary |
+| Primary action | x=16, y=536, w=358, h=54 | routes to `annoyanceChat` |
+| Quick actions | x=16 / 138 / 260, y=606, w=114, h=104 | diary / history / interaction |
+| Bottom navigation | x=0, y=774, w=390, h=70 | custom Penpot nav, not Material NavigationBar |
+
+### Implementation Notes
+
+- `HomePage` Web 版改為 `LayoutBuilder + Column / Row / Expanded / ConstrainedBox` 的相對 layout；Mobile 版仍保留 390 x 844 Penpot canvas。
+- Home 色彩集中於 `frontend/lib/theme/app_colors.dart` 的 `home*` token，page 不直接宣告色碼。
+- 主要行動 `homeAnnoyanceChatButton` 使用 `context.pushNamed(AppRoute.annoyanceChat)`，讓明確返回按鈕保留上一頁。
+- Mobile 右上角通知按鈕不再重複提供個人資料入口；底部 `mobileNavProfile` 導向 `profile`。
+- 尚未開放的 diary / history / collection / community / interaction 入口顯示具名的「即將開放」訊息。
+- `homeAnimatedMonster`、`homeAnimatedMonsterIdle`、`homeAnimatedMonsterReacting` 測試 key 保留，降低既有測試與互動行為破壞。
+---
+
+## 2026-07-16 Penpot ProfilePage Web / App Alignment
+
+本次依 Penpot `Account / Web / 06 Profile / 個人資料` 與 `Account / Mobile / 06 Profile / 個人資料` 調整 Flutter `ProfilePage`，並保留既有 `UserProfileController -> UserRepository -> ApiClient -> REST API` 流程。
+
+### Penpot Boards
+
+| Target | Board | Size | Background |
+|---|---|---:|---|
+| Web | `Account / Web / 06 Profile / 個人資料` | 1440 x 900 | `#F7F1E8` |
+| App / Mobile | `Account / Mobile / 06 Profile / 個人資料` | 390 x 844 | `#FFFDD2` |
+
+### Implementation Notes
+
+- Profile Mobile 採 390 x 844 Penpot canvas；Tablet／Desktop 使用 scrollable flow layout，不使用整頁 `Stack + FittedBox`。
+- Profile、Home 的 Tablet／Desktop 根節點必須使用 stretch／滿寬 constraint，背景、App bar 與底部導覽不得只停在 674px 固定內容寬度而留下右側空白。
+- Web 保留上方導覽列、資料卡、avatar、基本資料欄位、唯讀 Email / 帳號欄位與儲存狀態卡，欄位依可用寬度切換單欄／雙欄。
+- Mobile 保留 390x844 Profile canvas、App bar、avatar、暱稱 / Email / 帳號 / 生日欄位、登出入口、儲存狀態卡與底部導覽列。
+- 生日欄位使用內建日曆並維持 `profileBirthdayField` key；可編輯欄位、儲存與登出分別維持 `profileUserNameField`、`profileSaveButton`、`profileLogoutButton` 測試 key 與既有驗證規則。
+- Profile 顏色 token 集中於 `frontend/lib/theme/app_colors.dart` 的 `profile*` token，Page 不直接宣告色碼。
+- Penpot canvas widgets 拆至 `frontend/lib/widgets/profile/profile_penpot_canvas.dart`，`ProfilePage` 僅保留狀態、驗證與提交流程。
+
+## 2026-07-18 Profile Calendar／Logout 與 Annoyance Penpot Sync
+
+- Penpot `Profile & Settings / Web / 01 個人首頁`、`02 編輯個人資料` 與 Mobile 對應畫板已加入登出入口及生日日曆欄位；既有 Web／Mobile 登出確認畫板沿用。
+- Annoyance 使用 Penpot `Annoyance Flow / Web` 與 `Annoyance Flow / Mobile` 的導覽、進度、陪伴訊息、操作面板、色票與間距；Flutter 狀態機與 API contract 不變。
+- Annoyance Mobile `< 600px` 使用單欄；Tablet `600px - 1199px` 使用堆疊 flow；Desktop `>= 1200px` 使用左側陪伴區與右側操作區雙欄，根節點一律填滿 viewport 寬度。
+- 測試 viewport 覆蓋 390、600、900、1024、1199、1440 與 1920px，檢查滿寬 shell、主要進度／操作區存在且沒有 overflow 或例外。
+- Penpot 雖包含獎勵延伸畫板，本次依 Phase 3 正式規格只同步建立完成狀態，不提前實作怪獸獎勵。
+
+## 2026-07-16 HomePage Full-Bleed Correction（已由 2026-07-18 RWD 規格取代）
+
+- `HomePage` 仍使用 `WEB / Web / Companion Home` 與 `Mobile / Companion Home` 規格。
+- 此段保留歷史紀錄；目前僅 Mobile 保留 Penpot canvas，Tablet／Desktop 已改為 flow layout，不再以 `BoxFit.cover` 縮放整張 Web canvas。
+## 2026-07-16 HomePage Web Companion Home Refinement
+
+- 本次以 Penpot MCP 選取的 `WEB / Web / Companion Home` 為準，修正 Web HomePage 不應套用舊版 `Web / Companion Home` 近似版型的問題。
+- Web HomePage 改為相對 layout：內容最大寬度、水平 padding、區塊 gap 由 viewport 推導，避免使用固定 x/y 座標排列。
+- Web 版新增 Penpot navbar、右上 CTA、通知圓鈕與 profile 圓鈕；profile 入口導向 `profile` route，尚未開放入口維持 snackbar placeholder。
+- Web collection panel 改為 flow layout，保留 7 個怪獸 chip 與 `+1` more chip。
+- 本次僅調整 Web HomePage；Mobile HomePage 規格與座標未變更。
+
+## 2026-07-18 Web-first RWD 共用版型
+
+目前已完成 Penpot 畫面與定位方式盤點，Splash、Login、Register、Home、Profile 均已實作 Mobile／Tablet／Desktop 分級。Mobile 保留 390 x 844 Penpot 精準畫布；Tablet／Desktop 以相對 flow layout 實作，瀏覽器調整視窗寬度時可即時切換。
+
+| Page | Mobile `< 600px` | Tablet `600px - 1199px` | Desktop `>= 1200px` |
+|---|---|---|---|
+| Splash | Penpot fixed canvas | centered flow | centered flow |
+| Login | mobile form flow | compact centered form | Penpot brand／form split flow |
+| Register | mobile form flow | compact centered form | Penpot brand／form split flow |
+| Home | Penpot fixed canvas | compact companion flow | bounded multi-column flow |
+| Profile | Penpot fixed canvas | single-column profile flow | bounded one／two-column profile flow |
+
+實作規則：
+
+- `ResponsiveLayout` 依 `LayoutBuilder` constraints 即時判斷 window class，不快取初次 viewport。
+- `ResponsiveContent` 集中管理最大寬度、水平 padding 與對齊方式。
+- 390 x 844 Mobile Penpot canvas 必須透過 `ResponsiveFixedCanvas` 依實際 viewport 寬度等比例縮放；391 至 599px 不得維持 390px 固定寬度靠左，縮放後高度超過 viewport 時改為垂直捲動。
+- Web 主版面不使用整頁 `FittedBox`、固定 1440 x 900 canvas 或固定 x/y 座標。
+- Home 在舊 breakpoint 900／950／1024px 曾發生的負 padding 與 nav overflow，已由 Tablet flow layout 排除。
+- Widget tests 覆蓋 breakpoint 邊界與 390 至 1920px 常用 viewport，並驗證同一 widget tree 可在 599／600／1199／1200px 即時切換。
+
+## 2026-07-18 共用導覽與頁面切換規格
+
+### Desktop Navbar（`>= 1200px`）
+
+- Home、Profile、Annoyance 必須共用 `AppTopNavigation`，不得各頁複製 Navbar。
+- 固定選項依序為 Logo／陪伴首頁、心的軌跡、怪獸收藏、匿名社群、互動區、記下現在的心情、通知、個人資料。
+- 已完成入口使用正式 route；尚未完成入口顯示具名「即將開放」，不得建立空白頁或假 route。
+- Navbar 使用 `Row`、`Spacer` 與 viewport 衍生間距；1200 至 1920px 不得 overflow 或留下固定畫布空白。
+- Profile 的儲存與登出為頁面操作，放在共用 Navbar 下方的 Profile action bar，不混入全站導覽設定。
+- Profile action bar 底色使用 `profileActionBackground`，色值與 Annoyance 進度列的 `annoyanceBrandBackground` 同為 `#FFFDD2`。
+
+### Mobile Navigation（`< 600px`）
+
+- Home 與 Profile 共用 `MobileAppBottomNavigation`，選項固定為首頁、社群、怪獸、互動、我的。
+- 首頁與「我的」為正式 route；其餘未完成項目顯示「即將開放」。
+- 首頁右上角只顯示通知，不再重複提供個人資料入口；個人資料一律由底部「我的」進入。
+
+### Page Transition
+
+- 所有一般前進、登入結果、Navbar 與底部選單切換使用零秒進場動畫，直接呈現目的頁。
+- Home 進入 Profile／Annoyance、Login 進入 Register 使用 push 保留 navigation stack。
+- 明確的返回按鈕優先 pop；返回動畫為 220ms，當前頁面向右退出。若沒有上一頁，才直接導回預設頁。

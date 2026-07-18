@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/annoyance_draft.dart';
+import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
 
 class MoodScoreSelector extends StatelessWidget {
@@ -32,18 +33,24 @@ class MoodScoreSelector extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             Semantics(
               label: '煩惱分數，1 到 5 分',
-              child: Wrap(
-                alignment: WrapAlignment.center,
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
-                children: [
-                  for (final score in annoyanceScores)
-                    _ScoreButton(
-                      score: score,
-                      isSelected: score == selectedScore,
-                      onPressed: () => onSelected(score),
-                    ),
-                ],
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final compact = constraints.maxWidth < 440;
+                  return Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: compact ? AppSpacing.sm : AppSpacing.md,
+                    runSpacing: AppSpacing.sm,
+                    children: [
+                      for (final score in annoyanceScores)
+                        _ScoreButton(
+                          score: score,
+                          dimension: compact ? 82 : 92,
+                          isSelected: score == selectedScore,
+                          onPressed: () => onSelected(score),
+                        ),
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -56,11 +63,13 @@ class MoodScoreSelector extends StatelessWidget {
 class _ScoreButton extends StatelessWidget {
   const _ScoreButton({
     required this.score,
+    required this.dimension,
     required this.isSelected,
     required this.onPressed,
   });
 
   final int score;
+  final double dimension;
   final bool isSelected;
   final VoidCallback onPressed;
 
@@ -70,20 +79,72 @@ class _ScoreButton extends StatelessWidget {
       button: true,
       selected: isSelected,
       label: score.scoreLabel,
-      child: SizedBox.square(
-        dimension: 64,
-        child:
-            isSelected
-                ? FilledButton(
-                  key: Key('annoyanceScore$score'),
-                  onPressed: onPressed,
-                  child: Text(score.scoreLabel),
-                )
-                : OutlinedButton(
-                  key: Key('annoyanceScore$score'),
-                  onPressed: onPressed,
-                  child: Text(score.scoreLabel),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          key: Key('annoyanceScore$score'),
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(18),
+          child: AnimatedContainer(
+            key: Key(
+              isSelected
+                  ? 'annoyanceScoreSelected$score'
+                  : 'annoyanceScoreOption$score',
+            ),
+            duration: const Duration(milliseconds: 160),
+            width: dimension,
+            padding: const EdgeInsets.fromLTRB(8, 10, 8, 9),
+            decoration: BoxDecoration(
+              color:
+                  isSelected
+                      ? AppColors.annoyanceSoft
+                      : AppColors.annoyanceSurface,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color:
+                    isSelected
+                        ? AppColors.annoyancePrimary
+                        : AppColors.annoyanceBorder,
+                width: isSelected ? 2.5 : 1,
+              ),
+              boxShadow:
+                  isSelected
+                      ? [
+                        BoxShadow(
+                          color: AppColors.annoyancePrimary.withValues(
+                            alpha: 0.14,
+                          ),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
+                      : null,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/images/moodPoint_$score.png',
+                  key: Key('annoyanceScoreImage$score'),
+                  width: dimension - 20,
+                  height: dimension - 20,
+                  fit: BoxFit.contain,
                 ),
+                const SizedBox(height: 5),
+                Text(
+                  score.scoreLabel,
+                  style: TextStyle(
+                    color:
+                        isSelected
+                            ? AppColors.annoyancePrimary
+                            : AppColors.annoyanceInk,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

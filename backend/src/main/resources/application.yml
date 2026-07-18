@@ -2,7 +2,7 @@ spring:
   application:
     name: monsters
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:prod}
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   jpa:
     open-in-view: false
     properties:
@@ -29,7 +29,7 @@ app:
       issuer: ${JWT_ISSUER:monsters}
       secret: ${JWT_SECRET:}
       access-token-expiration-seconds: ${JWT_ACCESS_TOKEN_EXPIRATION_SECONDS:3600}
-      refresh-token-expiration-seconds: ${JWT_REFRESH_TOKEN_EXPIRATION_SECONDS:1209600}
+      refresh-token-expiration-seconds: ${JWT_REFRESH_TOKEN_EXPIRATION_SECONDS:2592000}
     google:
       client-ids: ${GOOGLE_CLIENT_IDS:}
   storage:

@@ -15,6 +15,29 @@
 
 前端功能預設以 Flutter 共用程式支援三平台。新增頁面或互動流程時，需同步確認 Web、Android、iOS 皆有可執行入口；若有平台限制，需在對應 Task 文件中記錄替代處理。
 
+## Web-first 與 RWD 開發設定
+
+目前 UI 開發與驗收以 Web 版本為主要目標，同時保留 Android／iOS 相容性。Web 必須在瀏覽器視窗縮放時即時 reflow，不得要求重新整理，也不得把完整手機或 1440 x 900 Penpot 畫布直接等比放大。
+
+共用設定位於 `lib/layout/responsive_layout.dart`：
+
+| Window class | Viewport width | 版型原則 |
+|---|---:|---|
+| Mobile | `< 600px` | 保留既有 Mobile Penpot layout，內容可捲動且不可溢位 |
+| Tablet | `600px - 1199px` | 單欄或 compact flow layout，內容置中並設定最大寬度 |
+| Desktop | `>= 1200px` | Web 專用雙欄／多欄 flow layout，內容寬度受限 |
+
+頁面應使用 `ResponsiveLayout` 判斷 window class，並以 `ResponsiveContent`、`Row`、`Column`、`Wrap`、`Expanded` 與 `ConstrainedBox` 配置相對版面。`Stack`／`Positioned` 僅限 Mobile Penpot 精準畫布或元件內局部疊圖，不得作為 Tablet／Desktop 的主版面定位。
+
+Web 本機開發：
+
+```bash
+GOOGLE_CLIENT_ID=your-web-client-id.apps.googleusercontent.com \
+  ./tool/run_web_local.sh
+```
+
+固定網址為 `http://localhost:5050`。開發時應拖曳 Chrome 視窗跨越 600px 與 1200px，並至少驗證 390、600、900、1024、1200、1440、1920px；切換過程不得出現 overflow、裁切、負 padding 或版面跳回固定 canvas。
+
 ## 專案規範
 
 前端開發需遵守：
@@ -63,13 +86,15 @@ UI 不得直接呼叫 Dio，後續功能需透過 Provider / Repository 使用 `
 - `lib/models/login_result.g.dart`
 - `lib/models/register_result.dart`
 
-登入流程使用 `AuthRepository` 呼叫 `POST /api/auth/login`，成功後由 `ApiClient.setAccessToken()` 將 access token 套用到目前執行階段的 Authorization header，並透過 `AuthSessionStore` 保存 `LoginResult` 與最後開啟時間。使用者未登出且 30 天內再次開啟 App 時，`SplashPage` 會恢復 session 並直接導向首頁；超過 30 天、session 無效或使用者登出時，會清除本地 session 並要求重新登入。
+登入流程使用 `AuthRepository` 呼叫 `POST /api/auth/login`，成功後由 `ApiClient.setAccessToken()` 將 access token 套用到目前執行階段的 Authorization header，並透過 `AuthSessionStore` 保存 `LoginResult` 與最後開啟時間。使用者未登出且 30 天內再次開啟 App 時，`SplashPage` 會先以保存的 refresh token 呼叫 `POST /api/auth/refresh` 完成 rotation，再使用新 access token 進入首頁；不得直接重用可能已過期的 access token。
+
+受保護 API 若回傳 401，`ApiClient` 會共用單一 refresh request 換發 Token，成功後只重試原 request 一次，避免並行 API 觸發多次 rotation。Refresh API 本身、登入、Google 登入、註冊與登出不得啟動 401 refresh retry。Refresh token 驗證失敗、超過 30 天、session 格式無效或使用者登出時，必須清除 Authorization header 與本地 session，並回到登入頁；暫時性網路錯誤保留 session 供下次重試。
 
 Google 登入流程使用 `GoogleSignInService` 透過 `google_sign_in` / `google_sign_in_web` 取得 Google ID Token，再由 `AuthRepository` 呼叫 `POST /api/auth/google-login` 交給後端驗證並換發本系統 JWT。Web 版使用 Google Identity Services 官方按鈕，Android / iOS 使用共用 Flutter 登入按鈕；成功後同樣由 `AuthSessionStore` 保存 30 天登入狀態。
 
 註冊流程使用 `AuthRepository` 呼叫 `POST /api/auth/register`，成功後導回登入頁，不自動登入，也不保存密碼或 token。帳號為必填且唯一，需英文開頭，只能包含英文、數字、底線，長度 4 到 50，前端送出前會轉為小寫。
 
-密碼不得寫入 SharedPreferences；登入 session 僅由 `AuthSessionStore` 集中管理，頁面不得直接讀寫 token。Google 登入不得假造 ID Token 或沿用舊系統空密碼登入流程。
+密碼不得寫入 SharedPreferences；登入 session 僅由 `AuthSessionStore` 集中管理，頁面不得直接讀寫 token。Refresh token 每次換發後必須覆蓋舊 session，前端不得重複使用舊 refresh token。Google 登入不得假造 ID Token 或沿用舊系統空密碼登入流程。
 
 Google 登入執行時需提供 dart-define，且後端 `GOOGLE_CLIENT_IDS` 必須包含對應 Client ID：
 
@@ -88,7 +113,6 @@ GOOGLE_CLIENT_ID=your-web-client-id.apps.googleusercontent.com \
 ```
 
 `tool/run_web_local.sh` 與 Windows `tool/run_web_local.ps1` 會固定 Web 本機網址為 `http://localhost:5050`，避免 Flutter Web 每次啟動改用不同 port 而被 Google OAuth 擋下。PowerShell 版本可將 Client ID 填入檔案內的 `$DefaultGoogleClientId`，之後只需執行 `./tool/run_web_local.ps1`。Google Cloud OAuth Client 的 Authorized JavaScript origins 請加入：
-un_web_local.ps1`。Google Cloud OAuth Client 的 Authorized JavaScript origins 請加入：
 
 ```text
 http://localhost:5050

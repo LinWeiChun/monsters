@@ -23,31 +23,55 @@ void main() {
   });
 
   testWidgets('shows login form actions', (tester) async {
+    await _setMobileSurface(tester);
     await tester.pumpWidget(_loginApp(_FakeAuthRepository()));
     await tester.pumpAndSettle();
 
-    expect(find.text('貘nsters'), findsOneWidget);
+    expect(find.text('歡迎回來'), findsOneWidget);
     expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
     expect(find.byKey(const Key('loginPasswordField')), findsOneWidget);
     expect(find.text('登入'), findsOneWidget);
     expect(find.text('使用 Google 登入'), findsOneWidget);
-    expect(find.text('還沒有帳號？前往註冊'), findsOneWidget);
+    expect(find.text('還沒有帳號？'), findsOneWidget);
+    expect(find.text('建立新帳號'), findsOneWidget);
   });
 
+  for (final size in const [
+    Size(600, 700),
+    Size(900, 700),
+    Size(1024, 768),
+    Size(1199, 800),
+    Size(1440, 900),
+    Size(1920, 1080),
+  ]) {
+    testWidgets('login form reflows without overflow at $size', (tester) async {
+      await _setSurface(tester, size);
+      await tester.pumpWidget(_loginApp(_FakeAuthRepository()));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
+      expect(find.byKey(const Key('loginPasswordField')), findsOneWidget);
+      expect(find.byKey(const Key('loginSubmitButton')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('validates required login fields', (tester) async {
+    await _setMobileSurface(tester);
     await tester.pumpWidget(_loginApp(_FakeAuthRepository()));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('loginSubmitButton')));
     await tester.pumpAndSettle();
 
-    expect(find.text('請輸入 Email'), findsOneWidget);
+    expect(find.text('請輸入帳號或 Email'), findsOneWidget);
     expect(find.text('請輸入密碼'), findsOneWidget);
   });
 
   testWidgets('submits credentials and navigates to home on success', (
     tester,
   ) async {
+    await _setMobileSurface(tester);
     final repository = _FakeAuthRepository();
     await tester.pumpWidget(_loginApp(repository));
     await tester.pumpAndSettle();
@@ -68,6 +92,7 @@ void main() {
   testWidgets('submits Google ID token and navigates to home on success', (
     tester,
   ) async {
+    await _setMobileSurface(tester);
     final repository = _FakeAuthRepository();
     final googleSignInService = _FakeGoogleSignInService();
     await tester.pumpWidget(
@@ -75,7 +100,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('使用 Google 登入'));
+    await tester.tap(find.byKey(const Key('loginGoogleButton')));
     await tester.pumpAndSettle();
 
     expect(repository.googleIdToken, 'google-id-token');
@@ -85,6 +110,7 @@ void main() {
   });
 
   testWidgets('handles Google web authentication event', (tester) async {
+    await _setMobileSurface(tester);
     final repository = _FakeAuthRepository();
     final googleSignInService = _FakeGoogleSignInService();
     await tester.pumpWidget(
@@ -102,6 +128,7 @@ void main() {
   });
 
   testWidgets('shows repository error message', (tester) async {
+    await _setMobileSurface(tester);
     await tester.pumpWidget(
       _loginApp(
         _FakeAuthRepository(
@@ -127,6 +154,7 @@ void main() {
   });
 
   testWidgets('shows Google repository error message', (tester) async {
+    await _setMobileSurface(tester);
     final googleSignInService = _FakeGoogleSignInService();
     await tester.pumpWidget(
       _loginApp(
@@ -141,7 +169,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('使用 Google 登入'));
+    await tester.tap(find.byKey(const Key('loginGoogleButton')));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('loginErrorMessage')), findsOneWidget);
@@ -158,21 +186,41 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('首頁'), findsWidgets);
+    expect(find.byKey(const Key('tabletCompanionHero')), findsOneWidget);
     expect(find.byKey(const Key('loginEmailField')), findsNothing);
   });
 
-  testWidgets('stays on splash actions when no active session exists', (
+  testWidgets('redirects from splash to login when no session exists', (
     tester,
   ) async {
     await tester.pumpWidget(_splashApp(_FakeAuthRepository()));
     await tester.pumpAndSettle();
 
-    expect(find.text('登入'), findsOneWidget);
-    expect(find.text('註冊'), findsOneWidget);
+    expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
+    expect(find.byKey(const Key('loginPasswordField')), findsOneWidget);
+    expect(find.text('建立新帳號'), findsOneWidget);
   });
 
-  testWidgets('home logout clears session and navigates to login', (
+  test('logout clears repository and Google session', () async {
+    final repository = _FakeAuthRepository();
+    final googleSignInService = _FakeGoogleSignInService();
+    final container = ProviderContainer(
+      overrides: [
+        authRepositoryProvider.overrideWithValue(repository),
+        googleSignInServiceProvider.overrideWithValue(googleSignInService),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await container.read(authControllerProvider.notifier).logout();
+
+    expect(repository.didLogout, isTrue);
+    expect(googleSignInService.didSignOut, isTrue);
+
+    await googleSignInService.dispose();
+  });
+
+  testWidgets('home keeps the account navigation control available', (
     tester,
   ) async {
     final repository = _FakeAuthRepository();
@@ -190,16 +238,22 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('homeAccountMenu')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('登出'));
-    await tester.pumpAndSettle();
-
-    expect(repository.didLogout, isTrue);
-    expect(googleSignInService.didSignOut, isTrue);
-    expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
+    expect(find.byKey(const Key('homeAccountMenu')), findsOneWidget);
+    expect(repository.didLogout, isFalse);
+    expect(googleSignInService.didSignOut, isFalse);
 
     await googleSignInService.dispose();
+  });
+}
+
+Future<void> _setMobileSurface(WidgetTester tester) async {
+  await _setSurface(tester, const Size(390, 844));
+}
+
+Future<void> _setSurface(WidgetTester tester, Size size) async {
+  await tester.binding.setSurfaceSize(size);
+  addTearDown(() async {
+    await tester.binding.setSurfaceSize(null);
   });
 }
 

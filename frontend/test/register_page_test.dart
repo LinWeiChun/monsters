@@ -14,10 +14,11 @@ import 'package:monsters/routes/app_routes.dart';
 
 void main() {
   testWidgets('shows register form actions', (tester) async {
+    await _setMobileSurface(tester);
     await tester.pumpWidget(_registerApp(_FakeAuthRepository()));
     await tester.pumpAndSettle();
 
-    expect(find.text('建立帳號'), findsOneWidget);
+    expect(find.text('開始你的陪伴旅程'), findsOneWidget);
     expect(find.byKey(const Key('registerAccountField')), findsOneWidget);
     expect(find.byKey(const Key('registerEmailField')), findsOneWidget);
     expect(find.byKey(const Key('registerUserNameField')), findsOneWidget);
@@ -26,11 +27,46 @@ void main() {
       find.byKey(const Key('registerConfirmPasswordField')),
       findsOneWidget,
     );
-    expect(find.text('註冊'), findsOneWidget);
-    expect(find.text('已有帳號？前往登入'), findsOneWidget);
+    expect(find.text('完成註冊'), findsOneWidget);
+    expect(find.text('已有帳號？'), findsOneWidget);
+    expect(find.text('返回登入'), findsOneWidget);
   });
 
+  testWidgets('shows web register layout copy', (tester) async {
+    await _setDesktopSurface(tester);
+    await tester.pumpWidget(_registerApp(_FakeAuthRepository()));
+    await tester.pumpAndSettle();
+
+    expect(find.text('建立新帳號'), findsOneWidget);
+    expect(find.text('註冊完成後，請使用新帳號登入。'), findsOneWidget);
+    expect(find.text('‹  返回登入'), findsOneWidget);
+    expect(find.text('完成註冊'), findsOneWidget);
+    expect(find.text('從一個帳號開始，\n把每一天好好收進來。'), findsOneWidget);
+    expect(find.text('帳號可使用英文、數字與底線　·　密碼至少 8 字元'), findsOneWidget);
+  });
+
+  for (final size in const [
+    Size(600, 700),
+    Size(900, 700),
+    Size(1024, 768),
+    Size(1199, 800),
+  ]) {
+    testWidgets('register form reflows without overflow at $size', (
+      tester,
+    ) async {
+      await _setSurface(tester, size);
+      await tester.pumpWidget(_registerApp(_FakeAuthRepository()));
+      await tester.pumpAndSettle();
+
+      expect(find.text('建立新帳號'), findsOneWidget);
+      expect(find.byKey(const Key('registerAccountField')), findsOneWidget);
+      expect(find.byKey(const Key('registerSubmitButton')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('validates required register fields', (tester) async {
+    await _setMobileSurface(tester);
     await tester.pumpWidget(_registerApp(_FakeAuthRepository()));
     await tester.pumpAndSettle();
 
@@ -47,6 +83,7 @@ void main() {
   });
 
   testWidgets('validates password confirmation', (tester) async {
+    await _setMobileSurface(tester);
     await tester.pumpWidget(_registerApp(_FakeAuthRepository()));
     await tester.pumpAndSettle();
 
@@ -78,6 +115,7 @@ void main() {
   });
 
   testWidgets('validates account format', (tester) async {
+    await _setMobileSurface(tester);
     await tester.pumpWidget(_registerApp(_FakeAuthRepository()));
     await tester.pumpAndSettle();
 
@@ -89,7 +127,7 @@ void main() {
     await tester.tap(find.byKey(const Key('registerSubmitButton')));
     await tester.pumpAndSettle();
 
-    expect(find.text('帳號至少 4 個字'), findsOneWidget);
+    expect(find.text('帳號至少 4 字元'), findsOneWidget);
 
     await tester.enterText(
       find.byKey(const Key('registerAccountField')),
@@ -99,12 +137,13 @@ void main() {
     await tester.tap(find.byKey(const Key('registerSubmitButton')));
     await tester.pumpAndSettle();
 
-    expect(find.text('帳號需英文開頭，且只能使用英文、數字、底線'), findsOneWidget);
+    expect(find.text('帳號需以英文開頭，僅可使用英文、數字與底線'), findsOneWidget);
   });
 
   testWidgets('submits register form and navigates to login on success', (
     tester,
   ) async {
+    await _setMobileSurface(tester);
     final repository = _FakeAuthRepository();
     await tester.pumpWidget(_registerApp(repository));
     await tester.pumpAndSettle();
@@ -141,6 +180,7 @@ void main() {
   });
 
   testWidgets('shows repository error message', (tester) async {
+    await _setMobileSurface(tester);
     await tester.pumpWidget(
       _registerApp(
         _FakeAuthRepository(
@@ -179,6 +219,24 @@ void main() {
 
     expect(find.byKey(const Key('registerErrorMessage')), findsOneWidget);
     expect(find.text('Email already exists'), findsOneWidget);
+  });
+}
+
+Future<void> _setMobileSurface(WidgetTester tester) async {
+  await _setSurface(tester, const Size(390, 844));
+}
+
+Future<void> _setSurface(WidgetTester tester, Size size) async {
+  await tester.binding.setSurfaceSize(size);
+  addTearDown(() async {
+    await tester.binding.setSurfaceSize(null);
+  });
+}
+
+Future<void> _setDesktopSurface(WidgetTester tester) async {
+  await tester.binding.setSurfaceSize(const Size(1440, 900));
+  addTearDown(() async {
+    await tester.binding.setSurfaceSize(null);
   });
 }
 

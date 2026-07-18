@@ -21,7 +21,9 @@
 | AI 回報要求 | AI 若參考 `system_data/`，需於工作報告中說明參考內容與轉換方式 |
 | Google 登入 Client ID | 後端透過 `GOOGLE_CLIENT_IDS` 設定允許的 Google Client ID，可用逗號支援 Web / App 多組 Client ID |
 | 忘記密碼流程 | 後端產生 15 分鐘短效 reset token，資料庫只保存 token hash；目前回傳 resetToken 供開發串接，正式寄信服務待後續定案 |
-| 登出流程 | 使用 JWT revocation；登出時只保存 access token hash 與原 token 過期時間，JWT 驗證需拒絕已撤銷 token |
+| 登出流程 | 使用 JWT revocation；登出時保存 access token hash，前端提供 refresh token 時一併保存其 hash 與原 token 過期時間，JWT 驗證與 refresh rotation 需拒絕已撤銷 token |
+| Token Refresh | Refresh token 預設有效 30 天並採 rotation；啟動恢復 session 先換發新 Token，受保護 API 的並行 401 共用單一 refresh request，舊 refresh token hash 寫入 `revoked_tokens` 後不可重用 |
+| Profile 生日選擇器 | 採方案 A：使用 Flutter 內建 `showDatePicker`，不新增第三方套件；選擇範圍為 1900-01-01 至當日，送出格式維持 `yyyy-MM-dd` |
 | 檔案上傳儲存方式 | 使用 Cloudflare R2 S3-compatible API；public avatar 與 private entry media 使用不同 bucket，環境變數包含 `R2_ACCOUNT_ID`、`R2_ACCESS_KEY_ID`、`R2_SECRET_ACCESS_KEY`、`R2_BUCKET`、`R2_PUBLIC_BASE_URL`、`R2_ENTRY_MEDIA_BUCKET` 與各類媒體限制 |
 | Web 管理後台 | 需要建立 Web 管理後台；實作範圍與權限模型於後續管理後台 Task 細化 |
 | 正式寄信服務 | 忘記密碼正式環境使用 SMTP 寄送 reset link |
@@ -43,7 +45,10 @@
 | Phase 3 Annoyance Core 範圍 | Core Task 建立領域基礎、lookup、DTO、Mapper、Service 驗證與 Controller 骨架；實際 API endpoint 依後續 Task 逐一完成（D12-A） |
 | Phase 3 R2 規格用語 | Entry media 在 Database 只保存 private R2 object key，不保存 public URL（D13-A） |
 | Phase 3 Mood seed | Annoyance 與 Diary 共用中性分數 code `SCORE_1`～`SCORE_5`，label 為 `1分`～`5分`，不在 lookup 綁定好壞或程度語意（D14-A） |
+| Phase 3 煩惱分數 UI | 依 2026-07-18 使用者指示，前端 `MoodScoreSelector` 使用 `moodPoint_1.png`～`moodPoint_5.png` 的綠色笑臉至紅色難過圖片呈現 1 至 5 分；API 與 Database lookup 仍只保存中性整數分數 |
 | Backend package layout | 全面採 layer-first `com.monsters.<layer>.<module>`；`common` 作為共用模組名，`MonstersApplication` 維持在 `com.monsters` |
+| Web／Mobile 導覽 | 採使用者選定 Web 方案 A、Mobile 方案 1：Desktop Home／Profile／Annoyance 共用完整 Navbar；Mobile 保留共用底部選單，「我的」為 Profile 唯一主要入口，首頁右上角改為通知 |
+| 頁面切換效果 | 一般前進與導覽切換直接換頁、無左右位移；明確返回按鈕使用 navigation pop，當前頁面以 220ms 向右退出 |
 
 ## 二、已核准套件與工具
 

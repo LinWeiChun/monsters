@@ -1,4 +1,14 @@
-# TASKS.md
+
+---
+
+## 插隊任務：Penpot MCP Web 註冊頁精準修正
+
+- [x] 確認 Penpot MCP 目前選取 `Account / Web / 03 Register / 註冊` board（1440 x 900）。
+- [x] 依 Web board 修正 Flutter 註冊頁雙欄、表單位置、欄位寬度、規則卡與完成註冊按鈕。
+- [x] 顏色維持集中於 `frontend/lib/theme/app_colors.dart`。
+- [x] 更新註冊頁 widget test，補上 Web 註冊頁文字驗證。
+- [x] 執行 `flutter analyze --no-pub` 與 `flutter test --no-pub test/register_page_test.dart`。
+- [x] 更新 UI_SPEC、CHANGE_LOG、CHANGE_HISTORY。# TASKS.md
 
 # 貘nsters AI 開發任務清單
 
@@ -11,18 +21,95 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - 哪些舊寫法未沿用
 - 是否有發現需要更新的正式文件
 
+## 插隊任務：Profile 操作列底色同步（2026-07-18）
+
+- [x] TODO：比對 Profile 操作列與 Annoyance 進度列底色色票。
+- [x] IN PROGRESS：新增 Profile action background token，套用與 Annoyance 相同的 `#FFFDD2`。
+- [x] REVIEW：補上底色 Widget test，完成 Analyze、132 項完整測試與 Web build。
+- [x] DONE：文件與 Log 完成；因 PR #63 已先合併，改以獨立 follow-up PR 提交底色修正。
+
+## 插隊任務：Web 共用 Navbar 與 Mobile 通知入口（2026-07-18）
+
+- [x] TODO：盤點 Home／Profile／Annoyance 重複導覽、現有路由與 Mobile 個人資料入口。
+- [x] IN PROGRESS：建立 Desktop 共用完整 Navbar 與 Mobile 共用底部選單，將首頁右上角個人資料改為通知。
+- [x] REVIEW：補齊導覽路由、未開放提示、Breakpoint、無 overflow、直接前進與向右返回測試。
+- [x] DONE：Flutter Analyze、131 項完整測試、Web build、文件與 Log 完成，準備 Commit、Push 與 PR。
+
 ---
 
-## 插隊任務：Penpot MCP 畫面排版同步
+## 插隊任務：Mobile 右側留白與煩惱分數圖片修正（2026-07-18）
 
-- [ ] 使用 Penpot MCP 讀取指定畫面設計
-- [ ] 比對 Flutter 現有畫面與 Penpot 排版差異
-- [ ] 依 Penpot 設計調整畫面排版
-- [ ] 執行 Flutter Analyze、Test 與 Web 視覺驗證
-- [ ] 同步 UI 規格與 Log
+- [x] TODO：以瀏覽器重現 391 至 599px Mobile 固定畫布右側留白，並確認 `moodPoint_1.png`～`moodPoint_5.png` 圖片內容。
+- [x] IN PROGRESS：建立等比例滿寬 `ResponsiveFixedCanvas`，套用 Home／Profile，並將 `MoodScoreSelector` 改為 1 至 5 分圖片卡片。
+- [x] REVIEW：補齊 500／599px RWD 與 320px 分數選擇測試，以實際 Flutter Web 500px viewport 確認右側空白已消失。
+- [x] DONE：Flutter Analyze、129 項完整測試、Web build、Migration 靜態檢查、文件與 Log 完成，準備 Commit、Push 與 PR。
 
 ---
 
+## 插隊任務：Profile／Annoyance Penpot 同步與 Web 右側留白修正（2026-07-18）
+
+- [x] TODO：檢查 Profile、Annoyance 舊系統參考流程、正式規格、Penpot Web／Mobile 畫板與現有 Flutter 實作。
+- [x] IN PROGRESS：以 Flutter 內建 `showDatePicker` 完成生日選擇、加入登出確認，並將 Home／Profile 外層改為滿寬 flow layout。
+- [x] REVIEW：依 Penpot Annoyance Flow 重整 Mobile／Tablet／Desktop 介面，補齊 390 至 1920px widget tests，並同步修改 Penpot Profile Web／Mobile 畫板。
+- [x] DONE：Flutter Analyze 與 Home／Profile／Annoyance 36 項測試通過；API／Database 無異動，文件與 Log 同步完成。
+
+---
+
+## 插隊任務：PR #59／#60 合併衝突處理（2026-07-18）
+
+- [x] TODO：確認 `fix/auth-token-refresh` 與已合併 `develop` 的衝突檔案及兩側功能範圍。
+- [x] IN PROGRESS：合併 Web-first RWD、Profile Token Refresh、測試、Task 與 Log 內容。
+- [x] REVIEW：清除所有 conflict marker，完成 Flutter Analyze、115 項完整測試、Web build 與 Backend test／build。
+- [x] DONE：保留兩側功能與歷史紀錄，準備提交並推送 `fix/auth-token-refresh` 供 PR #60 再次檢查。
+
+---
+
+## 插隊任務：Profile Token Refresh 修正（2026-07-18）
+
+- [x] TODO：確認 Profile 401 並定位 30 天本地 session 與 1 小時 access token 的期限落差。
+- [x] IN PROGRESS：新增 refresh API、refresh token rotation、30 天有效期與舊 token revocation。
+- [x] REVIEW：串接 Flutter 啟動換發、並行 401 單一 refresh、原 request 單次重試與失效回登入。
+- [x] DONE：Backend 完整測試、Flutter Analyze／完整測試通過，API／Database／UI／Decision／Log 同步完成。
+
+---
+
+## 插隊任務：Web-first RWD 共用版型（2026-07-18）
+
+- [x] TODO：盤點 Splash、Login、Register、Home、Profile 的 Penpot 實作與固定／相對定位狀況。
+- [x] IN PROGRESS：建立 Mobile／Tablet／Desktop 共用 breakpoint 與 Responsive shell，將 Web 主版面改為 flow layout。
+- [x] REVIEW：修正 Home 在 900、950、1024px 的負 padding／overflow，並補齊 390 至 1920px viewport 與動態 resize 測試。
+- [x] DONE：將前端開發設定明確改為 Web-first、保留 Android／iOS 相容，完成 Analyze、完整 Test、Web build、文件與 Log 同步。
+
+---
+
+## 插隊任務：登入帳號或 Email 驗證修正
+
+- [x] 比對 `bec7bcf` 與 `0b3d265` 的登入欄位及後端查詢行為（DONE）
+- [x] 修正 LoginRequest 將 Account 誤判為非法 Email 的驗證限制（REVIEW：保留 `email` request key，相容既有前端）
+- [x] 補齊 Account / Email 登入測試（DONE：登入相關後端測試與後端完整測試通過）
+- [x] 同步 API、UI 規格與 Log（DONE）
+
+---
+
+## 插隊任務：Penpot MCP 登入畫面排版同步
+
+- [x] 使用 Penpot MCP 讀取指定畫面設計（DONE：已讀取 Web `Account / Web / 02 Login / 登入` 與 APP `Account / Mobile / 02 Login / 登入`）
+- [x] 比對 Flutter 現有登入頁與 Penpot 排版差異（DONE：已確認桌面雙欄、手機 390x844、色票與圖片差異）
+- [x] 依 Penpot 設計調整登入頁排版（REVIEW：本次僅登入頁，未直接修改其他 APP 畫面）
+- [x] 執行 Flutter Analyze 與 Login Page Test（DONE：`flutter analyze`、`flutter test test/login_page_test.dart` 通過；Web 視覺驗證待使用者啟動 Chrome 流程確認）
+- [x] 同步 UI 規格與 Log（DONE）
+
+---
+
+## 插隊任務：Penpot MCP 註冊畫面排版同步
+
+- [x] 檢查 Penpot MCP 指定 Account & Access 畫面狀態（DONE：目前 selection 為空，註冊頁以已取得的 Account & Access 視覺系統與登入頁規格延伸）
+- [x] 比對 Flutter 現有註冊頁與 Account & Access 排版差異（DONE：已確認舊版置中表單、舊 logo 路徑與未使用 Penpot 版型）
+- [x] 依 Account & Access 視覺系統調整註冊頁排版（REVIEW：本次僅註冊頁）
+- [x] 執行 Flutter Analyze 與 Register Page Test（DONE：`flutter analyze --no-pub`、`flutter test --no-pub test/register_page_test.dart` 通過）
+- [x] 同步 UI 規格與 Log（DONE）
+
+---
 ## Phase 0：專案初始化
 
 - [x] 建立 Monorepo 結構（DONE）
@@ -235,3 +322,44 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [ ] MySQL 正式環境設定
 - [ ] 環境變數整理
 - [ ] 最終整合測試
+
+---
+
+## 插隊任務：Penpot SplashPage Web / App 畫面（2026-07-16）
+
+- [x] TODO：讀取 AGENTS.md、system_data、docs 與 Penpot SplashPage Web / App 畫板
+- [x] IN PROGRESS：依 Penpot `Account / Web / 01 Splash / 啟動` 與 `Account / Mobile / 01 Splash / 啟動` 調整 Flutter SplashPage responsive layout
+- [x] REVIEW：執行 `flutter analyze --no-pub` 與 `flutter test --no-pub test/splash_page_test.dart`
+- [x] DONE：更新 `docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`
+---
+
+## 插隊任務：SplashPage Session 失敗自動導向 LoginPage（2026-07-16）
+
+- [x] TODO：確認 SplashPage 與 Penpot 差異為未登入後額外顯示登入 / 註冊按鈕
+- [x] IN PROGRESS：調整 `restoreSession()` false 時直接導向 `login` route
+- [x] REVIEW：更新 SplashPage widget tests 並執行 analyze / test
+- [x] DONE：更新 `docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`
+---
+
+## 插隊任務：SplashPage 精準修正至 Penpot Page（2026-07-16）
+
+- [x] TODO：重新讀取 Penpot Splash Web / Mobile shape 與內部座標
+- [x] IN PROGRESS：修正 logo fill、文字對齊、status card 圓角與 status 內部元素座標
+- [x] REVIEW：補強 SplashPage widget tests，驗證 status dot / text / hint 座標
+- [x] DONE：執行 analyze / test 並同步文件與 Log
+---
+
+## 插隊任務：Penpot HomePage Web / App 畫面（2026-07-16）
+
+- [x] TODO：讀取 Penpot `Web / Companion Home` 與 `Mobile / Companion Home` 節點資料
+- [x] IN PROGRESS：重寫 Flutter `HomePage` 為 Penpot Web / Mobile responsive canvas
+- [x] REVIEW：執行 `flutter analyze --no-pub`、`flutter test --no-pub test/home_page_test.dart` 與 Home 路由指定測試
+- [x] DONE：更新 `docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`
+---
+
+## 插隊任務：Penpot ProfilePage Web / App 對齊與 HomePage 滿版修正（2026-07-16）
+
+- [x] TODO：依 AGENTS.md 檢查文件、Task 狀態、`system_data/` 舊個人資料與首頁參考程式，並確認本次不異動 API / Database。
+- [x] IN PROGRESS：依 Penpot `Account / Web / 06 Profile / 個人資料` 與 `Account / Mobile / 06 Profile / 個人資料` 改寫 Profile responsive canvas，並將 HomePage `WEB / Web / Companion Home` canvas 改為滿版縮放。
+- [x] REVIEW：執行 `flutter analyze --no-pub`、`flutter test --no-pub test/profile_page_test.dart`、`flutter test --no-pub test/home_page_test.dart`。
+- [x] DONE：更新 `docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`。

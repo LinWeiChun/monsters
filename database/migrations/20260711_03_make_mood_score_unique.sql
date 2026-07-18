@@ -47,13 +47,21 @@ BEGIN
     ALTER TABLE moods ADD CONSTRAINT uk_moods_score UNIQUE (score);
   END IF;
 
-  INSERT INTO moods (code, label, score, image_url, display_order)
+  INSERT INTO moods (
+    code,
+    label,
+    score,
+    image_url,
+    display_order,
+    created_at,
+    updated_at
+  )
   VALUES
-    ('SCORE_1', '1分', 1, NULL, 1),
-    ('SCORE_2', '2分', 2, NULL, 2),
-    ('SCORE_3', '3分', 3, NULL, 3),
-    ('SCORE_4', '4分', 4, NULL, 4),
-    ('SCORE_5', '5分', 5, NULL, 5)
+    ('SCORE_1', '1分', 1, NULL, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('SCORE_2', '2分', 2, NULL, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('SCORE_3', '3分', 3, NULL, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('SCORE_4', '4分', 4, NULL, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('SCORE_5', '5分', 5, NULL, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
   ON DUPLICATE KEY UPDATE
     label = VALUES(label),
     image_url = VALUES(image_url),

@@ -8,6 +8,182 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-16 10:56
+
+Task
+TASK-068 登入帳號或 Email 驗證修正（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 比對 `bec7bcf` 的登入欄位調整與 `0b3d265` 的 Account / Email 後端查詢邏輯。
+- 確認登入 400 的原因為 `LoginRequest.email` 仍套用 `@Email`，使 Account 在進入 `AuthService` 前即被拒絕。
+- 保留既有 `email` request key，移除 Email-only 格式限制，改為必填且最大長度 255，讓後端可接收 Account 或 Email。
+- 更新登入 Controller 與 Service 測試，涵蓋 Account request validation、Account 正規化查詢、Email 查詢、未知使用者與錯誤密碼。
+- 檢查 Log 保存期限；最早紀錄為 2026-06-29，未早於 2026-06-16，因此未刪除 Log。
+
+### Modified
+
+- `backend/src/main/java/com/monsters/dto/auth/LoginRequest.java`
+- `backend/src/test/java/com/monsters/controller/auth/AuthControllerTest.java`
+- `backend/src/test/java/com/monsters/service/auth/AuthServiceTest.java`
+- `docs/API_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- `gradlew.bat test --tests "com.monsters.controller.auth.AuthControllerTest" --tests "com.monsters.service.auth.AuthServiceTest"`：通過。
+- `gradlew.bat test`：BUILD SUCCESSFUL。
+- `flutter test --no-pub test/login_page_test.dart`：180 秒內無輸出並逾時；本次未修改前端程式，保留為 REVIEW 待後續環境確認。
+
+### system_data Reference
+
+- 參考舊系統以 Account 登入的流程意圖；未沿用舊系統空密碼 Google 登入、全域狀態或不安全憑證處理方式。
+
+### API
+
+- `POST /api/auth/login` 的 `email` 欄位名稱不變，語意擴充為可輸入已註冊的 Account 或 Email。
+
+### Database
+
+- No Database change.
+
+### UI
+
+- No frontend code changed；UI 規格同步標示登入欄位為「帳號或 Email」。
+
+### Pending
+
+- 待 Code Review 與 Railway 部署後，以 Account 及 Email 各執行一次公開環境登入驗證。
+- Flutter 登入頁測試需在 Flutter test runner 可正常輸出的環境重跑。
+
+---
+
+## 2026-07-15 16:41
+
+Task
+插隊任務 Penpot MCP 註冊畫面排版同步（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 將 Flutter 註冊頁從舊版置中表單調整為 Account & Access 系列版型。
+- Web 版使用左側品牌區與右側表單區；Mobile 版以 390px 寬、36px 邊距、54px 欄位高度調整。
+- 註冊頁圖片改用 `frontend/assets/images/title.png` 與 `frontend/assets/images/icon.png`。
+- 將註冊頁色票集中於 `AppColors`，頁面不直接宣告設計色票。
+- 更新註冊頁 widget tests，固定手機尺寸並同步新版文案。
+- 盤點目前已完成頁面與 Penpot MCP 差異：Splash、Home、Profile、Password Lock、Annoyance Chat 仍未完成 Penpot 精準對齊；Login 已完成；Register 本次完成。
+- 檢查 Log 保存期限；最早紀錄為 2026-06-29，未超過一個月，因此未刪除 Log。
+
+### Modified
+
+- `frontend/lib/pages/register_page.dart`
+- `frontend/lib/theme/app_colors.dart`
+- `frontend/test/register_page_test.dart`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- `dart format lib/pages/register_page.dart lib/theme/app_colors.dart test/register_page_test.dart`
+- `flutter analyze --no-pub`：通過
+- `flutter test --no-pub test/register_page_test.dart`：6 tests passed
+
+### system_data Reference
+
+- 本次依 Penpot MCP 與已完成登入頁 Account & Access 視覺系統調整，未新增引用 `system_data/` 舊程式。
+
+### API
+
+- No API endpoint changed.
+
+### Database
+
+- No Database change.
+
+### UI
+
+- 註冊頁 Web 與 Mobile 視覺排版、圖片與色票已調整為 Account & Access 系列規格。
+
+### Pending
+
+- Penpot MCP 目前 selection 為空，註冊頁未能直接讀取註冊畫板子節點；若使用者選取註冊畫板，可再做精準尺寸比對。
+- 已完成但仍需 Penpot 精準對齊的畫面：Splash、Home、Profile、Password Lock、Annoyance Chat。
+
+---
+
+## 2026-07-15 15:19
+
+Task
+插隊任務 Penpot MCP 登入畫面排版同步（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 依 Penpot `Account / Web / 02 Login / 登入` 調整 Flutter Web 登入頁雙欄排版、品牌區、表單區、欄位與按鈕尺寸。
+- 依 Penpot `Account / Mobile / 02 Login / 登入` 調整 App / Mobile 登入頁 390x844 版型、logo 位置、欄位高度與登入操作區。
+- 將登入頁設計色票集中到 `AppColors`，登入頁不再直接宣告設計用 `Color(0x...)`。
+- 套用使用者放入 `frontend/assets/images/` 的 `title.png` 與 `icon.png`，並以 `assets/images/` 目錄註冊 Flutter assets。
+- 更新登入頁 widget tests，固定手機尺寸並以 key 操作 Google 登入按鈕。
+- 檢查 Log 保存期限；最早紀錄為 2026-06-29，未超過一個月，因此未刪除 Log。
+
+### Modified
+
+- `frontend/lib/pages/login_page.dart`
+- `frontend/lib/theme/app_colors.dart`
+- `frontend/pubspec.yaml`
+- `frontend/test/login_page_test.dart`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Added
+
+- `frontend/assets/images/bonus.png`
+- `frontend/assets/images/icon.png`
+- `frontend/assets/images/icon_main.png`
+- `frontend/assets/images/title.png`
+
+### Tests
+
+- `dart format lib/pages/login_page.dart lib/theme/app_colors.dart test/login_page_test.dart`
+- `flutter analyze`：通過
+- `flutter test test/login_page_test.dart`：10 tests passed
+
+### system_data Reference
+
+- 本次依 Penpot MCP 指定畫面與現有 Flutter 登入頁調整，未新增引用 `system_data/` 舊程式。
+
+### API
+
+- No API endpoint changed.
+
+### Database
+
+- No Database change.
+
+### UI
+
+- 登入頁 Web 與 Mobile 視覺排版、圖片與色票已同步至 Penpot 登入畫面規格。
+
+### Pending
+
+- Web Chrome 實機視覺驗證尚未在本次流程啟動；目前以 Flutter analyze 與登入頁 widget tests 作為驗證。
+
+---
+
 ## 2026-07-13 17:57
 
 Task
@@ -5734,3 +5910,870 @@ docs(project): 新增異動紀錄檔並更新 README 使用指令
 ### 備註 / 待確認事項
 
 - 無
+
+---
+
+## 2026-07-16 15:49
+
+Task
+PENPOT-WEB-REGISTER Web 註冊頁依 Penpot 設計精準修正
+
+執行者
+Codex
+
+### 完成內容
+
+- 依 Penpot MCP 選取 board `Account / Web / 03 Register / 註冊` 修正 Web 註冊頁。
+- Web 版調整為 620px brand panel、520px 表單寬度，對齊 x=756 的表單起點。
+- 調整 Web 版返回登入、標題、副標、欄位提示、規則卡與 `完成註冊` 按鈕順序。
+- 新增註冊頁 Web widget test，驗證 Web copy 與主要元素。
+- 註冊頁新增顏色皆集中於 `AppColors`。
+
+### 新增
+
+- 無
+
+### 修改
+
+- `frontend/lib/pages/register_page.dart`
+- `frontend/lib/theme/app_colors.dart`
+- `frontend/test/register_page_test.dart`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- `flutter analyze --no-pub`：通過，No issues found。
+- `flutter test --no-pub test/register_page_test.dart`：通過，7 tests passed。
+
+### Log 保存期限檢查
+
+- 已於新增本次 Log 前檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx` 是否存在。
+- 目前最早紀錄為 2026-06-29，距 2026-07-16 未超過一個月，未刪除紀錄。
+
+### 待確認事項
+
+- 目前未執行瀏覽器截圖比對；本次以 Penpot MCP 座標與 Flutter widget/analyze 驗證為準。
+---
+
+## 2026-07-16 16:12
+
+Task
+PENPOT-SPLASH Web / App SplashPage Penpot 畫面對齊
+
+執行者
+Codex
+
+### 完成內容
+
+- 使用 Penpot MCP 讀取 Account / Web / 01 Splash / 啟動 與 Account / Mobile / 01 Splash / 啟動。
+- 將 SplashPage 改為 Web 1440x900 與 Mobile 390x844 的 responsive layout。
+- 保留 AuthController.restoreSession()：有效 session 導向 home；無效 session 顯示登入 / 註冊行動。
+- 新增 Splash theme token，避免 page 直接宣告色碼。
+- 新增 SplashPage widget tests，驗證 Web / Mobile 位置尺寸與登入 / 註冊導向。
+
+### 新增
+
+- rontend/test/splash_page_test.dart
+
+### 修改
+
+- rontend/lib/pages/splash_page.dart
+- rontend/lib/theme/app_colors.dart
+- docs/UI_SPEC.md
+- docs/TASKS.md
+- log/CHANGE_LOG.md
+- log/CHANGE_HISTORY.csv
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- lutter analyze --no-pub：通過，No issues found
+- lutter test --no-pub test/splash_page_test.dart：通過，4 tests passed
+
+### Log 保存期限檢查
+
+- 已檢查 CHANGE_LOG.md、CHANGE_HISTORY.csv 與 CHANGE_HISTORY.xlsx。
+- 截止日為 2026-06-16；CHANGE_LOG.md 最早日期為 2026-06-16，CHANGE_HISTORY.csv 最早日期為 2026-06-29。
+- 本次沒有超過一個月的 Log，未刪除既有紀錄。
+
+### 待確認事項
+
+- 無
+---
+
+## 2026-07-16 16:22
+
+Task
+PENPOT-SPLASH-REDIRECT SplashPage session 失敗自動導向 LoginPage
+
+執行者
+Codex
+
+### 完成內容
+
+- 將 SplashPage session restore 失敗流程改為直接導向 login route。
+- 移除 Splash 畫面中的登入 / 註冊行動按鈕，避免與 Penpot Splash 畫板不一致。
+- 更新 SplashPage widget tests：檢查中狀態仍對齊 Penpot Web / Mobile，restore false 後自動進入 LoginPage。
+
+### 新增
+
+- 無
+
+### 修改
+
+- rontend/lib/pages/splash_page.dart
+- rontend/test/splash_page_test.dart
+- docs/UI_SPEC.md
+- docs/TASKS.md
+- log/CHANGE_LOG.md
+- log/CHANGE_HISTORY.csv
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- lutter analyze --no-pub：通過，No issues found
+- lutter test --no-pub test/splash_page_test.dart：通過，3 tests passed
+
+### Log 保存期限檢查
+
+- 已檢查 CHANGE_LOG.md、CHANGE_HISTORY.csv 與 CHANGE_HISTORY.xlsx。
+- 截止日為 2026-06-16；CHANGE_LOG.md 最早日期為 2026-06-16，CHANGE_HISTORY.csv 最早日期為 2026-06-29。
+- 本次沒有超過一個月的 Log，未刪除既有紀錄。
+
+### 待確認事項
+
+- 無
+---
+
+## 2026-07-16 16:29
+
+Task
+PENPOT-SPLASH-EXACT SplashPage 精準修正至 Penpot Page
+
+執行者
+Codex
+
+### 完成內容
+
+- 重新讀取 Penpot Splash Web / Mobile shape 資訊。
+- 修正 SplashPage 與 Penpot 不一致處：文字改為 left align、Logo 改為 BoxFit.fill、Status card 移除圓角、Status dot/text/hint 改為絕對座標定位。
+- 補強 widget tests，新增 status dot、status text、status hint 的 Web / Mobile 座標驗證。
+
+### 新增
+
+- 無
+
+### 修改
+
+- rontend/lib/pages/splash_page.dart
+- rontend/test/splash_page_test.dart
+- docs/UI_SPEC.md
+- docs/TASKS.md
+- log/CHANGE_LOG.md
+- log/CHANGE_HISTORY.csv
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- lutter analyze --no-pub：通過，No issues found
+- lutter test --no-pub test/splash_page_test.dart：通過，3 tests passed
+
+### Log 保存期限檢查
+
+- 已檢查 CHANGE_LOG.md、CHANGE_HISTORY.csv 與 CHANGE_HISTORY.xlsx。
+- 截止日為 2026-06-16；CHANGE_LOG.md 最早日期為 2026-06-16，CHANGE_HISTORY.csv 最早日期為 2026-06-29。
+- 本次沒有超過一個月的 Log，未刪除既有紀錄。
+
+### 待確認事項
+
+- 無
+---
+
+## 2026-07-16 16:46
+
+Task
+PENPOT-HOME HomePage Web / App Penpot 畫面對齊
+
+執行者
+Codex
+
+### 完成內容
+
+- 使用 Penpot MCP 讀取 Web / Companion Home 與 Mobile / Companion Home。
+- 重寫 HomePage 為 Web 1440x900 與 Mobile 390x844 的 Penpot canvas。
+- 移除 HomePage 對 Material AppBar / NavigationBar / 舊 quick action layout 的依賴，改為 Penpot 自訂版面。
+- 保留主按鈕導向 nnoyanceChat、帳號按鈕導向 profile、怪獸點擊動畫 key 與 reduced motion 行為。
+- 新增 Home theme token，避免 page 直接宣告色碼。
+
+### 新增
+
+- 無
+
+### 修改
+
+- rontend/lib/pages/home_page.dart
+- rontend/lib/theme/app_colors.dart
+- rontend/test/home_page_test.dart
+- docs/UI_SPEC.md
+- docs/TASKS.md
+- log/CHANGE_LOG.md
+- log/CHANGE_HISTORY.csv
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- lutter analyze --no-pub：通過，No issues found
+- lutter test --no-pub test/home_page_test.dart：通過，5 tests passed
+- lutter test --no-pub test/routes/app_router_test.dart --plain-name "supports annoyance chat route and home entry"：通過，1 test passed
+
+### Log 保存期限檢查
+
+- 已檢查 CHANGE_LOG.md、CHANGE_HISTORY.csv 與 CHANGE_HISTORY.xlsx。
+- 截止日為 2026-06-16；CHANGE_LOG.md 最早日期為 2026-06-16，CHANGE_HISTORY.csv 最早日期為 2026-06-29。
+- 本次沒有超過一個月的 Log，未刪除既有紀錄。
+
+### 待確認事項
+
+- 	est/routes/app_router_test.dart 全檔仍有既有 Register 測試文字定位失敗；本次只驗證 Home route 指定測試。
+---
+
+## 2026-07-16 17:26 PENPOT-PROFILE-HOME-FULL
+
+Task
+Penpot ProfilePage Web / App 對齊與 HomePage 滿版修正
+
+執行者
+Codex
+
+### 完成內容
+
+- 依 Penpot Profile Web / Mobile 設計調整 Flutter ProfilePage。
+- 保留既有 UserProfileController / UserRepository / ApiClient 流程與表單驗證。
+- 新增 profile theme tokens，ProfilePage 不直接宣告色碼。
+- 將 Profile Penpot canvas widgets 拆至 rontend/lib/widgets/profile/profile_penpot_canvas.dart，避免 Page 檔案過長。
+- 將 HomePage WEB / Web / Companion Home canvas 外層縮放改為 BoxFit.cover，修正部署寬螢幕非滿版問題。
+
+### 新增
+
+- rontend/lib/widgets/profile/profile_penpot_canvas.dart
+
+### 修改
+
+- rontend/lib/pages/profile_page.dart
+- rontend/lib/pages/home_page.dart
+- rontend/lib/theme/app_colors.dart
+- docs/UI_SPEC.md
+- docs/TASKS.md
+- log/CHANGE_LOG.md
+- log/CHANGE_HISTORY.csv
+
+### 刪除
+
+- 無
+
+### Migration
+
+- 無
+
+### API
+
+- 無
+
+### Database
+
+- 無
+
+### 測試
+
+- lutter analyze --no-pub：通過，No issues found
+- lutter test --no-pub test/profile_page_test.dart：通過，5 tests passed
+- lutter test --no-pub test/home_page_test.dart：通過，5 tests passed
+
+### system_data 參考
+
+- 已檢查 system_data/front-end/monsters_front_end/lib/pages/drawer/edit_personalInfo.dart 與 system_data/front-end/monsters_front_end/lib/pages/home.dart。
+- 僅參考舊系統個人資料編輯與首頁怪獸互動意圖，未複製舊程式、未沿用舊硬編碼色碼或舊架構。
+
+### Log 保存期限檢查
+
+- 已檢查 CHANGE_LOG.md、CHANGE_HISTORY.csv 與 CHANGE_HISTORY.xlsx 是否存在。
+- 保存期限截止日：2026-06-16。
+- CHANGE_LOG.md 最早日期為 2026-06-16，CHANGE_HISTORY.csv 最早日期為 2026-06-29，未發現超過一個月紀錄。
+- 本次未刪除過期 Log。
+
+### 待確認事項
+
+- 若要進一步精準比對 HomePage，需由使用者在 Penpot 選取正確 WEB / Web / Companion Home board 後再執行尺寸比對。
+
+---
+
+## 2026-07-18 WEB-FIRST-RWD 與 AUTH-REFRESH
+
+Task
+整合 Web-first RWD 共用版型、Penpot 頁面相對定位，以及 Profile 401 與 30 天登入狀態 Token Refresh 修正
+
+執行者
+Codex
+
+### AUTH-REFRESH 完成內容
+
+- 確認 ProfilePage 本身與 `GET /api/users/me` 路徑正確，根因為本地 session 30 天但 access token 僅 1 小時。
+- 新增 `POST /api/auth/refresh`，驗證 refresh token 簽章、issuer、type、期限與使用者狀態。
+- Refresh token 預設期限改為 2592000 秒，符合 rolling 30 天登入需求。
+- 實作 refresh token rotation；舊 token hash 寫入既有 `revoked_tokens`，重複使用會回傳 401。
+- Flutter 啟動恢復 session 時先換發新 Token，不再直接重用保存的 access token。
+- `ApiClient` 遇到受保護 API 401 時共用單一 refresh request，成功後只重試原 request 一次。
+- Refresh token 驗證失敗時清除 Authorization header 與本地 session，並由 App 導回登入頁；暫時性網路錯誤保留 session。
+- 登出 request 可攜帶 refresh token，後端一併撤銷 access 與 refresh token。
+
+### 新增
+
+- `backend/src/main/java/com/monsters/dto/auth/RefreshTokenRequest.java`
+- `frontend/test/repositories/auth_repository_test.dart`
+
+### 修改
+
+- Backend Auth Controller／Service、JWT、Security、Token revocation 與相關測試。
+- Flutter App、ApiClient、Auth Provider／Repository 與登入、路由相關測試。
+- `README.md`、Backend／Frontend README、PROJECT／API／DATABASE／UI／DECISIONS／TASKS 規格。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`。
+
+### system_data 參考
+
+- 已搜尋舊前端 access token 使用方式，未找到 refresh token 或 rotation 流程可重用。
+- 舊程式只出現硬編碼 `<ACCESS_TOKEN>` placeholder，本次未沿用，也未修改 `system_data/`。
+
+### API
+
+- 新增 `POST /api/auth/refresh`。
+- `POST /api/auth/logout` 新增 optional `refreshToken` request body，未帶 body 的舊 Client 仍相容。
+- Refresh 成功沿用既有 `LoginResponse` contract；無效、過期、type 錯誤、已 rotation 或使用者無效回傳 401。
+
+### Database
+
+- 沿用既有 `revoked_tokens` schema 保存 refresh token hash，無欄位與資料表異動。
+- 無 Migration。
+
+### 文件更新
+
+- Refresh token 預設有效期由 14 天統一調整為 rolling 30 天。
+- 補齊 rotation、並行 401 single-flight、單次 retry、失效導頁與登出撤銷規格。
+
+### 測試
+
+- Backend `./gradlew test`：通過。
+- Backend `./gradlew build`：通過。
+- Frontend `flutter analyze --no-pub`：通過，No issues found。
+- Frontend `flutter test --no-pub`：通過，86 tests passed。
+- Frontend `flutter build web --no-pub`：通過，已產出 `frontend/build/web`。
+- Web build 顯示既有 Cupertino icon font 提示，不影響建置或 Token Refresh。
+
+### WEB-FIRST-RWD 完成內容
+
+- 盤點 Splash、Login、Register、Home、Profile 的 Penpot 實作與定位方式。
+- 新增 Mobile／Tablet／Desktop 共用 breakpoint 與 `ResponsiveLayout`／`ResponsiveContent`。
+- 將 Splash、Login、Register、Home、Profile 的 Tablet／Desktop 主版面改為相對 flow layout；Mobile 保留 Penpot 精準畫布。
+- 修正 Home 在 900、950、1024px 的負 padding、導覽 overflow 與固定 canvas 問題。
+- 補上 Web-first 開發設定、固定本機網址、RWD 驗收寬度與瀏覽器即時 resize 規範。
+- 更新既有啟動、路由與密碼鎖測試，使測試契約符合目前路由及頁面入口。
+
+### 新增
+
+- `frontend/lib/layout/responsive_layout.dart`
+- `frontend/test/layout/responsive_layout_test.dart`
+
+### 修改
+
+- `frontend/lib/pages/splash_page.dart`
+- `frontend/lib/pages/login_page.dart`
+- `frontend/lib/pages/register_page.dart`
+- `frontend/lib/pages/home_page.dart`
+- `frontend/lib/pages/profile_page.dart`
+- `frontend/lib/widgets/profile/profile_penpot_canvas.dart`
+- `frontend/test/splash_page_test.dart`
+- `frontend/test/login_page_test.dart`
+- `frontend/test/register_page_test.dart`
+- `frontend/test/home_page_test.dart`
+- `frontend/test/profile_page_test.dart`
+- `frontend/test/widget_test.dart`
+- `frontend/test/routes/app_router_test.dart`
+- `frontend/test/password_lock_page_test.dart`
+- `README.md`
+- `frontend/README.md`
+- `docs/PROJECT_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/CODING_STANDARD.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### system_data 參考
+
+- 已依本次盤點結果確認舊系統首頁與個人資料流程僅作互動意圖參考。
+- 未修改 `system_data/`，未沿用舊系統固定座標 Web 畫面、舊架構、金鑰或環境設定。
+
+### API
+
+- 無異動。
+
+### Database
+
+- 無異動，無 Migration。
+
+### 文件更新
+
+- 明確定義目前前端採 Web-first 開發與驗收，Android／iOS 維持相容。
+- 共用 breakpoint 定為 Mobile `< 600px`、Tablet `600px - 1199px`、Desktop `>= 1200px`。
+- 補上 Penpot 頁面定位方式盤點、相對 layout 規範與 390 至 1920px RWD 測試矩陣。
+
+### 測試
+
+- `flutter analyze --no-pub`：通過，No issues found。
+- `flutter test --no-pub`：通過，107 tests passed。
+- `flutter build web --no-pub`：通過，已產出 `frontend/build/web`。
+- Web build 顯示既有 Cupertino icon font 提示，不影響建置成功或本次 RWD 功能。
+
+### Log 保存期限檢查
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx` 是否存在。
+- 保存期限截止日為 2026-06-18；`CHANGE_LOG.md` 最早正式 Task 日期為 2026-06-29，`CHANGE_HISTORY.csv` 最早日期為 2026-06-29。
+- 未發現超過一個月的正式紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源，未修改。
+
+### 待確認事項
+
+- 部署時需確認未以環境變數將 `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` 覆寫回舊值 1209600。
+
+---
+
+## 2026-07-18 14:28 MERGE-PR59-PR60
+
+Task
+處理 PR #59 Web-first RWD 合併至 `develop` 後，PR #60 Profile Token Refresh 的合併衝突
+
+執行者
+Codex
+
+### 完成內容
+
+- 將 `origin/develop` 合併至 `fix/auth-token-refresh`，逐項解決 5 個衝突檔案。
+- `docs/TASKS.md`、`CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv` 均保留 RWD 與 Token Refresh 兩側紀錄。
+- `login_page_test.dart` 同時保留 Splash 未登入導頁、登出清除 session 與 Home 帳號入口驗證。
+- `widget_test.dart` 同時保留啟動登入頁、Auth 失效導頁與登入前往註冊頁驗證。
+- 已確認 Repository 不再存在 conflict marker，且 `git diff --check` 通過。
+
+### 修改
+
+- `docs/TASKS.md`
+- `frontend/test/login_page_test.dart`
+- `frontend/test/widget_test.dart`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 新增／刪除
+
+- 無；其餘 RWD 新增檔案來自已合併的 PR #59。
+
+### system_data 參考
+
+- RWD 與 Token Refresh 原任務皆已完成 `system_data/` 檢查；本次只處理兩組已驗證變更的 Git 衝突，未發現需再次引用的舊流程。
+- 未修改 `system_data/`。
+
+### API
+
+- 本次衝突處理未新增或修改 API；保留 PR #60 已完成的 `POST /api/auth/refresh` 與相容 logout contract。
+
+### Database
+
+- 無異動，無 Migration；保留既有 `revoked_tokens` 使用方式。
+
+### 文件更新
+
+- 更新 Task 狀態並整合 RWD、Token Refresh 與本次 merge 工作報告及歷史紀錄。
+
+### 測試
+
+- Backend `./gradlew test`：通過。
+- Backend `./gradlew build`：通過。
+- Frontend `flutter analyze --no-pub`：通過，No issues found。
+- Frontend `flutter test --no-pub`：通過，115 tests passed。
+- Frontend `flutter build web --no-pub`：通過，已產出 `frontend/build/web`。
+- Web build 僅顯示既有 Cupertino icon font 提示，不影響建置結果。
+
+### Log 保存期限檢查
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；保存期限截止日為 2026-06-18。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月紀錄，本次未刪除 Log。
+
+### 待確認事項
+
+- 部署環境仍需確認未將 `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` 覆寫回舊值 1209600。
+
+---
+
+## 2026-07-18 15:03 PROFILE-ANNOYANCE-PENPOT-RWD
+
+Task
+同步 Profile 生日／登出與 Annoyance Penpot 畫面，並修正 Home／Profile Web 右側留白
+
+執行者
+Codex
+
+### 完成內容
+
+- Profile 生日欄位改用 Flutter 內建 `showDatePicker`，限制 1900-01-01 至當日並維持 `yyyy-MM-dd` API 格式；未新增第三方套件。
+- Profile Web、Tablet、Mobile 加入可見登出按鈕與確認對話框，確認後沿用 `AuthController.logout()` 清除登入狀態並返回登入頁。
+- Home／Profile Tablet 與 Desktop 最外層改為 stretch 的滿寬 flow layout，修正 674px 固定內容寬度造成的右側留白。
+- Annoyance Page 依 Penpot Web／Mobile Flow 同步導覽、進度、陪伴訊息與操作面板，保留原本結構化狀態機、媒體、繪圖、分數、分享與送出流程。
+- Penpot Profile Web／Mobile 個人首頁新增登出入口、編輯頁新增日曆生日欄位；匯出四張畫板完成視覺檢查。
+- 依正式規格未實作 Penpot 獎勵延伸畫面，Phase 3 建立成功後仍只顯示完成結果。
+
+### 新增
+
+- `frontend/lib/widgets/annoyance/annoyance_penpot_shell.dart`
+
+### 修改
+
+- `frontend/lib/pages/annoyance_chat_page.dart`
+- `frontend/lib/pages/home_page.dart`
+- `frontend/lib/pages/profile_page.dart`
+- `frontend/lib/theme/app_colors.dart`
+- `frontend/lib/widgets/profile/profile_penpot_canvas.dart`
+- `frontend/test/annoyance_chat_page_test.dart`
+- `frontend/test/home_page_test.dart`
+- `frontend/test/profile_page_test.dart`
+- `docs/PROJECT_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### system_data 參考
+
+- 參考 `四技第111405組-貘nsters APP-系統手冊.pdf`、系統簡介與舊 Flutter Profile／Home／Annoyance 流程，保留舊系統的個人資料顯示、抽屜登出及聊天式煩惱建立意圖。
+- 新版改用 Riverpod、go_router、REST API 與相對 RWD layout；未沿用舊全域狀態、固定 Web 座標、硬編碼登入資料或舊獎勵流程。
+- 未修改 `system_data/`。
+
+### API／Database
+
+- API 無異動；Profile 更新、登出與 Annoyance 建立沿用現有 contract。
+- Database 無異動，無 Migration。
+
+### 文件更新
+
+- PROJECT_SPEC 補上內建日曆生日輸入及個人資料頁登出需求。
+- UI_SPEC 補上滿寬 shell、Profile 日曆／登出、Annoyance Penpot 與 390 至 1920px RWD 規範。
+- DECISIONS 記錄使用者選定方案 A，不新增第三方日曆套件。
+- TASKS 完整記錄 TODO → IN PROGRESS → REVIEW → DONE。
+
+### 測試
+
+- `flutter analyze --no-pub`：通過，No issues found。
+- Home／Profile／Annoyance targeted widget tests：36 tests passed。
+- `flutter test --no-pub`：124 tests passed。
+- `flutter build web --no-pub`：通過，已產出 `frontend/build/web`。
+- Web build 僅顯示既有 Cupertino icon font 提示，不影響建置結果。
+
+### Log 保存期限檢查
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；保存期限截止日為 2026-06-18。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源，未修改。
+
+### 待確認事項
+
+- 無。
+
+---
+
+## 2026-07-18 15:29 MOBILE-FULL-WIDTH-MOOD-SCORE
+
+Task
+修正 391 至 599px Mobile 右側留白、加入煩惱分數圖片選擇，並提交 annoyance type／mood migration 時間欄位
+
+執行者
+Codex
+
+### 完成內容
+
+- 透過實際 Flutter Web 500px viewport 重現問題，確認 Mobile 分支的 390px Penpot canvas 維持固定寬度靠左，造成右側留白。
+- 新增 `ResponsiveFixedCanvas`，讓 390 x 844 canvas 依 viewport 寬度等比例填滿；縮放高度超過 viewport 時改為垂直捲動。
+- Home 與 Profile Mobile 套用滿寬 canvas，補上 500px、599px 回歸測試。
+- `MoodScoreSelector` 改用 `moodPoint_1.png`～`moodPoint_5.png` 圖片卡片，保留 `1分`～`5分`、既有 key、API 整數值與無障礙語意。
+- 分數卡片在窄螢幕自動換行，選取狀態使用品牌色邊框、底色與陰影。
+- 納入使用者修改的兩支 Database migration，並將六位短日期字串正規化為 MySQL `CURRENT_TIMESTAMP`。
+
+### 新增
+
+- `frontend/assets/images/moodPoint_1.png`
+- `frontend/assets/images/moodPoint_2.png`
+- `frontend/assets/images/moodPoint_3.png`
+- `frontend/assets/images/moodPoint_4.png`
+- `frontend/assets/images/moodPoint_5.png`
+
+### 修改
+
+- `frontend/lib/layout/responsive_layout.dart`
+- `frontend/lib/pages/home_page.dart`
+- `frontend/lib/pages/profile_page.dart`
+- `frontend/lib/widgets/annoyance/mood_score_selector.dart`
+- `frontend/test/home_page_test.dart`
+- `frontend/test/profile_page_test.dart`
+- `frontend/test/widgets/mood_score_selector_test.dart`
+- `database/migrations/20260711_01_add_annoyance_type_codes_and_seed.sql`
+- `database/migrations/20260711_03_make_mood_score_unique.sql`
+- `docs/PROJECT_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### system_data 參考
+
+- 本次為已完成 Home／Profile／Annoyance 流程的精準 follow-up，沿用前一任務對舊 Mobile 固定畫布與煩惱分數流程的參考結果，未新增複製舊程式。
+- 未修改 `system_data/`，未沿用舊全域狀態或直接 Database 存取方式。
+
+### API／Database
+
+- API 無異動；煩惱分數仍送出整數 1 至 5。
+- Database schema 無異動，無新 Migration；修改既有 `20260711_01`、`20260711_03` seed DML，使 `created_at`／`updated_at` 明確使用 `CURRENT_TIMESTAMP`。
+
+### 文件更新
+
+- PROJECT_SPEC、UI_SPEC 同步分數圖片卡片與 Mobile 等比例滿寬行為。
+- DATABASE_SPEC 同步兩支 migration 的 timestamp seed 規則。
+- DECISIONS 記錄使用者指定的分數圖片 UI，Database lookup 仍維持中性整數語意。
+- TASKS 記錄 TODO → IN PROGRESS → REVIEW → DONE。
+
+### 測試
+
+- `flutter analyze --no-pub`：通過，No issues found。
+- Home／Profile／MoodScore／Annoyance targeted tests：42 tests passed。
+- `flutter test --no-pub`：129 tests passed。
+- `flutter build web --no-pub`：通過，已產出 `frontend/build/web`。
+- Flutter Web 瀏覽器 500 x 844 viewport：`body`、`flutter-view` 均為 500px，Home 右側空白已消失。
+- 5 張 moodPoint 圖片皆驗證為 156 x 156 RGBA PNG，Flutter asset bundle 載入通過。
+- Docker daemon 未啟動，未執行隔離 MySQL migration；已完成 migration diff、短日期殘留與 `CURRENT_TIMESTAMP` 靜態檢查。
+
+### Log 保存期限檢查
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；保存期限截止日為 2026-06-18。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源，未修改。
+
+### 待確認事項
+
+- Docker／MySQL 啟動後可再於隔離測試資料庫實際執行兩支既有 migration；本次未連線或修改任何本機 Database 資料。
+
+---
+
+## 2026-07-18 18:31 SHARED-NAVIGATION-TRANSITION
+
+Task
+Web 方案 A 共用完整 Navbar、Mobile 方案 1 改通知，並統一頁面切換效果
+
+執行者
+Codex
+
+### 完成內容
+
+- 新增 `AppTopNavigation`，統一 Home／Profile／Annoyance Desktop Navbar 的 Logo、五個主要模組、記下心情 CTA、通知與個人資料入口。
+- 新增 `MobileAppBottomNavigation`，統一 Home／Profile 的首頁、社群、怪獸、互動與「我的」；首頁與「我的」使用正式 route，其餘顯示具名即將開放提示。
+- 首頁 Mobile 右上角由個人資料改為通知，移除重複 Profile 入口；底部「我的」成為正式個人資料入口。
+- Profile Desktop 將儲存與登出移至共用 Navbar 下方的頁面 action bar，保留原驗證、API 與登出確認流程。
+- 所有 route 前進進場動畫改為 0 秒；Home→Profile／Annoyance、Login→Register 使用 push 保留導覽堆疊，明確返回按鈕以 220ms 向右退出。
+- 補齊 Mobile 通知、底部 Profile 導頁、三頁共用 Navbar、390 至 1920px overflow 與返回方向測試。
+
+### 新增
+
+- `frontend/lib/widgets/navigation/app_navigation.dart`
+
+### 修改
+
+- `frontend/lib/pages/home_page.dart`
+- `frontend/lib/pages/profile_page.dart`
+- `frontend/lib/pages/annoyance_chat_page.dart`
+- `frontend/lib/pages/login_page.dart`
+- `frontend/lib/pages/register_page.dart`
+- `frontend/lib/routes/app_router.dart`
+- `frontend/lib/widgets/profile/profile_penpot_canvas.dart`
+- `frontend/lib/widgets/annoyance/annoyance_penpot_shell.dart`
+- `frontend/test/home_page_test.dart`
+- `frontend/test/profile_page_test.dart`
+- `frontend/test/annoyance_chat_page_test.dart`
+- `docs/PROJECT_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### system_data 參考
+
+- 參考舊 Flutter `state/drawer.dart` 與 `pages/home.dart` 的個人資料、密碼鎖、使用說明、回饋及登出入口意圖。
+- 新版依使用者選定方案改為 Web 共用 Navbar 與 Mobile 底部「我的」，未沿用舊 `endDrawer`、各頁重複選單、`MaterialPageRoute` 或直接操作本地登入資料的作法。
+- 未修改 `system_data/`。
+
+### API／Database
+
+- API 無異動；通知與未完成模組目前只顯示 UI 提示，不呼叫假 API。
+- Database 無異動，無 Migration。
+
+### 文件更新
+
+- PROJECT_SPEC 同步 Web／Mobile 導覽角色與頁面切換原則。
+- UI_SPEC 補上共用 Navbar、Mobile 底部選單、通知入口、route stack 與 220ms 返回動畫規格。
+- DECISIONS 記錄使用者選定 Web 方案 A、Mobile 方案 1改通知及頁面切換決策。
+- TASKS 完整記錄 TODO → IN PROGRESS → REVIEW → DONE。
+
+### 測試
+
+- `flutter analyze --no-pub`：通過，No issues found。
+- Home／Profile／Annoyance／Login／Register targeted tests：70 tests passed。
+- `flutter test --no-pub`：131 tests passed。
+- `flutter build web --no-pub`：通過，已產出 `frontend/build/web`。
+- Web build 僅顯示既有 Cupertino icon font 提示，不影響建置結果。
+
+### Log 保存期限檢查
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；保存期限截止日為 2026-06-18。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源，未修改。
+
+### 待確認事項
+
+- 通知後端與通知中心頁面尚未開發；目前依正式規格顯示「通知即將開放」。
+
+---
+
+## 2026-07-18 18:38 PROFILE-ACTION-BACKGROUND
+
+Task
+將個人資料頁操作列底色同步為新增煩惱進度列底色
+
+執行者
+Codex
+
+### 完成內容
+
+- 新增 `profileActionBackground` 色票，使用與 `annoyanceBrandBackground` 相同的 `#FFFDD2`。
+- 將 Desktop Profile 的個人資料／登出／儲存變更操作列改為淡黃色底色。
+- 保留共用 Navbar、Profile 內容背景、表單卡片、按鈕與 Mobile 版型不變。
+- 新增 Widget test，驗證 Profile action bar 與 Annoyance brand background 色值一致。
+
+### 修改
+
+- `frontend/lib/theme/app_colors.dart`
+- `frontend/lib/widgets/profile/profile_penpot_canvas.dart`
+- `frontend/test/profile_page_test.dart`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### system_data 參考
+
+- 本次為現有 Profile／Annoyance 視覺 token 同步，未新增引用或修改 `system_data/`。
+
+### API／Database
+
+- API 無異動。
+- Database 無異動，無 Migration。
+
+### 測試
+
+- `flutter analyze --no-pub`：通過，No issues found。
+- `flutter test --no-pub`：132 tests passed。
+- `flutter build web --no-pub`：通過，已產出 `frontend/build/web`。
+- Web build 僅顯示既有 Cupertino icon font 提示，不影響建置結果。
+
+### Log 保存期限檢查
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；保存期限截止日為 2026-06-18。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未修改。
+
+### 待確認事項
+
+- 無。

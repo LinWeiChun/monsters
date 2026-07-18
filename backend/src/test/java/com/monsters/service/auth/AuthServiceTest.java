@@ -14,6 +14,7 @@ import com.monsters.dto.auth.LoginResponse;
 import com.monsters.dto.auth.GoogleLoginRequest;
 import com.monsters.dto.auth.RegisterRequest;
 import com.monsters.dto.auth.RegisterResponse;
+import com.monsters.dto.auth.RefreshTokenRequest;
 import com.monsters.dto.auth.ResetPasswordRequest;
 import com.monsters.exception.common.ConflictException;
 import com.monsters.exception.common.UnauthorizedException;
@@ -72,6 +73,9 @@ class AuthServiceTest {
     @Mock
     private PasswordResetTokenService passwordResetTokenService;
 
+    @Mock
+    private TokenRevocationService tokenRevocationService;
+
     private AuthService authService;
 
     @BeforeEach
@@ -86,8 +90,52 @@ class AuthServiceTest {
                 jwtProperties,
                 googleIdTokenVerifier,
                 passwordResetTokenService,
+                tokenRevocationService,
                 Clock.systemDefaultZone()
         );
+    }
+
+    @Test
+    void refreshShouldRotateTokenAndReturnNewLoginResponse() {
+        User user = new User("wei_account", "user@example.com", "Wei");
+        ReflectionTestUtils.setField(user, "id", 1L);
+        com.monsters.security.common.JwtTokenPayload payload =
+                new com.monsters.security.common.JwtTokenPayload(
+                        1L,
+                        "user@example.com",
+                        "refresh",
+                        java.time.Instant.now(),
+                        java.time.Instant.now().plusSeconds(3600)
+                );
+        when(tokenRevocationService.consumeRefreshToken("old-refresh-token")).thenReturn(payload);
+        when(userRepository.findByIdAndDeletedFalse(1L)).thenReturn(Optional.of(user));
+        when(jwtTokenService.createAccessToken(user)).thenReturn("new-access-token");
+        when(jwtTokenService.createRefreshToken(user)).thenReturn("new-refresh-token");
+        when(jwtProperties.accessTokenExpirationSeconds()).thenReturn(3600L);
+
+        LoginResponse response = authService.refresh(new RefreshTokenRequest("old-refresh-token"));
+
+        assertThat(response.accessToken()).isEqualTo("new-access-token");
+        assertThat(response.refreshToken()).isEqualTo("new-refresh-token");
+        assertThat(response.user().userId()).isEqualTo(1L);
+    }
+
+    @Test
+    void refreshShouldRejectDeletedOrMissingUser() {
+        com.monsters.security.common.JwtTokenPayload payload =
+                new com.monsters.security.common.JwtTokenPayload(
+                        99L,
+                        "deleted@example.com",
+                        "refresh",
+                        java.time.Instant.now(),
+                        java.time.Instant.now().plusSeconds(3600)
+                );
+        when(tokenRevocationService.consumeRefreshToken("refresh-token")).thenReturn(payload);
+        when(userRepository.findByIdAndDeletedFalse(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.refresh(new RefreshTokenRequest("refresh-token")))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("Invalid refresh token");
     }
 
     @Test
@@ -146,7 +194,7 @@ class AuthServiceTest {
         ReflectionTestUtils.setField(user, "id", 1L);
         UserCredential credential = new UserCredential(user, "encoded-password");
 
-        when(userRepository.findByEmailAndDeletedFalse("user@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailOrAccountAndDeletedFalse("user@example.com")).thenReturn(Optional.of(user));
         when(userCredentialRepository.findByUser(user)).thenReturn(Optional.of(credential));
         when(passwordEncoder.matches("password123", "encoded-password")).thenReturn(true);
         when(jwtTokenService.createAccessToken(user)).thenReturn("access-token");
@@ -166,9 +214,29 @@ class AuthServiceTest {
     }
 
     @Test
+    void loginShouldFindUserByNormalizedAccount() {
+        LoginRequest request = new LoginRequest(" WEI_ACCOUNT ", "password123");
+        User user = new User("wei_account", "user@example.com", "Wei");
+        ReflectionTestUtils.setField(user, "id", 1L);
+        UserCredential credential = new UserCredential(user, "encoded-password");
+
+        when(userRepository.findByEmailOrAccountAndDeletedFalse("wei_account")).thenReturn(Optional.of(user));
+        when(userCredentialRepository.findByUser(user)).thenReturn(Optional.of(credential));
+        when(passwordEncoder.matches("password123", "encoded-password")).thenReturn(true);
+        when(jwtTokenService.createAccessToken(user)).thenReturn("access-token");
+        when(jwtTokenService.createRefreshToken(user)).thenReturn("refresh-token");
+        when(jwtProperties.accessTokenExpirationSeconds()).thenReturn(3600L);
+
+        LoginResponse response = authService.login(request);
+
+        assertThat(response.user().account()).isEqualTo("wei_account");
+        verify(userRepository).findByEmailOrAccountAndDeletedFalse("wei_account");
+    }
+
+    @Test
     void loginShouldRejectUnknownEmail() {
         LoginRequest request = new LoginRequest("user@example.com", "password123");
-        when(userRepository.findByEmailAndDeletedFalse("user@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmailOrAccountAndDeletedFalse("user@example.com")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.login(request))
                 .isInstanceOf(UnauthorizedException.class)
@@ -181,7 +249,7 @@ class AuthServiceTest {
         User user = new User("wei_account", "user@example.com", "Wei");
         UserCredential credential = new UserCredential(user, "encoded-password");
 
-        when(userRepository.findByEmailAndDeletedFalse("user@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailOrAccountAndDeletedFalse("user@example.com")).thenReturn(Optional.of(user));
         when(userCredentialRepository.findByUser(user)).thenReturn(Optional.of(credential));
         when(passwordEncoder.matches("wrong-password", "encoded-password")).thenReturn(false);
 

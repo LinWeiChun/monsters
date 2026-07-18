@@ -184,7 +184,7 @@ JWT 基礎設定：
 | app.security.jwt.issuer | JWT_ISSUER | monsters |
 | app.security.jwt.secret | JWT_SECRET | 空字串，正式環境必須提供 |
 | app.security.jwt.access-token-expiration-seconds | JWT_ACCESS_TOKEN_EXPIRATION_SECONDS | 3600 |
-| app.security.jwt.refresh-token-expiration-seconds | JWT_REFRESH_TOKEN_EXPIRATION_SECONDS | 1209600 |
+| app.security.jwt.refresh-token-expiration-seconds | JWT_REFRESH_TOKEN_EXPIRATION_SECONDS | 2592000 |
 
 Google 登入設定：
 
@@ -340,9 +340,10 @@ Response：
 
 規則：
 
-- `email` 必須轉為小寫並去除前後空白後查詢。
+- `email` 為相容既有前端保留的欄位名稱，實際可傳入已註冊的 Account 或 Email，必填且最大長度 255。
+- Account 或 Email 必須轉為小寫並去除前後空白後查詢。
 - 密碼以 BCrypt `PasswordEncoder.matches` 比對，不得明文保存或寫入 log。
-- Email 不存在、帳號已刪除、憑證不存在或密碼錯誤時，回傳 401。
+- Account / Email 不存在、帳號已刪除、憑證不存在或密碼錯誤時，回傳 401。
 - `accessToken` 與 `refreshToken` 使用 HMAC-SHA256 JWT 產生。
 - `JWT_SECRET` 必須設定，否則不得產生 JWT。
 
@@ -394,7 +395,52 @@ Response：
 - ID Token 無效、email 未驗證、對應使用者已刪除或 `GOOGLE_CLIENT_IDS` 未設定時，回傳 401。
 - 不得將 Google ID Token、JWT、Google 公鑰 response 或敏感驗證細節寫入 log。
 
-### 2.4 忘記密碼
+### 2.4 Token 換發
+
+`POST /api/auth/refresh`
+
+Request：
+
+```json
+{
+  "refreshToken": "current_refresh_token"
+}
+```
+
+Response：
+
+```json
+{
+  "success": true,
+  "message": "Token refresh success",
+  "data": {
+    "accessToken": "new_access_token",
+    "refreshToken": "new_refresh_token",
+    "tokenType": "Bearer",
+    "expiresIn": 3600,
+    "user": {
+      "userId": 1,
+      "account": "wei_account",
+      "email": "user@example.com",
+      "userName": "Wei",
+      "avatarUrl": null
+    }
+  }
+}
+```
+
+規則：
+
+- Refresh API 允許未帶 access token 呼叫，但 `refreshToken` 必填。
+- 後端必須驗證 JWT 簽章、issuer、`type = refresh`、有效期限與對應使用者未刪除。
+- Refresh token 預設有效時間為 2592000 秒（30 天）。
+- 每次成功換發都必須 rotation：舊 refresh token hash 寫入 `revoked_tokens`，並回傳新的 access token 與 refresh token。
+- 舊 refresh token、已撤銷 token、過期 token、access token 或格式錯誤 token 不得換發，回傳 401。
+- 同一舊 refresh token 遭並行使用時只允許一次成功；其餘 request 回傳 401。
+- Response 與登入 API 使用相同 `LoginResponse` contract，前端成功後必須以新資料覆蓋本地 session。
+- 不得記錄 refresh token 明文或 token hash。
+
+### 2.5 忘記密碼
 
 `POST /api/auth/forgot-password`
 
@@ -430,7 +476,7 @@ Response：
 - 不得將 email 對應結果、reset token 明文或 token hash 寫入 log。
 - 目前 response 回傳 `resetToken` 供開發與前端串接；正式寄信服務定案後，應改為由後端寄送 reset link 或驗證碼。
 
-### 2.5 重設密碼
+### 2.6 重設密碼
 
 `POST /api/auth/reset-password`
 
@@ -465,7 +511,7 @@ Response：
 - 密碼重設成功後，reset token 必須標記為已使用。
 - 不得將新密碼、reset token 明文或 token hash 寫入 log。
 
-### 2.6 登出
+### 2.7 登出
 
 `POST /api/auth/logout`
 
@@ -473,6 +519,14 @@ Header：
 
 ```text
 Authorization: Bearer <access_token>
+```
+
+Optional Request：
+
+```json
+{
+  "refreshToken": "current_refresh_token"
+}
 ```
 
 Response：
@@ -489,7 +543,7 @@ Response：
 
 - 登出 API 需登入。
 - 後端必須驗證 access token 簽章、issuer、type 與 exp。
-- 登出時不得保存 token 明文，僅保存 token hash 至 `revoked_tokens`。
+- 登出時不得保存 token 明文；access token 與 optional refresh token 僅保存 hash 至 `revoked_tokens`。
 - token 撤銷紀錄需保存至原 token 過期時間。
 - JWT 驗證流程需拒絕已撤銷 token。
 - 無 Authorization header、非 Bearer token、token 無效、token 已過期或 token 已撤銷時，回傳 401。

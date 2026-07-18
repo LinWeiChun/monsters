@@ -19,6 +19,40 @@ import 'package:monsters/repositories/annoyance_repository.dart';
 import 'package:monsters/services/annoyance_media_service.dart';
 
 void main() {
+  for (final size in const [
+    Size(390, 844),
+    Size(600, 700),
+    Size(900, 700),
+    Size(1024, 768),
+    Size(1199, 800),
+    Size(1440, 900),
+    Size(1920, 1080),
+  ]) {
+    testWidgets('annoyance shell reflows without clipping at $size', (
+      tester,
+    ) async {
+      await _setSurface(tester, size);
+      await tester.pumpWidget(
+        const ProviderScope(child: MaterialApp(home: AnnoyanceChatPage())),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('annoyanceResponsiveShell')), findsOneWidget);
+      expect(
+        tester.getSize(find.byKey(const Key('annoyanceResponsiveShell'))).width,
+        size.width,
+      );
+      expect(find.byKey(const Key('annoyanceProgress')), findsOneWidget);
+      expect(find.byKey(const Key('annoyanceOperationPanel')), findsOneWidget);
+      if (size.width >= 1200) {
+        expect(find.byKey(const Key('appTopNavigation')), findsOneWidget);
+        expect(find.byKey(const Key('appTopNavNotification')), findsOneWidget);
+        expect(find.byKey(const Key('appTopNavProfile')), findsOneWidget);
+      }
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('uses structured selectors to reach the content step', (
     tester,
   ) async {
@@ -33,7 +67,10 @@ void main() {
     expect(find.byKey(const Key('annoyanceChatGreeting')), findsOneWidget);
     expect(find.byKey(const Key('annoyanceChatStartButton')), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('annoyanceChatStartButton')));
+    await _tapVisible(
+      tester,
+      find.byKey(const Key('annoyanceChatStartButton')),
+    );
     await tester.pumpAndSettle();
 
     for (final code in [
@@ -74,12 +111,14 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byKey(const Key('annoyanceChatStartButton')));
+    await _tapVisible(
+      tester,
+      find.byKey(const Key('annoyanceChatStartButton')),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('annoyanceCategoryCAREER')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('annoyanceChatBackButton')));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.byKey(const Key('annoyanceChatBackButton')));
 
     expect(find.byKey(const Key('annoyanceCategoryCAREER')), findsOneWidget);
     expect(find.byKey(const Key('annoyanceRecordMethodTEXT')), findsNothing);
@@ -102,7 +141,10 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byKey(const Key('annoyanceChatStartButton')));
+    await _tapVisible(
+      tester,
+      find.byKey(const Key('annoyanceChatStartButton')),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('annoyanceCategoryOTHER')));
     await tester.pumpAndSettle();
@@ -139,19 +181,25 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byKey(const Key('annoyanceChatStartButton')));
+    await _tapVisible(
+      tester,
+      find.byKey(const Key('annoyanceChatStartButton')),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('annoyanceCategoryFAMILY')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('annoyanceRecordMethodAUDIO')));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('annoyanceRecordButton')));
+    final recordButton = find.byKey(const Key('annoyanceRecordButton'));
+    await tester.ensureVisible(recordButton);
+    await tester.pumpAndSettle();
+    await tester.tap(recordButton);
     await tester.pump();
     expect(mediaService.audioStartCount, 1);
     expect(find.byKey(const Key('annoyanceRecordingDuration')), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('annoyanceRecordButton')));
+    await _tapVisible(tester, find.byKey(const Key('annoyanceRecordButton')));
     await tester.pumpAndSettle();
 
     expect(mediaService.audioStopCount, 1);
@@ -175,7 +223,10 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byKey(const Key('annoyanceChatStartButton')));
+    await _tapVisible(
+      tester,
+      find.byKey(const Key('annoyanceChatStartButton')),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('annoyanceCategoryLOVE')));
     await tester.pumpAndSettle();
@@ -212,20 +263,23 @@ void main() {
     );
     expect(find.byKey(const Key('annoyanceScorePrompt')), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('annoyanceScore4')));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.byKey(const Key('annoyanceScore4')));
 
     expect(find.byKey(const Key('annoyanceShareChoiceCard')), findsOneWidget);
     expect(find.text('4分'), findsOneWidget);
     expect(find.byKey(const Key('annoyanceSharingPrompt')), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('annoyanceSharePrivateButton')));
-    await tester.pumpAndSettle();
+    await _tapVisible(
+      tester,
+      find.byKey(const Key('annoyanceSharePrivateButton')),
+    );
 
     expect(find.byKey(const Key('annoyanceReviewCard')), findsOneWidget);
     expect(find.text('保持私人'), findsWidgets);
     expect(find.byKey(const Key('annoyanceReviewPrompt')), findsOneWidget);
 
+    await tester.ensureVisible(find.byKey(const Key('annoyanceSubmitButton')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('annoyanceSubmitButton')));
     await tester.pump();
     expect(find.byKey(const Key('annoyanceSubmittingCard')), findsOneWidget);
@@ -235,6 +289,20 @@ void main() {
     expect(find.textContaining('101'), findsOneWidget);
     expect(find.byKey(const Key('annoyanceChatBackButton')), findsNothing);
   });
+}
+
+Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
+  await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
+  await tester.tap(finder);
+  await tester.pumpAndSettle();
+}
+
+Future<void> _setSurface(WidgetTester tester, Size size) async {
+  tester.view.physicalSize = size;
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
 }
 
 Future<Uint8List> _exportTestDrawing(List<MoodDrawingStroke> strokes) async {

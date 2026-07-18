@@ -15,7 +15,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('首頁'), findsWidgets);
+    expect(find.byKey(const Key('homeAnnoyanceChatButton')), findsOneWidget);
   });
 
   testWidgets('register route can navigate to login route', (tester) async {
@@ -28,7 +28,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final loginLink = find.text('已有帳號？前往登入');
+    final loginLink = find.text('返回登入');
     await tester.ensureVisible(loginLink);
     await tester.tap(loginLink);
     await tester.pumpAndSettle();
@@ -46,7 +46,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('homeAnnoyanceChatButton')));
+    final startButton = find.byKey(const Key('homeAnnoyanceChatButton'));
+    await tester.ensureVisible(startButton);
+    await tester.tap(startButton);
     await tester.pumpAndSettle();
 
     expect(find.text('新增煩惱'), findsOneWidget);
