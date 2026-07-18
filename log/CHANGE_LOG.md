@@ -6565,3 +6565,85 @@ Codex
 ### 待確認事項
 
 - 無。
+
+---
+
+## 2026-07-18 15:29 MOBILE-FULL-WIDTH-MOOD-SCORE
+
+Task
+修正 391 至 599px Mobile 右側留白、加入煩惱分數圖片選擇，並提交 annoyance type／mood migration 時間欄位
+
+執行者
+Codex
+
+### 完成內容
+
+- 透過實際 Flutter Web 500px viewport 重現問題，確認 Mobile 分支的 390px Penpot canvas 維持固定寬度靠左，造成右側留白。
+- 新增 `ResponsiveFixedCanvas`，讓 390 x 844 canvas 依 viewport 寬度等比例填滿；縮放高度超過 viewport 時改為垂直捲動。
+- Home 與 Profile Mobile 套用滿寬 canvas，補上 500px、599px 回歸測試。
+- `MoodScoreSelector` 改用 `moodPoint_1.png`～`moodPoint_5.png` 圖片卡片，保留 `1分`～`5分`、既有 key、API 整數值與無障礙語意。
+- 分數卡片在窄螢幕自動換行，選取狀態使用品牌色邊框、底色與陰影。
+- 納入使用者修改的兩支 Database migration，並將六位短日期字串正規化為 MySQL `CURRENT_TIMESTAMP`。
+
+### 新增
+
+- `frontend/assets/images/moodPoint_1.png`
+- `frontend/assets/images/moodPoint_2.png`
+- `frontend/assets/images/moodPoint_3.png`
+- `frontend/assets/images/moodPoint_4.png`
+- `frontend/assets/images/moodPoint_5.png`
+
+### 修改
+
+- `frontend/lib/layout/responsive_layout.dart`
+- `frontend/lib/pages/home_page.dart`
+- `frontend/lib/pages/profile_page.dart`
+- `frontend/lib/widgets/annoyance/mood_score_selector.dart`
+- `frontend/test/home_page_test.dart`
+- `frontend/test/profile_page_test.dart`
+- `frontend/test/widgets/mood_score_selector_test.dart`
+- `database/migrations/20260711_01_add_annoyance_type_codes_and_seed.sql`
+- `database/migrations/20260711_03_make_mood_score_unique.sql`
+- `docs/PROJECT_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### system_data 參考
+
+- 本次為已完成 Home／Profile／Annoyance 流程的精準 follow-up，沿用前一任務對舊 Mobile 固定畫布與煩惱分數流程的參考結果，未新增複製舊程式。
+- 未修改 `system_data/`，未沿用舊全域狀態或直接 Database 存取方式。
+
+### API／Database
+
+- API 無異動；煩惱分數仍送出整數 1 至 5。
+- Database schema 無異動，無新 Migration；修改既有 `20260711_01`、`20260711_03` seed DML，使 `created_at`／`updated_at` 明確使用 `CURRENT_TIMESTAMP`。
+
+### 文件更新
+
+- PROJECT_SPEC、UI_SPEC 同步分數圖片卡片與 Mobile 等比例滿寬行為。
+- DATABASE_SPEC 同步兩支 migration 的 timestamp seed 規則。
+- DECISIONS 記錄使用者指定的分數圖片 UI，Database lookup 仍維持中性整數語意。
+- TASKS 記錄 TODO → IN PROGRESS → REVIEW → DONE。
+
+### 測試
+
+- `flutter analyze --no-pub`：通過，No issues found。
+- Home／Profile／MoodScore／Annoyance targeted tests：42 tests passed。
+- `flutter test --no-pub`：129 tests passed。
+- `flutter build web --no-pub`：通過，已產出 `frontend/build/web`。
+- Flutter Web 瀏覽器 500 x 844 viewport：`body`、`flutter-view` 均為 500px，Home 右側空白已消失。
+- 5 張 moodPoint 圖片皆驗證為 156 x 156 RGBA PNG，Flutter asset bundle 載入通過。
+- Docker daemon 未啟動，未執行隔離 MySQL migration；已完成 migration diff、短日期殘留與 `CURRENT_TIMESTAMP` 靜態檢查。
+
+### Log 保存期限檢查
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；保存期限截止日為 2026-06-18。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源，未修改。
+
+### 待確認事項
+
+- Docker／MySQL 啟動後可再於隔離測試資料庫實際執行兩支既有 migration；本次未連線或修改任何本機 Database 資料。

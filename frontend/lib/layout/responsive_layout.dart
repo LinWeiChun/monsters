@@ -74,3 +74,55 @@ class ResponsiveContent extends StatelessWidget {
     );
   }
 }
+
+class ResponsiveFixedCanvas extends StatelessWidget {
+  const ResponsiveFixedCanvas({
+    required this.canvasWidth,
+    required this.canvasHeight,
+    required this.child,
+    this.viewportKey,
+    super.key,
+  });
+
+  final double canvasWidth;
+  final double canvasHeight;
+  final Widget child;
+  final Key? viewportKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final scale = constraints.maxWidth / canvasWidth;
+        final scaledHeight = canvasHeight * scale;
+        final contentHeight =
+            scaledHeight < constraints.maxHeight
+                ? constraints.maxHeight
+                : scaledHeight;
+
+        return SingleChildScrollView(
+          child: SizedBox(
+            key: viewportKey,
+            width: constraints.maxWidth,
+            height: contentHeight,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: SizedBox(
+                width: constraints.maxWidth,
+                height: scaledHeight,
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: SizedBox(
+                    width: canvasWidth,
+                    height: canvasHeight,
+                    child: child,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

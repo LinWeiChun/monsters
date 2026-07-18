@@ -26,14 +26,20 @@ UPDATE annoyance_types SET code = 'FRIENDSHIP' WHERE type_name = '友情' AND co
 UPDATE annoyance_types SET code = 'FAMILY' WHERE type_name = '親情' AND code IS NULL;
 UPDATE annoyance_types SET code = 'OTHER' WHERE type_name = '其他' AND code IS NULL;
 
-INSERT INTO annoyance_types (code, type_name, display_order)
+INSERT INTO annoyance_types (
+  code,
+  type_name,
+  display_order,
+  created_at,
+  updated_at
+)
 VALUES
-  ('ACADEMIC', '課業', 1),
-  ('CAREER', '事業', 2),
-  ('LOVE', '愛情', 3),
-  ('FRIENDSHIP', '友情', 4),
-  ('FAMILY', '親情', 5),
-  ('OTHER', '其他', 6)
+  ('ACADEMIC', '課業', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('CAREER', '事業', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('LOVE', '愛情', 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('FRIENDSHIP', '友情', 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('FAMILY', '親情', 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('OTHER', '其他', 6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   code = VALUES(code),
   type_name = VALUES(type_name),

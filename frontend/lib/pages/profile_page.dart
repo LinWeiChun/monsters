@@ -124,27 +124,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               compact: true,
             ),
         mobile:
-            (context, constraints) => ClipRect(
-              child: FittedBox(
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter,
-                child: SizedBox(
-                  width: 390,
-                  height: 844,
-                  child: _MobileProfileCanvas(
-                    profile: profile,
-                    userNameController: _userNameController,
-                    birthdayController: _birthdayController,
-                    isSaving: state.isSaving,
-                    isLoggingOut: isLoggingOut,
-                    errorMessage: state.errorMessage,
-                    onSave: _submit,
-                    onSelectBirthday: _selectBirthday,
-                    onLogout: () => _confirmLogout(context),
-                    onBack: () => context.goNamed(AppRoute.home),
-                    onUnavailable: () => _showUnavailableMessage(context),
-                  ),
-                ),
+            (context, constraints) => ResponsiveFixedCanvas(
+              viewportKey: const Key('profileMobileViewport'),
+              canvasWidth: 390,
+              canvasHeight: 844,
+              child: _MobileProfileCanvas(
+                profile: profile,
+                userNameController: _userNameController,
+                birthdayController: _birthdayController,
+                isSaving: state.isSaving,
+                isLoggingOut: isLoggingOut,
+                errorMessage: state.errorMessage,
+                onSave: _submit,
+                onSelectBirthday: _selectBirthday,
+                onLogout: () => _confirmLogout(context),
+                onBack: () => context.goNamed(AppRoute.home),
+                onUnavailable: () => _showUnavailableMessage(context),
               ),
             ),
       ),

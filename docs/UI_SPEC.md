@@ -114,7 +114,7 @@ Phase 3 完成頁不顯示假怪獸獎勵；真實獎勵與圖鑑導向於 Phase
 
 畫心情 Task 在主要內容確認後顯示「想畫／先不用」結構化選項；選擇略過時直接進入分數步驟，選擇繪圖時顯示單一正方形畫布。`MoodDrawingCanvas` 使用正規化座標保存筆畫，提供六色畫筆、2 至 16 的線寬、橡皮擦、復原、清除、取消與完成操作；完成時以白色背景輸出固定 1024×1024 PNG，限制 5 MB，並在聊天紀錄顯示一張心情圖預覽後進入分數步驟。取消繪圖須返回是否繪圖選項，返回上一步或重新選擇主要內容時須清除未提交的繪圖草稿；心情圖不另存至相簿，後續由既有新增煩惱 multipart API 的 `drawingFile` 上傳。
 
-煩惱分數 Task 使用 `MoodScoreSelector` 顯示視覺權重一致的 `1分`～`5分` 結構化按鈕，不以顏色、表情或文案綁定正負情緒語意。使用者點選後，草稿保存整數 `score` 並進入 `sharing` 步驟；僅接受 1 至 5，與既有 API `score` contract 及 Database `SCORE_1`～`SCORE_5` lookup 一致。從分享步驟返回時保留原分數並標示選取狀態以便修改；返回繪圖選擇或重新開始時清除分數。分享、摘要、送出與完成 UI 由後續 Task 接續同一狀態機。
+煩惱分數 Task 使用 `MoodScoreSelector` 顯示 `moodPoint_1.png`～`moodPoint_5.png` 與 `1分`～`5分` 結構化圖片卡片，圖片依綠色笑臉至紅色難過表情對應分數 1 至 5；選取卡片需以品牌色邊框、底色與陰影標示，窄螢幕可自動換行。使用者點選後，草稿保存整數 `score` 並進入 `sharing` 步驟；僅接受 1 至 5，與既有 API `score` contract 及 Database `SCORE_1`～`SCORE_5` lookup 一致。從分享步驟返回時保留原分數並標示選取狀態以便修改；返回繪圖選擇或重新開始時清除分數。
 
 煩惱分享 Task 使用 `ShareChoiceCard` 顯示「保持私人」與「分享到社群」兩個結構化選項，預設語意為私人，不使用無參數 toggle。使用者選擇後，草稿保存 boolean `isShared`，並進入 `review` 步驟；選擇「保持私人」對應既有 API `isShared = false`，選擇「分享到社群」對應 `isShared = true`。從摘要步驟返回分享步驟時保留原選擇並標示選取狀態；返回分數步驟、上游內容步驟或重新開始時清除分享選擇。
 
@@ -834,6 +834,7 @@ Logo 規範：
 
 - `ResponsiveLayout` 依 `LayoutBuilder` constraints 即時判斷 window class，不快取初次 viewport。
 - `ResponsiveContent` 集中管理最大寬度、水平 padding 與對齊方式。
+- 390 x 844 Mobile Penpot canvas 必須透過 `ResponsiveFixedCanvas` 依實際 viewport 寬度等比例縮放；391 至 599px 不得維持 390px 固定寬度靠左，縮放後高度超過 viewport 時改為垂直捲動。
 - Web 主版面不使用整頁 `FittedBox`、固定 1440 x 900 canvas 或固定 x/y 座標。
 - Home 在舊 breakpoint 900／950／1024px 曾發生的負 padding 與 nav overflow，已由 Tablet flow layout 排除。
 - Widget tests 覆蓋 breakpoint 邊界與 390 至 1920px 常用 viewport，並驗證同一 widget tree 可在 599／600／1199／1200px 即時切換。

@@ -61,6 +61,21 @@ void main() {
     );
   });
 
+  for (final size in const [Size(500, 844), Size(599, 900)]) {
+    testWidgets('mobile Penpot canvas fills viewport width at $size', (
+      tester,
+    ) async {
+      await pumpHome(tester, size);
+
+      expect(find.byKey(const Key('mobileCompanionHero')), findsOneWidget);
+      expect(
+        tester.getSize(find.byKey(const Key('homeMobileViewport'))).width,
+        size.width,
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('desktop home matches Penpot companion layout', (tester) async {
     await pumpHome(tester, const Size(1440, 900));
 

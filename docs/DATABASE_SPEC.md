@@ -634,11 +634,11 @@ database/init/01_schema.sql
 
 若需從 `system_data/` 舊資料庫匯入資料，應建立明確的 migration mapping，不得直接將舊表結構搬入新版資料庫。
 
-Phase 3 annoyance type migration：`database/migrations/20260711_01_add_annoyance_type_codes_and_seed.sql`。既有環境只執行一次；全新環境由 `database/init/01_schema.sql` 直接建立並 seed。
+Phase 3 annoyance type migration：`database/migrations/20260711_01_add_annoyance_type_codes_and_seed.sql`。既有環境只執行一次；全新環境由 `database/init/01_schema.sql` 直接建立並 seed。Migration seed 明確以 `CURRENT_TIMESTAMP` 寫入 `created_at`、`updated_at`，相容未提供欄位預設值的既有環境。
 
 Phase 3 private entry media migration：`database/migrations/20260711_02_make_entry_media_private.sql`。此 migration 會在 `entry_media` 已有資料時主動中止；既有資料必須先匯出，另行建立經審查的 public URL → private R2 object key 資料 migration，不得直接將 public URL 原值當成 object key。
 
-Phase 3 mood score migration：`database/migrations/20260711_03_make_mood_score_unique.sql`。此 migration 建立 `moods.score` 唯一約束與 `SCORE_1`～`SCORE_5` seed；若既有分數重複或 code / score 對應衝突會主動中止，必須先審查與清理資料。
+Phase 3 mood score migration：`database/migrations/20260711_03_make_mood_score_unique.sql`。此 migration 建立 `moods.score` 唯一約束與 `SCORE_1`～`SCORE_5` seed，並以 `CURRENT_TIMESTAMP` 寫入建立及更新時間；若既有分數重複或 code / score 對應衝突會主動中止，必須先審查與清理資料。
 
 Migration 應包含：
 

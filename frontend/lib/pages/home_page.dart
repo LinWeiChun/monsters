@@ -37,21 +37,15 @@ class HomePage extends ConsumerWidget {
               onUnavailable: () => _showUnavailableMessage(context),
             ),
         mobile:
-            (context, constraints) => ClipRect(
-              child: FittedBox(
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter,
-                child: SizedBox(
-                  width: 390,
-                  height: 844,
-                  child: _MobileHomeCanvas(
-                    greetingName: greetingName,
-                    onAddAnnoyance:
-                        () => context.goNamed(AppRoute.annoyanceChat),
-                    onProfile: () => context.goNamed(AppRoute.profile),
-                    onUnavailable: () => _showUnavailableMessage(context),
-                  ),
-                ),
+            (context, constraints) => ResponsiveFixedCanvas(
+              viewportKey: const Key('homeMobileViewport'),
+              canvasWidth: 390,
+              canvasHeight: 844,
+              child: _MobileHomeCanvas(
+                greetingName: greetingName,
+                onAddAnnoyance: () => context.goNamed(AppRoute.annoyanceChat),
+                onProfile: () => context.goNamed(AppRoute.profile),
+                onUnavailable: () => _showUnavailableMessage(context),
               ),
             ),
       ),
