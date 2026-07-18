@@ -978,3 +978,18 @@
 2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Documentation,docs/TASKS.md,修改,新增插隊任務並標記 TODO IN PROGRESS REVIEW DONE,Codex,Task status DONE
 2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Documentation,log/CHANGE_LOG.md,修改,新增本次工作紀錄與 Log 保存期限檢查結果,Codex,未刪除過期 Log
 2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Documentation,log/CHANGE_HISTORY.csv,修改,新增本次 change history rows,Codex,CHANGE_HISTORY.csv 已更新
+2026-07-18,14:17,AUTH-REFRESH,Backend,backend/src/main/java/com/monsters/dto/auth/RefreshTokenRequest.java,新增,建立 refresh token request contract,Codex,是,否,否,否,refreshToken 必填
+2026-07-18,14:17,AUTH-REFRESH,Backend,backend/src/main/java/com/monsters/controller/auth/AuthController.java,修改,新增 refresh API 並讓 logout optional 撤銷 refresh token,Codex,是,否,否,否,相容無 body logout
+2026-07-18,14:17,AUTH-REFRESH,Backend,backend/src/main/java/com/monsters/service/auth/AuthService.java,修改,驗證並 rotation refresh token 後換發 LoginResponse,Codex,是,否,否,否,無效使用者回 401
+2026-07-18,14:17,AUTH-REFRESH,Backend,backend/src/main/java/com/monsters/service/auth/TokenRevocationService.java,修改,以 revoked_tokens 防止 refresh token 重複使用,Codex,是,否,否,否,保存 token hash
+2026-07-18,14:17,AUTH-REFRESH,Backend,backend/src/main/java/com/monsters/security/common/JwtTokenService.java,修改,新增 refresh token type 驗證,Codex,是,否,否,否,拒絕 access token
+2026-07-18,14:17,AUTH-REFRESH,Backend,backend/src/main/resources/application.yml,修改,refresh token 預設期限改為 2592000 秒,Codex,否,否,否,否,rolling 30 天
+2026-07-18,14:17,AUTH-REFRESH,Frontend,frontend/lib/core/network/api_client.dart,修改,401 時 single-flight refresh 並單次重試原 request,Codex,是,否,否,否,refresh request 不遞迴
+2026-07-18,14:17,AUTH-REFRESH,Frontend,frontend/lib/repositories/auth_repository.dart,修改,啟動先 rotation 並在失效時清除 session,Codex,是,否,否,否,修正 Profile 401
+2026-07-18,14:17,AUTH-REFRESH,Frontend,frontend/lib/providers/auth_provider.dart,修改,註冊 token refresher 與 session expired state,Codex,否,否,是,否,失效導頁 signal
+2026-07-18,14:17,AUTH-REFRESH,Frontend,frontend/lib/app.dart,修改,監聽 session expired 並導向登入頁,Codex,否,否,是,否,全域受保護流程
+2026-07-18,14:17,AUTH-REFRESH,Test,backend/src/test,修改,補齊 refresh rotation replay security controller 與 service 測試,Codex,是,否,否,否,Gradle test passed
+2026-07-18,14:17,AUTH-REFRESH,Test,frontend/test,修改,補齊 session rotation 401 retry concurrent single-flight 與失效導頁測試,Codex,是,否,是,否,86 tests passed
+2026-07-18,14:17,AUTH-REFRESH,Documentation,docs,修改,同步 API Database UI Project Decision Task 與環境設定,Codex,是,否,是,否,無 Migration
+2026-07-18,14:17,AUTH-REFRESH,Documentation,log/CHANGE_LOG.md,修改,新增 Token Refresh 工作報告與 Log 保存期限檢查,Codex,否,否,否,否,無過期 Log
+2026-07-18,14:17,AUTH-REFRESH,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Token Refresh 異動歷史,Codex,否,否,否,否,Backend Frontend Web build 通過

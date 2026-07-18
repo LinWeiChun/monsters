@@ -28,7 +28,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final loginLink = find.text('已有帳號？前往登入');
+    final loginLink = find.text('返回登入');
     await tester.ensureVisible(loginLink);
     await tester.tap(loginLink);
     await tester.pumpAndSettle();

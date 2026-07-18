@@ -127,7 +127,7 @@ Index：
 
 ### 3.2.2 revoked_tokens
 
-登出後撤銷的 JWT。
+登出或 refresh rotation 後撤銷的 JWT。
 
 | 欄位 | 型別 | 約束 | 說明 |
 |---|---|---|---|
@@ -144,7 +144,8 @@ Index：
 規則：
 
 - 不得保存 JWT 明文。
-- 登出時保存 access token hash 與原 token 過期時間。
+- 登出時保存 access token hash；若 request 提供 refresh token，也保存 refresh token hash。
+- Refresh token 成功換發時必須保存舊 refresh token hash 與原 token 過期時間，防止 rotation 後重複使用。
 - JWT 驗證流程必須拒絕存在於本表且尚未過期的 token。
 - 可定期刪除 `expires_at` 已過期的紀錄。
 

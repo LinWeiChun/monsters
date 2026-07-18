@@ -388,7 +388,7 @@ docker compose down
 | `JWT_ISSUER` | JWT issuer | `monsters` |
 | `JWT_SECRET` | JWT 簽章密鑰 | 空字串，正式環境必須提供 |
 | `JWT_ACCESS_TOKEN_EXPIRATION_SECONDS` | Access token 有效秒數 | `3600` |
-| `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` | Refresh token 有效秒數 | `1209600` |
+| `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` | Refresh token 有效秒數 | `2592000`（30 天，rotation） |
 | `R2_ACCOUNT_ID` | Cloudflare R2 Account ID | 空字串，使用 R2 前必須提供 |
 | `R2_ACCESS_KEY_ID` | R2 S3 Access Key ID | 空字串，使用 R2 前必須提供 |
 | `R2_SECRET_ACCESS_KEY` | R2 S3 Secret Access Key | 空字串，使用 R2 前必須提供 |

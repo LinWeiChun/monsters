@@ -6283,3 +6283,76 @@ Codex
 ### 待確認事項
 
 - 若要進一步精準比對 HomePage，需由使用者在 Penpot 選取正確 WEB / Web / Companion Home board 後再執行尺寸比對。
+
+---
+
+## 2026-07-18 14:17 AUTH-REFRESH
+
+Task
+Profile 401 與 30 天登入狀態 Token Refresh 修正
+
+執行者
+Codex
+
+### 完成內容
+
+- 確認 ProfilePage 本身與 `GET /api/users/me` 路徑正確，根因為本地 session 30 天但 access token 僅 1 小時。
+- 新增 `POST /api/auth/refresh`，驗證 refresh token 簽章、issuer、type、期限與使用者狀態。
+- Refresh token 預設期限改為 2592000 秒，符合 rolling 30 天登入需求。
+- 實作 refresh token rotation；舊 token hash 寫入既有 `revoked_tokens`，重複使用會回傳 401。
+- Flutter 啟動恢復 session 時先換發新 Token，不再直接重用保存的 access token。
+- `ApiClient` 遇到受保護 API 401 時共用單一 refresh request，成功後只重試原 request 一次。
+- Refresh token 驗證失敗時清除 Authorization header 與本地 session，並由 App 導回登入頁；暫時性網路錯誤保留 session。
+- 登出 request 可攜帶 refresh token，後端一併撤銷 access 與 refresh token。
+
+### 新增
+
+- `backend/src/main/java/com/monsters/dto/auth/RefreshTokenRequest.java`
+- `frontend/test/repositories/auth_repository_test.dart`
+
+### 修改
+
+- Backend Auth Controller／Service、JWT、Security、Token revocation 與相關測試。
+- Flutter App、ApiClient、Auth Provider／Repository 與登入、路由相關測試。
+- `README.md`、Backend／Frontend README、PROJECT／API／DATABASE／UI／DECISIONS／TASKS 規格。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`。
+
+### system_data 參考
+
+- 已搜尋舊前端 access token 使用方式，未找到 refresh token 或 rotation 流程可重用。
+- 舊程式只出現硬編碼 `<ACCESS_TOKEN>` placeholder，本次未沿用，也未修改 `system_data/`。
+
+### API
+
+- 新增 `POST /api/auth/refresh`。
+- `POST /api/auth/logout` 新增 optional `refreshToken` request body，未帶 body 的舊 Client 仍相容。
+- Refresh 成功沿用既有 `LoginResponse` contract；無效、過期、type 錯誤、已 rotation 或使用者無效回傳 401。
+
+### Database
+
+- 沿用既有 `revoked_tokens` schema 保存 refresh token hash，無欄位與資料表異動。
+- 無 Migration。
+
+### 文件更新
+
+- Refresh token 預設有效期由 14 天統一調整為 rolling 30 天。
+- 補齊 rotation、並行 401 single-flight、單次 retry、失效導頁與登出撤銷規格。
+
+### 測試
+
+- Backend `./gradlew test`：通過。
+- Backend `./gradlew build`：通過。
+- Frontend `flutter analyze --no-pub`：通過，No issues found。
+- Frontend `flutter test --no-pub`：通過，86 tests passed。
+- Frontend `flutter build web --no-pub`：通過，已產出 `frontend/build/web`。
+- Web build 顯示既有 Cupertino icon font 提示，不影響建置或 Token Refresh。
+
+### Log 保存期限檢查
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx` 是否存在。
+- 保存期限截止日為 2026-06-18；`CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv` 最早正式紀錄為 2026-06-29。
+- 未發現超過一個月的正式紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源，未修改。
+
+### 待確認事項
+
+- 部署時需確認未以環境變數將 `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` 覆寫回舊值 1209600。

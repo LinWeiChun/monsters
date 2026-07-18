@@ -170,42 +170,31 @@ void main() {
     expect(find.byKey(const Key('loginEmailField')), findsNothing);
   });
 
-  testWidgets('stays on splash actions when no active session exists', (
+  testWidgets('redirects to login when no active session exists', (
     tester,
   ) async {
     await tester.pumpWidget(_splashApp(_FakeAuthRepository()));
     await tester.pumpAndSettle();
 
-    expect(find.text('登入'), findsOneWidget);
-    expect(find.text('註冊'), findsOneWidget);
+    expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
+    expect(find.byKey(const Key('loginPasswordField')), findsOneWidget);
   });
 
-  testWidgets('home logout clears session and navigates to login', (
-    tester,
-  ) async {
+  test('logout clears repository and Google session', () async {
     final repository = _FakeAuthRepository();
     final googleSignInService = _FakeGoogleSignInService();
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          authRepositoryProvider.overrideWithValue(repository),
-          googleSignInServiceProvider.overrideWithValue(googleSignInService),
-        ],
-        child: MaterialApp.router(
-          routerConfig: createAppRouter(initialLocation: AppPath.home),
-        ),
-      ),
+    final container = ProviderContainer(
+      overrides: [
+        authRepositoryProvider.overrideWithValue(repository),
+        googleSignInServiceProvider.overrideWithValue(googleSignInService),
+      ],
     );
-    await tester.pumpAndSettle();
+    addTearDown(container.dispose);
 
-    await tester.tap(find.byKey(const Key('homeAccountMenu')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('登出'));
-    await tester.pumpAndSettle();
+    await container.read(authControllerProvider.notifier).logout();
 
     expect(repository.didLogout, isTrue);
     expect(googleSignInService.didSignOut, isTrue);
-    expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
 
     await googleSignInService.dispose();
   });

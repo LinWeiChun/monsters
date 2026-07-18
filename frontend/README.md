@@ -63,13 +63,15 @@ UI 不得直接呼叫 Dio，後續功能需透過 Provider / Repository 使用 `
 - `lib/models/login_result.g.dart`
 - `lib/models/register_result.dart`
 
-登入流程使用 `AuthRepository` 呼叫 `POST /api/auth/login`，成功後由 `ApiClient.setAccessToken()` 將 access token 套用到目前執行階段的 Authorization header，並透過 `AuthSessionStore` 保存 `LoginResult` 與最後開啟時間。使用者未登出且 30 天內再次開啟 App 時，`SplashPage` 會恢復 session 並直接導向首頁；超過 30 天、session 無效或使用者登出時，會清除本地 session 並要求重新登入。
+登入流程使用 `AuthRepository` 呼叫 `POST /api/auth/login`，成功後由 `ApiClient.setAccessToken()` 將 access token 套用到目前執行階段的 Authorization header，並透過 `AuthSessionStore` 保存 `LoginResult` 與最後開啟時間。使用者未登出且 30 天內再次開啟 App 時，`SplashPage` 會先以保存的 refresh token 呼叫 `POST /api/auth/refresh` 完成 rotation，再使用新 access token 進入首頁；不得直接重用可能已過期的 access token。
+
+受保護 API 若回傳 401，`ApiClient` 會共用單一 refresh request 換發 Token，成功後只重試原 request 一次，避免並行 API 觸發多次 rotation。Refresh API 本身、登入、Google 登入、註冊與登出不得啟動 401 refresh retry。Refresh token 驗證失敗、超過 30 天、session 格式無效或使用者登出時，必須清除 Authorization header 與本地 session，並回到登入頁；暫時性網路錯誤保留 session 供下次重試。
 
 Google 登入流程使用 `GoogleSignInService` 透過 `google_sign_in` / `google_sign_in_web` 取得 Google ID Token，再由 `AuthRepository` 呼叫 `POST /api/auth/google-login` 交給後端驗證並換發本系統 JWT。Web 版使用 Google Identity Services 官方按鈕，Android / iOS 使用共用 Flutter 登入按鈕；成功後同樣由 `AuthSessionStore` 保存 30 天登入狀態。
 
 註冊流程使用 `AuthRepository` 呼叫 `POST /api/auth/register`，成功後導回登入頁，不自動登入，也不保存密碼或 token。帳號為必填且唯一，需英文開頭，只能包含英文、數字、底線，長度 4 到 50，前端送出前會轉為小寫。
 
-密碼不得寫入 SharedPreferences；登入 session 僅由 `AuthSessionStore` 集中管理，頁面不得直接讀寫 token。Google 登入不得假造 ID Token 或沿用舊系統空密碼登入流程。
+密碼不得寫入 SharedPreferences；登入 session 僅由 `AuthSessionStore` 集中管理，頁面不得直接讀寫 token。Refresh token 每次換發後必須覆蓋舊 session，前端不得重複使用舊 refresh token。Google 登入不得假造 ID Token 或沿用舊系統空密碼登入流程。
 
 Google 登入執行時需提供 dart-define，且後端 `GOOGLE_CLIENT_IDS` 必須包含對應 Client ID：
 

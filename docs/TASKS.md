@@ -23,6 +23,15 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ---
 
+## 插隊任務：Profile Token Refresh 修正（2026-07-18）
+
+- [x] TODO：確認 Profile 401 並定位 30 天本地 session 與 1 小時 access token 的期限落差。
+- [x] IN PROGRESS：新增 refresh API、refresh token rotation、30 天有效期與舊 token revocation。
+- [x] REVIEW：串接 Flutter 啟動換發、並行 401 單一 refresh、原 request 單次重試與失效回登入。
+- [x] DONE：Backend 完整測試、Flutter Analyze／完整測試通過，API／Database／UI／Decision／Log 同步完成。
+
+---
+
 ## 插隊任務：登入帳號或 Email 驗證修正
 
 - [x] 比對 `bec7bcf` 與 `0b3d265` 的登入欄位及後端查詢行為（DONE）

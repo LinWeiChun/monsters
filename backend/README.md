@@ -71,6 +71,7 @@ Docker Compose 會使用 `mysql` 作為 MySQL service hostname。
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 - `POST /api/auth/google-login`
+- `POST /api/auth/refresh`
 - `POST /api/auth/forgot-password`
 - `POST /api/auth/reset-password`
 
@@ -83,7 +84,9 @@ JWT 基礎環境變數：
 | `JWT_ISSUER` | `monsters` |
 | `JWT_SECRET` | 空字串，正式環境必須提供 |
 | `JWT_ACCESS_TOKEN_EXPIRATION_SECONDS` | `3600` |
-| `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` | `1209600` |
+| `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` | `2592000` |
+
+Refresh token 採 rotation：每次成功換發後，舊 refresh token hash 會寫入 `revoked_tokens` 並立即失效；重複使用、過期、type 錯誤或使用者已刪除皆回傳 401。預設有效期為 rolling 30 天。
 
 Google 登入環境變數：
 
