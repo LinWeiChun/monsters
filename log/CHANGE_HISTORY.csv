@@ -1026,3 +1026,14 @@
 2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Documentation,docs/TASKS.md,修改,記錄任務 TODO 至 DONE 狀態,Codex,否,否,是,否,DoR DoD 已檢查
 2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Documentation,log/CHANGE_LOG.md,修改,新增工作報告與 Log 保存期限檢查,Codex,否,否,否,否,無過期 Log
 2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Profile Annoyance Penpot RWD 異動歷史,Codex,否,否,否,否,Analyze Test Web build 通過
+2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Frontend,frontend/lib/layout/responsive_layout.dart,修改,新增固定 Penpot canvas 等比例滿寬與垂直捲動容器,Codex,否,否,是,否,修正 391 至 599px 右側留白
+2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Frontend,frontend/lib/pages/home_page.dart,修改,Home Mobile 套用滿寬 ResponsiveFixedCanvas,Codex,否,否,是,否,500px 瀏覽器實測通過
+2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Frontend,frontend/lib/pages/profile_page.dart,修改,Profile Mobile 套用滿寬 ResponsiveFixedCanvas,Codex,否,否,是,否,500 與 599px 測試通過
+2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Frontend,frontend/lib/widgets/annoyance/mood_score_selector.dart,修改,分數選擇改為 1 至 5 分圖片卡片,Codex,否,否,是,否,保留整數 API contract
+2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Asset,frontend/assets/images,新增,加入五張 moodPoint 分數圖片,Codex,否,否,是,否,156 x 156 RGBA PNG
+2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Database,database/migrations/20260711_01_add_annoyance_type_codes_and_seed.sql,修改,annoyance type seed 明確寫入 timestamp,Codex,否,是,否,否,使用 CURRENT_TIMESTAMP
+2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Database,database/migrations/20260711_03_make_mood_score_unique.sql,修改,mood score seed 明確寫入 timestamp,Codex,否,是,否,否,使用 CURRENT_TIMESTAMP
+2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Test,frontend/test,修改,補齊 500 599px 滿寬與 320px 分數圖片測試,Codex,否,否,是,否,完整 129 tests passed
+2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Documentation,docs,修改,同步 Project UI Database Decision 與 Task 規格,Codex,否,是,是,否,API 無異動
+2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Documentation,log/CHANGE_LOG.md,修改,新增工作報告與 Log 保存期限檢查,Codex,否,否,否,否,無過期 Log
+2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Mobile 滿寬與分數圖片異動歷史,Codex,否,否,否,否,Analyze Test Web build 通過

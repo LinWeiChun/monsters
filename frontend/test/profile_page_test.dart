@@ -25,6 +25,23 @@ void main() {
     expect(find.text('2000-01-02'), findsWidgets);
   });
 
+  for (final size in const [Size(500, 844), Size(599, 900)]) {
+    testWidgets('mobile profile canvas fills viewport width at $size', (
+      tester,
+    ) async {
+      await _setSurface(tester, size);
+      await tester.pumpWidget(_profileApp(_FakeUserRepository()));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('profileAvatar')), findsOneWidget);
+      expect(
+        tester.getSize(find.byKey(const Key('profileMobileViewport'))).width,
+        size.width,
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   for (final size in const [
     Size(600, 700),
     Size(900, 700),

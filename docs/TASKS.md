@@ -23,6 +23,15 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ---
 
+## 插隊任務：Mobile 右側留白與煩惱分數圖片修正（2026-07-18）
+
+- [x] TODO：以瀏覽器重現 391 至 599px Mobile 固定畫布右側留白，並確認 `moodPoint_1.png`～`moodPoint_5.png` 圖片內容。
+- [x] IN PROGRESS：建立等比例滿寬 `ResponsiveFixedCanvas`，套用 Home／Profile，並將 `MoodScoreSelector` 改為 1 至 5 分圖片卡片。
+- [x] REVIEW：補齊 500／599px RWD 與 320px 分數選擇測試，以實際 Flutter Web 500px viewport 確認右側空白已消失。
+- [x] DONE：Flutter Analyze、129 項完整測試、Web build、Migration 靜態檢查、文件與 Log 完成，準備 Commit、Push 與 PR。
+
+---
+
 ## 插隊任務：Profile／Annoyance Penpot 同步與 Web 右側留白修正（2026-07-18）
 
 - [x] TODO：檢查 Profile、Annoyance 舊系統參考流程、正式規格、Penpot Web／Mobile 畫板與現有 Flutter 實作。
