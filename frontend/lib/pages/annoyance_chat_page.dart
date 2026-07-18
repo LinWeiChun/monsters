@@ -64,10 +64,28 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
                   mediaService,
                 ),
                 onHome: () => context.goNamed(AppRoute.home),
+                onBack: () => _returnToHome(context),
+                onProfile: () => context.pushNamed(AppRoute.profile),
+                onNotification: () => _showUnavailable(context, '通知'),
+                onUnavailable: (feature) => _showUnavailable(context, feature),
                 onRestart: controller.restart,
                 canRestart: state.step != AnnoyanceChatStep.intro,
               ),
     );
+  }
+
+  void _returnToHome(BuildContext context) {
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
+    context.goNamed(AppRoute.home);
+  }
+
+  void _showUnavailable(BuildContext context, String feature) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text('$feature即將開放')));
   }
 
   List<Widget> _buildMessages(AnnoyanceChatState state) {
@@ -205,7 +223,7 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
             : AnnoyanceCompletedCard(
               annoyance: state.createdAnnoyance!,
               onCreateAnother: controller.restart,
-              onGoHome: () => context.goNamed(AppRoute.home),
+              onGoHome: () => _returnToHome(context),
             ),
       _ => const SizedBox.shrink(),
     };

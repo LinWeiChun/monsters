@@ -21,6 +21,13 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - 哪些舊寫法未沿用
 - 是否有發現需要更新的正式文件
 
+## 插隊任務：Web 共用 Navbar 與 Mobile 通知入口（2026-07-18）
+
+- [x] TODO：盤點 Home／Profile／Annoyance 重複導覽、現有路由與 Mobile 個人資料入口。
+- [x] IN PROGRESS：建立 Desktop 共用完整 Navbar 與 Mobile 共用底部選單，將首頁右上角個人資料改為通知。
+- [x] REVIEW：補齊導覽路由、未開放提示、Breakpoint、無 overflow、直接前進與向右返回測試。
+- [x] DONE：Flutter Analyze、131 項完整測試、Web build、文件與 Log 完成，準備 Commit、Push 與 PR。
+
 ---
 
 ## 插隊任務：Mobile 右側留白與煩惱分數圖片修正（2026-07-18）

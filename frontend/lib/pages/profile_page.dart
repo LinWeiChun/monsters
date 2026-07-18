@@ -11,6 +11,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/state/error_view.dart';
 import '../widgets/state/loading_view.dart';
+import '../widgets/navigation/app_navigation.dart';
 
 part '../widgets/profile/profile_penpot_canvas.dart';
 
@@ -105,7 +106,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               onSave: _submit,
               onSelectBirthday: _selectBirthday,
               onLogout: () => _confirmLogout(context),
-              onBack: () => context.goNamed(AppRoute.home),
+              onHome: () => context.goNamed(AppRoute.home),
+              onAddAnnoyance: () => context.pushNamed(AppRoute.annoyanceChat),
               onUnavailable: () => _showUnavailableMessage(context),
             ),
         tablet:
@@ -119,7 +121,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               onSave: _submit,
               onSelectBirthday: _selectBirthday,
               onLogout: () => _confirmLogout(context),
-              onBack: () => context.goNamed(AppRoute.home),
+              onHome: () => context.goNamed(AppRoute.home),
+              onAddAnnoyance: () => context.pushNamed(AppRoute.annoyanceChat),
               onUnavailable: () => _showUnavailableMessage(context),
               compact: true,
             ),
@@ -138,7 +141,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 onSave: _submit,
                 onSelectBirthday: _selectBirthday,
                 onLogout: () => _confirmLogout(context),
-                onBack: () => context.goNamed(AppRoute.home),
+                onHome: () => context.goNamed(AppRoute.home),
+                onBack: () => _returnToHome(context),
                 onUnavailable: () => _showUnavailableMessage(context),
               ),
             ),
@@ -241,6 +245,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     if (mounted) {
       context.goNamed(AppRoute.login);
     }
+  }
+
+  void _returnToHome(BuildContext context) {
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
+    context.goNamed(AppRoute.home);
   }
 
   static String _formatDate(DateTime date) {

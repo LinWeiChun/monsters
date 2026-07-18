@@ -58,8 +58,8 @@
 - 顯示目前怪獸與陪伴問候語
 - 以「記下現在的心情」作為單一主要操作，進入新增煩惱聊天室
 - 日記與歷史記錄在對應 Phase 完成前顯示「即將開放」且不可操作
-- 手機版使用底部導覽列，個人資料、密碼鎖與登出收納於個人選單
-- Web 桌面版使用獨立導覽與雙欄內容，不直接放大手機版面
+- 手機版使用共用底部導覽列，「我的」直接進入個人資料；首頁右上角為通知入口，密碼鎖與登出由個人資料頁提供
+- Web Desktop 使用 Home／Profile／Annoyance 共用完整導覽，頁面內容依 viewport 以相對 layout 重排
 
 導覽：
 
@@ -759,7 +759,7 @@ Logo 規範：
 |---|---|---|
 | App bar | x=0, y=0, w=390, h=72 | white |
 | Logo | x=20, y=12, w=96, h=48 | `assets/images/app_logo.png` |
-| Account button | x=338, y=18, w=38, h=38 | routes to profile |
+| Notification button | x=338, y=18, w=38, h=38 | 顯示通知；功能未完成前提供「即將開放」回饋 |
 | Companion hero | x=16, y=92, w=358, h=294 | `#D9F1F2` |
 | Monster | x=119, y=102, w=152, h=152 | animated monster key preserved |
 | Greeting card | x=40, y=250, w=310, h=118 | white card |
@@ -772,8 +772,9 @@ Logo 規範：
 
 - `HomePage` Web 版改為 `LayoutBuilder + Column / Row / Expanded / ConstrainedBox` 的相對 layout；Mobile 版仍保留 390 x 844 Penpot canvas。
 - Home 色彩集中於 `frontend/lib/theme/app_colors.dart` 的 `home*` token，page 不直接宣告色碼。
-- 主要行動 `homeAnnoyanceChatButton` 保留既有路由：`context.goNamed(AppRoute.annoyanceChat)`。
-- 帳號按鈕導向 `profile`；尚未開放的 diary / history / collection / interaction / bottom nav 入口顯示即將開放訊息。
+- 主要行動 `homeAnnoyanceChatButton` 使用 `context.pushNamed(AppRoute.annoyanceChat)`，讓明確返回按鈕保留上一頁。
+- Mobile 右上角通知按鈕不再重複提供個人資料入口；底部 `mobileNavProfile` 導向 `profile`。
+- 尚未開放的 diary / history / collection / community / interaction 入口顯示具名的「即將開放」訊息。
 - `homeAnimatedMonster`、`homeAnimatedMonsterIdle`、`homeAnimatedMonsterReacting` 測試 key 保留，降低既有測試與互動行為破壞。
 ---
 
@@ -838,3 +839,25 @@ Logo 規範：
 - Web 主版面不使用整頁 `FittedBox`、固定 1440 x 900 canvas 或固定 x/y 座標。
 - Home 在舊 breakpoint 900／950／1024px 曾發生的負 padding 與 nav overflow，已由 Tablet flow layout 排除。
 - Widget tests 覆蓋 breakpoint 邊界與 390 至 1920px 常用 viewport，並驗證同一 widget tree 可在 599／600／1199／1200px 即時切換。
+
+## 2026-07-18 共用導覽與頁面切換規格
+
+### Desktop Navbar（`>= 1200px`）
+
+- Home、Profile、Annoyance 必須共用 `AppTopNavigation`，不得各頁複製 Navbar。
+- 固定選項依序為 Logo／陪伴首頁、心的軌跡、怪獸收藏、匿名社群、互動區、記下現在的心情、通知、個人資料。
+- 已完成入口使用正式 route；尚未完成入口顯示具名「即將開放」，不得建立空白頁或假 route。
+- Navbar 使用 `Row`、`Spacer` 與 viewport 衍生間距；1200 至 1920px 不得 overflow 或留下固定畫布空白。
+- Profile 的儲存與登出為頁面操作，放在共用 Navbar 下方的 Profile action bar，不混入全站導覽設定。
+
+### Mobile Navigation（`< 600px`）
+
+- Home 與 Profile 共用 `MobileAppBottomNavigation`，選項固定為首頁、社群、怪獸、互動、我的。
+- 首頁與「我的」為正式 route；其餘未完成項目顯示「即將開放」。
+- 首頁右上角只顯示通知，不再重複提供個人資料入口；個人資料一律由底部「我的」進入。
+
+### Page Transition
+
+- 所有一般前進、登入結果、Navbar 與底部選單切換使用零秒進場動畫，直接呈現目的頁。
+- Home 進入 Profile／Annoyance、Login 進入 Register 使用 push 保留 navigation stack。
+- 明確的返回按鈕優先 pop；返回動畫為 220ms，當前頁面向右退出。若沒有上一頁，才直接導回預設頁。

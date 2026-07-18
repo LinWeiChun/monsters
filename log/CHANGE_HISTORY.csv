@@ -1037,3 +1037,10 @@
 2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Documentation,docs,修改,同步 Project UI Database Decision 與 Task 規格,Codex,否,是,是,否,API 無異動
 2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Documentation,log/CHANGE_LOG.md,修改,新增工作報告與 Log 保存期限檢查,Codex,否,否,否,否,無過期 Log
 2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Mobile 滿寬與分數圖片異動歷史,Codex,否,否,否,否,Analyze Test Web build 通過
+2026-07-18,18:31,SHARED-NAVIGATION-TRANSITION,Frontend,frontend/lib/widgets/navigation/app_navigation.dart,新增,建立 Desktop 共用完整 Navbar 與 Mobile 共用底部選單,Codex,否,否,是,否,Web 方案 A 與 Mobile 方案 1改通知
+2026-07-18,18:31,SHARED-NAVIGATION-TRANSITION,Frontend,frontend/lib/pages,修改,Home Profile Annoyance 串接共用導覽且 Mobile 右上角改通知,Codex,否,否,是,否,我的為正式 Profile 入口
+2026-07-18,18:31,SHARED-NAVIGATION-TRANSITION,Frontend,frontend/lib/routes/app_router.dart,修改,一般前進直接換頁且返回按鈕向右退出,Codex,否,否,是,否,reverse transition 220ms
+2026-07-18,18:31,SHARED-NAVIGATION-TRANSITION,Test,frontend/test,修改,補齊通知共用 Navbar 導頁 RWD 與返回方向測試,Codex,否,否,是,否,完整 131 tests passed
+2026-07-18,18:31,SHARED-NAVIGATION-TRANSITION,Documentation,docs,修改,同步 Project UI Decision 與 Task 導覽切換規格,Codex,否,否,是,否,API Database 無異動
+2026-07-18,18:31,SHARED-NAVIGATION-TRANSITION,Documentation,log/CHANGE_LOG.md,修改,新增工作報告與 Log 保存期限檢查,Codex,否,否,否,否,無過期 Log
+2026-07-18,18:31,SHARED-NAVIGATION-TRANSITION,Documentation,log/CHANGE_HISTORY.csv,修改,新增共用導覽與頁面切換異動歷史,Codex,否,否,否,否,Analyze Test Web build 通過

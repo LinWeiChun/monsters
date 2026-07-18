@@ -6647,3 +6647,81 @@ Codex
 ### 待確認事項
 
 - Docker／MySQL 啟動後可再於隔離測試資料庫實際執行兩支既有 migration；本次未連線或修改任何本機 Database 資料。
+
+---
+
+## 2026-07-18 18:31 SHARED-NAVIGATION-TRANSITION
+
+Task
+Web 方案 A 共用完整 Navbar、Mobile 方案 1 改通知，並統一頁面切換效果
+
+執行者
+Codex
+
+### 完成內容
+
+- 新增 `AppTopNavigation`，統一 Home／Profile／Annoyance Desktop Navbar 的 Logo、五個主要模組、記下心情 CTA、通知與個人資料入口。
+- 新增 `MobileAppBottomNavigation`，統一 Home／Profile 的首頁、社群、怪獸、互動與「我的」；首頁與「我的」使用正式 route，其餘顯示具名即將開放提示。
+- 首頁 Mobile 右上角由個人資料改為通知，移除重複 Profile 入口；底部「我的」成為正式個人資料入口。
+- Profile Desktop 將儲存與登出移至共用 Navbar 下方的頁面 action bar，保留原驗證、API 與登出確認流程。
+- 所有 route 前進進場動畫改為 0 秒；Home→Profile／Annoyance、Login→Register 使用 push 保留導覽堆疊，明確返回按鈕以 220ms 向右退出。
+- 補齊 Mobile 通知、底部 Profile 導頁、三頁共用 Navbar、390 至 1920px overflow 與返回方向測試。
+
+### 新增
+
+- `frontend/lib/widgets/navigation/app_navigation.dart`
+
+### 修改
+
+- `frontend/lib/pages/home_page.dart`
+- `frontend/lib/pages/profile_page.dart`
+- `frontend/lib/pages/annoyance_chat_page.dart`
+- `frontend/lib/pages/login_page.dart`
+- `frontend/lib/pages/register_page.dart`
+- `frontend/lib/routes/app_router.dart`
+- `frontend/lib/widgets/profile/profile_penpot_canvas.dart`
+- `frontend/lib/widgets/annoyance/annoyance_penpot_shell.dart`
+- `frontend/test/home_page_test.dart`
+- `frontend/test/profile_page_test.dart`
+- `frontend/test/annoyance_chat_page_test.dart`
+- `docs/PROJECT_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### system_data 參考
+
+- 參考舊 Flutter `state/drawer.dart` 與 `pages/home.dart` 的個人資料、密碼鎖、使用說明、回饋及登出入口意圖。
+- 新版依使用者選定方案改為 Web 共用 Navbar 與 Mobile 底部「我的」，未沿用舊 `endDrawer`、各頁重複選單、`MaterialPageRoute` 或直接操作本地登入資料的作法。
+- 未修改 `system_data/`。
+
+### API／Database
+
+- API 無異動；通知與未完成模組目前只顯示 UI 提示，不呼叫假 API。
+- Database 無異動，無 Migration。
+
+### 文件更新
+
+- PROJECT_SPEC 同步 Web／Mobile 導覽角色與頁面切換原則。
+- UI_SPEC 補上共用 Navbar、Mobile 底部選單、通知入口、route stack 與 220ms 返回動畫規格。
+- DECISIONS 記錄使用者選定 Web 方案 A、Mobile 方案 1改通知及頁面切換決策。
+- TASKS 完整記錄 TODO → IN PROGRESS → REVIEW → DONE。
+
+### 測試
+
+- `flutter analyze --no-pub`：通過，No issues found。
+- Home／Profile／Annoyance／Login／Register targeted tests：70 tests passed。
+- `flutter test --no-pub`：131 tests passed。
+- `flutter build web --no-pub`：通過，已產出 `frontend/build/web`。
+- Web build 僅顯示既有 Cupertino icon font 提示，不影響建置結果。
+
+### Log 保存期限檢查
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；保存期限截止日為 2026-06-18。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源，未修改。
+
+### 待確認事項
+
+- 通知後端與通知中心頁面尚未開發；目前依正式規格顯示「通知即將開放」。

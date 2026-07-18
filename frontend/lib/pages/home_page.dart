@@ -6,6 +6,7 @@ import '../layout/responsive_layout.dart';
 import '../providers/auth_provider.dart';
 import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
+import '../widgets/navigation/app_navigation.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -25,15 +26,19 @@ class HomePage extends ConsumerWidget {
         desktop:
             (context, constraints) => _DesktopHomeCanvas(
               greetingName: greetingName,
-              onAddAnnoyance: () => context.goNamed(AppRoute.annoyanceChat),
-              onProfile: () => context.goNamed(AppRoute.profile),
-              onUnavailable: () => _showUnavailableMessage(context),
+              onAddAnnoyance: () => context.pushNamed(AppRoute.annoyanceChat),
+              onProfile: () => context.pushNamed(AppRoute.profile),
+              onNotification:
+                  () => _showUnavailableMessage(context, feature: '通知'),
+              onUnavailable:
+                  (feature) =>
+                      _showUnavailableMessage(context, feature: feature),
             ),
         tablet:
             (context, constraints) => _TabletHomeCanvas(
               greetingName: greetingName,
-              onAddAnnoyance: () => context.goNamed(AppRoute.annoyanceChat),
-              onProfile: () => context.goNamed(AppRoute.profile),
+              onAddAnnoyance: () => context.pushNamed(AppRoute.annoyanceChat),
+              onProfile: () => context.pushNamed(AppRoute.profile),
               onUnavailable: () => _showUnavailableMessage(context),
             ),
         mobile:
@@ -43,9 +48,13 @@ class HomePage extends ConsumerWidget {
               canvasHeight: 844,
               child: _MobileHomeCanvas(
                 greetingName: greetingName,
-                onAddAnnoyance: () => context.goNamed(AppRoute.annoyanceChat),
-                onProfile: () => context.goNamed(AppRoute.profile),
-                onUnavailable: () => _showUnavailableMessage(context),
+                onAddAnnoyance: () => context.pushNamed(AppRoute.annoyanceChat),
+                onProfile: () => context.pushNamed(AppRoute.profile),
+                onNotification:
+                    () => _showUnavailableMessage(context, feature: '通知'),
+                onUnavailable:
+                    (feature) =>
+                        _showUnavailableMessage(context, feature: feature),
               ),
             ),
       ),
@@ -58,13 +67,15 @@ class _DesktopHomeCanvas extends StatelessWidget {
     required this.greetingName,
     required this.onAddAnnoyance,
     required this.onProfile,
+    required this.onNotification,
     required this.onUnavailable,
   });
 
   final String greetingName;
   final VoidCallback onAddAnnoyance;
   final VoidCallback onProfile;
-  final VoidCallback onUnavailable;
+  final VoidCallback onNotification;
+  final ValueChanged<String> onUnavailable;
 
   @override
   Widget build(BuildContext context) {
@@ -74,8 +85,12 @@ class _DesktopHomeCanvas extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _DesktopNavBar(
+          AppTopNavigation(
+            activeDestination: AppNavigationDestination.home,
+            profileInitial: greetingName,
+            onHome: () {},
             onAddAnnoyance: onAddAnnoyance,
+            onNotification: onNotification,
             onProfile: onProfile,
             onUnavailable: onUnavailable,
           ),
@@ -136,7 +151,8 @@ class _DesktopHomeCanvas extends StatelessWidget {
                                     ),
                                     SizedBox(height: verticalPadding * 0.45),
                                     _DesktopCollectionPanel(
-                                      onUnavailable: onUnavailable,
+                                      onUnavailable:
+                                          () => onUnavailable('怪獸收藏'),
                                     ),
                                   ],
                                 ),
@@ -146,7 +162,7 @@ class _DesktopHomeCanvas extends StatelessWidget {
                                 flex: 10,
                                 child: _DesktopActionColumn(
                                   onAddAnnoyance: onAddAnnoyance,
-                                  onUnavailable: onUnavailable,
+                                  onUnavailable: () => onUnavailable('此功能'),
                                 ),
                               ),
                             ],
@@ -365,104 +381,6 @@ class _TabletCollectionPanel extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _DesktopNavBar extends StatelessWidget {
-  const _DesktopNavBar({
-    required this.onAddAnnoyance,
-    required this.onProfile,
-    required this.onUnavailable,
-  });
-
-  final VoidCallback onAddAnnoyance;
-  final VoidCallback onProfile;
-  final VoidCallback onUnavailable;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final horizontalPadding = (constraints.maxWidth * 0.03).clamp(
-          32.0,
-          56.0,
-        );
-        final itemGap = (constraints.maxWidth * 0.025).clamp(24.0, 36.0);
-
-        return ColoredBox(
-          color: AppColors.homeSurface,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-            child: SizedBox(
-              height: 72,
-              child: Row(
-                children: [
-                  const Image(
-                    image: AssetImage('assets/images/app_logo.png'),
-                    key: Key('homeDesktopLogo'),
-                    width: 130,
-                    fit: BoxFit.contain,
-                  ),
-                  SizedBox(width: itemGap),
-                  const _DesktopNavText('陪伴首頁', active: true),
-                  SizedBox(width: itemGap * 0.8),
-                  const _DesktopNavText('心的軌跡'),
-                  SizedBox(width: itemGap * 0.8),
-                  const _DesktopNavText('怪獸收藏'),
-                  SizedBox(width: itemGap * 0.8),
-                  const _DesktopNavText('匿名社群'),
-                  SizedBox(width: itemGap * 0.8),
-                  const _DesktopNavText('互動區'),
-                  const Spacer(),
-                  SizedBox(
-                    height: 40,
-                    child: FilledButton(
-                      key: const Key('homeDesktopCtaButton'),
-                      onPressed: onAddAnnoyance,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.homePrimary,
-                        foregroundColor: AppColors.homeOnPrimary,
-                        shape: const RoundedRectangleBorder(),
-                      ),
-                      child: const Text('＋ 記下現在的心情'),
-                    ),
-                  ),
-                  SizedBox(width: itemGap * 0.55),
-                  _DesktopCircleButton(label: '●', onTap: onUnavailable),
-                  SizedBox(width: itemGap * 0.45),
-                  _DesktopCircleButton(
-                    key: const Key('homeAccountMenu'),
-                    label: 'W',
-                    filled: true,
-                    onTap: onProfile,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _DesktopNavText extends StatelessWidget {
-  const _DesktopNavText(this.text, {this.active = false});
-
-  final String text;
-  final bool active;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(
-        color: active ? AppColors.homeInk : AppColors.homeNavMuted,
-        fontSize: 14,
-        fontWeight: active ? FontWeight.w700 : FontWeight.w400,
-        height: 1.2,
       ),
     );
   }
@@ -905,13 +823,15 @@ class _MobileHomeCanvas extends StatelessWidget {
     required this.greetingName,
     required this.onAddAnnoyance,
     required this.onProfile,
+    required this.onNotification,
     required this.onUnavailable,
   });
 
   final String greetingName;
   final VoidCallback onAddAnnoyance;
   final VoidCallback onProfile;
-  final VoidCallback onUnavailable;
+  final VoidCallback onNotification;
+  final ValueChanged<String> onUnavailable;
 
   @override
   Widget build(BuildContext context) {
@@ -938,7 +858,7 @@ class _MobileHomeCanvas extends StatelessWidget {
             fit: BoxFit.fill,
           ),
         ),
-        _AccountButton(onTap: onProfile),
+        _NotificationButton(onTap: onNotification),
         _HeroPanel(
           key: const Key('mobileCompanionHero'),
           left: 16,
@@ -961,7 +881,7 @@ class _MobileHomeCanvas extends StatelessWidget {
           bodyText: '今天有什麼想說的嗎？慢慢來就好。',
           greetingName: greetingName,
         ),
-        _CollectionPanel.mobile(onUnavailable: onUnavailable),
+        _CollectionPanel.mobile(onUnavailable: () => onUnavailable('怪獸收藏')),
         _MobilePrimaryAction(onTap: onAddAnnoyance),
         _MobileQuickAction(
           left: 16,
@@ -971,7 +891,7 @@ class _MobileHomeCanvas extends StatelessWidget {
           background: AppColors.homeSurface,
           border: AppColors.homeBorder,
           iconColor: AppColors.homePrimary,
-          onTap: onUnavailable,
+          onTap: () => onUnavailable('寫日記'),
         ),
         _MobileQuickAction(
           left: 138,
@@ -981,7 +901,7 @@ class _MobileHomeCanvas extends StatelessWidget {
           background: AppColors.homeSurface,
           border: AppColors.homeBorder,
           iconColor: AppColors.homePrimary,
-          onTap: onUnavailable,
+          onTap: () => onUnavailable('回顧記錄'),
         ),
         _MobileQuickAction(
           left: 260,
@@ -993,9 +913,14 @@ class _MobileHomeCanvas extends StatelessWidget {
           iconColor: AppColors.homeAccent,
           titleColor: AppColors.homeInkSoft,
           captionColor: AppColors.homeNavMuted,
-          onTap: onUnavailable,
+          onTap: () => onUnavailable('互動區'),
         ),
-        _BottomNavigation(onUnavailable: onUnavailable),
+        MobileAppBottomNavigation(
+          activeDestination: AppNavigationDestination.home,
+          onHome: () {},
+          onProfile: onProfile,
+          onUnavailable: onUnavailable,
+        ),
       ],
     );
   }
@@ -1506,8 +1431,8 @@ class _MoreMonsterChip extends StatelessWidget {
   }
 }
 
-class _AccountButton extends StatelessWidget {
-  const _AccountButton({required this.onTap});
+class _NotificationButton extends StatelessWidget {
+  const _NotificationButton({required this.onTap});
 
   final VoidCallback onTap;
 
@@ -1518,98 +1443,16 @@ class _AccountButton extends StatelessWidget {
       top: 18,
       width: 38,
       height: 38,
-      child: GestureDetector(
-        key: const Key('homeAccountMenu'),
-        onTap: onTap,
-        child: const Stack(
-          children: [
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: AppColors.homeAccountBackground,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            _TextBlock(
-              left: 12,
-              top: 4,
-              width: 16,
-              height: 24,
-              text: '●',
-              color: AppColors.homePrimary,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
-          ],
+      child: IconButton.filledTonal(
+        key: const Key('homeNotificationButton'),
+        tooltip: '通知',
+        onPressed: onTap,
+        padding: EdgeInsets.zero,
+        style: IconButton.styleFrom(
+          backgroundColor: AppColors.homeAccountBackground,
+          foregroundColor: AppColors.homePrimary,
         ),
-      ),
-    );
-  }
-}
-
-class _BottomNavigation extends StatelessWidget {
-  const _BottomNavigation({required this.onUnavailable});
-
-  final VoidCallback onUnavailable;
-
-  @override
-  Widget build(BuildContext context) {
-    const labels = [
-      ('⌂', '首頁', AppColors.homeAccent, FontWeight.w400),
-      ('♡', '社群', AppColors.homeNavMuted, FontWeight.w400),
-      ('◇', '怪獸', AppColors.homeNavMuted, FontWeight.w400),
-      ('✦', '互動', AppColors.homeNavMuted, FontWeight.w700),
-      ('○', '我的', AppColors.homeNavMuted, FontWeight.w400),
-    ];
-    const lefts = [16.0, 90.0, 164.0, 238.0, 312.0];
-    return Positioned(
-      left: 0,
-      top: 774,
-      width: 390,
-      height: 70,
-      child: Stack(
-        children: [
-          const Positioned.fill(
-            child: ColoredBox(color: AppColors.homeSurface),
-          ),
-          for (var i = 0; i < labels.length; i++)
-            Positioned(
-              left: lefts[i],
-              top: 0,
-              width: 62,
-              height: 70,
-              child: GestureDetector(
-                onTap: i == 0 ? null : onUnavailable,
-                child: Stack(
-                  children: [
-                    _TextBlock(
-                      left: 0,
-                      top: 13,
-                      width: 62,
-                      height: 22,
-                      text: labels[i].$1,
-                      color: labels[i].$3,
-                      fontSize: 18,
-                      fontWeight: labels[i].$4,
-                      textAlign: TextAlign.center,
-                    ),
-                    _TextBlock(
-                      left: 0,
-                      top: 39,
-                      width: 62,
-                      height: 16,
-                      text: labels[i].$2,
-                      color: labels[i].$3,
-                      fontSize: 10,
-                      fontWeight: labels[i].$4,
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        ],
+        icon: const Icon(Icons.notifications_none_rounded, size: 21),
       ),
     );
   }
@@ -1625,7 +1468,6 @@ class _TextBlock extends StatelessWidget {
     required this.color,
     required this.fontSize,
     required this.fontWeight,
-    this.textAlign = TextAlign.left,
   });
 
   final double left;
@@ -1636,7 +1478,6 @@ class _TextBlock extends StatelessWidget {
   final Color color;
   final double fontSize;
   final FontWeight fontWeight;
-  final TextAlign textAlign;
 
   @override
   Widget build(BuildContext context) {
@@ -1647,7 +1488,6 @@ class _TextBlock extends StatelessWidget {
       height: height,
       child: Text(
         text,
-        textAlign: textAlign,
         style: TextStyle(
           color: color,
           fontSize: fontSize,
@@ -1659,8 +1499,8 @@ class _TextBlock extends StatelessWidget {
   }
 }
 
-void _showUnavailableMessage(BuildContext context) {
+void _showUnavailableMessage(BuildContext context, {String? feature}) {
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
-    ..showSnackBar(const SnackBar(content: Text('此功能即將開放')));
+    ..showSnackBar(SnackBar(content: Text('${feature ?? '此功能'}即將開放')));
 }

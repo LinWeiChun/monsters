@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -21,38 +22,64 @@ GoRouter createAppRouter({String initialLocation = AppPath.splash}) {
       GoRoute(
         path: AppPath.splash,
         name: AppRoute.splash,
-        builder: (context, state) => const SplashPage(),
+        pageBuilder: (context, state) => _appPage(state, const SplashPage()),
       ),
       GoRoute(
         path: AppPath.home,
         name: AppRoute.home,
-        builder: (context, state) => const HomePage(),
+        pageBuilder: (context, state) => _appPage(state, const HomePage()),
       ),
       GoRoute(
         path: AppPath.login,
         name: AppRoute.login,
-        builder: (context, state) => const LoginPage(),
+        pageBuilder: (context, state) => _appPage(state, const LoginPage()),
       ),
       GoRoute(
         path: AppPath.register,
         name: AppRoute.register,
-        builder: (context, state) => const RegisterPage(),
+        pageBuilder: (context, state) => _appPage(state, const RegisterPage()),
       ),
       GoRoute(
         path: AppPath.profile,
         name: AppRoute.profile,
-        builder: (context, state) => const ProfilePage(),
+        pageBuilder: (context, state) => _appPage(state, const ProfilePage()),
       ),
       GoRoute(
         path: AppPath.passwordLock,
         name: AppRoute.passwordLock,
-        builder: (context, state) => const PasswordLockPage(),
+        pageBuilder:
+            (context, state) => _appPage(state, const PasswordLockPage()),
       ),
       GoRoute(
         path: AppPath.annoyanceChat,
         name: AppRoute.annoyanceChat,
-        builder: (context, state) => const AnnoyanceChatPage(),
+        pageBuilder:
+            (context, state) => _appPage(state, const AnnoyanceChatPage()),
       ),
     ],
+  );
+}
+
+CustomTransitionPage<void> _appPage(GoRouterState state, Widget child) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    transitionDuration: Duration.zero,
+    reverseTransitionDuration: const Duration(milliseconds: 220),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(1, 0),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+            reverseCurve: Curves.easeInCubic,
+          ),
+        ),
+        child: child,
+      );
+    },
+    child: child,
   );
 }

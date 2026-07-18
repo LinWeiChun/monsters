@@ -7,6 +7,7 @@ import 'package:monsters/core/network/api_client.dart';
 import 'package:monsters/core/network/api_error_type.dart';
 import 'package:monsters/core/network/api_exception.dart';
 import 'package:monsters/models/user_profile.dart';
+import 'package:monsters/pages/profile_page.dart';
 import 'package:monsters/providers/user_profile_provider.dart';
 import 'package:monsters/repositories/user_repository.dart';
 import 'package:monsters/routes/app_router.dart';
@@ -62,6 +63,10 @@ void main() {
       expect(find.byKey(const Key('profileBirthdayField')), findsOneWidget);
       expect(find.byKey(const Key('profileSaveButton')), findsOneWidget);
       expect(find.byKey(const Key('profileLogoutButton')), findsOneWidget);
+      if (size.width >= 1200) {
+        expect(find.byKey(const Key('appTopNavigation')), findsOneWidget);
+        expect(find.byKey(const Key('appTopNavProfile')), findsOneWidget);
+      }
       expect(
         tester.getSize(find.byKey(const Key('profileResponsiveShell'))).width,
         size.width,
@@ -155,6 +160,7 @@ void main() {
   });
 
   testWidgets('home profile action navigates to profile route', (tester) async {
+    await _setSurface(tester, const Size(390, 844));
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -167,12 +173,43 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('homeAccountMenu')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('個人資料'));
+    await tester.tap(find.byKey(const Key('mobileNavProfile')));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('profileUserNameField')), findsOneWidget);
+  });
+
+  testWidgets('forward navigation is immediate and back exits to the right', (
+    tester,
+  ) async {
+    await _setSurface(tester, const Size(390, 844));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          userRepositoryProvider.overrideWithValue(_FakeUserRepository()),
+        ],
+        child: MaterialApp.router(
+          routerConfig: createAppRouter(initialLocation: AppPath.home),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('mobileNavProfile')));
+    await tester.pump();
+    expect(find.byType(ProfilePage), findsOneWidget);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('profileBackButton')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(
+      tester.getTopLeft(find.byKey(const Key('profileMobileViewport'))).dx,
+      greaterThan(0),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('mobileCompanionHero')), findsOneWidget);
   });
 }
 
