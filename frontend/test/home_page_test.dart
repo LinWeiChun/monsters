@@ -69,17 +69,16 @@ void main() {
     expect(find.byType(NavigationBar), findsNothing);
     expect(find.text('陪你整理今天的心情'), findsOneWidget);
     expect(find.text('選一件現在最想做的事，不需要一次處理所有情緒。'), findsOneWidget);
-    expect(find.text('你，我在這裡。'), findsOneWidget);
+    expect(find.text('嗨，我在這裡。'), findsOneWidget);
     expect(find.text('記下現在的心情'), findsOneWidget);
+    expect(find.text('＋ 記下現在的心情'), findsOneWidget);
     expect(find.text('寫一篇日記'), findsOneWidget);
     expect(find.text('回顧心情記錄'), findsOneWidget);
     expect(find.text('我的怪獸'), findsOneWidget);
-
-    _expectTopLeft(
-      tester,
-      find.byKey(const Key('homeAnnoyanceChatButton')),
-      const Offset(830, 152),
-    );
+    expect(find.text('互動區'), findsNWidgets(2));
+    expect(find.text('陪伴首頁'), findsOneWidget);
+    expect(find.byKey(const Key('homeDesktopLogo')), findsOneWidget);
+    expect(find.byKey(const Key('homeAccountMenu')), findsOneWidget);
   });
 
   testWidgets('primary home action opens annoyance chat on desktop', (
