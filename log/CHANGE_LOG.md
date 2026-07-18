@@ -6725,3 +6725,55 @@ Codex
 ### 待確認事項
 
 - 通知後端與通知中心頁面尚未開發；目前依正式規格顯示「通知即將開放」。
+
+---
+
+## 2026-07-18 18:38 PROFILE-ACTION-BACKGROUND
+
+Task
+將個人資料頁操作列底色同步為新增煩惱進度列底色
+
+執行者
+Codex
+
+### 完成內容
+
+- 新增 `profileActionBackground` 色票，使用與 `annoyanceBrandBackground` 相同的 `#FFFDD2`。
+- 將 Desktop Profile 的個人資料／登出／儲存變更操作列改為淡黃色底色。
+- 保留共用 Navbar、Profile 內容背景、表單卡片、按鈕與 Mobile 版型不變。
+- 新增 Widget test，驗證 Profile action bar 與 Annoyance brand background 色值一致。
+
+### 修改
+
+- `frontend/lib/theme/app_colors.dart`
+- `frontend/lib/widgets/profile/profile_penpot_canvas.dart`
+- `frontend/test/profile_page_test.dart`
+- `docs/UI_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### system_data 參考
+
+- 本次為現有 Profile／Annoyance 視覺 token 同步，未新增引用或修改 `system_data/`。
+
+### API／Database
+
+- API 無異動。
+- Database 無異動，無 Migration。
+
+### 測試
+
+- `flutter analyze --no-pub`：通過，No issues found。
+- `flutter test --no-pub`：132 tests passed。
+- `flutter build web --no-pub`：通過，已產出 `frontend/build/web`。
+- Web build 僅顯示既有 Cupertino icon font 提示，不影響建置結果。
+
+### Log 保存期限檢查
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；保存期限截止日為 2026-06-18。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未修改。
+
+### 待確認事項
+
+- 無。

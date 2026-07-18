@@ -12,6 +12,7 @@ import 'package:monsters/providers/user_profile_provider.dart';
 import 'package:monsters/repositories/user_repository.dart';
 import 'package:monsters/routes/app_router.dart';
 import 'package:monsters/routes/app_routes.dart';
+import 'package:monsters/theme/app_colors.dart';
 
 void main() {
   testWidgets('loads and shows current user profile', (tester) async {
@@ -140,6 +141,19 @@ void main() {
     await tester.tap(find.text('取消'));
     await tester.pumpAndSettle();
     expect(find.text('確認登出'), findsNothing);
+  });
+
+  testWidgets('desktop profile action bar matches annoyance background', (
+    tester,
+  ) async {
+    await _setSurface(tester, const Size(1440, 900));
+    await tester.pumpWidget(_profileApp(_FakeUserRepository()));
+    await tester.pumpAndSettle();
+
+    final actionBar = tester.widget<ColoredBox>(
+      find.byKey(const Key('profileActionBar')),
+    );
+    expect(actionBar.color, AppColors.annoyanceBrandBackground);
   });
 
   testWidgets('shows load error state with retry action', (tester) async {

@@ -1044,3 +1044,7 @@
 2026-07-18,18:31,SHARED-NAVIGATION-TRANSITION,Documentation,docs,修改,同步 Project UI Decision 與 Task 導覽切換規格,Codex,否,否,是,否,API Database 無異動
 2026-07-18,18:31,SHARED-NAVIGATION-TRANSITION,Documentation,log/CHANGE_LOG.md,修改,新增工作報告與 Log 保存期限檢查,Codex,否,否,否,否,無過期 Log
 2026-07-18,18:31,SHARED-NAVIGATION-TRANSITION,Documentation,log/CHANGE_HISTORY.csv,修改,新增共用導覽與頁面切換異動歷史,Codex,否,否,否,否,Analyze Test Web build 通過
+2026-07-18,18:38,PROFILE-ACTION-BACKGROUND,Frontend,frontend/lib/theme/app_colors.dart,修改,新增 Profile 操作列淡黃色背景 token,Codex,否,否,是,否,與 Annoyance #FFFDD2 一致
+2026-07-18,18:38,PROFILE-ACTION-BACKGROUND,Frontend,frontend/lib/widgets/profile/profile_penpot_canvas.dart,修改,個人資料操作列套用新增煩惱相同底色,Codex,否,否,是,否,Navbar 與內容卡片不變
+2026-07-18,18:38,PROFILE-ACTION-BACKGROUND,Test,frontend/test/profile_page_test.dart,修改,驗證 Profile 與 Annoyance 背景色一致,Codex,否,否,是,否,完整 132 tests passed
+2026-07-18,18:38,PROFILE-ACTION-BACKGROUND,Documentation,docs,修改,同步 UI Task 與 Log,Codex,否,否,是,否,API Database 無異動
