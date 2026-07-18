@@ -200,7 +200,8 @@ class _ProfileActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: AppColors.profileSurface,
+      key: const Key('profileActionBar'),
+      color: AppColors.profileActionBackground,
       child: ResponsiveContent(
         maxWidth: 1088,
         horizontalPadding: 48,

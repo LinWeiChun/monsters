@@ -849,6 +849,7 @@ Logo 規範：
 - 已完成入口使用正式 route；尚未完成入口顯示具名「即將開放」，不得建立空白頁或假 route。
 - Navbar 使用 `Row`、`Spacer` 與 viewport 衍生間距；1200 至 1920px 不得 overflow 或留下固定畫布空白。
 - Profile 的儲存與登出為頁面操作，放在共用 Navbar 下方的 Profile action bar，不混入全站導覽設定。
+- Profile action bar 底色使用 `profileActionBackground`，色值與 Annoyance 進度列的 `annoyanceBrandBackground` 同為 `#FFFDD2`。
 
 ### Mobile Navigation（`< 600px`）
 

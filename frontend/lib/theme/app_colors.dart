@@ -70,6 +70,7 @@ class AppColors {
   static const homeOnPrimary = Color(0xFFFFFFFF);
   static const profileBackground = loginFormBackground;
   static const profileMobileBackground = loginBrandBackground;
+  static const profileActionBackground = loginBrandBackground;
   static const profileSurface = registerRuleBackground;
   static const profileFieldFill = lightSurface;
   static const profileReadonlyFill = Color(0xFFF1ECE8);
