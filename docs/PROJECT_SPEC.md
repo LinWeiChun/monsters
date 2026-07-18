@@ -35,6 +35,8 @@
 - 使用者帳號：註冊時必填且唯一，英文開頭，可包含英文、數字、底線，長度 4 到 50
 - 使用者登入
 - 登入後若未登出，且距離上次開啟 App 未超過 30 天，Web、Android、iOS 需直接進入主畫面
+- 恢復登入時必須使用 refresh token 換發新 Token，不得直接重用可能已過期的 access token；refresh token 採 rolling 30 天 rotation
+- 受保護 API 遇到 access token 401 時，前端只允許執行一次共用 refresh request 並重試原 request 一次；refresh token 驗證失敗需清除 session 並回登入頁，暫時性網路錯誤不得誤清使用者 session
 - 超過 30 天未開啟 App、使用者登出或本地登入狀態無效時，需重新登入
 - Google 登入：Flutter Web / Android / iOS 使用 Google Sign-In SDK 取得 Google ID Token，並交由後端驗證後換發本系統 JWT
 - 首次 Google 登入設定個人資料

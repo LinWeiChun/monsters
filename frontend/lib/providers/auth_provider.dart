@@ -10,8 +10,19 @@ import '../services/google_sign_in_service.dart';
 import 'api_client_provider.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepository(ref.watch(apiClientProvider));
+  final apiClient = ref.watch(apiClientProvider);
+  final repository = AuthRepository(
+    apiClient,
+    onAuthenticationChanged: (isAuthenticated) {
+      ref.read(authSessionExpiredProvider.notifier).state = !isAuthenticated;
+    },
+  );
+  apiClient.setAccessTokenRefresher(repository.refreshAccessToken);
+  ref.onDispose(() => apiClient.setAccessTokenRefresher(null));
+  return repository;
 });
+
+final authSessionExpiredProvider = StateProvider<bool>((ref) => false);
 
 final googleSignInServiceProvider = Provider<GoogleSignInService>((ref) {
   return GoogleSignInService(config: ref.watch(appConfigProvider));

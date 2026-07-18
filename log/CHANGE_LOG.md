@@ -6286,15 +6286,68 @@ Codex
 
 ---
 
-## 2026-07-18 13:53 WEB-FIRST-RWD
+## 2026-07-18 WEB-FIRST-RWD 與 AUTH-REFRESH
 
 Task
-Web-first RWD 共用版型與 Penpot 頁面相對定位重構
+整合 Web-first RWD 共用版型、Penpot 頁面相對定位，以及 Profile 401 與 30 天登入狀態 Token Refresh 修正
 
 執行者
 Codex
 
-### 完成內容
+### AUTH-REFRESH 完成內容
+
+- 確認 ProfilePage 本身與 `GET /api/users/me` 路徑正確，根因為本地 session 30 天但 access token 僅 1 小時。
+- 新增 `POST /api/auth/refresh`，驗證 refresh token 簽章、issuer、type、期限與使用者狀態。
+- Refresh token 預設期限改為 2592000 秒，符合 rolling 30 天登入需求。
+- 實作 refresh token rotation；舊 token hash 寫入既有 `revoked_tokens`，重複使用會回傳 401。
+- Flutter 啟動恢復 session 時先換發新 Token，不再直接重用保存的 access token。
+- `ApiClient` 遇到受保護 API 401 時共用單一 refresh request，成功後只重試原 request 一次。
+- Refresh token 驗證失敗時清除 Authorization header 與本地 session，並由 App 導回登入頁；暫時性網路錯誤保留 session。
+- 登出 request 可攜帶 refresh token，後端一併撤銷 access 與 refresh token。
+
+### 新增
+
+- `backend/src/main/java/com/monsters/dto/auth/RefreshTokenRequest.java`
+- `frontend/test/repositories/auth_repository_test.dart`
+
+### 修改
+
+- Backend Auth Controller／Service、JWT、Security、Token revocation 與相關測試。
+- Flutter App、ApiClient、Auth Provider／Repository 與登入、路由相關測試。
+- `README.md`、Backend／Frontend README、PROJECT／API／DATABASE／UI／DECISIONS／TASKS 規格。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`。
+
+### system_data 參考
+
+- 已搜尋舊前端 access token 使用方式，未找到 refresh token 或 rotation 流程可重用。
+- 舊程式只出現硬編碼 `<ACCESS_TOKEN>` placeholder，本次未沿用，也未修改 `system_data/`。
+
+### API
+
+- 新增 `POST /api/auth/refresh`。
+- `POST /api/auth/logout` 新增 optional `refreshToken` request body，未帶 body 的舊 Client 仍相容。
+- Refresh 成功沿用既有 `LoginResponse` contract；無效、過期、type 錯誤、已 rotation 或使用者無效回傳 401。
+
+### Database
+
+- 沿用既有 `revoked_tokens` schema 保存 refresh token hash，無欄位與資料表異動。
+- 無 Migration。
+
+### 文件更新
+
+- Refresh token 預設有效期由 14 天統一調整為 rolling 30 天。
+- 補齊 rotation、並行 401 single-flight、單次 retry、失效導頁與登出撤銷規格。
+
+### 測試
+
+- Backend `./gradlew test`：通過。
+- Backend `./gradlew build`：通過。
+- Frontend `flutter analyze --no-pub`：通過，No issues found。
+- Frontend `flutter test --no-pub`：通過，86 tests passed。
+- Frontend `flutter build web --no-pub`：通過，已產出 `frontend/build/web`。
+- Web build 顯示既有 Cupertino icon font 提示，不影響建置或 Token Refresh。
+
+### WEB-FIRST-RWD 完成內容
 
 - 盤點 Splash、Login、Register、Home、Profile 的 Penpot 實作與定位方式。
 - 新增 Mobile／Tablet／Desktop 共用 breakpoint 與 `ResponsiveLayout`／`ResponsiveContent`。
@@ -6371,4 +6424,69 @@ Codex
 
 ### 待確認事項
 
-- 無。
+- 部署時需確認未以環境變數將 `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` 覆寫回舊值 1209600。
+
+---
+
+## 2026-07-18 14:28 MERGE-PR59-PR60
+
+Task
+處理 PR #59 Web-first RWD 合併至 `develop` 後，PR #60 Profile Token Refresh 的合併衝突
+
+執行者
+Codex
+
+### 完成內容
+
+- 將 `origin/develop` 合併至 `fix/auth-token-refresh`，逐項解決 5 個衝突檔案。
+- `docs/TASKS.md`、`CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv` 均保留 RWD 與 Token Refresh 兩側紀錄。
+- `login_page_test.dart` 同時保留 Splash 未登入導頁、登出清除 session 與 Home 帳號入口驗證。
+- `widget_test.dart` 同時保留啟動登入頁、Auth 失效導頁與登入前往註冊頁驗證。
+- 已確認 Repository 不再存在 conflict marker，且 `git diff --check` 通過。
+
+### 修改
+
+- `docs/TASKS.md`
+- `frontend/test/login_page_test.dart`
+- `frontend/test/widget_test.dart`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 新增／刪除
+
+- 無；其餘 RWD 新增檔案來自已合併的 PR #59。
+
+### system_data 參考
+
+- RWD 與 Token Refresh 原任務皆已完成 `system_data/` 檢查；本次只處理兩組已驗證變更的 Git 衝突，未發現需再次引用的舊流程。
+- 未修改 `system_data/`。
+
+### API
+
+- 本次衝突處理未新增或修改 API；保留 PR #60 已完成的 `POST /api/auth/refresh` 與相容 logout contract。
+
+### Database
+
+- 無異動，無 Migration；保留既有 `revoked_tokens` 使用方式。
+
+### 文件更新
+
+- 更新 Task 狀態並整合 RWD、Token Refresh 與本次 merge 工作報告及歷史紀錄。
+
+### 測試
+
+- Backend `./gradlew test`：通過。
+- Backend `./gradlew build`：通過。
+- Frontend `flutter analyze --no-pub`：通過，No issues found。
+- Frontend `flutter test --no-pub`：通過，115 tests passed。
+- Frontend `flutter build web --no-pub`：通過，已產出 `frontend/build/web`。
+- Web build 僅顯示既有 Cupertino icon font 提示，不影響建置結果。
+
+### Log 保存期限檢查
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；保存期限截止日為 2026-06-18。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月紀錄，本次未刪除 Log。
+
+### 待確認事項
+
+- 部署環境仍需確認未將 `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` 覆寫回舊值 1209600。

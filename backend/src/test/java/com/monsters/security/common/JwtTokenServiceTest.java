@@ -86,6 +86,33 @@ class JwtTokenServiceTest {
     }
 
     @Test
+    void verifyRefreshTokenShouldReturnRefreshPayload() {
+        JwtProperties jwtProperties = jwtProperties("test-secret");
+        JwtTokenService jwtTokenService = new JwtTokenService(jwtProperties, objectMapper);
+        User user = new User("wei_account", "user@example.com", "Wei");
+        ReflectionTestUtils.setField(user, "id", 1L);
+        String token = jwtTokenService.createRefreshToken(user);
+
+        JwtTokenPayload payload = jwtTokenService.verifyRefreshToken(token);
+
+        assertThat(payload.userId()).isEqualTo(1L);
+        assertThat(payload.tokenType()).isEqualTo("refresh");
+    }
+
+    @Test
+    void verifyRefreshTokenShouldRejectAccessToken() {
+        JwtProperties jwtProperties = jwtProperties("test-secret");
+        JwtTokenService jwtTokenService = new JwtTokenService(jwtProperties, objectMapper);
+        User user = new User("wei_account", "user@example.com", "Wei");
+        ReflectionTestUtils.setField(user, "id", 1L);
+        String token = jwtTokenService.createAccessToken(user);
+
+        assertThatThrownBy(() -> jwtTokenService.verifyRefreshToken(token))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("Invalid JWT token");
+    }
+
+    @Test
     void hashTokenShouldReturnStableHash() {
         JwtProperties jwtProperties = jwtProperties("test-secret");
         JwtTokenService jwtTokenService = new JwtTokenService(jwtProperties, objectMapper);
@@ -99,7 +126,7 @@ class JwtTokenServiceTest {
         jwtProperties.setIssuer("monsters-test");
         jwtProperties.setSecret(secret);
         jwtProperties.setAccessTokenExpirationSeconds(3600);
-        jwtProperties.setRefreshTokenExpirationSeconds(1209600);
+        jwtProperties.setRefreshTokenExpirationSeconds(2592000);
         return jwtProperties;
     }
 }

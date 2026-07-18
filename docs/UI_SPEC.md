@@ -375,9 +375,10 @@ REST API
 - 登入識別欄位顯示「帳號或 Email」；前端沿用 `email` request key，後端接受已註冊的 Account 或 Email，並在查詢前去除前後空白及轉為小寫。
 - 登入頁不得直接呼叫 Dio。
 - 登入頁不得直接保存 JWT、Refresh Token 或密碼至 SharedPreferences；登入狀態保存必須集中由 `AuthRepository` 與 `AuthSessionStore` 管理。
-- 登入成功後，`AuthSessionStore` 可保存 `LoginResult` 與最後開啟時間，讓 Web、Android、iOS 在未登出且 30 天內再次開啟時自動恢復登入。
-- App 啟動時由 `SplashPage` 透過 `AuthController.restoreSession()` 判斷登入狀態；若 session 有效，需套用 `ApiClient.setAccessToken()` 並導向 `home` route。
-- 若最後開啟時間超過 30 天、session 格式無效或使用者登出，必須清除本地登入狀態並要求重新登入。
+- 登入成功後，`AuthSessionStore` 保存 `LoginResult` 與最後開啟時間，讓 Web、Android、iOS 在未登出且 30 天內再次開啟時自動恢復登入。
+- App 啟動時由 `SplashPage` 透過 `AuthController.restoreSession()` 判斷登入狀態；若本地 session 有效，必須先以 refresh token 換發新 Token、覆蓋舊 session，再套用新 access token 並導向 `home` route。
+- 受保護 API 回傳 401 時，並行 request 必須共用單一 refresh request；換發成功後每個原 request 最多重試一次，refresh request 本身不得遞迴重試。
+- 若 refresh token 無效／過期／已 rotation、最後開啟時間超過 30 天、session 格式無效或使用者登出，必須清除本地登入狀態並導向登入頁；暫時性網路錯誤只顯示連線錯誤並保留 session。
 - 登出需呼叫 `AuthController.logout()`，由 Repository 呼叫登出 API、清除 `ApiClient` Authorization header 與本地 session。
 - 密碼不得保存至 SharedPreferences。`AuthUser` 與 `LoginResult` 必須使用 `json_serializable` 產生 JSON mapping。
 - Google 登入不得假造 Google ID Token、不得沿用舊系統空密碼登入流程、不得在前端自行驗證後傳入 Google 使用者資料。

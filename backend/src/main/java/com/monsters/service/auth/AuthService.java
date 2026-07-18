@@ -19,6 +19,7 @@ import com.monsters.dto.auth.LoginRequest;
 import com.monsters.dto.auth.LoginResponse;
 import com.monsters.dto.auth.RegisterRequest;
 import com.monsters.dto.auth.RegisterResponse;
+import com.monsters.dto.auth.RefreshTokenRequest;
 import com.monsters.dto.auth.ResetPasswordRequest;
 import com.monsters.entity.user.PasswordResetToken;
 import com.monsters.entity.user.User;
@@ -33,6 +34,7 @@ import com.monsters.repository.user.UserRepository;
 import com.monsters.security.common.GoogleIdTokenVerifier;
 import com.monsters.security.common.GoogleUserInfo;
 import com.monsters.security.common.JwtProperties;
+import com.monsters.security.common.JwtTokenPayload;
 import com.monsters.security.common.JwtTokenService;
 import com.monsters.security.common.PasswordResetTokenService;
 
@@ -52,6 +54,7 @@ public class AuthService {
 	private final JwtProperties jwtProperties;
 	private final GoogleIdTokenVerifier googleIdTokenVerifier;
 	private final PasswordResetTokenService passwordResetTokenService;
+	private final TokenRevocationService tokenRevocationService;
 	private final Clock clock;
 
 	@Autowired
@@ -59,17 +62,18 @@ public class AuthService {
 			UserOAuthAccountRepository userOAuthAccountRepository,
 			PasswordResetTokenRepository passwordResetTokenRepository, PasswordEncoder passwordEncoder,
 			JwtTokenService jwtTokenService, JwtProperties jwtProperties, GoogleIdTokenVerifier googleIdTokenVerifier,
-			PasswordResetTokenService passwordResetTokenService) {
+			PasswordResetTokenService passwordResetTokenService, TokenRevocationService tokenRevocationService) {
 		this(userRepository, userCredentialRepository, userOAuthAccountRepository, passwordResetTokenRepository,
 				passwordEncoder, jwtTokenService, jwtProperties, googleIdTokenVerifier, passwordResetTokenService,
-				Clock.systemDefaultZone());
+				tokenRevocationService, Clock.systemDefaultZone());
 	}
 
 	AuthService(UserRepository userRepository, UserCredentialRepository userCredentialRepository,
 			UserOAuthAccountRepository userOAuthAccountRepository,
 			PasswordResetTokenRepository passwordResetTokenRepository, PasswordEncoder passwordEncoder,
 			JwtTokenService jwtTokenService, JwtProperties jwtProperties, GoogleIdTokenVerifier googleIdTokenVerifier,
-			PasswordResetTokenService passwordResetTokenService, Clock clock) {
+			PasswordResetTokenService passwordResetTokenService, TokenRevocationService tokenRevocationService,
+			Clock clock) {
 		this.userRepository = userRepository;
 		this.userCredentialRepository = userCredentialRepository;
 		this.userOAuthAccountRepository = userOAuthAccountRepository;
@@ -79,6 +83,7 @@ public class AuthService {
 		this.jwtProperties = jwtProperties;
 		this.googleIdTokenVerifier = googleIdTokenVerifier;
 		this.passwordResetTokenService = passwordResetTokenService;
+		this.tokenRevocationService = tokenRevocationService;
 		this.clock = clock;
 	}
 
@@ -132,6 +137,14 @@ public class AuthService {
 
 		User user = oauthAccount.map(UserOAuthAccount::getUser).orElseGet(() -> findOrCreateGoogleUser(googleUser));
 
+		return createLoginResponse(user);
+	}
+
+	@Transactional
+	public LoginResponse refresh(RefreshTokenRequest request) {
+		JwtTokenPayload payload = tokenRevocationService.consumeRefreshToken(request.refreshToken());
+		User user = userRepository.findByIdAndDeletedFalse(payload.userId())
+				.orElseThrow(() -> new UnauthorizedException("Invalid refresh token"));
 		return createLoginResponse(user);
 	}
 

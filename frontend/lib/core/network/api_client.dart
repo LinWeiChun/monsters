@@ -6,6 +6,8 @@ import 'api_response.dart';
 
 const _authorizationHeader = 'Authorization';
 
+typedef AccessTokenRefresher = Future<String?> Function();
+
 class ApiClient {
   ApiClient({
     required AppConfig config,
@@ -28,6 +30,8 @@ class ApiClient {
 
   final Dio _dio;
   final ApiErrorHandler _errorHandler;
+  AccessTokenRefresher? _accessTokenRefresher;
+  Future<String?>? _activeRefresh;
 
   Dio get dio => _dio;
 
@@ -40,11 +44,16 @@ class ApiClient {
     _dio.options.headers[_authorizationHeader] = 'Bearer $token';
   }
 
+  void setAccessTokenRefresher(AccessTokenRefresher? refresher) {
+    _accessTokenRefresher = refresher;
+  }
+
   Future<ApiResponse<T>> get<T>(
     String path, {
     Map<String, dynamic>? queryParameters,
     T Function(Object? json)? fromJsonT,
     Options? options,
+    bool retryOnUnauthorized = true,
   }) {
     return _request<T>(
       () => _dio.get<Object?>(
@@ -53,6 +62,7 @@ class ApiClient {
         options: options,
       ),
       fromJsonT,
+      retryOnUnauthorized: retryOnUnauthorized,
     );
   }
 
@@ -62,6 +72,7 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     T Function(Object? json)? fromJsonT,
     Options? options,
+    bool retryOnUnauthorized = true,
   }) {
     return _request<T>(
       () => _dio.post<Object?>(
@@ -71,6 +82,7 @@ class ApiClient {
         options: options,
       ),
       fromJsonT,
+      retryOnUnauthorized: retryOnUnauthorized,
     );
   }
 
@@ -80,6 +92,7 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     T Function(Object? json)? fromJsonT,
     Options? options,
+    bool retryOnUnauthorized = true,
   }) {
     return _request<T>(
       () => _dio.put<Object?>(
@@ -89,6 +102,7 @@ class ApiClient {
         options: options,
       ),
       fromJsonT,
+      retryOnUnauthorized: retryOnUnauthorized,
     );
   }
 
@@ -98,6 +112,7 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     T Function(Object? json)? fromJsonT,
     Options? options,
+    bool retryOnUnauthorized = true,
   }) {
     return _request<T>(
       () => _dio.patch<Object?>(
@@ -107,6 +122,7 @@ class ApiClient {
         options: options,
       ),
       fromJsonT,
+      retryOnUnauthorized: retryOnUnauthorized,
     );
   }
 
@@ -116,6 +132,7 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     T Function(Object? json)? fromJsonT,
     Options? options,
+    bool retryOnUnauthorized = true,
   }) {
     return _request<T>(
       () => _dio.delete<Object?>(
@@ -125,13 +142,15 @@ class ApiClient {
         options: options,
       ),
       fromJsonT,
+      retryOnUnauthorized: retryOnUnauthorized,
     );
   }
 
   Future<ApiResponse<T>> _request<T>(
     Future<Response<Object?>> Function() request,
-    T Function(Object? json)? fromJsonT,
-  ) async {
+    T Function(Object? json)? fromJsonT, {
+    required bool retryOnUnauthorized,
+  }) async {
     try {
       final response = await request();
       final body = response.data;
@@ -142,9 +161,34 @@ class ApiClient {
 
       return ApiResponse<T>.fromJson(body, fromJsonT);
     } on DioException catch (error) {
+      if (retryOnUnauthorized &&
+          error.response?.statusCode == 401 &&
+          _accessTokenRefresher != null) {
+        final refreshedToken = await _refreshAccessToken();
+        if (refreshedToken != null && refreshedToken.isNotEmpty) {
+          return _request(request, fromJsonT, retryOnUnauthorized: false);
+        }
+      }
       throw _errorHandler.fromDioException(error);
     } on Object catch (error) {
       throw _errorHandler.handle(error);
+    }
+  }
+
+  Future<String?> _refreshAccessToken() async {
+    final activeRefresh = _activeRefresh;
+    if (activeRefresh != null) {
+      return activeRefresh;
+    }
+
+    final refresh = _accessTokenRefresher!();
+    _activeRefresh = refresh;
+    try {
+      return await refresh;
+    } finally {
+      if (identical(_activeRefresh, refresh)) {
+        _activeRefresh = null;
+      }
     }
   }
 }

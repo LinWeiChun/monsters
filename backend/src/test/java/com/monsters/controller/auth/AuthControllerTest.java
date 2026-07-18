@@ -15,6 +15,7 @@ import com.monsters.dto.auth.LoginRequest;
 import com.monsters.dto.auth.LoginResponse;
 import com.monsters.dto.auth.RegisterRequest;
 import com.monsters.dto.auth.RegisterResponse;
+import com.monsters.dto.auth.RefreshTokenRequest;
 import com.monsters.service.auth.AuthService;
 import com.monsters.service.auth.TokenRevocationService;
 import com.monsters.exception.common.GlobalExceptionHandler;
@@ -189,6 +190,38 @@ class AuthControllerTest {
     }
 
     @Test
+    void refreshShouldRotateTokenAndReturnOkResponse() throws Exception {
+        when(authService.refresh(any(RefreshTokenRequest.class)))
+                .thenReturn(new LoginResponse(
+                        "new-access-token",
+                        "new-refresh-token",
+                        "Bearer",
+                        3600,
+                        new AuthUserResponse(1L, "wei_account", "user@example.com", "Wei", null)
+                ));
+
+        mockMvc.perform(post("/api/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "refreshToken", "old-refresh-token"
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Token refresh success"))
+                .andExpect(jsonPath("$.data.accessToken").value("new-access-token"))
+                .andExpect(jsonPath("$.data.refreshToken").value("new-refresh-token"));
+    }
+
+    @Test
+    void refreshShouldValidateRequestBody() throws Exception {
+        mockMvc.perform(post("/api/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("refreshToken", ""))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
     void forgotPasswordShouldReturnOkResponse() throws Exception {
         when(authService.forgotPassword(any(ForgotPasswordRequest.class)))
                 .thenReturn(new ForgotPasswordResponse("reset-token", 900));
@@ -244,10 +277,17 @@ class AuthControllerTest {
     @Test
     void logoutShouldReturnOkResponse() throws Exception {
         mockMvc.perform(post("/api/auth/logout")
-                        .header("Authorization", "Bearer access-token"))
+                        .header("Authorization", "Bearer access-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "refreshToken", "refresh-token"
+                        ))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("Logout success"));
+
+        org.mockito.Mockito.verify(tokenRevocationService).revokeAccessToken("access-token");
+        org.mockito.Mockito.verify(tokenRevocationService).revokeRefreshToken("refresh-token");
     }
 
     @Test

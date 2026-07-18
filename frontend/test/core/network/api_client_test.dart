@@ -93,6 +93,123 @@ void main() {
         ),
       );
     });
+
+    test('refreshes once and retries an unauthorized request', () async {
+      final dio = Dio();
+      var requestCount = 0;
+      var refreshCount = 0;
+      final authorizationHeaders = <Object?>[];
+      dio.httpClientAdapter = _CallbackAdapter((options) {
+        requestCount++;
+        authorizationHeaders.add(options.headers[_authorizationHeader]);
+        if (requestCount == 1) {
+          return _jsonResponse({
+            'success': false,
+            'message': 'Token expired',
+            'data': null,
+          }, statusCode: 401);
+        }
+        return _jsonResponse({
+          'success': true,
+          'message': 'ok',
+          'data': {'id': 1},
+        });
+      });
+      final client = ApiClient(config: _config(), dio: dio);
+      client.setAccessToken('expired-token');
+      client.setAccessTokenRefresher(() async {
+        refreshCount++;
+        client.setAccessToken('new-token');
+        return 'new-token';
+      });
+
+      final response = await client.get<Map<String, dynamic>>(
+        '/users/me',
+        fromJsonT: (json) => json! as Map<String, dynamic>,
+      );
+
+      expect(response.data['id'], 1);
+      expect(refreshCount, 1);
+      expect(requestCount, 2);
+      expect(authorizationHeaders, [
+        'Bearer expired-token',
+        'Bearer new-token',
+      ]);
+    });
+
+    test('does not refresh when unauthorized retry is disabled', () async {
+      final dio = Dio();
+      var refreshCount = 0;
+      dio.httpClientAdapter = _JsonAdapter({
+        'success': false,
+        'message': 'Invalid refresh token',
+        'data': null,
+      }, statusCode: 401);
+      final client = ApiClient(config: _config(), dio: dio);
+      client.setAccessTokenRefresher(() async {
+        refreshCount++;
+        return 'new-token';
+      });
+
+      await expectLater(
+        client.post<void>('/auth/refresh', retryOnUnauthorized: false),
+        throwsA(isA<ApiException>()),
+      );
+      expect(refreshCount, 0);
+    });
+
+    test(
+      'shares one refresh request across concurrent 401 responses',
+      () async {
+        final dio = Dio();
+        var requestCount = 0;
+        var refreshCount = 0;
+        final refreshCompleter = Completer<String?>();
+        dio.httpClientAdapter = _CallbackAdapter((options) {
+          requestCount++;
+          if (requestCount <= 2) {
+            return _jsonResponse({
+              'success': false,
+              'message': 'Token expired',
+              'data': null,
+            }, statusCode: 401);
+          }
+          return _jsonResponse({
+            'success': true,
+            'message': 'ok',
+            'data': {'id': requestCount},
+          });
+        });
+        final client = ApiClient(config: _config(), dio: dio);
+        client.setAccessToken('expired-token');
+        client.setAccessTokenRefresher(() {
+          refreshCount++;
+          return refreshCompleter.future;
+        });
+
+        final first = client.get<Map<String, dynamic>>(
+          '/users/me',
+          fromJsonT: (json) => json! as Map<String, dynamic>,
+        );
+        final second = client.get<Map<String, dynamic>>(
+          '/users/me',
+          fromJsonT: (json) => json! as Map<String, dynamic>,
+        );
+        while (requestCount < 2) {
+          await Future<void>.delayed(Duration.zero);
+        }
+        await Future<void>.delayed(Duration.zero);
+        expect(refreshCount, 1);
+        client.setAccessToken('new-token');
+        refreshCompleter.complete('new-token');
+
+        final responses = await Future.wait([first, second]);
+
+        expect(responses, hasLength(2));
+        expect(refreshCount, 1);
+        expect(requestCount, 4);
+      },
+    );
   });
 }
 
@@ -152,4 +269,32 @@ class _RawAdapter implements HttpClientAdapter {
 
   @override
   void close({bool force = false}) {}
+}
+
+class _CallbackAdapter implements HttpClientAdapter {
+  _CallbackAdapter(this.callback);
+
+  final ResponseBody Function(RequestOptions options) callback;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    return callback(options);
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+ResponseBody _jsonResponse(Map<String, Object?> body, {int statusCode = 200}) {
+  return ResponseBody.fromString(
+    jsonEncode(body),
+    statusCode,
+    headers: {
+      Headers.contentTypeHeader: [Headers.jsonContentType],
+    },
+  );
 }

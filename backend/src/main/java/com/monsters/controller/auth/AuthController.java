@@ -7,6 +7,7 @@ import com.monsters.dto.auth.LoginRequest;
 import com.monsters.dto.auth.LoginResponse;
 import com.monsters.dto.auth.RegisterRequest;
 import com.monsters.dto.auth.RegisterResponse;
+import com.monsters.dto.auth.RefreshTokenRequest;
 import com.monsters.dto.auth.ResetPasswordRequest;
 import com.monsters.service.auth.AuthService;
 import com.monsters.service.auth.TokenRevocationService;
@@ -59,6 +60,14 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Google login success", response));
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<LoginResponse>> refresh(
+            @Valid @RequestBody RefreshTokenRequest request
+    ) {
+        LoginResponse response = authService.refresh(request);
+        return ResponseEntity.ok(ApiResponse.success("Token refresh success", response));
+    }
+
     @PostMapping("/forgot-password")
     public ResponseEntity<ApiResponse<ForgotPasswordResponse>> forgotPassword(
             @Valid @RequestBody ForgotPasswordRequest request
@@ -76,8 +85,16 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<Void>> logout(
+            HttpServletRequest request,
+            @RequestBody(required = false) RefreshTokenRequest refreshRequest
+    ) {
         tokenRevocationService.revokeAccessToken(requiredBearerToken(request));
+        if (refreshRequest != null
+                && refreshRequest.refreshToken() != null
+                && !refreshRequest.refreshToken().isBlank()) {
+            tokenRevocationService.revokeRefreshToken(refreshRequest.refreshToken());
+        }
         return ResponseEntity.ok(ApiResponse.success("Logout success", null));
     }
 

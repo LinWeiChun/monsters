@@ -38,7 +38,7 @@ import static org.mockito.Mockito.when;
         "app.security.jwt.issuer=monsters-test",
         "app.security.jwt.secret=test-secret",
         "app.security.jwt.access-token-expiration-seconds=3600",
-        "app.security.jwt.refresh-token-expiration-seconds=1209600"
+        "app.security.jwt.refresh-token-expiration-seconds=2592000"
 })
 class SecurityConfigTest {
 
@@ -62,7 +62,7 @@ class SecurityConfigTest {
         assertThat(jwtProperties.issuer()).isEqualTo("monsters-test");
         assertThat(jwtProperties.secret()).isEqualTo("test-secret");
         assertThat(jwtProperties.accessTokenExpirationSeconds()).isEqualTo(3600);
-        assertThat(jwtProperties.refreshTokenExpirationSeconds()).isEqualTo(1209600);
+        assertThat(jwtProperties.refreshTokenExpirationSeconds()).isEqualTo(2592000);
     }
 
     @Test
@@ -79,6 +79,14 @@ class SecurityConfigTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.status").value("login"));
+    }
+
+    @Test
+    void authRefreshShouldPermitAnonymousRequest() throws Exception {
+        mockMvc.perform(post("/api/auth/refresh"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.status").value("refresh"));
     }
 
     @Test
@@ -123,6 +131,11 @@ class SecurityConfigTest {
         @PostMapping("/api/auth/login")
         public ApiResponse<Map<String, String>> login() {
             return ApiResponse.success(Map.of("status", "login"));
+        }
+
+        @PostMapping("/api/auth/refresh")
+        public ApiResponse<Map<String, String>> refresh() {
+            return ApiResponse.success(Map.of("status", "refresh"));
         }
 
         @GetMapping("/api/protected")

@@ -197,7 +197,27 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
+    expect(find.byKey(const Key('loginPasswordField')), findsOneWidget);
     expect(find.text('建立新帳號'), findsOneWidget);
+  });
+
+  test('logout clears repository and Google session', () async {
+    final repository = _FakeAuthRepository();
+    final googleSignInService = _FakeGoogleSignInService();
+    final container = ProviderContainer(
+      overrides: [
+        authRepositoryProvider.overrideWithValue(repository),
+        googleSignInServiceProvider.overrideWithValue(googleSignInService),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await container.read(authControllerProvider.notifier).logout();
+
+    expect(repository.didLogout, isTrue);
+    expect(googleSignInService.didSignOut, isTrue);
+
+    await googleSignInService.dispose();
   });
 
   testWidgets('home keeps the account navigation control available', (
