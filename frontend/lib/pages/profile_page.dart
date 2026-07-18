@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../layout/responsive_layout.dart';
 import '../models/user_profile.dart';
+import '../providers/auth_provider.dart';
 import '../providers/user_profile_provider.dart';
 import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
@@ -60,11 +61,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     });
 
     final state = ref.watch(userProfileControllerProvider);
+    final isLoggingOut = ref.watch(
+      authControllerProvider.select((state) => state.isLoading),
+    );
     final profile = state.profile;
 
     return Scaffold(
       backgroundColor: AppColors.profileMobileBackground,
-      body: _buildBody(context, state, profile),
+      body: _buildBody(context, state, profile, isLoggingOut),
     );
   }
 
@@ -72,6 +76,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     BuildContext context,
     UserProfileState state,
     UserProfile? profile,
+    bool isLoggingOut,
   ) {
     if (state.isLoading && profile == null) {
       return const LoadingView(message: '正在讀取個人資料');
@@ -95,8 +100,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               userNameController: _userNameController,
               birthdayController: _birthdayController,
               isSaving: state.isSaving,
+              isLoggingOut: isLoggingOut,
               errorMessage: state.errorMessage,
               onSave: _submit,
+              onSelectBirthday: _selectBirthday,
+              onLogout: () => _confirmLogout(context),
               onBack: () => context.goNamed(AppRoute.home),
               onUnavailable: () => _showUnavailableMessage(context),
             ),
@@ -106,8 +114,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               userNameController: _userNameController,
               birthdayController: _birthdayController,
               isSaving: state.isSaving,
+              isLoggingOut: isLoggingOut,
               errorMessage: state.errorMessage,
               onSave: _submit,
+              onSelectBirthday: _selectBirthday,
+              onLogout: () => _confirmLogout(context),
               onBack: () => context.goNamed(AppRoute.home),
               onUnavailable: () => _showUnavailableMessage(context),
               compact: true,
@@ -125,8 +136,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     userNameController: _userNameController,
                     birthdayController: _birthdayController,
                     isSaving: state.isSaving,
+                    isLoggingOut: isLoggingOut,
                     errorMessage: state.errorMessage,
                     onSave: _submit,
+                    onSelectBirthday: _selectBirthday,
+                    onLogout: () => _confirmLogout(context),
                     onBack: () => context.goNamed(AppRoute.home),
                     onUnavailable: () => _showUnavailableMessage(context),
                   ),
@@ -178,6 +192,60 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           userName: _userNameController.text,
           birthday: _birthdayController.text,
         );
+  }
+
+  Future<void> _selectBirthday() async {
+    final today = DateUtils.dateOnly(DateTime.now());
+    final current = DateTime.tryParse(_birthdayController.text);
+    final initialDate =
+        current == null || current.isAfter(today)
+            ? DateTime(2000, 1, 1)
+            : current;
+    final selected = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(1900, 1, 1),
+      lastDate: today,
+      helpText: '選擇生日',
+      cancelText: '取消',
+      confirmText: '確定',
+      fieldLabelText: '生日',
+      fieldHintText: 'yyyy-MM-dd',
+    );
+    if (selected == null || !mounted) {
+      return;
+    }
+    setState(() => _birthdayController.text = _formatDate(selected));
+    _formKey.currentState?.validate();
+  }
+
+  Future<void> _confirmLogout(BuildContext context) async {
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder:
+          (dialogContext) => AlertDialog(
+            title: const Text('確認登出'),
+            content: const Text('登出後需要重新登入才能查看個人資料。'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: const Text('取消'),
+              ),
+              FilledButton(
+                key: const Key('profileConfirmLogoutButton'),
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: const Text('登出'),
+              ),
+            ],
+          ),
+    );
+    if (shouldLogout != true || !mounted) {
+      return;
+    }
+    await ref.read(authControllerProvider.notifier).logout();
+    if (mounted) {
+      context.goNamed(AppRoute.login);
+    }
   }
 
   static String _formatDate(DateTime date) {

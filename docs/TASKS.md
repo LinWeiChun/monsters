@@ -23,6 +23,15 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ---
 
+## 插隊任務：Profile／Annoyance Penpot 同步與 Web 右側留白修正（2026-07-18）
+
+- [x] TODO：檢查 Profile、Annoyance 舊系統參考流程、正式規格、Penpot Web／Mobile 畫板與現有 Flutter 實作。
+- [x] IN PROGRESS：以 Flutter 內建 `showDatePicker` 完成生日選擇、加入登出確認，並將 Home／Profile 外層改為滿寬 flow layout。
+- [x] REVIEW：依 Penpot Annoyance Flow 重整 Mobile／Tablet／Desktop 介面，補齊 390 至 1920px widget tests，並同步修改 Penpot Profile Web／Mobile 畫板。
+- [x] DONE：Flutter Analyze 與 Home／Profile／Annoyance 36 項測試通過；API／Database 無異動，文件與 Log 同步完成。
+
+---
+
 ## 插隊任務：PR #59／#60 合併衝突處理（2026-07-18）
 
 - [x] TODO：確認 `fix/auth-token-refresh` 與已合併 `develop` 的衝突檔案及兩側功能範圍。

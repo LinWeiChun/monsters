@@ -1013,3 +1013,16 @@
 2026-07-18,14:28,MERGE-PR59-PR60,Documentation,docs/TASKS.md,修改,整合 RWD 與 Token Refresh 任務並新增合併衝突處理狀態,Codex,否,否,否,否,TODO IN PROGRESS REVIEW DONE
 2026-07-18,14:28,MERGE-PR59-PR60,Documentation,log/CHANGE_LOG.md,修改,整合兩側工作報告並新增合併驗證紀錄,Codex,否,否,否,否,無過期 Log
 2026-07-18,14:28,MERGE-PR59-PR60,Documentation,log/CHANGE_HISTORY.csv,修改,保留兩側歷史並新增衝突處理紀錄,Codex,否,否,否,否,Analyze Test Web Backend build 通過
+2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Frontend,frontend/lib/pages/profile_page.dart,修改,使用內建日曆選擇生日並加入登出確認流程,Codex,否,否,是,否,方案 A 無新增套件
+2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Frontend,frontend/lib/widgets/profile/profile_penpot_canvas.dart,修改,Profile 三種斷點加入生日日期選擇與登出入口,Codex,否,否,是,否,根節點滿寬 stretch
+2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Frontend,frontend/lib/pages/home_page.dart,修改,修正 Tablet Desktop 外層未撐滿 viewport 的右側留白,Codex,否,否,是,否,背景與導覽滿寬
+2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Frontend,frontend/lib/pages/annoyance_chat_page.dart,修改,串接 Penpot 響應式 Annoyance shell 並保留狀態機,Codex,否,否,是,否,Phase 3 無獎勵
+2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Frontend,frontend/lib/widgets/annoyance/annoyance_penpot_shell.dart,新增,建立 Mobile Tablet Desktop Annoyance Penpot shell,Codex,否,否,是,否,滿寬相對 layout
+2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Frontend,frontend/lib/theme/app_colors.dart,修改,新增 Annoyance Penpot 色票 token,Codex,否,否,是,否,頁面不硬編碼色票
+2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Test,frontend/test,修改,補齊日曆登出滿寬與 390 至 1920px RWD 測試,Codex,否,否,是,否,完整 124 tests passed
+2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Documentation,docs/PROJECT_SPEC.md,修改,補上生日內建日曆與個人資料頁登出需求,Codex,否,否,是,否,功能規格同步
+2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Documentation,docs/UI_SPEC.md,修改,同步 Profile Annoyance Penpot 與滿寬 RWD 規範,Codex,否,否,是,否,含 viewport 測試矩陣
+2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Documentation,docs/DECISIONS.md,修改,記錄方案 A 使用 Flutter 內建日期選擇器,Codex,否,否,是,否,不新增第三方套件
+2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Documentation,docs/TASKS.md,修改,記錄任務 TODO 至 DONE 狀態,Codex,否,否,是,否,DoR DoD 已檢查
+2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Documentation,log/CHANGE_LOG.md,修改,新增工作報告與 Log 保存期限檢查,Codex,否,否,否,否,無過期 Log
+2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Profile Annoyance Penpot RWD 異動歷史,Codex,否,否,否,否,Analyze Test Web build 通過

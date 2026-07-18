@@ -453,7 +453,9 @@ REST API
 - 呼叫 `GET /api/users/me` 查詢目前登入使用者個人資料
 - 顯示頭貼、暱稱、Email、舊帳號與生日
 - 修改暱稱與生日
+- 生日欄位為唯讀文字輸入外觀，點擊後開啟 Flutter 內建日曆；不得要求使用者手動輸入日期格式
 - 呼叫 `PUT /api/users/me` 儲存個人資料
+- 顯示可見的登出按鈕；點擊後先顯示確認對話框，再由 `AuthController.logout()` 完成登出並導向登入頁
 - Loading 狀態
 - API 錯誤訊息與重試
 - 儲存成功提示
@@ -789,11 +791,20 @@ Logo 規範：
 ### Implementation Notes
 
 - Profile Mobile 採 390 x 844 Penpot canvas；Tablet／Desktop 使用 scrollable flow layout，不使用整頁 `Stack + FittedBox`。
+- Profile、Home 的 Tablet／Desktop 根節點必須使用 stretch／滿寬 constraint，背景、App bar 與底部導覽不得只停在 674px 固定內容寬度而留下右側空白。
 - Web 保留上方導覽列、資料卡、avatar、基本資料欄位、唯讀 Email / 帳號欄位與儲存狀態卡，欄位依可用寬度切換單欄／雙欄。
-- Mobile 保留 390x844 Profile canvas、App bar、avatar、暱稱 / Email / 帳號 / 生日欄位、儲存狀態卡與底部導覽列。
-- 可編輯欄位維持 `profileUserNameField`、`profileBirthdayField`、`profileSaveButton` 測試 key 與原本驗證規則。
+- Mobile 保留 390x844 Profile canvas、App bar、avatar、暱稱 / Email / 帳號 / 生日欄位、登出入口、儲存狀態卡與底部導覽列。
+- 生日欄位使用內建日曆並維持 `profileBirthdayField` key；可編輯欄位、儲存與登出分別維持 `profileUserNameField`、`profileSaveButton`、`profileLogoutButton` 測試 key 與既有驗證規則。
 - Profile 顏色 token 集中於 `frontend/lib/theme/app_colors.dart` 的 `profile*` token，Page 不直接宣告色碼。
 - Penpot canvas widgets 拆至 `frontend/lib/widgets/profile/profile_penpot_canvas.dart`，`ProfilePage` 僅保留狀態、驗證與提交流程。
+
+## 2026-07-18 Profile Calendar／Logout 與 Annoyance Penpot Sync
+
+- Penpot `Profile & Settings / Web / 01 個人首頁`、`02 編輯個人資料` 與 Mobile 對應畫板已加入登出入口及生日日曆欄位；既有 Web／Mobile 登出確認畫板沿用。
+- Annoyance 使用 Penpot `Annoyance Flow / Web` 與 `Annoyance Flow / Mobile` 的導覽、進度、陪伴訊息、操作面板、色票與間距；Flutter 狀態機與 API contract 不變。
+- Annoyance Mobile `< 600px` 使用單欄；Tablet `600px - 1199px` 使用堆疊 flow；Desktop `>= 1200px` 使用左側陪伴區與右側操作區雙欄，根節點一律填滿 viewport 寬度。
+- 測試 viewport 覆蓋 390、600、900、1024、1199、1440 與 1920px，檢查滿寬 shell、主要進度／操作區存在且沒有 overflow 或例外。
+- Penpot 雖包含獎勵延伸畫板，本次依 Phase 3 正式規格只同步建立完成狀態，不提前實作怪獸獎勵。
 
 ## 2026-07-16 HomePage Full-Bleed Correction（已由 2026-07-18 RWD 規格取代）
 

@@ -75,8 +75,10 @@ class _DesktopHomeCanvas extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
+      key: const Key('homeDesktopShell'),
       color: AppColors.homeBackground,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _DesktopNavBar(
             onAddAnnoyance: onAddAnnoyance,
@@ -185,8 +187,10 @@ class _TabletHomeCanvas extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
+      key: const Key('homeTabletShell'),
       color: AppColors.homeBackground,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _TabletNavBar(onAddAnnoyance: onAddAnnoyance, onProfile: onProfile),
           Expanded(

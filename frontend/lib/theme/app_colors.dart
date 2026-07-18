@@ -84,6 +84,17 @@ class AppColors {
   static const profileOnPrimary = registerOnPrimary;
   static const profileNavMuted = Color(0xFF7B6D66);
   static const profileError = Color(0xFFD14343);
+  static const annoyanceBackground = Color(0xFFF7F1E8);
+  static const annoyanceBrandBackground = Color(0xFFFFFDD2);
+  static const annoyanceSurface = Color(0xFFFFFDFC);
+  static const annoyanceInk = Color(0xFF3B2017);
+  static const annoyanceMuted = Color(0xFF8D6E63);
+  static const annoyancePrimary = Color(0xFFB45A2B);
+  static const annoyanceOnPrimary = Color(0xFFFFFFFF);
+  static const annoyanceBorder = Color(0xFFE7C7B5);
+  static const annoyanceSoft = Color(0xFFF7EFE9);
+  static const annoyanceProgressTrack = Color(0xFFE4D6CF);
+  static const annoyanceSuccess = Color(0xFF4F7A5A);
   static const darkBackground = Color(0xFF21140F);
   static const darkSurface = Color(0xFF2B1B14);
   static const darkOutline = Color(0xFF76513C);

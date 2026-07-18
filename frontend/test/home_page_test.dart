@@ -98,6 +98,10 @@ void main() {
       expect(find.byKey(const Key('homeTabletLogo')), findsOneWidget);
       expect(find.byKey(const Key('homeAccountMenu')), findsOneWidget);
       expect(find.byKey(const Key('homeAnnoyanceChatButton')), findsOneWidget);
+      expect(
+        tester.getSize(find.byKey(const Key('homeTabletShell'))).width,
+        size.width,
+      );
       expect(tester.takeException(), isNull);
     });
   }
@@ -107,6 +111,10 @@ void main() {
 
     expect(find.byKey(const Key('desktopCompanionHero')), findsOneWidget);
     expect(find.byKey(const Key('tabletCompanionHero')), findsNothing);
+    expect(
+      tester.getSize(find.byKey(const Key('homeDesktopShell'))).width,
+      1200,
+    );
     expect(tester.takeException(), isNull);
   });
 
