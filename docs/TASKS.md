@@ -26,7 +26,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] TODO：比對 Profile 操作列與 Annoyance 進度列底色色票。
 - [x] IN PROGRESS：新增 Profile action background token，套用與 Annoyance 相同的 `#FFFDD2`。
 - [x] REVIEW：補上底色 Widget test，完成 Analyze、132 項完整測試與 Web build。
-- [x] DONE：文件與 Log 完成，準備 Commit 並更新既有 PR #63。
+- [x] DONE：文件與 Log 完成；因 PR #63 已先合併，改以獨立 follow-up PR 提交底色修正。
 
 ## 插隊任務：Web 共用 Navbar 與 Mobile 通知入口（2026-07-18）
 
