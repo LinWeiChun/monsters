@@ -6283,3 +6283,92 @@ Codex
 ### 待確認事項
 
 - 若要進一步精準比對 HomePage，需由使用者在 Penpot 選取正確 WEB / Web / Companion Home board 後再執行尺寸比對。
+
+---
+
+## 2026-07-18 13:53 WEB-FIRST-RWD
+
+Task
+Web-first RWD 共用版型與 Penpot 頁面相對定位重構
+
+執行者
+Codex
+
+### 完成內容
+
+- 盤點 Splash、Login、Register、Home、Profile 的 Penpot 實作與定位方式。
+- 新增 Mobile／Tablet／Desktop 共用 breakpoint 與 `ResponsiveLayout`／`ResponsiveContent`。
+- 將 Splash、Login、Register、Home、Profile 的 Tablet／Desktop 主版面改為相對 flow layout；Mobile 保留 Penpot 精準畫布。
+- 修正 Home 在 900、950、1024px 的負 padding、導覽 overflow 與固定 canvas 問題。
+- 補上 Web-first 開發設定、固定本機網址、RWD 驗收寬度與瀏覽器即時 resize 規範。
+- 更新既有啟動、路由與密碼鎖測試，使測試契約符合目前路由及頁面入口。
+
+### 新增
+
+- `frontend/lib/layout/responsive_layout.dart`
+- `frontend/test/layout/responsive_layout_test.dart`
+
+### 修改
+
+- `frontend/lib/pages/splash_page.dart`
+- `frontend/lib/pages/login_page.dart`
+- `frontend/lib/pages/register_page.dart`
+- `frontend/lib/pages/home_page.dart`
+- `frontend/lib/pages/profile_page.dart`
+- `frontend/lib/widgets/profile/profile_penpot_canvas.dart`
+- `frontend/test/splash_page_test.dart`
+- `frontend/test/login_page_test.dart`
+- `frontend/test/register_page_test.dart`
+- `frontend/test/home_page_test.dart`
+- `frontend/test/profile_page_test.dart`
+- `frontend/test/widget_test.dart`
+- `frontend/test/routes/app_router_test.dart`
+- `frontend/test/password_lock_page_test.dart`
+- `README.md`
+- `frontend/README.md`
+- `docs/PROJECT_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/CODING_STANDARD.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### system_data 參考
+
+- 已依本次盤點結果確認舊系統首頁與個人資料流程僅作互動意圖參考。
+- 未修改 `system_data/`，未沿用舊系統固定座標 Web 畫面、舊架構、金鑰或環境設定。
+
+### API
+
+- 無異動。
+
+### Database
+
+- 無異動，無 Migration。
+
+### 文件更新
+
+- 明確定義目前前端採 Web-first 開發與驗收，Android／iOS 維持相容。
+- 共用 breakpoint 定為 Mobile `< 600px`、Tablet `600px - 1199px`、Desktop `>= 1200px`。
+- 補上 Penpot 頁面定位方式盤點、相對 layout 規範與 390 至 1920px RWD 測試矩陣。
+
+### 測試
+
+- `flutter analyze --no-pub`：通過，No issues found。
+- `flutter test --no-pub`：通過，107 tests passed。
+- `flutter build web --no-pub`：通過，已產出 `frontend/build/web`。
+- Web build 顯示既有 Cupertino icon font 提示，不影響建置成功或本次 RWD 功能。
+
+### Log 保存期限檢查
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx` 是否存在。
+- 保存期限截止日為 2026-06-18；`CHANGE_LOG.md` 最早正式 Task 日期為 2026-06-29，`CHANGE_HISTORY.csv` 最早日期為 2026-06-29。
+- 未發現超過一個月的正式紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源，未修改。
+
+### 待確認事項
+
+- 無。

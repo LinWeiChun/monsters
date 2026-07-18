@@ -65,7 +65,7 @@ void main() {
     );
   });
 
-  testWidgets('matches Penpot web splash layout while checking session', (
+  testWidgets('keeps Penpot hierarchy in responsive web splash layout', (
     tester,
   ) async {
     await _setDesktopSurface(tester);
@@ -79,43 +79,40 @@ void main() {
     expect(find.byKey(const Key('splashLoginButton')), findsNothing);
     expect(find.byKey(const Key('splashRegisterButton')), findsNothing);
 
-    _expectRect(
-      tester,
-      find.byKey(const Key('splashLogo')),
-      const Offset(570, 120),
-      const Size(300, 92),
-    );
-    _expectRect(
-      tester,
-      find.byKey(const Key('splashMonster')),
-      const Offset(610, 318),
-      const Size(220, 220),
-    );
-    _expectRect(
-      tester,
-      find.byKey(const Key('splashStatusCard')),
-      const Offset(550, 724),
-      const Size(340, 74),
-    );
-    _expectRect(
-      tester,
-      find.byKey(const Key('splashStatusDot')),
-      const Offset(576, 753),
-      const Size(16, 16),
-    );
-    _expectRect(
-      tester,
-      find.byKey(const Key('splashStatusText')),
-      const Offset(610, 746),
-      const Size(123, 17),
-    );
-    _expectRect(
-      tester,
-      find.byKey(const Key('splashStatusHint')),
-      const Offset(610, 770),
-      const Size(118, 14),
-    );
+    final logo = tester.getRect(find.byKey(const Key('splashLogo')));
+    final monster = tester.getRect(find.byKey(const Key('splashMonster')));
+    final status = tester.getRect(find.byKey(const Key('splashStatusCard')));
+    expect(logo.size, const Size(300, 92));
+    expect(monster.size, const Size(220, 220));
+    expect(status.width, 340);
+    expect(logo.center.dx, moreOrLessEquals(720));
+    expect(monster.center.dx, moreOrLessEquals(720));
+    expect(status.center.dx, moreOrLessEquals(720));
+    expect(logo.bottom, lessThan(monster.top));
+    expect(monster.bottom, lessThan(status.top));
   });
+
+  for (final size in const [
+    Size(600, 700),
+    Size(900, 700),
+    Size(1024, 768),
+    Size(1920, 1080),
+  ]) {
+    testWidgets('responsive splash remains usable at $size', (tester) async {
+      await _setSurface(tester, size);
+      await tester.pumpWidget(_splashApp(_PendingAuthRepository()));
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      _expectFullyVisible(tester, find.byKey(const Key('splashLogo')), size);
+      _expectFullyVisible(tester, find.byKey(const Key('splashMonster')), size);
+      _expectFullyVisible(
+        tester,
+        find.byKey(const Key('splashStatusCard')),
+        size,
+      );
+    });
+  }
 
   testWidgets('redirects to login when session restore fails', (tester) async {
     await _setMobileSurface(tester);
@@ -136,7 +133,11 @@ Future<void> _setMobileSurface(WidgetTester tester) async {
 }
 
 Future<void> _setDesktopSurface(WidgetTester tester) async {
-  await tester.binding.setSurfaceSize(const Size(1440, 900));
+  await _setSurface(tester, const Size(1440, 900));
+}
+
+Future<void> _setSurface(WidgetTester tester, Size size) async {
+  await tester.binding.setSurfaceSize(size);
   addTearDown(() async {
     await tester.binding.setSurfaceSize(null);
   });
@@ -161,6 +162,25 @@ void _expectRect(
   expect(tester.getTopLeft(finder).dy, moreOrLessEquals(expectedTopLeft.dy));
   expect(tester.getSize(finder).width, moreOrLessEquals(expectedSize.width));
   expect(tester.getSize(finder).height, moreOrLessEquals(expectedSize.height));
+}
+
+void _expectFullyVisible(
+  WidgetTester tester,
+  Finder finder,
+  Size viewportSize,
+) {
+  final rect = tester.getRect(finder);
+  final viewport = Offset.zero & viewportSize;
+  expect(
+    viewport.contains(rect.topLeft),
+    isTrue,
+    reason: '$rect starts outside',
+  );
+  expect(
+    viewport.contains(rect.bottomRight),
+    isTrue,
+    reason: '$rect ends outside',
+  );
 }
 
 class _FakeAuthRepository extends AuthRepository {

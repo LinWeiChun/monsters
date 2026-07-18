@@ -978,3 +978,18 @@
 2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Documentation,docs/TASKS.md,修改,新增插隊任務並標記 TODO IN PROGRESS REVIEW DONE,Codex,Task status DONE
 2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Documentation,log/CHANGE_LOG.md,修改,新增本次工作紀錄與 Log 保存期限檢查結果,Codex,未刪除過期 Log
 2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Documentation,log/CHANGE_HISTORY.csv,修改,新增本次 change history rows,Codex,CHANGE_HISTORY.csv 已更新
+2026-07-18,13:53,WEB-FIRST-RWD,Frontend,frontend/lib/layout/responsive_layout.dart,新增,建立 Mobile Tablet Desktop 共用 breakpoint 與 responsive content shell,Codex,否,否,是,否,Web-first RWD 核心設定
+2026-07-18,13:53,WEB-FIRST-RWD,Frontend,frontend/lib/pages/splash_page.dart,修改,保留 Mobile Penpot canvas 並將 Tablet Desktop 改為 flow layout,Codex,否,否,是,否,不縮放完整 Web canvas
+2026-07-18,13:53,WEB-FIRST-RWD,Frontend,frontend/lib/pages/login_page.dart,修改,登入頁依共用 breakpoint 切換 Mobile Tablet Desktop 版型,Codex,否,否,是,否,Web desktop 雙欄
+2026-07-18,13:53,WEB-FIRST-RWD,Frontend,frontend/lib/pages/register_page.dart,修改,註冊頁品牌與表單改為響應式 flow layout,Codex,否,否,是,否,Tablet compact form
+2026-07-18,13:53,WEB-FIRST-RWD,Frontend,frontend/lib/pages/home_page.dart,修改,新增 Tablet flow layout 並修正 900 950 1024px overflow,Codex,否,否,是,否,Desktop 從 1200px 啟用
+2026-07-18,13:53,WEB-FIRST-RWD,Frontend,frontend/lib/pages/profile_page.dart,修改,Profile Tablet Desktop 改用可捲動相對版面,Codex,否,否,是,否,Mobile 保留 Penpot canvas
+2026-07-18,13:53,WEB-FIRST-RWD,Frontend,frontend/lib/widgets/profile/profile_penpot_canvas.dart,修改,新增 Profile Web flow card 與響應式單雙欄欄位,Codex,否,否,是,否,移除 Web 整頁固定 canvas
+2026-07-18,13:53,WEB-FIRST-RWD,Test,frontend/test,修改,新增動態 resize 與 390 至 1920px viewport 測試並更新舊路由測試,Codex,否,否,是,否,完整 107 tests passed
+2026-07-18,13:53,WEB-FIRST-RWD,Documentation,README.md,修改,補上 Web-first 本機開發與 RWD 驗收設定,Codex,否,否,是,否,固定 localhost 5050
+2026-07-18,13:53,WEB-FIRST-RWD,Documentation,docs/PROJECT_SPEC.md,修改,定義 Web-first 優先順序與三平台相容原則,Codex,否,否,是,否,無需求擴張
+2026-07-18,13:53,WEB-FIRST-RWD,Documentation,docs/UI_SPEC.md,修改,同步共用 breakpoint Penpot 定位盤點與相對 layout 規範,Codex,否,否,是,否,取代舊 900px 規格
+2026-07-18,13:53,WEB-FIRST-RWD,Documentation,docs/CODING_STANDARD.md,修改,補上 ResponsiveLayout 使用與 Web 主版面禁止固定座標規範,Codex,否,否,是,否,Web resize 即時 reflow
+2026-07-18,13:53,WEB-FIRST-RWD,Documentation,docs/TASKS.md,修改,新增 Web-first RWD Task 並完成狀態流轉,Codex,否,否,否,否,TODO IN PROGRESS REVIEW DONE
+2026-07-18,13:53,WEB-FIRST-RWD,Documentation,log/CHANGE_LOG.md,修改,新增工作報告與一個月 Log 保存期限檢查,Codex,否,否,否,否,無過期 Log
+2026-07-18,13:53,WEB-FIRST-RWD,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Web-first RWD 異動歷史,Codex,否,否,否,否,Analyze Test Web build 通過

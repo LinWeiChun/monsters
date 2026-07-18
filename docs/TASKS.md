@@ -23,6 +23,15 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ---
 
+## 插隊任務：Web-first RWD 共用版型（2026-07-18）
+
+- [x] TODO：盤點 Splash、Login、Register、Home、Profile 的 Penpot 實作與固定／相對定位狀況。
+- [x] IN PROGRESS：建立 Mobile／Tablet／Desktop 共用 breakpoint 與 Responsive shell，將 Web 主版面改為 flow layout。
+- [x] REVIEW：修正 Home 在 900、950、1024px 的負 padding／overflow，並補齊 390 至 1920px viewport 與動態 resize 測試。
+- [x] DONE：將前端開發設定明確改為 Web-first、保留 Android／iOS 相容，完成 Analyze、完整 Test、Web build、文件與 Log 同步。
+
+---
+
 ## 插隊任務：登入帳號或 Email 驗證修正
 
 - [x] 比對 `bec7bcf` 與 `0b3d265` 的登入欄位及後端查詢行為（DONE）

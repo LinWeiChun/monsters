@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../layout/responsive_layout.dart';
 import '../providers/auth_provider.dart';
 import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
@@ -15,9 +16,6 @@ class RegisterPage extends ConsumerStatefulWidget {
 }
 
 class _RegisterPageState extends ConsumerState<RegisterPage> {
-  static const _desktopBreakpoint = 900.0;
-  static const _desktopReferenceWidth = 1440.0;
-  static const _desktopBrandWidth = 620.0;
   static const _desktopFormWidth = 520.0;
 
   final _formKey = GlobalKey<FormState>();
@@ -45,59 +43,35 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
     return Scaffold(
       backgroundColor: AppColors.registerBrandBackground,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isDesktop = constraints.maxWidth >= _desktopBreakpoint;
-          if (isDesktop) {
-            final isReferenceWide =
-                constraints.maxWidth >= _desktopReferenceWidth;
-            final brandWidth =
-                isReferenceWide
-                    ? _desktopBrandWidth
-                    : constraints.maxWidth * (_desktopBrandWidth / 1440);
-            final horizontalPadding = isReferenceWide ? 136.0 : AppSpacing.xxl;
-            final formWidth =
-                isReferenceWide
-                    ? _desktopFormWidth
-                    : (constraints.maxWidth -
-                            brandWidth -
-                            horizontalPadding * 2)
-                        .clamp(360.0, _desktopFormWidth);
-
-            return Row(
+      body: ResponsiveLayout(
+        mobile:
+            (context, constraints) => SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(36, 46, 36, 48),
+                child: _buildForm(authState, isMobile: true),
+              ),
+            ),
+        tablet:
+            (context, constraints) =>
+                _RegisterCompactLayout(form: _buildForm(authState)),
+        desktop:
+            (context, constraints) => Row(
               children: [
-                SizedBox(width: brandWidth, child: const _RegisterBrandPanel()),
+                const Expanded(flex: 43, child: _RegisterBrandPanel()),
                 Expanded(
+                  flex: 57,
                   child: ColoredBox(
                     color: AppColors.registerFormBackground,
                     child: SafeArea(
                       child: SingleChildScrollView(
-                        padding: EdgeInsets.fromLTRB(
-                          horizontalPadding,
-                          46,
-                          AppSpacing.xxl,
-                          56,
-                        ),
+                        padding: const EdgeInsets.fromLTRB(64, 46, 64, 56),
                         child: Align(
-                          alignment: Alignment.topLeft,
-                          child: SizedBox(
-                            width: formWidth,
-                            child: _RegisterForm(
-                              formKey: _formKey,
-                              accountController: _accountController,
-                              emailController: _emailController,
-                              userNameController: _userNameController,
-                              passwordController: _passwordController,
-                              confirmPasswordController:
-                                  _confirmPasswordController,
-                              obscurePassword: _obscurePassword,
-                              obscureConfirmPassword: _obscureConfirmPassword,
-                              authState: authState,
-                              onTogglePassword: _togglePassword,
-                              onToggleConfirmPassword: _toggleConfirmPassword,
-                              onSubmit: _submit,
-                              isDesktop: true,
+                          alignment: Alignment.topCenter,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(
+                              maxWidth: _desktopFormWidth,
                             ),
+                            child: _buildForm(authState, isDesktop: true),
                           ),
                         ),
                       ),
@@ -105,31 +79,31 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   ),
                 ),
               ],
-            );
-          }
-
-          return SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(36, 46, 36, 48),
-              child: _RegisterForm(
-                formKey: _formKey,
-                accountController: _accountController,
-                emailController: _emailController,
-                userNameController: _userNameController,
-                passwordController: _passwordController,
-                confirmPasswordController: _confirmPasswordController,
-                obscurePassword: _obscurePassword,
-                obscureConfirmPassword: _obscureConfirmPassword,
-                authState: authState,
-                onTogglePassword: _togglePassword,
-                onToggleConfirmPassword: _toggleConfirmPassword,
-                onSubmit: _submit,
-                isMobile: true,
-              ),
             ),
-          );
-        },
       ),
+    );
+  }
+
+  Widget _buildForm(
+    AuthState authState, {
+    bool isDesktop = false,
+    bool isMobile = false,
+  }) {
+    return _RegisterForm(
+      formKey: _formKey,
+      accountController: _accountController,
+      emailController: _emailController,
+      userNameController: _userNameController,
+      passwordController: _passwordController,
+      confirmPasswordController: _confirmPasswordController,
+      obscurePassword: _obscurePassword,
+      obscureConfirmPassword: _obscureConfirmPassword,
+      authState: authState,
+      onTogglePassword: _togglePassword,
+      onToggleConfirmPassword: _toggleConfirmPassword,
+      onSubmit: _submit,
+      isDesktop: isDesktop,
+      isMobile: isMobile,
     );
   }
 
@@ -243,34 +217,31 @@ class _RegisterBrandPanel extends StatelessWidget {
     return ColoredBox(
       color: AppColors.registerBrandBackground,
       child: SafeArea(
-        child: Stack(
-          children: [
-            Positioned(
-              left: 54,
-              top: 42,
-              child: Image.asset(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(54, 42, 54, 56),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Image.asset(
                 'assets/images/title.png',
                 width: 160,
                 height: 50,
                 fit: BoxFit.contain,
                 semanticLabel: '貘nsters',
               ),
-            ),
-            Positioned(
-              left: 130,
-              top: 208,
-              child: Image.asset(
-                'assets/images/icon.png',
-                width: 360,
-                height: 360,
-                fit: BoxFit.contain,
+              const SizedBox(height: 24),
+              Expanded(
+                child: Center(
+                  child: Image.asset(
+                    'assets/images/icon.png',
+                    width: 360,
+                    height: 360,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
-            ),
-            Positioned(
-              left: 92,
-              top: 622,
-              width: 436,
-              child: Text(
+              const SizedBox(height: 24),
+              Text(
                 '從一個帳號開始，\n把每一天好好收進來。',
                 style: textTheme.headlineSmall?.copyWith(
                   color: AppColors.registerAccentText,
@@ -278,19 +249,56 @@ class _RegisterBrandPanel extends StatelessWidget {
                   height: 1.25,
                 ),
               ),
-            ),
-            Positioned(
-              left: 92,
-              top: 756,
-              child: Text(
+              const SizedBox(height: 32),
+              Text(
                 '貘nsters · 陪你整理每一種心情',
                 style: textTheme.bodySmall?.copyWith(
                   color: AppColors.registerMuted,
                   fontWeight: FontWeight.w500,
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RegisterCompactLayout extends StatelessWidget {
+  const _RegisterCompactLayout({required this.form});
+
+  final Widget form;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: AppColors.registerFormBackground,
+      child: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xxl,
+            vertical: AppSpacing.xl,
+          ),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Image.asset(
+                      'assets/images/title.png',
+                      width: 170,
+                      semanticLabel: '貘nsters',
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  form,
+                ],
+              ),
             ),
-          ],
+          ),
         ),
       ),
     );

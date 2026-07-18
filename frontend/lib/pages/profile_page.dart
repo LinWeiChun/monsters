@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../layout/responsive_layout.dart';
 import '../models/user_profile.dart';
 import '../providers/user_profile_provider.dart';
 import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_spacing.dart';
 import '../widgets/state/error_view.dart';
 import '../widgets/state/loading_view.dart';
 
@@ -19,8 +21,6 @@ class ProfilePage extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
-  static const double _desktopBreakpoint = 900;
-
   final _formKey = GlobalKey<FormState>();
   final _userNameController = TextEditingController();
   final _birthdayController = TextEditingController();
@@ -88,42 +88,51 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     return Form(
       key: _formKey,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final isDesktop = constraints.maxWidth >= _desktopBreakpoint;
-          final size = isDesktop ? const Size(1440, 900) : const Size(390, 844);
-          return ClipRect(
-            child: FittedBox(
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-              child: SizedBox(
-                width: size.width,
-                height: size.height,
-                child:
-                    isDesktop
-                        ? _DesktopProfileCanvas(
-                          profile: profile,
-                          userNameController: _userNameController,
-                          birthdayController: _birthdayController,
-                          isSaving: state.isSaving,
-                          errorMessage: state.errorMessage,
-                          onSave: _submit,
-                          onUnavailable: () => _showUnavailableMessage(context),
-                        )
-                        : _MobileProfileCanvas(
-                          profile: profile,
-                          userNameController: _userNameController,
-                          birthdayController: _birthdayController,
-                          isSaving: state.isSaving,
-                          errorMessage: state.errorMessage,
-                          onSave: _submit,
-                          onBack: () => context.goNamed(AppRoute.home),
-                          onUnavailable: () => _showUnavailableMessage(context),
-                        ),
+      child: ResponsiveLayout(
+        desktop:
+            (context, constraints) => _ResponsiveProfileCanvas(
+              profile: profile,
+              userNameController: _userNameController,
+              birthdayController: _birthdayController,
+              isSaving: state.isSaving,
+              errorMessage: state.errorMessage,
+              onSave: _submit,
+              onBack: () => context.goNamed(AppRoute.home),
+              onUnavailable: () => _showUnavailableMessage(context),
+            ),
+        tablet:
+            (context, constraints) => _ResponsiveProfileCanvas(
+              profile: profile,
+              userNameController: _userNameController,
+              birthdayController: _birthdayController,
+              isSaving: state.isSaving,
+              errorMessage: state.errorMessage,
+              onSave: _submit,
+              onBack: () => context.goNamed(AppRoute.home),
+              onUnavailable: () => _showUnavailableMessage(context),
+              compact: true,
+            ),
+        mobile:
+            (context, constraints) => ClipRect(
+              child: FittedBox(
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
+                child: SizedBox(
+                  width: 390,
+                  height: 844,
+                  child: _MobileProfileCanvas(
+                    profile: profile,
+                    userNameController: _userNameController,
+                    birthdayController: _birthdayController,
+                    isSaving: state.isSaving,
+                    errorMessage: state.errorMessage,
+                    onSave: _submit,
+                    onBack: () => context.goNamed(AppRoute.home),
+                    onUnavailable: () => _showUnavailableMessage(context),
+                  ),
+                ),
               ),
             ),
-          );
-        },
       ),
     );
   }
