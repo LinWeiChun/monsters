@@ -45,6 +45,26 @@ void main() {
     expect(find.text('帳號可使用英文、數字與底線　·　密碼至少 8 字元'), findsOneWidget);
   });
 
+  for (final size in const [
+    Size(600, 700),
+    Size(900, 700),
+    Size(1024, 768),
+    Size(1199, 800),
+  ]) {
+    testWidgets('register form reflows without overflow at $size', (
+      tester,
+    ) async {
+      await _setSurface(tester, size);
+      await tester.pumpWidget(_registerApp(_FakeAuthRepository()));
+      await tester.pumpAndSettle();
+
+      expect(find.text('建立新帳號'), findsOneWidget);
+      expect(find.byKey(const Key('registerAccountField')), findsOneWidget);
+      expect(find.byKey(const Key('registerSubmitButton')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('validates required register fields', (tester) async {
     await _setMobileSurface(tester);
     await tester.pumpWidget(_registerApp(_FakeAuthRepository()));
@@ -203,7 +223,11 @@ void main() {
 }
 
 Future<void> _setMobileSurface(WidgetTester tester) async {
-  await tester.binding.setSurfaceSize(const Size(390, 844));
+  await _setSurface(tester, const Size(390, 844));
+}
+
+Future<void> _setSurface(WidgetTester tester, Size size) async {
+  await tester.binding.setSurfaceSize(size);
   addTearDown(() async {
     await tester.binding.setSurfaceSize(null);
   });

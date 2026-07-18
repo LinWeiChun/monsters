@@ -10,6 +10,8 @@
 * iOS
 * Web
 
+目前前端開發與驗收以 **Flutter Web-first** 為主，Android／iOS 仍維持共用程式相容。Web 畫面必須支援瀏覽器視窗即時縮放，並依 Mobile（小於 600px）、Tablet（600px 至 1199px）、Desktop（1200px 以上）流暢切換，不需重新整理頁面。
+
 ---
 
 # 專案特色
@@ -411,6 +413,16 @@ flutter analyze
 flutter test
 flutter build web
 ```
+
+Web 本機開發預設使用固定網址 `http://localhost:5050`：
+
+```bash
+cd frontend
+GOOGLE_CLIENT_ID=your-web-client-id.apps.googleusercontent.com \
+  ./tool/run_web_local.sh
+```
+
+開發者可直接拖曳瀏覽器寬度檢查 RWD；主要驗收寬度為 390、600、900、1024、1200、1440 與 1920px。共用 breakpoint 與內容寬度規則定義於 `frontend/lib/layout/responsive_layout.dart`，頁面不得自行建立互相衝突的切換值。
 
 後端：
 

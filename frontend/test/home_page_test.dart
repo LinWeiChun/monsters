@@ -81,6 +81,46 @@ void main() {
     expect(find.byKey(const Key('homeAccountMenu')), findsOneWidget);
   });
 
+  for (final size in const [
+    Size(600, 700),
+    Size(900, 700),
+    Size(1024, 768),
+    Size(1199, 800),
+  ]) {
+    testWidgets('tablet home reflows without overflow at $size', (
+      tester,
+    ) async {
+      await pumpHome(tester, size);
+
+      expect(find.byKey(const Key('tabletCompanionHero')), findsOneWidget);
+      expect(find.byKey(const Key('desktopCompanionHero')), findsNothing);
+      expect(find.byKey(const Key('mobileCompanionHero')), findsNothing);
+      expect(find.byKey(const Key('homeTabletLogo')), findsOneWidget);
+      expect(find.byKey(const Key('homeAccountMenu')), findsOneWidget);
+      expect(find.byKey(const Key('homeAnnoyanceChatButton')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('1200px switches to desktop home navigation', (tester) async {
+    await pumpHome(tester, const Size(1200, 800));
+
+    expect(find.byKey(const Key('desktopCompanionHero')), findsOneWidget);
+    expect(find.byKey(const Key('tabletCompanionHero')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('desktop home remains bounded on a wide web viewport', (
+    tester,
+  ) async {
+    await pumpHome(tester, const Size(1920, 1080));
+
+    expect(find.byKey(const Key('desktopCompanionHero')), findsOneWidget);
+    expect(find.byKey(const Key('homeDesktopLogo')), findsOneWidget);
+    expect(find.byKey(const Key('homeAnnoyanceChatButton')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('primary home action opens annoyance chat on desktop', (
     tester,
   ) async {

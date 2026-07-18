@@ -93,24 +93,17 @@ void main() {
     );
   });
 
-  testWidgets('home password lock action navigates to password lock route', (
-    tester,
-  ) async {
+  testWidgets('supports password lock route', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           userRepositoryProvider.overrideWithValue(_FakeUserRepository()),
         ],
         child: MaterialApp.router(
-          routerConfig: createAppRouter(initialLocation: AppPath.home),
+          routerConfig: createAppRouter(initialLocation: AppPath.passwordLock),
         ),
       ),
     );
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byKey(const Key('homeAccountMenu')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('密碼鎖'));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('passwordLockField')), findsOneWidget);

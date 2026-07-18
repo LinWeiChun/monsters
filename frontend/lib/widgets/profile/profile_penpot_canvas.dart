@@ -1,14 +1,16 @@
 part of '../../pages/profile_page.dart';
 
-class _DesktopProfileCanvas extends StatelessWidget {
-  const _DesktopProfileCanvas({
+class _ResponsiveProfileCanvas extends StatelessWidget {
+  const _ResponsiveProfileCanvas({
     required this.profile,
     required this.userNameController,
     required this.birthdayController,
     required this.isSaving,
     required this.errorMessage,
     required this.onSave,
+    required this.onBack,
     required this.onUnavailable,
+    this.compact = false,
   });
 
   final UserProfile profile;
@@ -17,152 +19,558 @@ class _DesktopProfileCanvas extends StatelessWidget {
   final bool isSaving;
   final String? errorMessage;
   final VoidCallback onSave;
+  final VoidCallback onBack;
+  final VoidCallback onUnavailable;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: AppColors.profileBackground,
+      child: Column(
+        children: [
+          _ResponsiveProfileHeader(
+            compact: compact,
+            isSaving: isSaving,
+            onSave: onSave,
+            onBack: onBack,
+            onUnavailable: onUnavailable,
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: ResponsiveContent(
+                maxWidth: 1088,
+                horizontalPadding: compact ? 32 : 48,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: compact ? 32 : 44),
+                  child: _ResponsiveProfileCard(
+                    profile: profile,
+                    userNameController: userNameController,
+                    birthdayController: birthdayController,
+                    isSaving: isSaving,
+                    errorMessage: errorMessage,
+                    onSave: onSave,
+                    compact: compact,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ResponsiveProfileHeader extends StatelessWidget {
+  const _ResponsiveProfileHeader({
+    required this.compact,
+    required this.isSaving,
+    required this.onSave,
+    required this.onBack,
+    required this.onUnavailable,
+  });
+
+  final bool compact;
+  final bool isSaving;
+  final VoidCallback onSave;
+  final VoidCallback onBack;
   final VoidCallback onUnavailable;
 
   @override
   Widget build(BuildContext context) {
-    final account = _formatAccount(profile.account);
-    return Stack(
-      children: [
-        const Positioned.fill(
-          child: ColoredBox(color: AppColors.profileBackground),
+    return ColoredBox(
+      color: AppColors.profileSurface,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: compact ? 32 : 42),
+          child: SizedBox(
+            height: 72,
+            child: Row(
+              children: [
+                InkWell(
+                  onTap: onBack,
+                  child: Image.asset(
+                    'assets/images/app_logo.png',
+                    width: 118,
+                    height: 36,
+                    fit: BoxFit.fill,
+                    semanticLabel: '返回陪伴首頁',
+                  ),
+                ),
+                if (!compact) ...[
+                  const SizedBox(width: 52),
+                  TextButton(onPressed: onBack, child: const Text('陪伴首頁')),
+                  TextButton(
+                    onPressed: onUnavailable,
+                    child: const Text('心的軌跡'),
+                  ),
+                  TextButton(
+                    onPressed: onUnavailable,
+                    child: const Text('怪獸收藏'),
+                  ),
+                ],
+                const Spacer(),
+                Text(
+                  '個人資料',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppColors.profileInk,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.lg),
+                SizedBox(
+                  height: 44,
+                  child: FilledButton(
+                    key: const Key('profileSaveButton'),
+                    onPressed: isSaving ? null : onSave,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.profilePrimary,
+                      foregroundColor: AppColors.profileOnPrimary,
+                      shape: const RoundedRectangleBorder(),
+                    ),
+                    child: Text(isSaving ? '儲存中' : '儲存變更'),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-        const _DesktopNavBar(),
-        const _TextBlock(
-          left: 182,
-          top: 24,
-          width: 120,
-          height: 30,
-          text: '個人資料',
-          color: AppColors.profileInk,
-          fontSize: 22,
-          fontWeight: FontWeight.w800,
-        ),
-        _SaveButton.desktop(isSaving: isSaving, onTap: onSave),
-        const _RectBlock(
-          left: 182,
-          top: 116,
-          width: 1088,
-          height: 736,
-          color: AppColors.profileSurface,
-          border: AppColors.profileBorder,
-        ),
-        _ProfileAvatar(
-          profile: profile,
-          left: 230,
-          top: 160,
-          halo: 172,
-          image: 108,
-        ),
-        const _EditAvatarButton(left: 350, top: 272, size: 44),
-        _TextBlock(
-          key: const Key('profileDisplayName'),
-          left: 442,
-          top: 184,
-          width: 300,
-          height: 34,
-          text: profile.userName,
-          color: AppColors.profileInk,
-          fontSize: 24,
-          fontWeight: FontWeight.w800,
-        ),
-        _TextBlock(
-          left: 442,
-          top: 224,
-          width: 240,
-          height: 18,
-          text: account,
-          color: AppColors.profileMuted,
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-        ),
-        const _StatusPill(left: 442, top: 262, width: 124, height: 30),
-        const _TextBlock(
-          left: 230,
-          top: 370,
-          width: 80,
-          height: 20,
-          text: '基本資料',
-          color: AppColors.profileInk,
-          fontSize: 14,
-          fontWeight: FontWeight.w800,
-        ),
-        _ProfileEditableField(
-          fieldKey: const Key('profileUserNameField'),
-          label: '暱稱',
-          labelLeft: 230,
-          labelTop: 408,
-          left: 230,
-          top: 432,
-          width: 460,
-          height: 56,
-          controller: userNameController,
-          validator: _ProfilePageState._validateUserName,
-          textInputAction: TextInputAction.next,
-        ),
-        _ProfileEditableField(
-          fieldKey: const Key('profileBirthdayField'),
-          label: '生日',
-          labelLeft: 726,
-          labelTop: 408,
-          left: 726,
-          top: 432,
-          width: 460,
-          height: 56,
-          controller: birthdayController,
-          validator: _ProfilePageState._validateBirthday,
-          textInputAction: TextInputAction.done,
-          keyboardType: TextInputType.datetime,
-          onSubmitted: (_) {
-            if (!isSaving) {
-              onSave();
-            }
+      ),
+    );
+  }
+}
+
+class _ResponsiveProfileCard extends StatelessWidget {
+  const _ResponsiveProfileCard({
+    required this.profile,
+    required this.userNameController,
+    required this.birthdayController,
+    required this.isSaving,
+    required this.errorMessage,
+    required this.onSave,
+    required this.compact,
+  });
+
+  final UserProfile profile;
+  final TextEditingController userNameController;
+  final TextEditingController birthdayController;
+  final bool isSaving;
+  final String? errorMessage;
+  final VoidCallback onSave;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.profileSurface,
+        border: Border.all(color: AppColors.profileBorder),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(compact ? AppSpacing.xl : AppSpacing.xxl),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final useColumns = constraints.maxWidth >= 760;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _ResponsiveProfileIdentity(profile: profile, compact: compact),
+                SizedBox(height: compact ? 36 : 48),
+                Text(
+                  '基本資料',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: AppColors.profileInk,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                _ResponsiveProfileFields(
+                  useColumns: useColumns,
+                  first: _FlowProfileEditableField(
+                    fieldKey: const Key('profileUserNameField'),
+                    label: '暱稱',
+                    controller: userNameController,
+                    validator: _ProfilePageState._validateUserName,
+                    textInputAction: TextInputAction.next,
+                  ),
+                  second: _FlowProfileEditableField(
+                    fieldKey: const Key('profileBirthdayField'),
+                    label: '生日',
+                    controller: birthdayController,
+                    validator: _ProfilePageState._validateBirthday,
+                    keyboardType: TextInputType.datetime,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) {
+                      if (!isSaving) {
+                        onSave();
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                _ResponsiveProfileFields(
+                  useColumns: useColumns,
+                  first: _FlowProfileReadonlyField(
+                    label: 'Email',
+                    value: profile.email,
+                  ),
+                  second: _FlowProfileReadonlyField(
+                    label: '帳號',
+                    value: profile.account ?? '尚未設定',
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                _FlowSaveStateMessage(errorMessage: errorMessage),
+                const SizedBox(height: AppSpacing.lg),
+                const Text(
+                  'Email 與帳號目前不可在此修改。',
+                  style: TextStyle(
+                    color: AppColors.profileMuted,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            );
           },
         ),
-        _ReadonlyField(
-          label: 'Email',
-          value: profile.email,
-          left: 230,
-          top: 540,
-          labelLeft: 230,
-          labelTop: 516,
-          width: 460,
-          height: 56,
-          lockLeft: 662,
-          lockTop: 560,
+      ),
+    );
+  }
+}
+
+class _ResponsiveProfileIdentity extends StatelessWidget {
+  const _ResponsiveProfileIdentity({
+    required this.profile,
+    required this.compact,
+  });
+
+  final UserProfile profile;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final account = _formatAccount(profile.account);
+    final details = Column(
+      crossAxisAlignment:
+          compact ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      children: [
+        Text(
+          profile.userName,
+          key: const Key('profileDisplayName'),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            color: AppColors.profileInk,
+            fontWeight: FontWeight.w800,
+          ),
         ),
-        _ReadonlyField(
-          label: '帳號',
-          value: profile.account ?? '尚未設定',
-          left: 726,
-          top: 540,
-          labelLeft: 726,
-          labelTop: 516,
-          width: 460,
-          height: 56,
-          lockLeft: 1158,
-          lockTop: 560,
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          account,
+          style: const TextStyle(color: AppColors.profileMuted, fontSize: 13),
         ),
-        _SaveStateMessage(
-          left: 230,
-          top: 650,
-          width: 956,
-          height: 72,
-          errorMessage: errorMessage,
+        const SizedBox(height: AppSpacing.md),
+        const DecoratedBox(
+          decoration: BoxDecoration(color: AppColors.profileSuccessBackground),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+            child: Text(
+              '●  帳號正常',
+              style: TextStyle(
+                color: AppColors.profileSuccessText,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
         ),
-        const _TextBlock(
-          left: 230,
-          top: 764,
-          width: 260,
-          height: 18,
-          text: 'Email 與帳號目前不可在此修改。',
-          color: AppColors.profileMuted,
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
+      ],
+    );
+    if (compact) {
+      return Column(
+        children: [
+          _FlowProfileAvatar(profile: profile),
+          const SizedBox(height: AppSpacing.lg),
+          details,
+        ],
+      );
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _FlowProfileAvatar(profile: profile),
+        const SizedBox(width: 36),
+        Expanded(child: details),
+      ],
+    );
+  }
+}
+
+class _FlowProfileAvatar extends StatelessWidget {
+  const _FlowProfileAvatar({required this.profile});
+
+  final UserProfile profile;
+
+  @override
+  Widget build(BuildContext context) {
+    final initial =
+        profile.userName.isEmpty ? '?' : profile.userName.characters.first;
+    return SizedBox.square(
+      dimension: 148,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          const DecoratedBox(
+            key: Key('profileAvatar'),
+            decoration: BoxDecoration(
+              color: AppColors.profileAvatarHalo,
+              shape: BoxShape.circle,
+            ),
+            child: SizedBox.square(dimension: 148),
+          ),
+          ClipOval(
+            child: SizedBox.square(
+              dimension: 104,
+              child:
+                  profile.avatarUrl == null
+                      ? ColoredBox(
+                        color: AppColors.profileAvatarHalo,
+                        child: Center(
+                          child: Text(
+                            initial,
+                            style: const TextStyle(
+                              color: AppColors.profileOnPrimary,
+                              fontSize: 36,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      )
+                      : Image.network(profile.avatarUrl!, fit: BoxFit.cover),
+            ),
+          ),
+          const Align(
+            alignment: Alignment.bottomRight,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: AppColors.profileSurface,
+                shape: BoxShape.circle,
+              ),
+              child: Padding(
+                padding: EdgeInsets.all(12),
+                child: Text(
+                  '✎',
+                  style: TextStyle(
+                    color: AppColors.profilePrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ResponsiveProfileFields extends StatelessWidget {
+  const _ResponsiveProfileFields({
+    required this.useColumns,
+    required this.first,
+    required this.second,
+  });
+
+  final bool useColumns;
+  final Widget first;
+  final Widget second;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!useColumns) {
+      return Column(
+        children: [first, const SizedBox(height: AppSpacing.lg), second],
+      );
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: first),
+        const SizedBox(width: 36),
+        Expanded(child: second),
+      ],
+    );
+  }
+}
+
+class _FlowProfileEditableField extends StatelessWidget {
+  const _FlowProfileEditableField({
+    required this.fieldKey,
+    required this.label,
+    required this.controller,
+    required this.validator,
+    required this.textInputAction,
+    this.keyboardType,
+    this.onSubmitted,
+  });
+
+  final Key fieldKey;
+  final String label;
+  final TextEditingController controller;
+  final String? Function(String?) validator;
+  final TextInputAction textInputAction;
+  final TextInputType? keyboardType;
+  final ValueChanged<String>? onSubmitted;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _FlowProfileLabel(label),
+        const SizedBox(height: AppSpacing.sm),
+        TextFormField(
+          key: fieldKey,
+          controller: controller,
+          validator: validator,
+          keyboardType: keyboardType,
+          textInputAction: textInputAction,
+          onFieldSubmitted: onSubmitted,
+          decoration: _flowProfileInputDecoration(),
         ),
       ],
     );
   }
+}
+
+class _FlowProfileReadonlyField extends StatelessWidget {
+  const _FlowProfileReadonlyField({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _FlowProfileLabel(label),
+        const SizedBox(height: AppSpacing.sm),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: AppColors.profileReadonlyFill,
+            border: Border.all(color: AppColors.profileBorder),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    value,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppColors.profileMuted,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                const Text(
+                  '●',
+                  style: TextStyle(color: AppColors.profileMuted, fontSize: 10),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FlowProfileLabel extends StatelessWidget {
+  const _FlowProfileLabel(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      style: const TextStyle(
+        color: AppColors.profileMuted,
+        fontSize: 12,
+        fontWeight: FontWeight.w700,
+      ),
+    );
+  }
+}
+
+class _FlowSaveStateMessage extends StatelessWidget {
+  const _FlowSaveStateMessage({required this.errorMessage});
+
+  final String? errorMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasError = errorMessage != null;
+    final color =
+        hasError ? AppColors.profileError : AppColors.profileSuccessText;
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: AppColors.profileSuccessBackground,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        child: Row(
+          children: [
+            Text(
+              hasError ? '!' : '✓',
+              style: TextStyle(
+                color: color,
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Text(
+                errorMessage ?? '資料已是最新狀態',
+                key: hasError ? const Key('profileErrorMessage') : null,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+InputDecoration _flowProfileInputDecoration() {
+  return const InputDecoration(
+    filled: true,
+    fillColor: AppColors.profileFieldFill,
+    contentPadding: EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.zero,
+      borderSide: BorderSide(color: AppColors.profileBorder),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.zero,
+      borderSide: BorderSide(color: AppColors.profileBorder),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.zero,
+      borderSide: BorderSide(color: AppColors.profilePrimary),
+    ),
+  );
 }
 
 class _MobileProfileCanvas extends StatelessWidget {
@@ -519,14 +927,6 @@ class _ReadonlyField extends StatelessWidget {
 }
 
 class _SaveButton extends StatelessWidget {
-  const _SaveButton.desktop({required this.isSaving, required this.onTap})
-    : left = 1056,
-      top = 10,
-      width = 216,
-      height = 56,
-      text = '儲存變更',
-      fontSize = 15;
-
   const _SaveButton.mobile({required this.isSaving, required this.onTap})
     : left = 318,
       top = 26,
@@ -682,45 +1082,6 @@ class _EditAvatarButton extends StatelessWidget {
   }
 }
 
-class _StatusPill extends StatelessWidget {
-  const _StatusPill({
-    required this.left,
-    required this.top,
-    required this.width,
-    required this.height,
-  });
-
-  final double left;
-  final double top;
-  final double width;
-  final double height;
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        _RectBlock(
-          left: left,
-          top: top,
-          width: width,
-          height: height,
-          color: AppColors.profileSuccessBackground,
-        ),
-        _TextBlock(
-          left: left + 16,
-          top: top + 9,
-          width: width - 24,
-          height: 14,
-          text: '●  帳號正常',
-          color: AppColors.profileSuccessText,
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-        ),
-      ],
-    );
-  }
-}
-
 class _SaveStateMessage extends StatelessWidget {
   const _SaveStateMessage({
     required this.left,
@@ -772,71 +1133,6 @@ class _SaveStateMessage extends StatelessWidget {
           color: color,
           fontSize: mobile ? 13 : 15,
           fontWeight: FontWeight.w700,
-        ),
-      ],
-    );
-  }
-}
-
-class _DesktopNavBar extends StatelessWidget {
-  const _DesktopNavBar();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Stack(
-      children: [
-        Positioned(
-          left: 0,
-          top: 0,
-          width: 1440,
-          height: 72,
-          child: ColoredBox(color: AppColors.profileSurface),
-        ),
-        Positioned(
-          left: 42,
-          top: 18,
-          width: 118,
-          height: 36,
-          child: Image(
-            image: AssetImage('assets/images/app_logo.png'),
-            fit: BoxFit.fill,
-          ),
-        ),
-        _TextBlock(
-          left: 212,
-          top: 27,
-          width: 70,
-          height: 18,
-          text: '陪伴首頁',
-          color: AppColors.profileMuted,
-          fontSize: 14,
-          fontWeight: FontWeight.w700,
-        ),
-        _TextBlock(
-          left: 306,
-          top: 27,
-          width: 70,
-          height: 18,
-          text: '心的軌跡',
-          color: AppColors.profileMuted,
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-        ),
-        _TextBlock(
-          left: 400,
-          top: 27,
-          width: 70,
-          height: 18,
-          text: '怪獸收藏',
-          color: AppColors.profileMuted,
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-        ),
-        _CircleBlock(
-          left: 1360,
-          top: 18,
-          size: 36,
-          color: AppColors.profileAvatarHalo,
         ),
       ],
     );
