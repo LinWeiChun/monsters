@@ -1057,3 +1057,15 @@
 2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Documentation,docs/TASKS.md,修改,更新 Phase 4 contract 任務與後續 Phase Penpot 檢查,Codex,否,否,是,否,TODO IN PROGRESS REVIEW DONE
 2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Documentation,log/CHANGE_LOG.md,修改,新增 Phase 4 準備工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
 2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Phase 4 contract 與 Penpot 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改
+2026-07-19,07:48,PHASE4-DIARY-CORE,Backend,backend/src/main/java/com/monsters/entity/entry/Entry.java,修改,新增 Diary factory update 與 Entry type invariant,Codex,否,否,否,否,共用 Entry 不新增 Diary Entity
+2026-07-19,07:48,PHASE4-DIARY-CORE,Backend,backend/src/main/java/com/monsters/dto/diary,新增,建立 Diary response media 與 record method DTO,Codex,是,否,否,否,Phase 4 reward 固定 null
+2026-07-19,07:48,PHASE4-DIARY-CORE,Backend,backend/src/main/java/com/monsters/mapper/diary/DiaryMapper.java,新增,建立 Diary response 與 active media mapping,Codex,是,否,否,否,不輸出 private R2 object key
+2026-07-19,07:48,PHASE4-DIARY-CORE,Backend,backend/src/main/java/com/monsters/service/diary/DiaryService.java,新增,建立 owner lookup Mood lookup response 與主要內容驗證,Codex,是,否,否,否,沿用共用 Entry repositories
+2026-07-19,07:48,PHASE4-DIARY-CORE,Backend,backend/src/main/java/com/monsters/controller/diary/DiaryController.java,新增,建立 api diaries Controller 骨架,Codex,是,否,否,否,尚無 endpoint
+2026-07-19,07:48,PHASE4-DIARY-CORE,Test,backend/src/test/java/com/monsters,新增,新增 Diary Controller Mapper Service 單元測試,Codex,是,否,否,否,targeted tests 通過
+2026-07-19,07:48,PHASE4-DIARY-CORE,Test,backend/src/test/java/com/monsters/entity/entry/EntryTest.java,修改,驗證 Diary safe defaults update 與 type invariant,Codex,否,否,否,否,
+2026-07-19,07:48,PHASE4-DIARY-CORE,Test,backend/src/test/java/com/monsters/entity/entry/MoodSchemaTest.java,修改,同步既有 migration timestamp seed assertion,Codex,否,否,否,否,未修改 SQL 行為
+2026-07-19,07:48,PHASE4-DIARY-CORE,Documentation,docs/DATABASE_SPEC.md,修改,補充 Diary Entry media 與 Mood lookup 規則,Codex,否,否,否,否,無 schema 或 Migration 異動
+2026-07-19,07:48,PHASE4-DIARY-CORE,Documentation,docs/TASKS.md,修改,記錄 Diary Core Task 狀態與完成範圍,Codex,否,否,否,否,TODO IN PROGRESS REVIEW DONE
+2026-07-19,07:48,PHASE4-DIARY-CORE,Documentation,log/CHANGE_LOG.md,修改,新增 Diary Core 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
+2026-07-19,07:48,PHASE4-DIARY-CORE,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Diary Core 異動歷史,Codex,否,否,否,否,Backend 216 tests passed

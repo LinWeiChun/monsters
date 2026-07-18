@@ -336,6 +336,7 @@ Unique：`user_id, monster_group_id`
 - `entry_type = 'ANNOYANCE'` 時，`annoyance_type_id` 必須有值。
 - Annoyance Service 依 `annoyance_types.code` 與 `moods.score` 解析 FK；Client 不得傳 lookup ID。
 - 每筆 ANNOYANCE 使用一種主要記錄方式：文字存於 `entries.content`，或一筆 image／audio／video 媒體；另可有一筆 drawing。此組合由 Service 驗證。
+- 每筆 DIARY 同樣只使用一種主要記錄方式：文字存於 `entries.content`，或一筆 image／audio／video 媒體；另可有一筆 optional drawing。Diary Service 依 `moods.score` 解析 FK，Client 不得傳 lookup ID。
 
 ### 3.13 entry_media
 

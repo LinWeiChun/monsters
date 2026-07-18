@@ -30,7 +30,11 @@ class MoodSchemaTest {
         assertThat(migration).contains("HAVING COUNT(*) > 1");
         assertThat(migration).contains("review data before migration");
         assertThat(migration).contains("ADD CONSTRAINT uk_moods_score UNIQUE (score)");
-        assertThat(migration).contains("('SCORE_1', '1分', 1, NULL, 1)");
-        assertThat(migration).contains("('SCORE_5', '5分', 5, NULL, 5)");
+        assertThat(migration).contains(
+                "('SCORE_1', '1分', 1, NULL, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
+        );
+        assertThat(migration).contains(
+                "('SCORE_5', '5分', 5, NULL, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
+        );
     }
 }

@@ -70,6 +70,26 @@ public class Entry extends BaseEntity {
         return entry;
     }
 
+    public static Entry diary(
+            Long userId,
+            Long moodId,
+            String content,
+            boolean shared,
+            LocalDateTime occurredAt
+    ) {
+        Entry entry = new Entry();
+        entry.userId = userId;
+        entry.entryType = EntryType.DIARY;
+        entry.annoyanceTypeId = null;
+        entry.moodId = moodId;
+        entry.content = content;
+        entry.shared = shared;
+        entry.solved = false;
+        entry.occurredAt = occurredAt;
+        entry.deleted = false;
+        return entry;
+    }
+
     public void updateAnnoyance(
             Long annoyanceTypeId,
             Long moodId,
@@ -82,6 +102,21 @@ public class Entry extends BaseEntity {
         this.moodId = moodId;
         this.content = content;
         this.shared = shared;
+        this.occurredAt = occurredAt;
+    }
+
+    public void updateDiary(
+            Long moodId,
+            String content,
+            boolean shared,
+            LocalDateTime occurredAt
+    ) {
+        requireDiary();
+        this.annoyanceTypeId = null;
+        this.moodId = moodId;
+        this.content = content;
+        this.shared = shared;
+        this.solved = false;
         this.occurredAt = occurredAt;
     }
 
@@ -102,6 +137,12 @@ public class Entry extends BaseEntity {
     private void requireAnnoyance() {
         if (entryType != EntryType.ANNOYANCE) {
             throw new IllegalStateException("Entry is not an annoyance");
+        }
+    }
+
+    private void requireDiary() {
+        if (entryType != EntryType.DIARY) {
+            throw new IllegalStateException("Entry is not a diary");
         }
     }
 
