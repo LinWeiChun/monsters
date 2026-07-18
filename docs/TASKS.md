@@ -23,12 +23,30 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ---
 
+## 插隊任務：PR #59／#60 合併衝突處理（2026-07-18）
+
+- [x] TODO：確認 `fix/auth-token-refresh` 與已合併 `develop` 的衝突檔案及兩側功能範圍。
+- [x] IN PROGRESS：合併 Web-first RWD、Profile Token Refresh、測試、Task 與 Log 內容。
+- [x] REVIEW：清除所有 conflict marker，完成 Flutter Analyze、115 項完整測試、Web build 與 Backend test／build。
+- [x] DONE：保留兩側功能與歷史紀錄，準備提交並推送 `fix/auth-token-refresh` 供 PR #60 再次檢查。
+
+---
+
 ## 插隊任務：Profile Token Refresh 修正（2026-07-18）
 
 - [x] TODO：確認 Profile 401 並定位 30 天本地 session 與 1 小時 access token 的期限落差。
 - [x] IN PROGRESS：新增 refresh API、refresh token rotation、30 天有效期與舊 token revocation。
 - [x] REVIEW：串接 Flutter 啟動換發、並行 401 單一 refresh、原 request 單次重試與失效回登入。
 - [x] DONE：Backend 完整測試、Flutter Analyze／完整測試通過，API／Database／UI／Decision／Log 同步完成。
+
+---
+
+## 插隊任務：Web-first RWD 共用版型（2026-07-18）
+
+- [x] TODO：盤點 Splash、Login、Register、Home、Profile 的 Penpot 實作與固定／相對定位狀況。
+- [x] IN PROGRESS：建立 Mobile／Tablet／Desktop 共用 breakpoint 與 Responsive shell，將 Web 主版面改為 flow layout。
+- [x] REVIEW：修正 Home 在 900、950、1024px 的負 padding／overflow，並補齊 390 至 1920px viewport 與動態 resize 測試。
+- [x] DONE：將前端開發設定明確改為 Web-first、保留 Android／iOS 相容，完成 Analyze、完整 Test、Web build、文件與 Log 同步。
 
 ---
 

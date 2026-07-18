@@ -6286,15 +6286,15 @@ Codex
 
 ---
 
-## 2026-07-18 14:17 AUTH-REFRESH
+## 2026-07-18 WEB-FIRST-RWD 與 AUTH-REFRESH
 
 Task
-Profile 401 與 30 天登入狀態 Token Refresh 修正
+整合 Web-first RWD 共用版型、Penpot 頁面相對定位，以及 Profile 401 與 30 天登入狀態 Token Refresh 修正
 
 執行者
 Codex
 
-### 完成內容
+### AUTH-REFRESH 完成內容
 
 - 確認 ProfilePage 本身與 `GET /api/users/me` 路徑正確，根因為本地 session 30 天但 access token 僅 1 小時。
 - 新增 `POST /api/auth/refresh`，驗證 refresh token 簽章、issuer、type、期限與使用者狀態。
@@ -6347,12 +6347,146 @@ Codex
 - Frontend `flutter build web --no-pub`：通過，已產出 `frontend/build/web`。
 - Web build 顯示既有 Cupertino icon font 提示，不影響建置或 Token Refresh。
 
+### WEB-FIRST-RWD 完成內容
+
+- 盤點 Splash、Login、Register、Home、Profile 的 Penpot 實作與定位方式。
+- 新增 Mobile／Tablet／Desktop 共用 breakpoint 與 `ResponsiveLayout`／`ResponsiveContent`。
+- 將 Splash、Login、Register、Home、Profile 的 Tablet／Desktop 主版面改為相對 flow layout；Mobile 保留 Penpot 精準畫布。
+- 修正 Home 在 900、950、1024px 的負 padding、導覽 overflow 與固定 canvas 問題。
+- 補上 Web-first 開發設定、固定本機網址、RWD 驗收寬度與瀏覽器即時 resize 規範。
+- 更新既有啟動、路由與密碼鎖測試，使測試契約符合目前路由及頁面入口。
+
+### 新增
+
+- `frontend/lib/layout/responsive_layout.dart`
+- `frontend/test/layout/responsive_layout_test.dart`
+
+### 修改
+
+- `frontend/lib/pages/splash_page.dart`
+- `frontend/lib/pages/login_page.dart`
+- `frontend/lib/pages/register_page.dart`
+- `frontend/lib/pages/home_page.dart`
+- `frontend/lib/pages/profile_page.dart`
+- `frontend/lib/widgets/profile/profile_penpot_canvas.dart`
+- `frontend/test/splash_page_test.dart`
+- `frontend/test/login_page_test.dart`
+- `frontend/test/register_page_test.dart`
+- `frontend/test/home_page_test.dart`
+- `frontend/test/profile_page_test.dart`
+- `frontend/test/widget_test.dart`
+- `frontend/test/routes/app_router_test.dart`
+- `frontend/test/password_lock_page_test.dart`
+- `README.md`
+- `frontend/README.md`
+- `docs/PROJECT_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/CODING_STANDARD.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 刪除
+
+- 無
+
+### system_data 參考
+
+- 已依本次盤點結果確認舊系統首頁與個人資料流程僅作互動意圖參考。
+- 未修改 `system_data/`，未沿用舊系統固定座標 Web 畫面、舊架構、金鑰或環境設定。
+
+### API
+
+- 無異動。
+
+### Database
+
+- 無異動，無 Migration。
+
+### 文件更新
+
+- 明確定義目前前端採 Web-first 開發與驗收，Android／iOS 維持相容。
+- 共用 breakpoint 定為 Mobile `< 600px`、Tablet `600px - 1199px`、Desktop `>= 1200px`。
+- 補上 Penpot 頁面定位方式盤點、相對 layout 規範與 390 至 1920px RWD 測試矩陣。
+
+### 測試
+
+- `flutter analyze --no-pub`：通過，No issues found。
+- `flutter test --no-pub`：通過，107 tests passed。
+- `flutter build web --no-pub`：通過，已產出 `frontend/build/web`。
+- Web build 顯示既有 Cupertino icon font 提示，不影響建置成功或本次 RWD 功能。
+
 ### Log 保存期限檢查
 
 - 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx` 是否存在。
-- 保存期限截止日為 2026-06-18；`CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv` 最早正式紀錄為 2026-06-29。
+- 保存期限截止日為 2026-06-18；`CHANGE_LOG.md` 最早正式 Task 日期為 2026-06-29，`CHANGE_HISTORY.csv` 最早日期為 2026-06-29。
 - 未發現超過一個月的正式紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源，未修改。
 
 ### 待確認事項
 
 - 部署時需確認未以環境變數將 `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` 覆寫回舊值 1209600。
+
+---
+
+## 2026-07-18 14:28 MERGE-PR59-PR60
+
+Task
+處理 PR #59 Web-first RWD 合併至 `develop` 後，PR #60 Profile Token Refresh 的合併衝突
+
+執行者
+Codex
+
+### 完成內容
+
+- 將 `origin/develop` 合併至 `fix/auth-token-refresh`，逐項解決 5 個衝突檔案。
+- `docs/TASKS.md`、`CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv` 均保留 RWD 與 Token Refresh 兩側紀錄。
+- `login_page_test.dart` 同時保留 Splash 未登入導頁、登出清除 session 與 Home 帳號入口驗證。
+- `widget_test.dart` 同時保留啟動登入頁、Auth 失效導頁與登入前往註冊頁驗證。
+- 已確認 Repository 不再存在 conflict marker，且 `git diff --check` 通過。
+
+### 修改
+
+- `docs/TASKS.md`
+- `frontend/test/login_page_test.dart`
+- `frontend/test/widget_test.dart`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### 新增／刪除
+
+- 無；其餘 RWD 新增檔案來自已合併的 PR #59。
+
+### system_data 參考
+
+- RWD 與 Token Refresh 原任務皆已完成 `system_data/` 檢查；本次只處理兩組已驗證變更的 Git 衝突，未發現需再次引用的舊流程。
+- 未修改 `system_data/`。
+
+### API
+
+- 本次衝突處理未新增或修改 API；保留 PR #60 已完成的 `POST /api/auth/refresh` 與相容 logout contract。
+
+### Database
+
+- 無異動，無 Migration；保留既有 `revoked_tokens` 使用方式。
+
+### 文件更新
+
+- 更新 Task 狀態並整合 RWD、Token Refresh 與本次 merge 工作報告及歷史紀錄。
+
+### 測試
+
+- Backend `./gradlew test`：通過。
+- Backend `./gradlew build`：通過。
+- Frontend `flutter analyze --no-pub`：通過，No issues found。
+- Frontend `flutter test --no-pub`：通過，115 tests passed。
+- Frontend `flutter build web --no-pub`：通過，已產出 `frontend/build/web`。
+- Web build 僅顯示既有 Cupertino icon font 提示，不影響建置結果。
+
+### Log 保存期限檢查
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；保存期限截止日為 2026-06-18。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月紀錄，本次未刪除 Log。
+
+### 待確認事項
+
+- 部署環境仍需確認未將 `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` 覆寫回舊值 1209600。

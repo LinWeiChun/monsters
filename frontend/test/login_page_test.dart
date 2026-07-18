@@ -36,6 +36,26 @@ void main() {
     expect(find.text('建立新帳號'), findsOneWidget);
   });
 
+  for (final size in const [
+    Size(600, 700),
+    Size(900, 700),
+    Size(1024, 768),
+    Size(1199, 800),
+    Size(1440, 900),
+    Size(1920, 1080),
+  ]) {
+    testWidgets('login form reflows without overflow at $size', (tester) async {
+      await _setSurface(tester, size);
+      await tester.pumpWidget(_loginApp(_FakeAuthRepository()));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
+      expect(find.byKey(const Key('loginPasswordField')), findsOneWidget);
+      expect(find.byKey(const Key('loginSubmitButton')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('validates required login fields', (tester) async {
     await _setMobileSurface(tester);
     await tester.pumpWidget(_loginApp(_FakeAuthRepository()));
@@ -166,11 +186,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('首頁'), findsWidgets);
+    expect(find.byKey(const Key('tabletCompanionHero')), findsOneWidget);
     expect(find.byKey(const Key('loginEmailField')), findsNothing);
   });
 
-  testWidgets('redirects to login when no active session exists', (
+  testWidgets('redirects from splash to login when no session exists', (
     tester,
   ) async {
     await tester.pumpWidget(_splashApp(_FakeAuthRepository()));
@@ -178,6 +198,7 @@ void main() {
 
     expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
     expect(find.byKey(const Key('loginPasswordField')), findsOneWidget);
+    expect(find.text('建立新帳號'), findsOneWidget);
   });
 
   test('logout clears repository and Google session', () async {
@@ -198,10 +219,39 @@ void main() {
 
     await googleSignInService.dispose();
   });
+
+  testWidgets('home keeps the account navigation control available', (
+    tester,
+  ) async {
+    final repository = _FakeAuthRepository();
+    final googleSignInService = _FakeGoogleSignInService();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(repository),
+          googleSignInServiceProvider.overrideWithValue(googleSignInService),
+        ],
+        child: MaterialApp.router(
+          routerConfig: createAppRouter(initialLocation: AppPath.home),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('homeAccountMenu')), findsOneWidget);
+    expect(repository.didLogout, isFalse);
+    expect(googleSignInService.didSignOut, isFalse);
+
+    await googleSignInService.dispose();
+  });
 }
 
 Future<void> _setMobileSurface(WidgetTester tester) async {
-  await tester.binding.setSurfaceSize(const Size(390, 844));
+  await _setSurface(tester, const Size(390, 844));
+}
+
+Future<void> _setSurface(WidgetTester tester, Size size) async {
+  await tester.binding.setSurfaceSize(size);
   addTearDown(() async {
     await tester.binding.setSurfaceSize(null);
   });

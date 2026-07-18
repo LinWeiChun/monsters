@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../layout/responsive_layout.dart';
 import '../providers/auth_provider.dart';
 import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
@@ -39,23 +40,22 @@ class _SplashPageState extends ConsumerState<SplashPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.splashBackground,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isDesktop = constraints.maxWidth >= 900;
-          final designSize =
-              isDesktop ? const Size(1440, 900) : const Size(390, 844);
-
-          return Center(
-            child: FittedBox(
-              fit: BoxFit.contain,
-              child: SizedBox(
-                width: designSize.width,
-                height: designSize.height,
-                child: _SplashArtwork(isDesktop: isDesktop),
+      body: ResponsiveLayout(
+        mobile:
+            (context, constraints) => const Center(
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: SizedBox(
+                  width: 390,
+                  height: 844,
+                  child: _SplashArtwork(isDesktop: false),
+                ),
               ),
             ),
-          );
-        },
+        tablet:
+            (context, constraints) =>
+                const _ResponsiveSplashArtwork(compact: true),
+        desktop: (context, constraints) => const _ResponsiveSplashArtwork(),
       ),
     );
   }
@@ -153,6 +153,164 @@ class _SplashArtwork extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class _ResponsiveSplashArtwork extends StatelessWidget {
+  const _ResponsiveSplashArtwork({this.compact = false});
+
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final logoWidth = compact ? 240.0 : 300.0;
+    final logoHeight = compact ? 74.0 : 92.0;
+    final haloSize = compact ? 280.0 : 330.0;
+    final monsterSize = compact ? 190.0 : 220.0;
+
+    return SafeArea(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: compact ? 32 : 48,
+                  vertical: 48,
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        'assets/images/app_logo.png',
+                        key: const Key('splashLogo'),
+                        width: logoWidth,
+                        height: logoHeight,
+                        fit: BoxFit.fill,
+                        semanticLabel: 'monsters logo',
+                      ),
+                      SizedBox(height: compact ? 36 : 58),
+                      SizedBox.square(
+                        dimension: haloSize,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            const Positioned.fill(
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: AppColors.splashHalo,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                            Image.asset(
+                              'assets/images/icon.png',
+                              key: const Key('splashMonster'),
+                              width: monsterSize,
+                              height: monsterSize,
+                              fit: BoxFit.contain,
+                              semanticLabel: 'monsters mascot',
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: compact ? 32 : 42),
+                      SizedBox(
+                        width: compact ? 340 : 390,
+                        child: Text(
+                          '把心裡的重量，先放在這裡。',
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            color: AppColors.splashAccentText,
+                            fontSize: compact ? 22 : 28,
+                            fontWeight: FontWeight.w700,
+                            height: 1.2,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: compact ? 32 : 46),
+                      SizedBox(
+                        width: 340,
+                        child: _ResponsiveSplashStatusCard(compact: compact),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _ResponsiveSplashStatusCard extends StatelessWidget {
+  const _ResponsiveSplashStatusCard({required this.compact});
+
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      key: const Key('splashStatusCard'),
+      decoration: BoxDecoration(
+        color: AppColors.splashStatusBackground,
+        border: Border.all(color: AppColors.splashStatusBorder),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 22 : 25,
+          vertical: compact ? 18 : 17,
+        ),
+        child: const Row(
+          children: [
+            const SizedBox.square(
+              dimension: 16,
+              child: DecoratedBox(
+                key: Key('splashStatusDot'),
+                decoration: BoxDecoration(
+                  color: AppColors.splashPrimary,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+            const SizedBox(width: 18),
+            const Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '正在確認登入狀態…',
+                    key: Key('splashStatusText'),
+                    style: TextStyle(
+                      color: AppColors.splashInk,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      height: 1.2,
+                    ),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    '最長保留 30 天登入狀態',
+                    key: Key('splashStatusHint'),
+                    style: TextStyle(
+                      color: AppColors.splashMuted,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w400,
+                      height: 1.2,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

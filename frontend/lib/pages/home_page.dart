@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../layout/responsive_layout.dart';
 import '../providers/auth_provider.dart';
 import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
-
-  static const double _desktopBreakpoint = 900;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,36 +21,39 @@ class HomePage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.homeBackground,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isDesktop = constraints.maxWidth >= _desktopBreakpoint;
-          if (isDesktop) {
-            return _DesktopHomeCanvas(
+      body: ResponsiveLayout(
+        desktop:
+            (context, constraints) => _DesktopHomeCanvas(
               greetingName: greetingName,
               onAddAnnoyance: () => context.goNamed(AppRoute.annoyanceChat),
               onProfile: () => context.goNamed(AppRoute.profile),
               onUnavailable: () => _showUnavailableMessage(context),
-            );
-          }
-
-          const size = Size(390, 844);
-          return ClipRect(
-            child: FittedBox(
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-              child: SizedBox(
-                width: size.width,
-                height: size.height,
-                child: _MobileHomeCanvas(
-                  greetingName: greetingName,
-                  onAddAnnoyance: () => context.goNamed(AppRoute.annoyanceChat),
-                  onProfile: () => context.goNamed(AppRoute.profile),
-                  onUnavailable: () => _showUnavailableMessage(context),
+            ),
+        tablet:
+            (context, constraints) => _TabletHomeCanvas(
+              greetingName: greetingName,
+              onAddAnnoyance: () => context.goNamed(AppRoute.annoyanceChat),
+              onProfile: () => context.goNamed(AppRoute.profile),
+              onUnavailable: () => _showUnavailableMessage(context),
+            ),
+        mobile:
+            (context, constraints) => ClipRect(
+              child: FittedBox(
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
+                child: SizedBox(
+                  width: 390,
+                  height: 844,
+                  child: _MobileHomeCanvas(
+                    greetingName: greetingName,
+                    onAddAnnoyance:
+                        () => context.goNamed(AppRoute.annoyanceChat),
+                    onProfile: () => context.goNamed(AppRoute.profile),
+                    onUnavailable: () => _showUnavailableMessage(context),
+                  ),
                 ),
               ),
             ),
-          );
-        },
       ),
     );
   }
@@ -162,6 +164,209 @@ class _DesktopHomeCanvas extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _TabletHomeCanvas extends StatelessWidget {
+  const _TabletHomeCanvas({
+    required this.greetingName,
+    required this.onAddAnnoyance,
+    required this.onProfile,
+    required this.onUnavailable,
+  });
+
+  final String greetingName;
+  final VoidCallback onAddAnnoyance;
+  final VoidCallback onProfile;
+  final VoidCallback onUnavailable;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: AppColors.homeBackground,
+      child: Column(
+        children: [
+          _TabletNavBar(onAddAnnoyance: onAddAnnoyance, onProfile: onProfile),
+          Expanded(
+            child: SingleChildScrollView(
+              child: ResponsiveContent(
+                maxWidth: 900,
+                horizontalPadding: 32,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 36),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        '陪你整理今天的心情',
+                        style: TextStyle(
+                          color: AppColors.homeInk,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w700,
+                          height: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        '畫面會依瀏覽器寬度重新排列，先選一件現在最想做的事。',
+                        style: TextStyle(
+                          color: AppColors.homeMuted,
+                          fontSize: 15,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                      const _DesktopHeroPanel(key: Key('tabletCompanionHero')),
+                      const SizedBox(height: 24),
+                      _TabletCollectionPanel(onUnavailable: onUnavailable),
+                      const SizedBox(height: 24),
+                      _DesktopActionColumn(
+                        onAddAnnoyance: onAddAnnoyance,
+                        onUnavailable: onUnavailable,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TabletNavBar extends StatelessWidget {
+  const _TabletNavBar({required this.onAddAnnoyance, required this.onProfile});
+
+  final VoidCallback onAddAnnoyance;
+  final VoidCallback onProfile;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: AppColors.homeSurface,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: SizedBox(
+            height: 72,
+            child: Row(
+              children: [
+                const Image(
+                  image: AssetImage('assets/images/app_logo.png'),
+                  key: Key('homeTabletLogo'),
+                  width: 124,
+                  fit: BoxFit.contain,
+                ),
+                const Spacer(),
+                SizedBox(
+                  height: 40,
+                  child: FilledButton(
+                    key: const Key('homeTabletCtaButton'),
+                    onPressed: onAddAnnoyance,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.homePrimary,
+                      foregroundColor: AppColors.homeOnPrimary,
+                      shape: const RoundedRectangleBorder(),
+                    ),
+                    child: const Text('＋ 記下心情'),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                _DesktopCircleButton(
+                  key: const Key('homeAccountMenu'),
+                  label: 'W',
+                  filled: true,
+                  onTap: onProfile,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TabletCollectionPanel extends StatelessWidget {
+  const _TabletCollectionPanel({required this.onUnavailable});
+
+  final VoidCallback onUnavailable;
+
+  @override
+  Widget build(BuildContext context) {
+    const assets = [
+      'assets/images/icon.png',
+      'assets/images/app_icon.png',
+      'assets/images/bonus.png',
+      'assets/images/icon_main.png',
+      'assets/images/icon.png',
+      'assets/images/app_icon.png',
+      'assets/images/icon_main.png',
+    ];
+
+    return InkWell(
+      onTap: onUnavailable,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppColors.homePanel,
+          border: Border.all(color: AppColors.homeSoftBorder),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                children: [
+                  Text(
+                    '我的怪獸',
+                    style: TextStyle(
+                      color: AppColors.homeInkAlt,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Text(
+                    '8 / 20',
+                    style: TextStyle(
+                      color: AppColors.homeAccent,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Spacer(),
+                  Text(
+                    '查看全部 ›',
+                    style: TextStyle(
+                      color: AppColors.homeAccent,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Wrap(
+                spacing: 16,
+                runSpacing: 16,
+                children: [
+                  for (var index = 0; index < assets.length; index++)
+                    _DesktopMonsterChip(
+                      asset: assets[index],
+                      selected: index == 0,
+                    ),
+                  const _DesktopMoreChip(),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

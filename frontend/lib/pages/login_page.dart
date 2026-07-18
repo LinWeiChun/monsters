@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../layout/responsive_layout.dart';
 import '../providers/auth_provider.dart';
 import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
@@ -51,11 +52,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     return Scaffold(
       backgroundColor: AppColors.loginBrandBackground,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isDesktop = constraints.maxWidth >= 900;
-          if (isDesktop) {
-            return Row(
+      body: ResponsiveLayout(
+        desktop:
+            (context, constraints) => Row(
               children: [
                 const Expanded(flex: 43, child: _LoginBrandPanel()),
                 Expanded(
@@ -89,28 +88,48 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                 ),
               ],
-            );
-          }
-
-          return SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(36, 46, 36, 48),
-              child: _LoginForm(
-                formKey: _formKey,
-                emailController: _emailController,
-                passwordController: _passwordController,
-                obscurePassword: _obscurePassword,
-                authState: authState,
-                onTogglePassword: _togglePassword,
-                onSubmit: _submit,
-                onSubmitGoogle: _submitGoogle,
-                onForgotPassword: _showForgotPassword,
-                isMobile: true,
+            ),
+        tablet:
+            (context, constraints) => ColoredBox(
+              color: AppColors.loginFormBackground,
+              child: SafeArea(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xxl,
+                    vertical: AppSpacing.xl,
+                  ),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 600),
+                      child: _buildForm(authState, isMobile: true),
+                    ),
+                  ),
+                ),
               ),
             ),
-          );
-        },
+        mobile:
+            (context, constraints) => SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(36, 46, 36, 48),
+                child: _buildForm(authState, isMobile: true),
+              ),
+            ),
       ),
+    );
+  }
+
+  Widget _buildForm(AuthState authState, {bool isMobile = false}) {
+    return _LoginForm(
+      formKey: _formKey,
+      emailController: _emailController,
+      passwordController: _passwordController,
+      obscurePassword: _obscurePassword,
+      authState: authState,
+      onTogglePassword: _togglePassword,
+      onSubmit: _submit,
+      onSubmitGoogle: _submitGoogle,
+      onForgotPassword: _showForgotPassword,
+      isMobile: isMobile,
     );
   }
 

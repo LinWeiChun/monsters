@@ -10,7 +10,7 @@
 - iOS
 - Web
 
-手機版優先，Web 版需以 Responsive Layout 呈現。
+目前開發與驗收以 Web-first 為主，Web 版需以 Responsive Layout 呈現；Mobile Penpot 畫面與 Android／iOS 相容性仍須保留。
 
 前端功能 Task 預設需以 Flutter 共用程式實作，並確認 Web、Android、iOS 三平台皆可使用。若功能涉及平台差異，例如檔案選取、通知、相機、外部連結或權限，必須在同一 Task 內補齊三平台處理或明確記錄平台限制與替代方案。
 
@@ -59,7 +59,7 @@
 - 以「記下現在的心情」作為單一主要操作，進入新增煩惱聊天室
 - 日記與歷史記錄在對應 Phase 完成前顯示「即將開放」且不可操作
 - 手機版使用底部導覽列，個人資料、密碼鎖與登出收納於個人選單
-- Web 桌面版使用固定左側導覽與雙欄內容，不直接放大手機版面
+- Web 桌面版使用獨立導覽與雙欄內容，不直接放大手機版面
 
 導覽：
 
@@ -69,7 +69,7 @@
 - 社群
 - 圖鑑
 
-首頁以 900px 作為手機／桌面版型切換基準。手機內容最大寬度 560px；桌面主要內容最大寬度 1180px，怪獸陪伴區與操作區並列。設計來源為 Figma 檔案 [貘nsters 陪伴式首頁 UI - Mobile & Web](https://www.figma.com/design/bo3ooJWyoIThN9D7YqkY1x)。
+首頁使用共用 window class：Mobile `< 600px`、Tablet `600px - 1199px`、Desktop `>= 1200px`。Mobile 保留 390 x 844 Penpot 畫布；Tablet 使用 compact flow layout；Desktop 主要內容最大寬度 1200px，怪獸陪伴區與操作區並列。設計來源為 Penpot Web／Mobile 畫板與現行 Web RWD 規格。
 
 首頁怪獸使用 Flutter 程式動畫，不修改或拆分原始圖片。進入首頁時播放有限次數的輕微呼吸與上下漂浮，點擊怪獸時播放彈跳、縮放及小幅擺動；動畫只作用於怪獸區，不得遮擋或移動主要操作。系統啟用「減少動態效果」時必須停止待機與點擊動畫，並維持靜態圖片與完整操作功能。
 
@@ -223,11 +223,16 @@ Phase 3 完成頁不顯示假怪獸獎勵；真實獎勵與圖鑑導向於 Phase
 
 Web 版規則：
 
+- 目前 UI 開發與驗收採 Web-first；共用功能仍需支援 Android 與 iOS。
+- 共用 breakpoint 固定為 Mobile `< 600px`、Tablet `600px - 1199px`、Desktop `>= 1200px`，由 `frontend/lib/layout/responsive_layout.dart` 集中管理。
+- 瀏覽器視窗跨越 breakpoint 時必須即時 reflow，不得要求重新整理或保存舊 viewport 狀態。
 - 表單、聊天室與單一內容流程最大內容寬度建議 480px 至 720px。
-- 首頁等資訊架構頁在 900px 以上需使用 Web 專用桌面版型，可採固定側邊導覽與多欄內容。
+- 首頁等資訊架構頁在 Tablet 使用 compact flow layout，Desktop 使用 Web 專用雙欄或多欄版型。
 - Web 專用版型不得直接放大或置中顯示完整手機畫面。
 - 桌面主要內容需設定最大寬度並置中，避免卡片與文字隨視窗無限延伸。
 - 不得讓聊天泡泡、卡片與按鈕過度拉伸。
+- Tablet／Desktop 主版面使用 `LayoutBuilder`、`Row`、`Column`、`Wrap`、`Expanded`、`Flexible` 與 `ConstrainedBox`；`Stack`／`Positioned` 僅限 Mobile Penpot 精準畫布或元件內局部疊圖。
+- RWD widget test 至少覆蓋 390、600、900、1024、1200、1440 與 1920px，並檢查沒有 overflow、裁切、負 padding 或例外。
 - Web 不支援的手機功能需提供替代提示。
 
 ## 四、共用元件
@@ -704,7 +709,7 @@ Logo 規範：
 
 - `SplashPage` 保留 `AuthController.restoreSession()` 流程；有效 session 導向 `home`，無效 session 顯示登入 / 註冊行動。
 - Splash 顏色集中於 `frontend/lib/theme/app_colors.dart` 的 `splash*` token，page 不直接宣告色碼。
-- Web / App 尺寸以 `_SplashSpec` 分別記錄 Penpot 座標，並透過 `FittedBox` 支援不同螢幕比例縮放。
+- Mobile 尺寸以 `_SplashSpec` 記錄 390 x 844 Penpot 座標；Tablet／Desktop 改用置中的 flow layout，不縮放完整 1440 x 900 canvas。
 - Splash 導向仍使用 `go_router` 的 `context.goNamed()`；Flutter 不直接存取 Database 或 Auth storage。
 ### 2026-07-16 SplashPage Redirect Update
 
@@ -783,18 +788,17 @@ Logo 規範：
 
 ### Implementation Notes
 
-- Profile Web / Mobile 採 `Stack + FittedBox(BoxFit.cover)` Penpot canvas，保持畫面滿版並以 top center 對齊。
-- Web 保留 1440x900 Profile canvas、上方導覽列、資料卡、avatar、基本資料欄位、唯讀 Email / 帳號欄位與儲存狀態卡。
+- Profile Mobile 採 390 x 844 Penpot canvas；Tablet／Desktop 使用 scrollable flow layout，不使用整頁 `Stack + FittedBox`。
+- Web 保留上方導覽列、資料卡、avatar、基本資料欄位、唯讀 Email / 帳號欄位與儲存狀態卡，欄位依可用寬度切換單欄／雙欄。
 - Mobile 保留 390x844 Profile canvas、App bar、avatar、暱稱 / Email / 帳號 / 生日欄位、儲存狀態卡與底部導覽列。
 - 可編輯欄位維持 `profileUserNameField`、`profileBirthdayField`、`profileSaveButton` 測試 key 與原本驗證規則。
 - Profile 顏色 token 集中於 `frontend/lib/theme/app_colors.dart` 的 `profile*` token，Page 不直接宣告色碼。
 - Penpot canvas widgets 拆至 `frontend/lib/widgets/profile/profile_penpot_canvas.dart`，`ProfilePage` 僅保留狀態、驗證與提交流程。
 
-## 2026-07-16 HomePage Full-Bleed Correction
+## 2026-07-16 HomePage Full-Bleed Correction（已由 2026-07-18 RWD 規格取代）
 
 - `HomePage` 仍使用 `WEB / Web / Companion Home` 與 `Mobile / Companion Home` 規格。
-- Web / Mobile canvas 外層縮放由 `BoxFit.contain` 改為 `BoxFit.cover`，避免寬螢幕部署畫面出現非滿版留白。
-- 修正僅影響縮放與裁切策略，不改變 HomePage 的 Penpot 元件座標、導覽、互動 key 或 API 行為。
+- 此段保留歷史紀錄；目前僅 Mobile 保留 Penpot canvas，Tablet／Desktop 已改為 flow layout，不再以 `BoxFit.cover` 縮放整張 Web canvas。
 ## 2026-07-16 HomePage Web Companion Home Refinement
 
 - 本次以 Penpot MCP 選取的 `WEB / Web / Companion Home` 為準，修正 Web HomePage 不應套用舊版 `Web / Companion Home` 近似版型的問題。
@@ -802,3 +806,23 @@ Logo 規範：
 - Web 版新增 Penpot navbar、右上 CTA、通知圓鈕與 profile 圓鈕；profile 入口導向 `profile` route，尚未開放入口維持 snackbar placeholder。
 - Web collection panel 改為 flow layout，保留 7 個怪獸 chip 與 `+1` more chip。
 - 本次僅調整 Web HomePage；Mobile HomePage 規格與座標未變更。
+
+## 2026-07-18 Web-first RWD 共用版型
+
+目前已完成 Penpot 畫面與定位方式盤點，Splash、Login、Register、Home、Profile 均已實作 Mobile／Tablet／Desktop 分級。Mobile 保留 390 x 844 Penpot 精準畫布；Tablet／Desktop 以相對 flow layout 實作，瀏覽器調整視窗寬度時可即時切換。
+
+| Page | Mobile `< 600px` | Tablet `600px - 1199px` | Desktop `>= 1200px` |
+|---|---|---|---|
+| Splash | Penpot fixed canvas | centered flow | centered flow |
+| Login | mobile form flow | compact centered form | Penpot brand／form split flow |
+| Register | mobile form flow | compact centered form | Penpot brand／form split flow |
+| Home | Penpot fixed canvas | compact companion flow | bounded multi-column flow |
+| Profile | Penpot fixed canvas | single-column profile flow | bounded one／two-column profile flow |
+
+實作規則：
+
+- `ResponsiveLayout` 依 `LayoutBuilder` constraints 即時判斷 window class，不快取初次 viewport。
+- `ResponsiveContent` 集中管理最大寬度、水平 padding 與對齊方式。
+- Web 主版面不使用整頁 `FittedBox`、固定 1440 x 900 canvas 或固定 x/y 座標。
+- Home 在舊 breakpoint 900／950／1024px 曾發生的負 padding 與 nav overflow，已由 Tablet flow layout 排除。
+- Widget tests 覆蓋 breakpoint 邊界與 390 至 1920px 常用 viewport，並驗證同一 widget tree 可在 599／600／1199／1200px 即時切換。

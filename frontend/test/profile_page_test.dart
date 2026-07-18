@@ -25,6 +25,30 @@ void main() {
     expect(find.text('2000-01-02'), findsWidgets);
   });
 
+  for (final size in const [
+    Size(600, 700),
+    Size(900, 700),
+    Size(1024, 768),
+    Size(1199, 800),
+    Size(1440, 900),
+    Size(1920, 1080),
+  ]) {
+    testWidgets('profile uses flow layout without clipping at $size', (
+      tester,
+    ) async {
+      await _setSurface(tester, size);
+      await tester.pumpWidget(_profileApp(_FakeUserRepository()));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('profileAvatar')), findsOneWidget);
+      expect(find.byKey(const Key('profileUserNameField')), findsOneWidget);
+      expect(find.byKey(const Key('profileBirthdayField')), findsOneWidget);
+      expect(find.byKey(const Key('profileSaveButton')), findsOneWidget);
+      expect(find.byType(FittedBox), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('validates profile form fields', (tester) async {
     await tester.pumpWidget(_profileApp(_FakeUserRepository()));
     await tester.pumpAndSettle();
@@ -111,6 +135,13 @@ Widget _profileApp(UserRepository userRepository) {
       routerConfig: createAppRouter(initialLocation: AppPath.profile),
     ),
   );
+}
+
+Future<void> _setSurface(WidgetTester tester, Size size) async {
+  await tester.binding.setSurfaceSize(size);
+  addTearDown(() async {
+    await tester.binding.setSurfaceSize(null);
+  });
 }
 
 class _FakeUserRepository extends UserRepository {
