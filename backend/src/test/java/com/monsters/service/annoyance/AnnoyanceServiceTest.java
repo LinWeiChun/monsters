@@ -337,7 +337,7 @@ class AnnoyanceServiceTest {
         AnnoyanceResponse firstResponse = response(first);
         AnnoyanceResponse secondResponse = response(second);
         PageRequest pageable = PageRequest.of(2, 2);
-        when(entryRepository.findAnnoyancePage(
+        when(entryRepository.findEntryPage(
                 1L,
                 EntryType.ANNOYANCE,
                 true,
@@ -372,7 +372,7 @@ class AnnoyanceServiceTest {
         assertThat(result.totalPages()).isEqualTo(3);
         assertThat(result.first()).isFalse();
         assertThat(result.last()).isTrue();
-        verify(entryRepository).findAnnoyancePage(
+        verify(entryRepository).findEntryPage(
                 1L,
                 EntryType.ANNOYANCE,
                 true,
@@ -387,7 +387,7 @@ class AnnoyanceServiceTest {
     void findAllShouldReturnEmptyPageWithoutLookupQueries() {
         prepareUser();
         PageRequest pageable = PageRequest.of(0, 20);
-        when(entryRepository.findAnnoyancePage(
+        when(entryRepository.findEntryPage(
                 1L,
                 EntryType.ANNOYANCE,
                 null,
@@ -427,7 +427,7 @@ class AnnoyanceServiceTest {
                 .isInstanceOf(ValidationException.class);
         assertThatThrownBy(() -> service.findAll(1L, 0, 20, "score,asc,extra", null, null))
                 .isInstanceOf(ValidationException.class);
-        verify(entryRepository, never()).findAnnoyancePage(
+        verify(entryRepository, never()).findEntryPage(
                 anyLong(), any(), any(), any(), anyString(), anyString(), any()
         );
     }

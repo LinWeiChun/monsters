@@ -1076,3 +1076,11 @@
 2026-07-19,08:14,PHASE4-DIARY-CREATE,Documentation,docs/TASKS.md,修改,記錄新增日記 API TODO 至 DONE 狀態,Codex,否,否,否,否,下一個 Task 為查詢日記 API
 2026-07-19,08:14,PHASE4-DIARY-CREATE,Documentation,log/CHANGE_LOG.md,修改,新增 Diary create 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
 2026-07-19,08:14,PHASE4-DIARY-CREATE,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Diary create 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改
+2026-07-19,08:31,PHASE4-DIARY-QUERY,Backend,backend/src/main/java/com/monsters/controller/diary/DiaryController.java,修改,實作 Diary 列表與單筆 GET endpoints,Codex,是,否,否,否,成功回傳 HTTP 200
+2026-07-19,08:31,PHASE4-DIARY-QUERY,Backend,backend/src/main/java/com/monsters/service/diary/DiaryService.java,修改,建立 owner scoped 分頁篩選排序與批次 response mapping,Codex,是,否,否,否,空列表不執行 lookup 查詢
+2026-07-19,08:31,PHASE4-DIARY-QUERY,Backend,backend/src/main/java/com/monsters/repository/entry/EntryRepository.java,修改,將共用分頁方法更名為 findEntryPage,Codex,是,否,否,否,Annoyance 與 Diary 共用 JPQL
+2026-07-19,08:31,PHASE4-DIARY-QUERY,Test,backend/src/test/java/com/monsters,修改,驗證 Repository Service Controller 與 Annoyance regression,Codex,是,否,否,否,Backend 232 tests passed
+2026-07-19,08:31,PHASE4-DIARY-QUERY,Documentation,docs/DATABASE_SPEC.md,修改,補充 Entry 分頁與穩定次排序規則,Codex,否,否,否,否,無 schema 或 Migration 異動
+2026-07-19,08:31,PHASE4-DIARY-QUERY,Documentation,docs/TASKS.md,修改,記錄查詢日記 API TODO 至 DONE 狀態,Codex,否,否,否,否,下一個 Task 為修改日記 API
+2026-07-19,08:31,PHASE4-DIARY-QUERY,Documentation,log/CHANGE_LOG.md,修改,新增 Diary query 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
+2026-07-19,08:31,PHASE4-DIARY-QUERY,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Diary query 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改

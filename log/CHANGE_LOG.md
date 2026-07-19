@@ -6994,3 +6994,69 @@ Codex
 ### 待確認事項
 
 - 無。
+
+---
+
+## 2026-07-19 08:31 PHASE4-DIARY-QUERY
+
+Task
+Phase 4 查詢日記 API
+
+執行者
+Codex
+
+### 完成內容
+
+- 實作 `GET /api/diaries` owner-scoped 列表查詢，支援 `page`、`size`、`sort` 與 optional `isShared` 篩選。
+- 實作 `GET /api/diaries/{id}` 單筆查詢，只允許目前 JWT 使用者讀取自己的未刪除 DIARY entry。
+- 列表限定 `occurredAt`、`createdAt`、`score` 排序與 `asc`／`desc` 方向，空白 sort 使用 `occurredAt,desc`；相同排序值維持 entry id descending。
+- 將共用 Entry Repository 的 `findAnnoyancePage` 更名為 `findEntryPage`，Diary 與 Annoyance 共用同一個 owner、entry type、soft-delete、分享與分數排序 JPQL。
+- 列表批次載入 Mood 與 active EntryMedia，避免逐筆 lookup；空列表不執行額外 mood／media 查詢。
+- 無效分頁或排序回傳 400；不存在、已刪除、類型錯誤或 owner 不符回傳 404；response 保持 `reward = null` 且不輸出 private R2 object key。
+
+### 修改／新增／刪除檔案
+
+- 修改 `backend/src/main/java/com/monsters/controller/diary/DiaryController.java`。
+- 修改 `backend/src/main/java/com/monsters/service/diary/DiaryService.java`。
+- 修改 `backend/src/main/java/com/monsters/repository/entry/EntryRepository.java`。
+- 修改 `backend/src/main/java/com/monsters/service/annoyance/AnnoyanceService.java` 以沿用更名後的共用 Repository 方法，行為不變。
+- 修改 Diary Controller／Service、Entry Repository 與 Annoyance Service 測試。
+- 修改 `docs/DATABASE_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv`。
+- 無新增或刪除檔案。
+
+### system_data 參考結果
+
+- 參考系統手冊歷史記錄列表、日記篩選與詳細內容流程，以及舊 `HistoryController`、Diary Service／DAO、Flutter History Repository 與日記詳細頁。
+- 保留「從歷史列表查看日記詳細內容」的業務意圖；未沿用 account path parameter、記憶體排序、空列表視為失敗、查詢回傳 HTTP 201、Base64 媒體、全域登入資料或 UI 直接呼叫 API。
+- 未修改 `system_data/`。
+
+### API 異動
+
+- 實作既有 contract 的 `GET /api/diaries` 與 `GET /api/diaries/{id}`；成功回傳 HTTP 200 與 `ApiResponse<T>`。
+- `docs/API_SPEC.md` 既有 contract 已涵蓋本次實作，無新增或修改。
+
+### Database 異動
+
+- 無 schema、SQL 或 Migration 異動。
+- `docs/DATABASE_SPEC.md` 補充 Annoyance／Diary 共用 Entry offset pagination 與穩定次排序規則。
+
+### 文件更新
+
+- `docs/DATABASE_SPEC.md` 同步共用列表查詢規則。
+- `docs/TASKS.md` 記錄 TODO → IN PROGRESS → REVIEW → DONE 與完成範圍。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次實作與驗證。
+
+### 測試方式與結果
+
+- Diary Query／Entry Repository／Annoyance regression targeted Gradle tests：BUILD SUCCESSFUL。
+- `./gradlew test`：BUILD SUCCESSFUL，232 tests、0 failures、0 errors、0 skipped。
+- `git diff --check`：通過。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；2026-07-19 的保存期限截止日為 2026-06-19。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- Task PR 合併至 `feature/phase4` 後，下一個 Task 為修改日記 API。
