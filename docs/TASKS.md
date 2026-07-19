@@ -218,7 +218,11 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR
 
 - [x] 擴充共用 Entry diary factory／update，建立 Diary DTO / Mapper / Repository / Service / Controller（DONE：沿用共用 EntryRepository，不新增獨立 Diary Entity／Repository）
-- [ ] 新增日記 API
+- [x] TODO：確認 PR #67 已合併、重讀 Diary create contract、舊系統流程與共用 Entry／R2 實作
+- [x] IN PROGRESS：實作 `POST /api/diaries` multipart 建立流程、owner 驗證、private R2 媒體與交易保存
+- [x] REVIEW：執行建立日記單元測試、Backend 完整測試與契約檢查
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR
+- [x] 新增日記 API（DONE：`POST /api/diaries` multipart、private R2 媒體與交易補償流程）
 - [ ] 查詢日記 API
 - [ ] 修改日記 API
 - [ ] 分享 / 取消分享日記 API

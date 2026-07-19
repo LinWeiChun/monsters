@@ -6568,6 +6568,79 @@ Codex
 
 ---
 
+## 2026-07-19 08:14 PHASE4-DIARY-CREATE
+
+Task
+Phase 4 新增日記 API
+
+執行者
+Codex
+
+### 完成內容
+
+- 新增 `CreateDiaryRequest`，驗證 record method 與 1 至 5 分 score，並將未提供的分享狀態預設為 false。
+- 完成 `POST /api/diaries` multipart endpoint，使用 JWT current user，不接受 Client 傳入 user id。
+- 支援 TEXT、IMAGE、AUDIO、VIDEO 四種互斥主要記錄方式及 optional drawing；媒體沿用 private R2 上傳與既有 MIME／大小／影音長度驗證。
+- 以獨立 Spring transaction 保存共用 `entries` 與 `entry_media`；上傳或 Database 失敗時補償刪除本次已上傳物件。
+- 將 `occurredAt` 正規化為 Asia/Taipei，未提供時使用伺服器目前時間；回應不暴露 R2 object key，Phase 4 `reward` 固定為 null。
+- `docs/TASKS.md` 完整記錄 TODO → IN PROGRESS → REVIEW → DONE，並標記新增日記 API 完成。
+
+### 新增
+
+- `backend/src/main/java/com/monsters/dto/diary/CreateDiaryRequest.java`
+- `backend/src/main/java/com/monsters/service/diary/CreatedDiary.java`
+- `backend/src/main/java/com/monsters/service/diary/DiaryPersistenceService.java`
+- `backend/src/main/java/com/monsters/service/diary/NewDiaryMedia.java`
+- `backend/src/test/java/com/monsters/dto/diary/CreateDiaryRequestTest.java`
+- `backend/src/test/java/com/monsters/service/diary/DiaryPersistenceServiceTest.java`
+
+### 修改
+
+- `backend/src/main/java/com/monsters/controller/diary/DiaryController.java`
+- `backend/src/main/java/com/monsters/service/diary/DiaryService.java`
+- `backend/src/test/java/com/monsters/controller/diary/DiaryControllerTest.java`
+- `backend/src/test/java/com/monsters/service/diary/DiaryServiceTest.java`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### system_data 參考
+
+- 參考舊日記手冊與舊 Backend 的文字、拍照、錄影、錄音、匯入媒體、optional 繪圖、1 至 5 分與分享流程意圖。
+- 新版依正式 contract 改為 multipart、JWT owner、共用 Entry 與 private R2；未沿用舊聊天式 API、Base64／字串媒體、硬編碼 Windows 路徑、Controller 獎勵邏輯或不安全帳號參數。
+- 未修改或納入本 Task 的 `system_data/` 內容；工作樹中既有素材異動由使用者保留。
+
+### API 異動
+
+- 實作 `POST /api/diaries`，Content-Type 為 `multipart/form-data`，包含 JSON `request`、條件必填 `contentFile` 與 optional `drawingFile`。
+- 建立成功回傳 HTTP 201 與 Diary response；正式 API contract 無新增或變更。
+
+### Database 異動
+
+- 無 schema 或 Migration 異動；沿用 `entries`、`entry_media` 與 `moods`。
+
+### 文件更新
+
+- `docs/TASKS.md` 更新 Task 狀態與完成範圍。
+- `docs/API_SPEC.md`、`docs/DATABASE_SPEC.md` 與 `docs/UI_SPEC.md` 既有 contract 已涵蓋本次實作，無需改動。
+
+### 測試方式與結果
+
+- Diary／Entry targeted Gradle tests：BUILD SUCCESSFUL。
+- `./gradlew test`：BUILD SUCCESSFUL，225 tests、0 failures。
+- `git diff --check`：通過。
+
+### Log 保存期限檢查
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；2026-07-19 的保存期限截止日為 2026-06-19。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源，未修改。
+
+### 待確認事項
+
+- Task PR 合併至 `feature/phase4` 後，下一個 Task 為查詢日記 API。
+
+---
+
 ## 2026-07-19 07:48 PHASE4-DIARY-CORE
 
 Task

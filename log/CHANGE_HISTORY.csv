@@ -1069,3 +1069,10 @@
 2026-07-19,07:48,PHASE4-DIARY-CORE,Documentation,docs/TASKS.md,修改,記錄 Diary Core Task 狀態與完成範圍,Codex,否,否,否,否,TODO IN PROGRESS REVIEW DONE
 2026-07-19,07:48,PHASE4-DIARY-CORE,Documentation,log/CHANGE_LOG.md,修改,新增 Diary Core 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
 2026-07-19,07:48,PHASE4-DIARY-CORE,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Diary Core 異動歷史,Codex,否,否,否,否,Backend 216 tests passed
+2026-07-19,08:14,PHASE4-DIARY-CREATE,Backend,backend/src/main/java/com/monsters/dto/diary/CreateDiaryRequest.java,新增,建立 Diary create request validation 與分享預設,Codex,是,否,否,否,score 1 至 5
+2026-07-19,08:14,PHASE4-DIARY-CREATE,Backend,backend/src/main/java/com/monsters/service/diary,新增與修改,建立 Diary multipart orchestration transaction persistence 與 R2 cleanup,Codex,是,否,否,否,沿用 private entry media storage
+2026-07-19,08:14,PHASE4-DIARY-CREATE,Backend,backend/src/main/java/com/monsters/controller/diary/DiaryController.java,修改,實作 POST api diaries endpoint,Codex,是,否,否,否,成功回傳 HTTP 201
+2026-07-19,08:14,PHASE4-DIARY-CREATE,Test,backend/src/test/java/com/monsters,新增與修改,驗證 request controller service transaction media 與 cleanup,Codex,是,否,否,否,Backend 225 tests passed
+2026-07-19,08:14,PHASE4-DIARY-CREATE,Documentation,docs/TASKS.md,修改,記錄新增日記 API TODO 至 DONE 狀態,Codex,否,否,否,否,下一個 Task 為查詢日記 API
+2026-07-19,08:14,PHASE4-DIARY-CREATE,Documentation,log/CHANGE_LOG.md,修改,新增 Diary create 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
+2026-07-19,08:14,PHASE4-DIARY-CREATE,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Diary create 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改
