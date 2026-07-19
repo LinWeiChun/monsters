@@ -1,6 +1,7 @@
 package com.monsters.controller.diary;
 
 import com.monsters.dto.common.ApiResponse;
+import com.monsters.dto.common.PageResponse;
 import com.monsters.dto.diary.CreateDiaryRequest;
 import com.monsters.dto.diary.DiaryResponse;
 import com.monsters.security.common.AuthenticatedUser;
@@ -10,8 +11,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,5 +46,32 @@ public class DiaryController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Diary creation success", response));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<PageResponse<DiaryResponse>>> findAll(
+            @AuthenticationPrincipal AuthenticatedUser currentUser,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "occurredAt,desc") String sort,
+            @RequestParam(required = false) Boolean isShared
+    ) {
+        PageResponse<DiaryResponse> response = diaryService.findAll(
+                currentUser.userId(),
+                page,
+                size,
+                sort,
+                isShared
+        );
+        return ResponseEntity.ok(ApiResponse.success("Diary query success", response));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<DiaryResponse>> findOne(
+            @AuthenticationPrincipal AuthenticatedUser currentUser,
+            @PathVariable Long id
+    ) {
+        DiaryResponse response = diaryService.findOne(currentUser.userId(), id);
+        return ResponseEntity.ok(ApiResponse.success("Diary query success", response));
     }
 }

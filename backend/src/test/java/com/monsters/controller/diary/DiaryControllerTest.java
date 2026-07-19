@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.monsters.dto.common.ApiResponse;
+import com.monsters.dto.common.PageResponse;
 import com.monsters.dto.diary.CreateDiaryRequest;
 import com.monsters.dto.diary.DiaryRecordMethod;
 import com.monsters.dto.diary.DiaryResponse;
@@ -73,6 +74,62 @@ class DiaryControllerTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().success()).isTrue();
         assertThat(response.getBody().message()).isEqualTo("Diary creation success");
+        assertThat(response.getBody().data()).isSameAs(diary);
+    }
+
+    @Test
+    void findAllShouldReturnPageForCurrentUser() {
+        DiaryService service = org.mockito.Mockito.mock(DiaryService.class);
+        DiaryController controller = new DiaryController(service);
+        PageResponse<DiaryResponse> page = new PageResponse<>(
+                List.of(),
+                0,
+                20,
+                0,
+                0,
+                true,
+                true
+        );
+        when(service.findAll(1L, 0, 20, "occurredAt,desc", false)).thenReturn(page);
+
+        ResponseEntity<ApiResponse<PageResponse<DiaryResponse>>> response = controller.findAll(
+                new AuthenticatedUser(1L, "user@example.com"),
+                0,
+                20,
+                "occurredAt,desc",
+                false
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().message()).isEqualTo("Diary query success");
+        assertThat(response.getBody().data()).isSameAs(page);
+    }
+
+    @Test
+    void findOneShouldReturnOwnerDiary() {
+        DiaryService service = org.mockito.Mockito.mock(DiaryService.class);
+        DiaryController controller = new DiaryController(service);
+        DiaryResponse diary = new DiaryResponse(
+                10L,
+                DiaryRecordMethod.TEXT,
+                "content",
+                4,
+                false,
+                OffsetDateTime.parse("2026-07-19T12:00:00+08:00"),
+                List.of(),
+                null
+        );
+        when(service.findOne(1L, 10L)).thenReturn(diary);
+
+        ResponseEntity<ApiResponse<DiaryResponse>> response = controller.findOne(
+                new AuthenticatedUser(1L, "user@example.com"),
+                10L
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().message()).isEqualTo("Diary query success");
         assertThat(response.getBody().data()).isSameAs(diary);
     }
 }

@@ -617,7 +617,7 @@ Unique：`user_id, answered_date`
 - `entry_comments(entry_id, created_at)`
 - `daily_tests(active_date)`
 
-Annoyance 列表的 `page`、`size`、`sort` 由查詢的 `LIMIT`／`OFFSET` 與排序實作，不在任何資料表新增頁碼欄位。
+Annoyance 與 Diary 列表的 `page`、`size`、`sort` 由共用 Entry 查詢的 `LIMIT`／`OFFSET` 與排序實作，不在任何資料表新增頁碼欄位；相同排序值以 entry id 由大至小作為穩定次排序。
 
 ## 七、Migration / Init SQL
 

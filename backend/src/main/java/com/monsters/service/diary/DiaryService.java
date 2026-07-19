@@ -1,5 +1,6 @@
 package com.monsters.service.diary;
 
+import com.monsters.dto.common.PageResponse;
 import com.monsters.dto.diary.CreateDiaryRequest;
 import com.monsters.dto.diary.DiaryRecordMethod;
 import com.monsters.dto.diary.DiaryResponse;
@@ -20,9 +21,17 @@ import com.monsters.storage.entry.StoredEntryMedia;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +41,13 @@ public class DiaryService {
 
     private static final Logger log = LoggerFactory.getLogger(DiaryService.class);
     private static final ZoneId APPLICATION_ZONE = ZoneId.of("Asia/Taipei");
+    private static final String DEFAULT_SORT = "occurredAt,desc";
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
+            "occurredAt",
+            "createdAt",
+            "score"
+    );
+    private static final Set<String> ALLOWED_SORT_DIRECTIONS = Set.of("asc", "desc");
 
     private final EntryRepository entryRepository;
     private final EntryMediaRepository entryMediaRepository;
@@ -88,6 +104,44 @@ public class DiaryService {
         }
 
         return diaryMapper.toResponse(created.entry(), mood, created.media());
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<DiaryResponse> findAll(
+            Long userId,
+            int page,
+            int size,
+            String sort,
+            Boolean shared
+    ) {
+        requireUser(userId);
+        validatePage(page, size);
+        DiarySort diarySort = parseSort(sort);
+        Page<Entry> entries = entryRepository.findEntryPage(
+                userId,
+                EntryType.DIARY,
+                null,
+                shared,
+                diarySort.field(),
+                diarySort.direction(),
+                PageRequest.of(page, size)
+        );
+        List<DiaryResponse> content = mapEntries(entries.getContent());
+        return new PageResponse<>(
+                content,
+                entries.getNumber(),
+                entries.getSize(),
+                entries.getTotalElements(),
+                entries.getTotalPages(),
+                entries.isFirst(),
+                entries.isLast()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public DiaryResponse findOne(Long userId, Long entryId) {
+        requireUser(userId);
+        return toResponse(requireOwnedEntry(userId, entryId));
     }
 
     @Transactional(readOnly = true)
@@ -201,5 +255,68 @@ public class DiaryService {
                 log.warn("Failed to clean up newly uploaded diary media after persistence failure");
             }
         }
+    }
+
+    private void validatePage(int page, int size) {
+        if (page < 0) {
+            throw new ValidationException("Page must be zero or greater");
+        }
+        if (size < 1 || size > 100) {
+            throw new ValidationException("Size must be between 1 and 100");
+        }
+    }
+
+    private DiarySort parseSort(String sort) {
+        String normalizedSort = sort == null || sort.isBlank() ? DEFAULT_SORT : sort.trim();
+        String[] parts = normalizedSort.split(",", -1);
+        if (parts.length != 2) {
+            throw new ValidationException("Sort must contain one field and one direction");
+        }
+        String field = parts[0].trim();
+        String direction = parts[1].trim().toLowerCase(Locale.ROOT);
+        if (!ALLOWED_SORT_FIELDS.contains(field)
+                || !ALLOWED_SORT_DIRECTIONS.contains(direction)) {
+            throw new ValidationException("Sort field or direction is invalid");
+        }
+        return new DiarySort(field, direction);
+    }
+
+    private List<DiaryResponse> mapEntries(List<Entry> entries) {
+        if (entries.isEmpty()) {
+            return List.of();
+        }
+        Map<Long, Mood> moods = moodRepository
+                .findAllById(distinctIds(entries.stream().map(Entry::getMoodId).toList()))
+                .stream()
+                .collect(Collectors.toMap(Mood::getId, Function.identity()));
+        Map<Long, List<EntryMedia>> mediaByEntryId = entryMediaRepository
+                .findAllByEntryIdInAndDeletedFalseOrderByEntryIdAscDisplayOrderAsc(
+                        entries.stream().map(Entry::getId).toList()
+                )
+                .stream()
+                .collect(Collectors.groupingBy(EntryMedia::getEntryId));
+
+        return entries.stream()
+                .map(entry -> diaryMapper.toResponse(
+                        entry,
+                        requiredMood(moods, entry.getMoodId()),
+                        mediaByEntryId.getOrDefault(entry.getId(), List.of())
+                ))
+                .toList();
+    }
+
+    private List<Long> distinctIds(Collection<Long> ids) {
+        return ids.stream().distinct().toList();
+    }
+
+    private Mood requiredMood(Map<Long, Mood> moods, Long moodId) {
+        Mood mood = moods.get(moodId);
+        if (mood == null) {
+            throw new ResourceNotFoundException("Mood not found");
+        }
+        return mood;
+    }
+
+    private record DiarySort(String field, String direction) {
     }
 }

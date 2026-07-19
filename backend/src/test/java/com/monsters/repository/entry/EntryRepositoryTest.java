@@ -30,9 +30,9 @@ class EntryRepositoryTest {
     }
 
     @Test
-    void shouldExposeOwnerScopedFilteredAnnoyancePageQuery() throws NoSuchMethodException {
+    void shouldExposeOwnerScopedFilteredEntryPageQuery() throws NoSuchMethodException {
         Method method = EntryRepository.class.getMethod(
-                "findAnnoyancePage",
+                "findEntryPage",
                 Long.class,
                 EntryType.class,
                 Boolean.class,

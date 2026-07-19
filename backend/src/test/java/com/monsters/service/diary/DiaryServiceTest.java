@@ -6,14 +6,17 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.monsters.dto.common.PageResponse;
 import com.monsters.dto.diary.CreateDiaryRequest;
 import com.monsters.dto.diary.DiaryRecordMethod;
 import com.monsters.dto.diary.DiaryResponse;
 import com.monsters.entity.entry.Entry;
+import com.monsters.entity.entry.EntryMedia;
 import com.monsters.entity.entry.EntryMediaType;
 import com.monsters.entity.entry.EntryType;
 import com.monsters.entity.entry.Mood;
@@ -37,6 +40,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -165,6 +170,145 @@ class DiaryServiceTest {
     }
 
     @Test
+    void findAllShouldApplyOwnerFilterSortAndBatchMap() {
+        prepareUser();
+        Entry first = entry(10L, "first");
+        Entry second = entry(11L, "second");
+        Mood mood = mood();
+        EntryMedia drawing = new EntryMedia(
+                10L,
+                EntryMediaType.DRAWING,
+                "entries/media/1/drawing/key.webp",
+                "image/webp",
+                1,
+                null,
+                1
+        );
+        DiaryResponse firstResponse = response(first);
+        DiaryResponse secondResponse = response(second);
+        PageRequest pageable = PageRequest.of(2, 2);
+        when(entryRepository.findEntryPage(
+                1L,
+                EntryType.DIARY,
+                null,
+                false,
+                "score",
+                "asc",
+                pageable
+        )).thenReturn(new PageImpl<>(List.of(first, second), pageable, 6));
+        when(moodRepository.findAllById(any())).thenReturn(List.of(mood));
+        when(entryMediaRepository.findAllByEntryIdInAndDeletedFalseOrderByEntryIdAscDisplayOrderAsc(
+                List.of(10L, 11L)
+        )).thenReturn(List.of(drawing));
+        when(diaryMapper.toResponse(first, mood, List.of(drawing))).thenReturn(firstResponse);
+        when(diaryMapper.toResponse(second, mood, List.of())).thenReturn(secondResponse);
+
+        PageResponse<DiaryResponse> result = service().findAll(
+                1L,
+                2,
+                2,
+                "score,ASC",
+                false
+        );
+
+        assertThat(result.content()).containsExactly(firstResponse, secondResponse);
+        assertThat(result.page()).isEqualTo(2);
+        assertThat(result.size()).isEqualTo(2);
+        assertThat(result.totalElements()).isEqualTo(6);
+        assertThat(result.totalPages()).isEqualTo(3);
+        assertThat(result.first()).isFalse();
+        assertThat(result.last()).isTrue();
+        verify(entryRepository).findEntryPage(
+                1L,
+                EntryType.DIARY,
+                null,
+                false,
+                "score",
+                "asc",
+                pageable
+        );
+    }
+
+    @Test
+    void findAllShouldReturnEmptyPageWithoutLookupQueries() {
+        prepareUser();
+        PageRequest pageable = PageRequest.of(0, 20);
+        when(entryRepository.findEntryPage(
+                1L,
+                EntryType.DIARY,
+                null,
+                null,
+                "occurredAt",
+                "desc",
+                pageable
+        )).thenReturn(new PageImpl<>(List.of(), pageable, 0));
+
+        PageResponse<DiaryResponse> result = service().findAll(1L, 0, 20, " ", null);
+
+        assertThat(result.content()).isEmpty();
+        assertThat(result.totalElements()).isZero();
+        assertThat(result.totalPages()).isZero();
+        assertThat(result.first()).isTrue();
+        assertThat(result.last()).isTrue();
+        verify(moodRepository, never()).findAllById(any());
+        verify(entryMediaRepository, never())
+                .findAllByEntryIdInAndDeletedFalseOrderByEntryIdAscDisplayOrderAsc(anyList());
+    }
+
+    @Test
+    void findAllShouldRejectInvalidPaginationAndSort() {
+        prepareUser();
+        DiaryService service = service();
+
+        assertThatThrownBy(() -> service.findAll(1L, -1, 20, null, null))
+                .isInstanceOf(ValidationException.class);
+        assertThatThrownBy(() -> service.findAll(1L, 0, 0, null, null))
+                .isInstanceOf(ValidationException.class);
+        assertThatThrownBy(() -> service.findAll(1L, 0, 101, null, null))
+                .isInstanceOf(ValidationException.class);
+        assertThatThrownBy(() -> service.findAll(1L, 0, 20, "id,asc", null))
+                .isInstanceOf(ValidationException.class);
+        assertThatThrownBy(() -> service.findAll(1L, 0, 20, "score,sideways", null))
+                .isInstanceOf(ValidationException.class);
+        assertThatThrownBy(() -> service.findAll(1L, 0, 20, "score,asc,extra", null))
+                .isInstanceOf(ValidationException.class);
+        verify(entryRepository, never()).findEntryPage(
+                anyLong(), any(), any(), any(), anyString(), anyString(), any()
+        );
+    }
+
+    @Test
+    void findOneShouldReturnOwnerDiaryResponse() {
+        prepareUser();
+        Entry entry = entry();
+        Mood mood = mood();
+        DiaryResponse expected = response(entry);
+        when(entryRepository.findByIdAndUserIdAndEntryTypeAndDeletedFalse(
+                10L,
+                1L,
+                EntryType.DIARY
+        )).thenReturn(Optional.of(entry));
+        when(moodRepository.findById(3L)).thenReturn(Optional.of(mood));
+        when(entryMediaRepository.findAllByEntryIdAndDeletedFalseOrderByDisplayOrderAsc(10L))
+                .thenReturn(List.of());
+        when(diaryMapper.toResponse(entry, mood, List.of())).thenReturn(expected);
+
+        assertThat(service().findOne(1L, 10L)).isSameAs(expected);
+    }
+
+    @Test
+    void findOneShouldRejectDeletedUserBeforeEntryQuery() {
+        when(userRepository.findByIdAndDeletedFalse(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service().findOne(1L, 10L))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("User not found");
+        verify(entryRepository, never()).findByIdAndUserIdAndEntryTypeAndDeletedFalse(
+                anyLong(), anyLong(), any()
+        );
+    }
+
+    @Test
     void shouldRequireOwnerScopedDiary() {
         Entry entry = entry();
         when(entryRepository.findByIdAndUserIdAndEntryTypeAndDeletedFalse(
@@ -260,22 +404,26 @@ class DiaryServiceTest {
     }
 
     private Entry entry() {
+        return entry(10L, "diary content");
+    }
+
+    private Entry entry(Long id, String content) {
         Entry entry = Entry.diary(
                 1L,
                 3L,
-                "diary content",
+                content,
                 false,
                 LocalDateTime.of(2026, 7, 19, 9, 0)
         );
-        ReflectionTestUtils.setField(entry, "id", 10L);
+        ReflectionTestUtils.setField(entry, "id", id);
         return entry;
     }
 
     private DiaryResponse response(Entry entry) {
         return new DiaryResponse(
-                10L,
+                entry.getId(),
                 DiaryRecordMethod.TEXT,
-                "diary content",
+                entry.getContent(),
                 4,
                 false,
                 entry.getOccurredAt().atZone(ZoneId.of("Asia/Taipei")).toOffsetDateTime(),
@@ -299,9 +447,13 @@ class DiaryServiceTest {
     }
 
     private void prepareLookups(Mood mood) {
+        prepareUser();
+        when(moodRepository.findByScore(4)).thenReturn(Optional.of(mood));
+    }
+
+    private void prepareUser() {
         when(userRepository.findByIdAndDeletedFalse(1L))
                 .thenReturn(Optional.of(new User("account", "user@example.com", "User")));
-        when(moodRepository.findByScore(4)).thenReturn(Optional.of(mood));
     }
 
     private StoredEntryMedia stored(String objectKey, String contentType) {

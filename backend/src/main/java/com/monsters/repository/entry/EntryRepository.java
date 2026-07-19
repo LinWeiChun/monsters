@@ -53,7 +53,7 @@ public interface EntryRepository extends JpaRepository<Entry, Long> {
                       AND (:shared IS NULL OR e.shared = :shared)
                     """
     )
-    Page<Entry> findAnnoyancePage(
+    Page<Entry> findEntryPage(
             @Param("userId") Long userId,
             @Param("entryType") EntryType entryType,
             @Param("solved") Boolean solved,
