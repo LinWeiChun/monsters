@@ -212,7 +212,12 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] REVIEW：檢查 Project／API／UI／Decision／Task／Log 與 Penpot 畫板一致性
 - [x] DONE：完成 contract-first 文件、Penpot Web／Mobile 狀態修正、驗證與 Git 流程
 
-- [ ] 擴充共用 Entry diary factory／update，建立 Diary DTO / Mapper / Repository / Service / Controller
+- [x] TODO：確認 PR #66 已合併、重讀 Diary 正式規格與舊系統參考、盤點 Annoyance Core 可重用架構
+- [x] IN PROGRESS：擴充共用 Entry Diary domain，建立 Diary response DTO、Mapper、Service 驗證與 Controller 骨架
+- [x] REVIEW：執行 Diary Core 單元測試、Backend 完整測試與架構檢查
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR
+
+- [x] 擴充共用 Entry diary factory／update，建立 Diary DTO / Mapper / Repository / Service / Controller（DONE：沿用共用 EntryRepository，不新增獨立 Diary Entity／Repository）
 - [ ] 新增日記 API
 - [ ] 查詢日記 API
 - [ ] 修改日記 API

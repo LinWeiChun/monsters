@@ -1,6 +1,7 @@
 package com.monsters.entity.entry;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.monsters.entity.common.BaseEntity;
 import jakarta.persistence.Entity;
@@ -58,5 +59,52 @@ class EntryTest {
         assertThat(entry.isShared()).isFalse();
         assertThat(entry.isDeleted()).isTrue();
         assertThat(entry.getDeletedAt()).isNotNull();
+    }
+
+    @Test
+    void shouldCreateDiaryWithSafeDefaults() {
+        LocalDateTime occurredAt = LocalDateTime.of(2026, 7, 19, 9, 0);
+
+        Entry entry = Entry.diary(1L, 3L, "diary content", true, occurredAt);
+
+        assertThat(entry.getUserId()).isEqualTo(1L);
+        assertThat(entry.getEntryType()).isEqualTo(EntryType.DIARY);
+        assertThat(entry.getMonsterId()).isNull();
+        assertThat(entry.getAnnoyanceTypeId()).isNull();
+        assertThat(entry.getMoodId()).isEqualTo(3L);
+        assertThat(entry.getContent()).isEqualTo("diary content");
+        assertThat(entry.isShared()).isTrue();
+        assertThat(entry.isSolved()).isFalse();
+        assertThat(entry.isDeleted()).isFalse();
+        assertThat(entry.getOccurredAt()).isEqualTo(occurredAt);
+    }
+
+    @Test
+    void shouldSupportDiaryUpdatesAndProtectEntryTypeInvariants() {
+        Entry diary = Entry.diary(
+                1L,
+                3L,
+                "old",
+                false,
+                LocalDateTime.of(2026, 7, 19, 9, 0)
+        );
+        LocalDateTime updatedOccurredAt = LocalDateTime.of(2026, 7, 19, 10, 0);
+
+        diary.updateDiary(4L, "new", true, updatedOccurredAt);
+
+        assertThat(diary.getAnnoyanceTypeId()).isNull();
+        assertThat(diary.getMoodId()).isEqualTo(4L);
+        assertThat(diary.getContent()).isEqualTo("new");
+        assertThat(diary.isShared()).isTrue();
+        assertThat(diary.isSolved()).isFalse();
+        assertThat(diary.getOccurredAt()).isEqualTo(updatedOccurredAt);
+        assertThatThrownBy(() -> diary.updateAnnoyance(2L, 4L, "invalid", false, updatedOccurredAt))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Entry is not an annoyance");
+
+        Entry annoyance = Entry.annoyance(1L, 2L, 3L, "content", false, updatedOccurredAt);
+        assertThatThrownBy(() -> annoyance.updateDiary(4L, "invalid", false, updatedOccurredAt))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Entry is not a diary");
     }
 }

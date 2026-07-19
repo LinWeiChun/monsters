@@ -6568,6 +6568,79 @@ Codex
 
 ---
 
+## 2026-07-19 07:48 PHASE4-DIARY-CORE
+
+Task
+Phase 4 Diary 共用 Entry Domain 與 Backend Core 骨架
+
+執行者
+Codex
+
+### 完成內容
+
+- 擴充共用 `Entry`，新增 Diary factory 與 update domain operation，固定 `entryType = DIARY`、`annoyanceTypeId = null`、`isSolved = false`，並阻擋 Annoyance／Diary 交叉更新。
+- 新增 Diary response DTO、record method、media response 與 Mapper；由文字或 active primary media 推導記錄方式，download URL 指向 Backend，Response 不包含 private R2 object key，Phase 4 `reward` 固定為 null。
+- 新增 Diary Service Core，提供 owner-scoped Entry lookup、Mood lookup、active media response 組裝，以及 TEXT／IMAGE／AUDIO／VIDEO 主要內容組合驗證。
+- 新增 `/api/diaries` Controller 骨架；本 Task 尚未開放任何 endpoint，新增日記 API 由下一個 Task 實作。
+- 沿用共用 `EntryRepository`、`EntryMediaRepository` 與 `MoodRepository`，不建立獨立 Diary Entity、table 或 Repository。
+- 完整測試初次發現既有 Mood migration assertion 仍比對未含 timestamp 的舊 seed tuple；僅同步測試 assertion 至目前 migration，未修改 SQL 行為。
+
+### 修改／新增／刪除檔案
+
+- 修改 `backend/src/main/java/com/monsters/entity/entry/Entry.java`。
+- 新增 `backend/src/main/java/com/monsters/dto/diary/DiaryMediaResponse.java`。
+- 新增 `backend/src/main/java/com/monsters/dto/diary/DiaryRecordMethod.java`。
+- 新增 `backend/src/main/java/com/monsters/dto/diary/DiaryResponse.java`。
+- 新增 `backend/src/main/java/com/monsters/mapper/diary/DiaryMapper.java`。
+- 新增 `backend/src/main/java/com/monsters/service/diary/DiaryService.java`。
+- 新增 `backend/src/main/java/com/monsters/controller/diary/DiaryController.java`。
+- 修改 `backend/src/test/java/com/monsters/entity/entry/EntryTest.java`。
+- 修改 `backend/src/test/java/com/monsters/entity/entry/MoodSchemaTest.java`。
+- 新增 Diary Controller／Mapper／Service 單元測試。
+- 修改 `docs/DATABASE_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv`。
+- 無刪除檔案；未納入使用者的 `frontend/lib/pages/home_page.dart` 工作樹異動。
+
+### system_data 參考結果
+
+- 重讀系統手冊 Diary 資料表與新增日記頁面，確認舊流程包含文字／相機／影音／錄音、optional 心情圖、1 至 5 分與分享設定。
+- 參考舊 `DiaryController`、`DiaryServiceImpl`、`DiaryDAOImpl`、`Diary` 與 `DiaryBean` 的欄位意圖。
+- 未沿用 account 外鍵、獨立 diary table、Controller 發獎、硬編碼 Windows 路徑、舊 Hibernate DAO、錯誤 null 判斷、自由文字 yes／no 或 monster 發放邏輯。
+- 未修改 `system_data/`。
+
+### API 異動
+
+- API contract 無異動；新增 `/api/diaries` Controller 骨架但尚無可呼叫 endpoint。
+- 建立 Diary response mapping 基礎，媒體 URL、owner 隔離與 `reward = null` 符合既有 API 規格。
+
+### Database 異動
+
+- 無 schema、SQL 或 Migration 異動。
+- 沿用 `entries`、`entry_media` 與 `moods`；DATABASE_SPEC 補充 DIARY 一種主要內容與 optional drawing 規則。
+
+### 文件更新
+
+- DATABASE_SPEC 補充 Diary Entry／Media 與 Mood lookup 規則。
+- TASKS 記錄 Diary Core TODO → IN PROGRESS → REVIEW → DONE 狀態。
+- CHANGE_LOG 與 CHANGE_HISTORY 記錄本次實作、測試與保存期限檢查。
+
+### 測試方式與結果
+
+- Diary／Entry targeted Gradle tests：通過。
+- Backend `./gradlew test`：BUILD SUCCESSFUL，216 tests passed。
+- Spring context、Annoyance、Auth、User 與 Entry regression tests 全部通過。
+- `git diff --check`：通過；新增 Diary production code 無 TODO、FIXME、`System.out` 或 object key 輸出。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；保存期限截止日為 2026-06-19。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- 無；下一個 Task 為 `POST /api/diaries` 新增日記 API，會在新的 task branch 實作 request DTO、private media upload 與 transaction cleanup。
+
+---
+
 ## 2026-07-18 22:21 PHASE4-DIARY-CONTRACT
 
 Task
