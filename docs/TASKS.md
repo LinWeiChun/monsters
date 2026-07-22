@@ -231,8 +231,12 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] TODO：確認 PR #69 已合併、重讀 Diary update contract、既有 Annoyance 更新流程與 private R2 清理規則
 - [x] IN PROGRESS：實作 `PUT /api/diaries/{id}` multipart 完整修改、既有媒體保留／替換與 transaction 補償流程
 - [x] REVIEW：執行 Diary DTO／Controller／Service／Persistence 測試與 Backend 完整測試，確認 owner-scoped、媒體組合與清理行為
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR
+- [x] 修改日記 API（DONE：owner-scoped multipart 完整修改、既有媒體保留／替換與 private R2 清理）
+- [x] TODO：確認 PR #70 已合併，重讀 Diary sharing contract 與既有 Annoyance 冪等分享流程
+- [x] IN PROGRESS：實作 `PATCH /api/diaries/{id}/share` 明確目標狀態更新與 owner-scoped 驗證
+- [x] REVIEW：執行 Diary 分享 DTO／Controller／Service 定向測試與 Backend 完整測試
 - [ ] DONE：同步文件與 Log，完成 Git commit、push 與 task PR
-- [ ] 修改日記 API
 - [ ] 分享 / 取消分享日記 API
 - [ ] 下載日記媒體 API
 - [ ] 抽出 Entry 共用前端元件、Responsive flow shell 與媒體 Adapter

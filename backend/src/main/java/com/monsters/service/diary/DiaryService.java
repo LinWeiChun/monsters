@@ -151,6 +151,20 @@ public class DiaryService {
         return diaryMapper.toResponse(updated.entry(), mood, updated.media());
     }
 
+    @Transactional
+    public DiaryResponse updateSharing(Long userId, Long entryId, Boolean shared) {
+        if (shared == null) {
+            throw new ValidationException("Shared state is required");
+        }
+        requireUser(userId);
+        Entry entry = requireOwnedEntry(userId, entryId);
+        if (entry.isShared() != shared) {
+            entry.updateShared(shared);
+            entryRepository.saveAndFlush(entry);
+        }
+        return toResponse(entry);
+    }
+
     @Transactional(readOnly = true)
     public PageResponse<DiaryResponse> findAll(
             Long userId,

@@ -7120,3 +7120,65 @@ Codex
 ### 待確認事項
 
 - 等待 Task PR 建立與 review；核准並合併至 `feature/phase4` 後，才能將本 Task 標記 DONE 並開始分享／取消分享日記 API。
+
+---
+
+## 2026-07-22 09:29 PHASE4-DIARY-SHARING
+
+Task
+Phase 4 分享／取消分享日記 API（REVIEW）
+
+執行者
+Codex
+
+### 完成內容
+
+- 實作 `PATCH /api/diaries/{id}/share`，以 request body 的 `isShared` 明確設定分享目標狀態，不使用 toggle。
+- 僅允許目前 JWT 使用者更新自己的未刪除 DIARY entry；資料不存在、已刪除或 owner 不符時維持 404。
+- 同狀態請求採冪等成功，只有分享狀態實際改變時才寫入資料庫。
+- `isShared` 缺漏時以 Bean Validation 拒絕，Service 亦保留 null 防禦驗證。
+
+### 修改／新增／刪除檔案
+
+- 修改 `backend/src/main/java/com/monsters/controller/diary/DiaryController.java`。
+- 新增 `backend/src/main/java/com/monsters/dto/diary/ShareDiaryRequest.java`。
+- 修改 `backend/src/main/java/com/monsters/service/diary/DiaryService.java`。
+- 新增或修改 Diary 分享 DTO、Controller、Service 單元測試。
+- 修改 `docs/TASKS.md`、`log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv`。
+- 未刪除檔案，亦未修改 `system_data/`。
+
+### system_data/ 參考結果
+
+- 參考舊 Diary controller、service 與 DAO 的分享欄位及公開日記查詢業務意圖。
+- 正式 API contract 優先；未沿用舊系統的 account path parameter、廣泛修改 endpoint 或舊分層程式。
+- 實作沿用新版 Annoyance 的 owner 驗證、明確 boolean 目標狀態與冪等更新模式。
+
+### API 異動
+
+- 實作既有 contract 的 `PATCH /api/diaries/{id}/share`，成功回傳 HTTP 200 與更新後的 `ApiResponse<DiaryResponse>`。
+- Request body 為 `{ "isShared": true | false }`；缺漏欄位為 400，找不到 owner-scoped 日記為 404。
+- `docs/API_SPEC.md` 已完整定義本次 contract，未修改規格。
+
+### Database 異動
+
+- 無 schema、SQL 或 Migration 異動；沿用 `entries.is_shared` 欄位。
+
+### 文件更新
+
+- `docs/TASKS.md` 將修改日記 API 標記 DONE，並記錄分享／取消分享日記 API 的 TODO → IN PROGRESS → REVIEW。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次實作與驗證。
+
+### 測試方式與結果
+
+- Diary 分享 DTO／Controller／Service targeted Gradle tests：BUILD SUCCESSFUL。
+- `./gradlew test`：BUILD SUCCESSFUL。
+- `git diff --check`：通過。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；保存期限截止日為 2026-06-22。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- 等待 Task PR 建立與 review；核准並合併至 `feature/phase4` 後，才能將本 Task 標記 DONE 並開始下載日記媒體 API。

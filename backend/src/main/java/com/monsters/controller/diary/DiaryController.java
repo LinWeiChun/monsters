@@ -4,6 +4,7 @@ import com.monsters.dto.common.ApiResponse;
 import com.monsters.dto.common.PageResponse;
 import com.monsters.dto.diary.CreateDiaryRequest;
 import com.monsters.dto.diary.DiaryResponse;
+import com.monsters.dto.diary.ShareDiaryRequest;
 import com.monsters.dto.diary.UpdateDiaryRequest;
 import com.monsters.security.common.AuthenticatedUser;
 import com.monsters.service.diary.DiaryService;
@@ -14,8 +15,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -93,5 +96,22 @@ public class DiaryController {
                 drawingFile
         );
         return ResponseEntity.ok(ApiResponse.success("Diary update success", response));
+    }
+
+    @PatchMapping("/{id}/share")
+    public ResponseEntity<ApiResponse<DiaryResponse>> updateSharing(
+            @AuthenticationPrincipal AuthenticatedUser currentUser,
+            @PathVariable Long id,
+            @Valid @RequestBody ShareDiaryRequest request
+    ) {
+        DiaryResponse response = diaryService.updateSharing(
+                currentUser.userId(),
+                id,
+                request.isShared()
+        );
+        return ResponseEntity.ok(ApiResponse.success(
+                "Diary sharing update success",
+                response
+        ));
     }
 }
