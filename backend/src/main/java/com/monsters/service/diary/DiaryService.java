@@ -4,6 +4,7 @@ import com.monsters.dto.common.PageResponse;
 import com.monsters.dto.diary.CreateDiaryRequest;
 import com.monsters.dto.diary.DiaryRecordMethod;
 import com.monsters.dto.diary.DiaryResponse;
+import com.monsters.dto.diary.UpdateDiaryRequest;
 import com.monsters.entity.entry.Entry;
 import com.monsters.entity.entry.EntryMedia;
 import com.monsters.entity.entry.EntryMediaType;
@@ -22,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -104,6 +106,49 @@ public class DiaryService {
         }
 
         return diaryMapper.toResponse(created.entry(), mood, created.media());
+    }
+
+    public DiaryResponse update(
+            Long userId,
+            Long entryId,
+            UpdateDiaryRequest request,
+            MultipartFile contentFile,
+            MultipartFile drawingFile
+    ) {
+        validateUpdateRecord(request, contentFile, drawingFile);
+        requireUser(userId);
+        Entry entry = requireOwnedEntry(userId, entryId);
+        Mood mood = requireMood(request.score());
+        List<EntryMedia> activeMedia = entryMediaRepository
+                .findAllByEntryIdAndDeletedFalseOrderByDisplayOrderAsc(entryId);
+        Set<Long> retainedMediaIds = retainedMediaIds(request, activeMedia);
+        List<NewDiaryMedia> newMedia = new ArrayList<>();
+
+        UpdatedDiary updated;
+        try {
+            if (hasFile(contentFile)) {
+                uploadPrimaryMedia(userId, request.recordMethod(), contentFile, newMedia);
+            }
+            if (hasFile(drawingFile)) {
+                uploadDrawing(userId, drawingFile, newMedia);
+            }
+            updated = persistenceService.update(
+                    entry,
+                    mood.getId(),
+                    normalizedContent(request),
+                    request.sharedOrDefault(),
+                    resolveOccurredAt(request),
+                    activeMedia,
+                    retainedMediaIds,
+                    newMedia
+            );
+        } catch (RuntimeException exception) {
+            cleanupUploadedMedia(newMedia);
+            throw exception;
+        }
+
+        cleanupStoredObjects(updated.removedObjectKeys());
+        return diaryMapper.toResponse(updated.entry(), mood, updated.media());
     }
 
     @Transactional(readOnly = true)
@@ -206,7 +251,22 @@ public class DiaryService {
                 .toLocalDateTime();
     }
 
+    private LocalDateTime resolveOccurredAt(UpdateDiaryRequest request) {
+        if (request.occurredAt() == null) {
+            return LocalDateTime.now(APPLICATION_ZONE);
+        }
+        return request.occurredAt()
+                .atZoneSameInstant(APPLICATION_ZONE)
+                .toLocalDateTime();
+    }
+
     private String normalizedContent(CreateDiaryRequest request) {
+        return request.recordMethod() == DiaryRecordMethod.TEXT
+                ? request.content().trim()
+                : null;
+    }
+
+    private String normalizedContent(UpdateDiaryRequest request) {
         return request.recordMethod() == DiaryRecordMethod.TEXT
                 ? request.content().trim()
                 : null;
@@ -255,6 +315,101 @@ public class DiaryService {
                 log.warn("Failed to clean up newly uploaded diary media after persistence failure");
             }
         }
+    }
+
+    private void cleanupStoredObjects(List<String> objectKeys) {
+        for (String objectKey : objectKeys) {
+            try {
+                entryMediaStorageService.delete(objectKey);
+            } catch (RuntimeException cleanupException) {
+                log.warn("Failed to clean up replaced entry media after diary update");
+            }
+        }
+    }
+
+    private void validateUpdateRecord(
+            UpdateDiaryRequest request,
+            MultipartFile contentFile,
+            MultipartFile drawingFile
+    ) {
+        DiaryRecordMethod recordMethod = request.recordMethod();
+        if (recordMethod == null) {
+            throw new ValidationException("Record method is required");
+        }
+        boolean hasContentFile = hasFile(contentFile);
+        boolean keepsContentMedia = request.existingContentMediaId() != null;
+        if (recordMethod == DiaryRecordMethod.TEXT) {
+            if (request.content() == null
+                    || request.content().isBlank()
+                    || hasContentFile
+                    || keepsContentMedia) {
+                throw new ValidationException(
+                        "TEXT requires content and must not include content media"
+                );
+            }
+        } else if (request.content() != null || hasContentFile == keepsContentMedia) {
+            throw new ValidationException(
+                    recordMethod + " requires exactly one new or existing content media"
+            );
+        }
+
+        if (hasFile(drawingFile) && request.existingDrawingMediaId() != null) {
+            throw new ValidationException(
+                    "Drawing requires either a new file or an existing media id, not both"
+            );
+        }
+    }
+
+    private Set<Long> retainedMediaIds(
+            UpdateDiaryRequest request,
+            List<EntryMedia> activeMedia
+    ) {
+        Set<Long> retainedIds = new HashSet<>();
+        if (request.existingContentMediaId() != null) {
+            requireRetainedMedia(
+                    activeMedia,
+                    request.existingContentMediaId(),
+                    primaryMediaType(request.recordMethod()),
+                    "content"
+            );
+            retainedIds.add(request.existingContentMediaId());
+        }
+        if (request.existingDrawingMediaId() != null) {
+            requireRetainedMedia(
+                    activeMedia,
+                    request.existingDrawingMediaId(),
+                    EntryMediaType.DRAWING,
+                    "drawing"
+            );
+            retainedIds.add(request.existingDrawingMediaId());
+        }
+        return Set.copyOf(retainedIds);
+    }
+
+    private void requireRetainedMedia(
+            List<EntryMedia> activeMedia,
+            Long mediaId,
+            EntryMediaType expectedType,
+            String purpose
+    ) {
+        boolean matches = activeMedia.stream().anyMatch(media -> mediaId.equals(media.getId())
+                && media.getMediaType() == expectedType);
+        if (!matches) {
+            throw new ValidationException("Existing " + purpose + " media is invalid");
+        }
+    }
+
+    private EntryMediaType primaryMediaType(DiaryRecordMethod recordMethod) {
+        return switch (recordMethod) {
+            case IMAGE -> EntryMediaType.IMAGE;
+            case AUDIO -> EntryMediaType.AUDIO;
+            case VIDEO -> EntryMediaType.VIDEO;
+            case TEXT -> throw new ValidationException("TEXT does not use content media");
+        };
+    }
+
+    private boolean hasFile(MultipartFile file) {
+        return file != null && !file.isEmpty();
     }
 
     private void validatePage(int page, int size) {

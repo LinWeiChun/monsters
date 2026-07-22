@@ -15,6 +15,7 @@ import com.monsters.dto.common.PageResponse;
 import com.monsters.dto.diary.CreateDiaryRequest;
 import com.monsters.dto.diary.DiaryRecordMethod;
 import com.monsters.dto.diary.DiaryResponse;
+import com.monsters.dto.diary.UpdateDiaryRequest;
 import com.monsters.entity.entry.Entry;
 import com.monsters.entity.entry.EntryMedia;
 import com.monsters.entity.entry.EntryMediaType;
@@ -36,6 +37,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -166,6 +168,112 @@ class DiaryServiceTest {
                 null
         )).isInstanceOf(ResourceNotFoundException.class).hasMessage("User not found");
 
+        verify(entryMediaStorageService, never()).upload(anyLong(), any(), any());
+    }
+
+    @Test
+    void updateShouldRetainContentMediaAndRemoveDrawingAfterTransaction() {
+        Entry entry = entry(10L, null);
+        Mood mood = mood();
+        EntryMedia image = media(21L, EntryMediaType.IMAGE, "entries/media/1/image/old.png", 0);
+        EntryMedia drawing = media(22L, EntryMediaType.DRAWING, "entries/media/1/drawing/old.webp", 1);
+        UpdateDiaryRequest request = updateRequest(
+                DiaryRecordMethod.IMAGE,
+                null,
+                false,
+                21L,
+                null
+        );
+        DiaryResponse expected = response(entry);
+        prepareLookups(mood);
+        when(entryRepository.findByIdAndUserIdAndEntryTypeAndDeletedFalse(
+                10L,
+                1L,
+                EntryType.DIARY
+        )).thenReturn(Optional.of(entry));
+        when(entryMediaRepository.findAllByEntryIdAndDeletedFalseOrderByDisplayOrderAsc(10L))
+                .thenReturn(List.of(image, drawing));
+        when(persistenceService.update(
+                any(), anyLong(), any(), anyBoolean(), any(), anyList(), any(), anyList()
+        )).thenReturn(new UpdatedDiary(
+                entry,
+                List.of(image),
+                List.of("entries/media/1/drawing/old.webp")
+        ));
+        when(diaryMapper.toResponse(entry, mood, List.of(image))).thenReturn(expected);
+
+        assertThat(service().update(1L, 10L, request, null, null)).isSameAs(expected);
+
+        verify(persistenceService).update(
+                entry,
+                3L,
+                null,
+                false,
+                LocalDateTime.of(2026, 7, 22, 12, 0),
+                List.of(image, drawing),
+                Set.of(21L),
+                List.of()
+        );
+        verify(entryMediaStorageService).delete("entries/media/1/drawing/old.webp");
+    }
+
+    @Test
+    void updateShouldCleanNewMediaWhenDatabaseTransactionFails() {
+        Entry entry = entry(10L, null);
+        Mood mood = mood();
+        MockMultipartFile contentFile = file("new-image.png", "image/png");
+        UpdateDiaryRequest request = updateRequest(
+                DiaryRecordMethod.IMAGE,
+                null,
+                false,
+                null,
+                null
+        );
+        prepareLookups(mood);
+        when(entryRepository.findByIdAndUserIdAndEntryTypeAndDeletedFalse(
+                10L,
+                1L,
+                EntryType.DIARY
+        )).thenReturn(Optional.of(entry));
+        when(entryMediaRepository.findAllByEntryIdAndDeletedFalseOrderByDisplayOrderAsc(10L))
+                .thenReturn(List.of());
+        when(entryMediaStorageService.upload(1L, EntryMediaType.IMAGE, contentFile))
+                .thenReturn(stored("entries/media/1/image/new.png", "image/png"));
+        when(persistenceService.update(
+                any(), anyLong(), any(), anyBoolean(), any(), anyList(), any(), anyList()
+        )).thenThrow(new IllegalStateException("database failed"));
+
+        assertThatThrownBy(() -> service().update(1L, 10L, request, contentFile, null))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("database failed");
+
+        verify(entryMediaStorageService).delete("entries/media/1/image/new.png");
+    }
+
+    @Test
+    void updateShouldRejectInvalidRetainedMedia() {
+        Entry entry = entry(10L, null);
+        Mood mood = mood();
+        EntryMedia image = media(21L, EntryMediaType.IMAGE, "entries/media/1/image/old.png", 0);
+        UpdateDiaryRequest request = updateRequest(
+                DiaryRecordMethod.IMAGE,
+                null,
+                false,
+                99L,
+                null
+        );
+        prepareLookups(mood);
+        when(entryRepository.findByIdAndUserIdAndEntryTypeAndDeletedFalse(
+                10L,
+                1L,
+                EntryType.DIARY
+        )).thenReturn(Optional.of(entry));
+        when(entryMediaRepository.findAllByEntryIdAndDeletedFalseOrderByDisplayOrderAsc(10L))
+                .thenReturn(List.of(image));
+
+        assertThatThrownBy(() -> service().update(1L, 10L, request, null, null))
+                .isInstanceOf(ValidationException.class)
+                .hasMessage("Existing content media is invalid");
         verify(entryMediaStorageService, never()).upload(anyLong(), any(), any());
     }
 
@@ -460,6 +568,20 @@ class DiaryServiceTest {
         return new StoredEntryMedia(objectKey, contentType, 1, (BigDecimal) null);
     }
 
+    private EntryMedia media(Long id, EntryMediaType type, String objectKey, int displayOrder) {
+        EntryMedia media = new EntryMedia(
+                10L,
+                type,
+                objectKey,
+                type == EntryMediaType.IMAGE ? "image/png" : "image/webp",
+                1,
+                null,
+                displayOrder
+        );
+        ReflectionTestUtils.setField(media, "id", id);
+        return media;
+    }
+
     private CreateDiaryRequest mediaRequest() {
         return new CreateDiaryRequest(
                 DiaryRecordMethod.IMAGE,
@@ -467,6 +589,24 @@ class DiaryServiceTest {
                 4,
                 false,
                 OffsetDateTime.parse("2026-07-19T12:00:00+08:00")
+        );
+    }
+
+    private UpdateDiaryRequest updateRequest(
+            DiaryRecordMethod recordMethod,
+            String content,
+            Boolean shared,
+            Long existingContentMediaId,
+            Long existingDrawingMediaId
+    ) {
+        return new UpdateDiaryRequest(
+                recordMethod,
+                content,
+                4,
+                shared,
+                OffsetDateTime.parse("2026-07-22T12:00:00+08:00"),
+                existingContentMediaId,
+                existingDrawingMediaId
         );
     }
 }

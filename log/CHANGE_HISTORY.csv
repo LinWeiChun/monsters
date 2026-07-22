@@ -1084,3 +1084,10 @@
 2026-07-19,08:31,PHASE4-DIARY-QUERY,Documentation,docs/TASKS.md,修改,記錄查詢日記 API TODO 至 DONE 狀態,Codex,否,否,否,否,下一個 Task 為修改日記 API
 2026-07-19,08:31,PHASE4-DIARY-QUERY,Documentation,log/CHANGE_LOG.md,修改,新增 Diary query 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
 2026-07-19,08:31,PHASE4-DIARY-QUERY,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Diary query 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改
+2026-07-22,09:05,PHASE4-DIARY-UPDATE,Backend,backend/src/main/java/com/monsters/controller/diary/DiaryController.java,修改,實作 PUT api diaries multipart 更新 endpoint,Codex,是,否,否,否,成功回傳 HTTP 200
+2026-07-22,09:05,PHASE4-DIARY-UPDATE,Backend,backend/src/main/java/com/monsters/dto/diary/UpdateDiaryRequest.java,新增,建立 Diary 完整修改 request 與既有媒體 ID 欄位,Codex,是,否,否,否,score 1 至 5
+2026-07-22,09:05,PHASE4-DIARY-UPDATE,Backend,backend/src/main/java/com/monsters/service/diary,新增與修改,建立 Diary 媒體保留替換軟刪除與 R2 清理流程,Codex,是,否,否,否,交易成功後才清理舊物件
+2026-07-22,09:05,PHASE4-DIARY-UPDATE,Test,backend/src/test/java/com/monsters,新增與修改,驗證 update request controller service transaction 與媒體清理,Codex,是,否,否,否,targeted 與完整 Backend tests 通過
+2026-07-22,09:05,PHASE4-DIARY-UPDATE,Documentation,docs/TASKS.md,修改,記錄修改日記 API TODO 至 REVIEW 狀態,Codex,否,否,否,否,等待 Task PR review
+2026-07-22,09:05,PHASE4-DIARY-UPDATE,Documentation,log/CHANGE_LOG.md,修改,新增 Diary update 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
+2026-07-22,09:05,PHASE4-DIARY-UPDATE,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Diary update 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改
