@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 
-import '../../models/annoyance_drawing.dart';
+import '../../models/entry_drawing.dart';
 import '../../theme/app_spacing.dart';
 
 class DrawingPreviewCard extends StatelessWidget {
-  const DrawingPreviewCard({required this.drawing, super.key});
+  const DrawingPreviewCard({
+    required this.drawing,
+    this.keyPrefix = 'entry',
+    super.key,
+  });
 
-  final AnnoyanceDrawingFile drawing;
+  final EntryDrawingFile drawing;
+  final String keyPrefix;
 
   @override
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerRight,
       child: Card(
-        key: const Key('annoyanceDrawingPreviewCard'),
+        key: Key('${keyPrefix}DrawingPreviewCard'),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.sm),
           child: Column(
@@ -24,7 +29,7 @@ class DrawingPreviewCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppRadius.md),
                 child: Image.memory(
                   drawing.bytes,
-                  key: const Key('annoyanceDrawingPreview'),
+                  key: Key('${keyPrefix}DrawingPreview'),
                   width: 220,
                   height: 220,
                   fit: BoxFit.contain,

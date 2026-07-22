@@ -11,6 +11,7 @@ const moodDrawingPalette = <Color>[
   Color(0xFF159957),
 ];
 
+/// Shared drawing controls for Entry flows.
 class MoodDrawingControls extends StatelessWidget {
   const MoodDrawingControls({
     required this.brushWidth,

@@ -8,6 +8,73 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-22 11:04 PHASE4-ENTRY-FRONTEND-FOUNDATION
+
+Task
+Phase 4 Entry 共用前端元件、Responsive flow shell 與媒體 Adapter（REVIEW）
+
+執行者
+Codex
+
+### 完成內容
+
+- 將記錄方式、媒體檔案、心情繪圖等跨 Entry 型別抽至 `entry_record.dart`、`entry_media.dart` 與 `entry_drawing.dart`，Annoyance 草稿保留相容別名。
+- 建立 Entry 共用 media service、validator 與 Web／IO／unsupported platform adapter；以 `recordingFilePrefix` 區分 Annoyance／Diary 錄音暫存檔。
+- 將內容輸入、記錄方式、媒體預覽、繪圖、分數、分享與 Responsive flow shell 移至 `widgets/entry/`。
+- 共用元件以 `keyPrefix`、標題與語意文案支援不同 Entry flow；Annoyance 改用共用元件並保留既有測試 key 與操作行為。
+- 新增 Entry 共用 selector 與 Mobile／Tablet／Desktop shell 測試，並將媒體 validator 與共用 Widget 測試改為 Entry contract。
+- 依狀態稽核結果將 LoginRequest、註冊排版、煩惱／日記媒體下載、媒體 Task closeout 與 App icon／Logo 共 6 項標記 DONE；登入頁排版維持 REVIEW。
+
+### 修改／新增／刪除檔案
+
+- 新增 `frontend/lib/models/entry_*.dart` 與 `frontend/lib/services/entry_media_*.dart`。
+- 將可共用 Widget 從 `frontend/lib/widgets/annoyance/` 移至 `frontend/lib/widgets/entry/`，並參數化 flow-specific key 與文案。
+- 修改 `frontend/lib/pages/annoyance_chat_page.dart`、Annoyance media Provider、相容模型／Service 與 `frontend/lib/theme/app_colors.dart`。
+- 新增 `frontend/test/widgets/entry_shared_components_test.dart`，移轉 Entry media validator 測試並更新共用 Widget 測試。
+- 修改 `docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv`。
+- 未修改 `system_data/` 或 `log/CHANGE_HISTORY.xlsx`。
+
+### system_data/ 參考結果
+
+- 參考舊 `diaryChat.dart` 的聊天式引導、文字／圖片／錄音／影片、optional 心情圖、分數與分享流程。
+- 保留可重用的使用者流程與媒體選擇意圖；未沿用舊版 `setState` 大型頁面、全域登入狀態、直接 Repository 呼叫、硬編碼路徑或 `Navigator.push` 分散路由。
+- 正式 Project／API／Database／UI／Coding Standard 優先，Entry 共用層採 Riverpod、Dio Repository、go_router 與 Responsive flow 架構。
+
+### API 異動
+
+- 無 API contract 或 endpoint 異動。
+- 共用媒體前端限制仍與既有 Annoyance／Diary multipart contract 一致。
+
+### Database 異動
+
+- 無 schema、SQL 或 Migration 異動。
+
+### 文件更新
+
+- `docs/UI_SPEC.md` 補充 Entry 共用模型、媒體 Adapter、Widget 路徑與 Diary 不得依賴 Annoyance 專屬層的規則。
+- `docs/TASKS.md` 同步 6 項 DONE、1 項保留 REVIEW，並記錄本 Task 的 TODO → IN PROGRESS → REVIEW。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次實作與驗證。
+
+### 測試方式與結果
+
+- `flutter analyze --no-pub`：No issues found。
+- Entry 共用元件、媒體 validator 與 Annoyance Page／Provider／Repository 定向回歸：35 tests passed。
+- `flutter test --no-pub`：136 tests passed。
+- `flutter build web --no-pub`：成功，產出 `build/web`；僅有既有 CupertinoIcons 字型提示與 Wasm 建議，未造成 build 失敗。
+- `git diff --check`：通過。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；2026-07-22 的保存期限截止日為 2026-06-22。
+- `CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv` 最早正式紀錄皆為 2026-06-29，無超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- 等待 Task PR 建立與 review；合併至 `feature/phase4` 後，才能將 Entry 共用前端基礎 Task 標記 DONE，並開始 Diary Web 聊天室實作。
+- 登入頁 Web／Chrome 視覺驗證仍未完成，因此該項維持 REVIEW。
+
+---
+
 ## 2026-07-22 10:04 PHASE4-ENTRY-MEDIA-DOWNLOAD
 
 Task

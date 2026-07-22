@@ -85,7 +85,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 ## 插隊任務：登入帳號或 Email 驗證修正
 
 - [x] 比對 `bec7bcf` 與 `0b3d265` 的登入欄位及後端查詢行為（DONE）
-- [x] 修正 LoginRequest 將 Account 誤判為非法 Email 的驗證限制（REVIEW：保留 `email` request key，相容既有前端）
+- [x] 修正 LoginRequest 將 Account 誤判為非法 Email 的驗證限制（DONE：PR #52 已合併；保留 `email` request key，相容既有前端）
 - [x] 補齊 Account / Email 登入測試（DONE：登入相關後端測試與後端完整測試通過）
 - [x] 同步 API、UI 規格與 Log（DONE）
 
@@ -105,7 +105,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 - [x] 檢查 Penpot MCP 指定 Account & Access 畫面狀態（DONE：目前 selection 為空，註冊頁以已取得的 Account & Access 視覺系統與登入頁規格延伸）
 - [x] 比對 Flutter 現有註冊頁與 Account & Access 排版差異（DONE：已確認舊版置中表單、舊 logo 路徑與未使用 Penpot 版型）
-- [x] 依 Account & Access 視覺系統調整註冊頁排版（REVIEW：本次僅註冊頁）
+- [x] 依 Account & Access 視覺系統調整註冊頁排版（DONE：PR #51、#53 已合併；本次僅註冊頁）
 - [x] 執行 Flutter Analyze 與 Register Page Test（DONE：`flutter analyze --no-pub`、`flutter test --no-pub test/register_page_test.dart` 通過）
 - [x] 同步 UI 規格與 Log（DONE）
 
@@ -190,7 +190,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] 修改煩惱 API（DONE：PR #33 已合併至 `feature/phase3`）
 - [x] 解決煩惱 API（DONE：PR #34 已合併至 `feature/phase3`）
 - [x] 分享 / 取消分享煩惱 API（DONE：PR #34 已合併至 `feature/phase3`）
-- [ ] 下載煩惱媒體 API（REVIEW：與 Diary 共用 private R2 串流、owner／分享授權及單一 Range；待 Task PR 合併）
+- [x] 下載煩惱媒體 API（DONE：PR #72 已合併至 `feature/phase4`；與 Diary 共用 private R2 串流、owner／分享授權及單一 Range）
 - [x] Flutter 新增煩惱聊天室（DONE：PR #35 已合併至 `feature/phase3`）
 - [x] Flutter 文字 / 圖片 / 錄音 / 影片選取與預覽（DONE：PR #36 已合併至 `feature/phase3`）
 - [x] Flutter 畫心情功能（DONE：PR #37 已合併至 `feature/phase3`）
@@ -242,9 +242,13 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] TODO：確認 PR #71 已合併，重讀 Annoyance／Diary 媒體下載 contract、舊系統媒體流程與既有 private R2 Range 實作
 - [x] IN PROGRESS：實作共用 Entry 媒體授權與串流，提供 Annoyance／Diary 下載 endpoint，補齊 Range CORS headers
 - [x] REVIEW：執行授權、200／206、404／416／500、CORS、R2 與 Backend 完整測試
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（PR #72 已合併至 `feature/phase4`）
+- [x] 下載日記媒體 API（DONE：PR #72 已合併至 `feature/phase4`；共用 private R2 串流、owner／分享授權及單一 Range）
+- [x] TODO：確認 PR #72 已合併，重讀 Diary UI contract、舊系統流程與 Annoyance 可重用前端架構
+- [x] IN PROGRESS：抽出 Entry 共用前端元件、Responsive flow shell 與媒體 Adapter，並維持 Annoyance 行為相容
+- [x] REVIEW：Entry 共用元件與媒體 Adapter 定向回歸 35 項、Flutter Analyze、136 項完整測試與 Web build 通過
 - [ ] DONE：同步文件與 Log，完成 Git commit、push 與 task PR
-- [ ] 下載日記媒體 API（REVIEW：共用 private R2 串流、owner／分享授權及單一 Range；待 Task PR 合併）
-- [ ] 抽出 Entry 共用前端元件、Responsive flow shell 與媒體 Adapter
+- [ ] 抽出 Entry 共用前端元件、Responsive flow shell 與媒體 Adapter（REVIEW：實作、測試、文件與 Log 完成；待 Task PR 合併）
 - [ ] 依 Penpot `Diary Flow / Web` 實作 Flutter Web 日記聊天室並先完成 RWD 驗收
 - [ ] 依 Penpot `Diary Flow / Mobile` 適配 Flutter Mobile 日記聊天室
 - [ ] Flutter 日記分數選擇
@@ -354,7 +358,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [ ] 排除舊系統金鑰、憑證、jar、metadata 與 build artifact
 - [ ] 依新版環境變數、部署與 Git 規範重新整理
 
-- [ ] App icon / Logo 三平台替換（REVIEW：本地產圖、登入 / 註冊 / 啟動畫面 logo 套用與文件同步完成；待測試與 GitHub push）
+- [x] App icon / Logo 三平台替換（DONE：相關提交已合併並存在於 `develop`／目前分支，三平台建置與測試紀錄已通過）
 - [ ] Android 測試
 - [ ] iOS 測試
 - [ ] Web 測試

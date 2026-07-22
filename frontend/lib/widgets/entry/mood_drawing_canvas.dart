@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../models/annoyance_drawing.dart';
+import '../../models/entry_drawing.dart';
 import '../../theme/app_spacing.dart';
 import 'mood_drawing_controls.dart';
 import 'mood_drawing_exporter.dart';
@@ -20,7 +20,7 @@ class MoodDrawingCanvas extends StatefulWidget {
     super.key,
   });
 
-  final ValueChanged<AnnoyanceDrawingFile> onCompleted;
+  final ValueChanged<EntryDrawingFile> onCompleted;
   final VoidCallback onCancel;
   final MoodDrawingExport? exportPng;
 
@@ -225,12 +225,12 @@ class _MoodDrawingCanvasState extends State<MoodDrawingCanvas> {
       final bytes = await (widget.exportPng ?? MoodDrawingExporter.renderPng)(
         _strokes,
       );
-      if (bytes.length > AnnoyanceDrawingLimits.maxBytes) {
+      if (bytes.length > EntryDrawingLimits.maxBytes) {
         throw const FormatException('心情圖超過 5 MB，請減少筆畫後再試。');
       }
       final name = 'mood-${DateTime.now().microsecondsSinceEpoch}.png';
       widget.onCompleted(
-        AnnoyanceDrawingFile(
+        EntryDrawingFile(
           file: XFile.fromData(bytes, name: name, mimeType: 'image/png'),
           bytes: bytes,
           name: name,

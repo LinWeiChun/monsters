@@ -2,14 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../models/annoyance_draft.dart';
-import '../../models/annoyance_media.dart';
-import '../../services/annoyance_media_service.dart';
+import '../../models/entry_media.dart';
+import '../../models/entry_record.dart';
+import '../../services/entry_media_service.dart';
 import '../../theme/app_spacing.dart';
 import 'media_preview_card.dart';
 
-class AnnoyanceContentInput extends StatefulWidget {
-  const AnnoyanceContentInput({
+class EntryContentInput extends StatefulWidget {
+  const EntryContentInput({
     required this.method,
     required this.textContent,
     required this.media,
@@ -19,24 +19,30 @@ class AnnoyanceContentInput extends StatefulWidget {
     required this.onClear,
     required this.canContinue,
     required this.onContinue,
+    this.keyPrefix = 'entry',
+    this.textLabel = '記錄內容',
+    this.textHint = '把想說的話慢慢寫下來…',
     super.key,
   });
 
-  final AnnoyanceRecordMethod method;
+  final EntryRecordMethod method;
   final String textContent;
-  final AnnoyanceMediaFile? media;
-  final AnnoyanceMediaService mediaService;
+  final EntryMediaFile? media;
+  final EntryMediaService mediaService;
   final ValueChanged<String> onTextChanged;
-  final ValueChanged<AnnoyanceMediaFile> onMediaSelected;
+  final ValueChanged<EntryMediaFile> onMediaSelected;
   final VoidCallback onClear;
   final bool canContinue;
   final VoidCallback onContinue;
+  final String keyPrefix;
+  final String textLabel;
+  final String textHint;
 
   @override
-  State<AnnoyanceContentInput> createState() => _AnnoyanceContentInputState();
+  State<EntryContentInput> createState() => _EntryContentInputState();
 }
 
-class _AnnoyanceContentInputState extends State<AnnoyanceContentInput> {
+class _EntryContentInputState extends State<EntryContentInput> {
   late final TextEditingController _textController;
   Timer? _recordingTimer;
   Duration _recordingDuration = Duration.zero;
@@ -51,7 +57,7 @@ class _AnnoyanceContentInputState extends State<AnnoyanceContentInput> {
   }
 
   @override
-  void didUpdateWidget(covariant AnnoyanceContentInput oldWidget) {
+  void didUpdateWidget(covariant EntryContentInput oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.method != oldWidget.method ||
         widget.textContent != _textController.text) {
@@ -75,7 +81,7 @@ class _AnnoyanceContentInputState extends State<AnnoyanceContentInput> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      key: const Key('annoyanceContentStep'),
+      key: Key('${widget.keyPrefix}ContentStep'),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
@@ -83,18 +89,18 @@ class _AnnoyanceContentInputState extends State<AnnoyanceContentInput> {
           children: [
             Text(_title, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: AppSpacing.sm),
-            if (widget.method == AnnoyanceRecordMethod.text)
+            if (widget.method == EntryRecordMethod.text)
               TextField(
-                key: const Key('annoyanceTextContentField'),
+                key: Key('${widget.keyPrefix}TextContentField'),
                 controller: _textController,
                 minLines: 4,
                 maxLines: 8,
                 textInputAction: TextInputAction.newline,
-                decoration: const InputDecoration(
-                  labelText: '煩惱內容',
-                  hintText: '把想說的話慢慢寫下來…',
+                decoration: InputDecoration(
+                  labelText: widget.textLabel,
+                  hintText: widget.textHint,
                   alignLabelWithHint: true,
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
                 onChanged: widget.onTextChanged,
               )
@@ -103,14 +109,17 @@ class _AnnoyanceContentInputState extends State<AnnoyanceContentInput> {
                 media: media,
                 onRemove: _clearMedia,
                 onReselect: _reselectMedia,
+                keyPrefix: widget.keyPrefix,
               )
-            else if (widget.method == AnnoyanceRecordMethod.audio)
+            else if (widget.method == EntryRecordMethod.audio)
               _buildRecorder()
             else
               _buildPickerActions(),
             if (_isBusy) ...[
               const SizedBox(height: AppSpacing.sm),
-              const LinearProgressIndicator(key: Key('annoyanceMediaProgress')),
+              LinearProgressIndicator(
+                key: Key('${widget.keyPrefix}MediaProgress'),
+              ),
             ],
             if (_errorMessage case final message?) ...[
               const SizedBox(height: AppSpacing.sm),
@@ -118,7 +127,7 @@ class _AnnoyanceContentInputState extends State<AnnoyanceContentInput> {
                 liveRegion: true,
                 child: Text(
                   message,
-                  key: const Key('annoyanceMediaError'),
+                  key: Key('${widget.keyPrefix}MediaError'),
                   style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
               ),
@@ -130,7 +139,7 @@ class _AnnoyanceContentInputState extends State<AnnoyanceContentInput> {
             ),
             const SizedBox(height: AppSpacing.md),
             FilledButton.icon(
-              key: const Key('annoyanceContentContinueButton'),
+              key: Key('${widget.keyPrefix}ContentContinueButton'),
               onPressed:
                   widget.canContinue && !_isBusy && !_isRecording
                       ? widget.onContinue
@@ -150,26 +159,23 @@ class _AnnoyanceContentInputState extends State<AnnoyanceContentInput> {
       runSpacing: AppSpacing.sm,
       children: [
         FilledButton.tonalIcon(
-          key: const Key('annoyanceMediaGalleryButton'),
+          key: Key('${widget.keyPrefix}MediaGalleryButton'),
           onPressed:
-              _isBusy ? null : () => _pickMedia(AnnoyanceMediaOrigin.gallery),
+              _isBusy ? null : () => _pickMedia(EntryMediaOrigin.gallery),
           icon: const Icon(Icons.photo_library_outlined),
           label: Text(
-            widget.method == AnnoyanceRecordMethod.image ? '選取圖片' : '選取影片',
+            widget.method == EntryRecordMethod.image ? '選取圖片' : '選取影片',
           ),
         ),
         OutlinedButton.icon(
-          key: const Key('annoyanceMediaCameraButton'),
-          onPressed:
-              _isBusy ? null : () => _pickMedia(AnnoyanceMediaOrigin.camera),
+          key: Key('${widget.keyPrefix}MediaCameraButton'),
+          onPressed: _isBusy ? null : () => _pickMedia(EntryMediaOrigin.camera),
           icon: Icon(
-            widget.method == AnnoyanceRecordMethod.image
+            widget.method == EntryRecordMethod.image
                 ? Icons.camera_alt_outlined
                 : Icons.videocam_outlined,
           ),
-          label: Text(
-            widget.method == AnnoyanceRecordMethod.image ? '拍照' : '錄影',
-          ),
+          label: Text(widget.method == EntryRecordMethod.image ? '拍照' : '錄影'),
         ),
       ],
     );
@@ -189,12 +195,12 @@ class _AnnoyanceContentInputState extends State<AnnoyanceContentInput> {
         const SizedBox(height: AppSpacing.sm),
         Text(
           _formatDuration(_recordingDuration),
-          key: const Key('annoyanceRecordingDuration'),
+          key: Key('${widget.keyPrefix}RecordingDuration'),
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: AppSpacing.sm),
         FilledButton.icon(
-          key: const Key('annoyanceRecordButton'),
+          key: Key('${widget.keyPrefix}RecordButton'),
           onPressed:
               _isBusy
                   ? null
@@ -206,12 +212,12 @@ class _AnnoyanceContentInputState extends State<AnnoyanceContentInput> {
     );
   }
 
-  Future<void> _pickMedia(AnnoyanceMediaOrigin origin) async {
+  Future<void> _pickMedia(EntryMediaOrigin origin) async {
     await _runBusy(() async {
       final media = switch (widget.method) {
-        AnnoyanceRecordMethod.image => widget.mediaService.pickImage(origin),
-        AnnoyanceRecordMethod.video => widget.mediaService.pickVideo(origin),
-        _ => Future<AnnoyanceMediaFile?>.value(),
+        EntryRecordMethod.image => widget.mediaService.pickImage(origin),
+        EntryRecordMethod.video => widget.mediaService.pickVideo(origin),
+        _ => Future<EntryMediaFile?>.value(),
       };
       final selected = await media;
       if (selected != null) {
@@ -237,7 +243,7 @@ class _AnnoyanceContentInputState extends State<AnnoyanceContentInput> {
         }
         final next = _recordingDuration + const Duration(seconds: 1);
         setState(() => _recordingDuration = next);
-        if (next >= AnnoyanceMediaLimits.audioMaxDuration) {
+        if (next >= EntryMediaLimits.audioMaxDuration) {
           unawaited(_stopRecording());
         }
       });
@@ -254,7 +260,7 @@ class _AnnoyanceContentInputState extends State<AnnoyanceContentInput> {
       if (selected != null) {
         widget.onMediaSelected(selected);
       } else {
-        throw const AnnoyanceMediaValidationException('沒有取得錄音內容，請再試一次。');
+        throw const EntryMediaValidationException('沒有取得錄音內容，請再試一次。');
       }
     });
   }
@@ -266,7 +272,7 @@ class _AnnoyanceContentInputState extends State<AnnoyanceContentInput> {
     });
     try {
       await action();
-    } on AnnoyanceMediaValidationException catch (error) {
+    } on EntryMediaValidationException catch (error) {
       if (mounted) {
         setState(() => _errorMessage = error.message);
       }
@@ -288,23 +294,23 @@ class _AnnoyanceContentInputState extends State<AnnoyanceContentInput> {
 
   void _reselectMedia() {
     _clearMedia();
-    if (widget.method != AnnoyanceRecordMethod.audio) {
-      unawaited(_pickMedia(AnnoyanceMediaOrigin.gallery));
+    if (widget.method != EntryRecordMethod.audio) {
+      unawaited(_pickMedia(EntryMediaOrigin.gallery));
     }
   }
 
   String get _title => switch (widget.method) {
-    AnnoyanceRecordMethod.text => '寫下想說的話',
-    AnnoyanceRecordMethod.image => '選擇一張圖片',
-    AnnoyanceRecordMethod.audio => '錄下想說的話',
-    AnnoyanceRecordMethod.video => '選擇一段影片',
+    EntryRecordMethod.text => '寫下想說的話',
+    EntryRecordMethod.image => '選擇一張圖片',
+    EntryRecordMethod.audio => '錄下想說的話',
+    EntryRecordMethod.video => '選擇一段影片',
   };
 
   String get _limitDescription => switch (widget.method) {
-    AnnoyanceRecordMethod.text => '文字內容不可空白。',
-    AnnoyanceRecordMethod.image => '支援 JPG、PNG、WebP，最多 5 MB。',
-    AnnoyanceRecordMethod.audio => '支援 WAV 錄音，最多 10 MB 或 5 分鐘。',
-    AnnoyanceRecordMethod.video => '支援 MP4、MOV、WebM，最多 50 MB 或 60 秒。',
+    EntryRecordMethod.text => '文字內容不可空白。',
+    EntryRecordMethod.image => '支援 JPG、PNG、WebP，最多 5 MB。',
+    EntryRecordMethod.audio => '支援 WAV 錄音，最多 10 MB 或 5 分鐘。',
+    EntryRecordMethod.video => '支援 MP4、MOV、WebM，最多 50 MB 或 60 秒。',
   };
 
   String _formatDuration(Duration duration) {

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:video_player/video_player.dart';
 
-import '../../models/annoyance_draft.dart';
-import '../../models/annoyance_media.dart';
-import '../../services/annoyance_media_platform.dart';
-import '../../services/annoyance_media_platform_factory.dart';
+import '../../models/entry_media.dart';
+import '../../models/entry_record.dart';
+import '../../services/entry_media_platform.dart';
+import '../../services/entry_media_platform_factory.dart';
 import '../../theme/app_spacing.dart';
 
 class MediaPreviewCard extends StatelessWidget {
@@ -13,17 +13,19 @@ class MediaPreviewCard extends StatelessWidget {
     required this.media,
     required this.onRemove,
     required this.onReselect,
+    this.keyPrefix = 'entry',
     super.key,
   });
 
-  final AnnoyanceMediaFile media;
+  final EntryMediaFile media;
   final VoidCallback onRemove;
   final VoidCallback onReselect;
+  final String keyPrefix;
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      key: const Key('annoyanceMediaPreviewCard'),
+      key: Key('${keyPrefix}MediaPreviewCard'),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
@@ -44,13 +46,13 @@ class MediaPreviewCard extends StatelessWidget {
               spacing: AppSpacing.sm,
               children: [
                 TextButton.icon(
-                  key: const Key('annoyanceMediaRemoveButton'),
+                  key: Key('${keyPrefix}MediaRemoveButton'),
                   onPressed: onRemove,
                   icon: const Icon(Icons.delete_outline),
                   label: const Text('移除'),
                 ),
                 FilledButton.tonalIcon(
-                  key: const Key('annoyanceMediaReselectButton'),
+                  key: Key('${keyPrefix}MediaReselectButton'),
                   onPressed: onReselect,
                   icon: const Icon(Icons.refresh),
                   label: const Text('重新選擇'),
@@ -65,11 +67,11 @@ class MediaPreviewCard extends StatelessWidget {
 
   Widget _buildPreview() {
     return switch (media.method) {
-      AnnoyanceRecordMethod.image => ClipRRect(
+      EntryRecordMethod.image => ClipRRect(
         borderRadius: BorderRadius.circular(AppRadius.md),
         child: Image.memory(
           media.bytes,
-          key: const Key('annoyanceImagePreview'),
+          key: Key('${keyPrefix}ImagePreview'),
           height: 220,
           fit: BoxFit.contain,
           errorBuilder:
@@ -77,9 +79,15 @@ class MediaPreviewCard extends StatelessWidget {
                   const _PreviewError(message: '圖片預覽無法顯示，請重新選擇。'),
         ),
       ),
-      AnnoyanceRecordMethod.audio => _AudioPreview(path: media.file.path),
-      AnnoyanceRecordMethod.video => _VideoPreview(path: media.file.path),
-      AnnoyanceRecordMethod.text => const SizedBox.shrink(),
+      EntryRecordMethod.audio => _AudioPreview(
+        path: media.file.path,
+        keyPrefix: keyPrefix,
+      ),
+      EntryRecordMethod.video => _VideoPreview(
+        path: media.file.path,
+        keyPrefix: keyPrefix,
+      ),
+      EntryRecordMethod.text => const SizedBox.shrink(),
     };
   }
 
@@ -101,9 +109,10 @@ class MediaPreviewCard extends StatelessWidget {
 }
 
 class _AudioPreview extends StatefulWidget {
-  const _AudioPreview({required this.path});
+  const _AudioPreview({required this.path, required this.keyPrefix});
 
   final String path;
+  final String keyPrefix;
 
   @override
   State<_AudioPreview> createState() => _AudioPreviewState();
@@ -111,14 +120,14 @@ class _AudioPreview extends StatefulWidget {
 
 class _AudioPreviewState extends State<_AudioPreview> {
   final _player = AudioPlayer();
-  late final AnnoyanceMediaPlatform _platform;
+  late final EntryMediaPlatform _platform;
   bool _ready = false;
   bool _failed = false;
 
   @override
   void initState() {
     super.initState();
-    _platform = createAnnoyanceMediaPlatform();
+    _platform = createEntryMediaPlatform();
     _load();
   }
 
@@ -138,11 +147,11 @@ class _AudioPreviewState extends State<_AudioPreview> {
       builder: (context, snapshot) {
         final isPlaying = snapshot.data?.playing ?? false;
         return ListTile(
-          key: const Key('annoyanceAudioPreview'),
+          key: Key('${widget.keyPrefix}AudioPreview'),
           leading: const Icon(Icons.graphic_eq),
           title: const Text('錄音預覽'),
           trailing: IconButton.filledTonal(
-            key: const Key('annoyanceAudioPlayButton'),
+            key: Key('${widget.keyPrefix}AudioPlayButton'),
             tooltip: isPlaying ? '暫停' : '播放',
             onPressed: !_ready ? null : () => _toggleAudio(isPlaying),
             icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
@@ -178,9 +187,10 @@ class _AudioPreviewState extends State<_AudioPreview> {
 }
 
 class _VideoPreview extends StatefulWidget {
-  const _VideoPreview({required this.path});
+  const _VideoPreview({required this.path, required this.keyPrefix});
 
   final String path;
+  final String keyPrefix;
 
   @override
   State<_VideoPreview> createState() => _VideoPreviewState();
@@ -215,14 +225,14 @@ class _VideoPreviewState extends State<_VideoPreview> {
       );
     }
     return AspectRatio(
-      key: const Key('annoyanceVideoPreview'),
+      key: Key('${widget.keyPrefix}VideoPreview'),
       aspectRatio: controller.value.aspectRatio,
       child: Stack(
         alignment: Alignment.center,
         children: [
           VideoPlayer(controller),
           IconButton.filledTonal(
-            key: const Key('annoyanceVideoPlayButton'),
+            key: Key('${widget.keyPrefix}VideoPlayButton'),
             tooltip: controller.value.isPlaying ? '暫停' : '播放',
             onPressed: () async {
               controller.value.isPlaying
@@ -243,7 +253,7 @@ class _VideoPreviewState extends State<_VideoPreview> {
 
   Future<void> _load() async {
     try {
-      final controller = createAnnoyanceMediaPlatform().createVideoController(
+      final controller = createEntryMediaPlatform().createVideoController(
         widget.path,
       );
       await controller.initialize();

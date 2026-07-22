@@ -152,6 +152,8 @@ Phase 3 完成頁不顯示假怪獸獎勵；真實獎勵與圖鑑導向於 Phase
 
 Diary 前端需抽出並重用 Phase 3 Entry 共用元件與平台 Adapter，包括記錄方式、媒體預覽、心情畫布、分數、分享選擇及 Responsive flow shell；Diary 仍維持獨立的 draft state、Provider、Repository、DTO、review 與完成元件，不得直接耦合 Annoyance 專屬類別或 API。
 
+Entry 共用前端基礎位於 `frontend/lib/models/entry_*.dart`、`frontend/lib/services/entry_media_*.dart` 與 `frontend/lib/widgets/entry/`。共用 Widget 以 `keyPrefix`、標題與語意文案區分 Annoyance／Diary，媒體 Service 以 `recordingFilePrefix` 區分錄音暫存檔；Annoyance 已改為直接使用這些共用元件並保留原測試 key。Diary 後續只能依賴 Entry 共用層，不得匯入 `widgets/annoyance/` 或 Annoyance 媒體型別。
+
 媒體 MIME type、大小、長度、private R2、JWT download URL 與 HTTP Range 規則全部沿用新增煩惱規格；每筆日記限一個主要媒體與一張 optional 心情圖。Web 不支援的來源需提供可理解的替代選取方式，不得阻斷文字日記或檔案上傳。
 
 Phase 4 完成頁只顯示日記已安全保存、分數與分享狀態；API `reward` 為 `null`，不得顯示假怪獸、連續天數禮物或尚未完成的歷史頁導向。日記獎勵於 Phase 6 串接。

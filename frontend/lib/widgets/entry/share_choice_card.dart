@@ -2,27 +2,32 @@ import 'package:flutter/material.dart';
 
 import '../../theme/app_spacing.dart';
 
+/// Shared private-or-community choice for Entry flows.
 class ShareChoiceCard extends StatelessWidget {
   const ShareChoiceCard({
     required this.onSelected,
     this.selectedValue,
+    this.keyPrefix = 'entry',
+    this.title = '是否分享這筆記錄？',
     super.key,
   });
 
   final ValueChanged<bool> onSelected;
   final bool? selectedValue;
+  final String keyPrefix;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      key: const Key('annoyanceShareChoiceCard'),
+      key: Key('${keyPrefix}ShareChoiceCard'),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('是否分享這筆煩惱？', style: Theme.of(context).textTheme.titleMedium),
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: AppSpacing.xs),
             Text(
               '預設會保持私人。分享到社群後，其他使用者可以在社群看到這筆內容。',
@@ -30,7 +35,7 @@ class ShareChoiceCard extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             _ShareOptionButton(
-              key: const Key('annoyanceSharePrivateButton'),
+              key: Key('${keyPrefix}SharePrivateButton'),
               icon: Icons.lock_outline,
               title: '保持私人',
               subtitle: '只保存在你的紀錄中',
@@ -39,7 +44,7 @@ class ShareChoiceCard extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
             _ShareOptionButton(
-              key: const Key('annoyanceSharePublicButton'),
+              key: Key('${keyPrefix}SharePublicButton'),
               icon: Icons.groups_outlined,
               title: '分享到社群',
               subtitle: '讓社群中的使用者看見',
