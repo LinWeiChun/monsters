@@ -1126,5 +1126,5 @@
 2026-07-22,14:49,PHASE4-DIARY-MOBILE-CHAT,Frontend,frontend/lib/widgets/diary/diary_mobile_flow.dart,新增,建立 Penpot 390x844 Diary Mobile 九狀態畫布,Codex,否,否,是,否,320 至 599px 等比例填滿 viewport
 2026-07-22,14:49,PHASE4-DIARY-MOBILE-CHAT,Frontend,frontend/lib/pages/diary_chat_page.dart 與 frontend/lib/providers/diary_chat_provider.dart,修改,沿用共用狀態 API 並加入 Mobile 選擇後確認流程,Codex,否,否,是,否,Web Tablet 快速選擇行為保持相容
 2026-07-22,14:49,PHASE4-DIARY-MOBILE-CHAT,Test,frontend/test/diary_chat_page_test.dart 與 frontend/test/providers/diary_chat_provider_test.dart,修改,驗證 Mobile RWD 九狀態逐步確認畫布完成頁與 Web 回歸,Codex,否,否,是,否,Analyze 通過 18 項定向與 156 項完整測試 Web build 成功
-2026-07-22,14:49,PHASE4-DIARY-MOBILE-CHAT,Documentation,docs/UI_SPEC.md 與 docs/TASKS.md,修改,同步 Diary Mobile 規格並將 PR 74 Web Task 轉為 DONE,Codex,否,否,是,否,本 Task 維持 REVIEW 待 PR 合併
+2026-07-22,14:49,PHASE4-DIARY-MOBILE-CHAT,Documentation,docs/UI_SPEC.md 與 docs/TASKS.md,修改,同步 Diary Mobile 規格並將 PR 74 Web Task 轉為 DONE,Codex,否,否,是,否,PR #75 已建立且本 Task 維持 REVIEW 待合併
 2026-07-22,14:49,PHASE4-DIARY-MOBILE-CHAT,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增 Diary Mobile 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log

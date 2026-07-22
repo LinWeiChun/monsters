@@ -71,7 +71,7 @@ Codex
 
 ### 待確認事項
 
-- 等待 Task PR 建立與 review；合併至 `feature/phase4` 後，才能將 Diary Mobile Task 標記 DONE。
+- Task PR #75 已建立並等待 review；合併至 `feature/phase4` 後，才能將 Diary Mobile Task 標記 DONE。
 - Flutter 日記分數選擇、Phase 4 `reward = null` 最終確認、首頁入口開放與 Phase 4 整合驗收仍依後續 Task 處理。
 
 ---
