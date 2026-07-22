@@ -190,6 +190,7 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] 修改煩惱 API（DONE：PR #33 已合併至 `feature/phase3`）
 - [x] 解決煩惱 API（DONE：PR #34 已合併至 `feature/phase3`）
 - [x] 分享 / 取消分享煩惱 API（DONE：PR #34 已合併至 `feature/phase3`）
+- [ ] 下載煩惱媒體 API（REVIEW：與 Diary 共用 private R2 串流、owner／分享授權及單一 Range；待 Task PR 合併）
 - [x] Flutter 新增煩惱聊天室（DONE：PR #35 已合併至 `feature/phase3`）
 - [x] Flutter 文字 / 圖片 / 錄音 / 影片選取與預覽（DONE：PR #36 已合併至 `feature/phase3`）
 - [x] Flutter 畫心情功能（DONE：PR #37 已合併至 `feature/phase3`）
@@ -236,9 +237,13 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] TODO：確認 PR #70 已合併，重讀 Diary sharing contract 與既有 Annoyance 冪等分享流程
 - [x] IN PROGRESS：實作 `PATCH /api/diaries/{id}/share` 明確目標狀態更新與 owner-scoped 驗證
 - [x] REVIEW：執行 Diary 分享 DTO／Controller／Service 定向測試與 Backend 完整測試
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（PR #71 已合併至 `feature/phase4`）
+- [x] 分享 / 取消分享日記 API（DONE：PR #71 已合併至 `feature/phase4`）
+- [x] TODO：確認 PR #71 已合併，重讀 Annoyance／Diary 媒體下載 contract、舊系統媒體流程與既有 private R2 Range 實作
+- [x] IN PROGRESS：實作共用 Entry 媒體授權與串流，提供 Annoyance／Diary 下載 endpoint，補齊 Range CORS headers
+- [x] REVIEW：執行授權、200／206、404／416／500、CORS、R2 與 Backend 完整測試
 - [ ] DONE：同步文件與 Log，完成 Git commit、push 與 task PR
-- [ ] 分享 / 取消分享日記 API
-- [ ] 下載日記媒體 API
+- [ ] 下載日記媒體 API（REVIEW：共用 private R2 串流、owner／分享授權及單一 Range；待 Task PR 合併）
 - [ ] 抽出 Entry 共用前端元件、Responsive flow shell 與媒體 Adapter
 - [ ] 依 Penpot `Diary Flow / Web` 實作 Flutter Web 日記聊天室並先完成 RWD 驗收
 - [ ] 依 Penpot `Diary Flow / Mobile` 適配 Flutter Mobile 日記聊天室

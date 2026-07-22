@@ -11,6 +11,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface EntryRepository extends JpaRepository<Entry, Long> {
 
+    Optional<Entry> findByIdAndEntryTypeAndDeletedFalse(Long id, EntryType entryType);
+
     Optional<Entry> findByIdAndUserIdAndEntryTypeAndDeletedFalse(
             Long id,
             Long userId,

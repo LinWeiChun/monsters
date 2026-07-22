@@ -8,6 +8,72 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-22 10:04 PHASE4-ENTRY-MEDIA-DOWNLOAD
+
+Task
+Phase 4 下載煩惱／日記媒體 API（REVIEW）
+
+執行者
+Codex
+
+### 完成內容
+
+- 實作 `GET /api/annoyances/{id}/media/{mediaId}` 與 `GET /api/diaries/{id}/media/{mediaId}`，共用 Entry 媒體下載服務。
+- 僅允許有效 JWT 使用者下載；owner 可讀取私密 entry，非 owner 僅能讀取目前為分享狀態的 entry，未授權時以 404 隱藏資源存在性。
+- 媒體必須屬於 path 指定的未刪除 entry，並使用資料庫保存的 `content_type`；response 不輸出 private R2 URL 或 object key。
+- 完整下載回傳 200；單一 Range 下載回傳 206，並設定 `Content-Type`、`Content-Length`、`Accept-Ranges` 與必要的 `Content-Range`。
+- 沿用既有 private R2 Range 下載，補測超出範圍 416、R2 物件不存在 404 與儲存失敗 500 的安全錯誤訊息。
+- CORS 預設允許 `Range` request header，並公開媒體播放器需要讀取的 response headers。
+
+### 修改／新增／刪除檔案
+
+- 新增 `backend/src/main/java/com/monsters/controller/entry/EntryMediaController.java`。
+- 新增 `backend/src/main/java/com/monsters/service/entry/EntryMediaDownloadService.java` 與 `EntryMediaDownloadResult.java`。
+- 修改 `backend/src/main/java/com/monsters/repository/entry/EntryRepository.java` 與 `backend/src/main/resources/application.yml`。
+- 新增或修改 Entry media Controller／Service、Repository、R2 storage 與 CORS 測試。
+- 修改 `README.md`、`backend/README.md`、`docs/API_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv`。
+- 未刪除檔案，亦未修改 `system_data/` 或 `log/CHANGE_HISTORY.xlsx`。
+
+### system_data/ 參考結果
+
+- 舊系統沒有 Diary 媒體下載 API；Annoyance 僅有硬編碼本機路徑的圖片／影片 Base64 prototype，History／Social 則把 Base64 媒體包在 JSON。
+- 保留登入後讀取已分享內容與顯示圖片／影音的業務意圖；未沿用 Base64 JSON、硬編碼路徑、公開檔案位置、缺少授權或不支援 Range 的舊實作。
+- 正式 API、Database、UI 與 Decision 文件優先，採新版 JWT、共用 Entry 與 private R2 串流架構。
+
+### API 異動
+
+- 實作既有 contract 的兩支媒體下載 endpoint；成功回傳 binary stream，而非 `ApiResponse<T>`。
+- 支援完整回應 200 與單一 Range 回應 206；未登入為 401、資源或權限不符為 404、Range 超出物件範圍為 416、R2 失敗為 500。
+- `docs/API_SPEC.md` 的 endpoint contract 不變；僅同步 CORS 預設 header 設定。
+
+### Database 異動
+
+- 無 schema、SQL 或 Migration 異動。
+- 沿用 `entries` 的 owner、entry type、分享與 soft-delete 欄位，以及 `entry_media` 的 entry 關聯、object key、content type 與 soft-delete 欄位。
+
+### 文件更新
+
+- `README.md`、`backend/README.md` 與 `docs/API_SPEC.md` 同步 Range request／response CORS headers。
+- `docs/TASKS.md` 將 PR #71 的 Diary 分享 Task 標記 DONE，並記錄本 Task 的 TODO → IN PROGRESS → REVIEW。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次實作與驗證。
+
+### 測試方式與結果
+
+- Entry media Service／Controller、Entry Repository、CORS 與 R2 storage targeted Gradle tests：BUILD SUCCESSFUL。
+- `./gradlew test`：BUILD SUCCESSFUL，259 tests、0 failures、0 errors、4 skipped。
+- `git diff --check`：通過。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；2026-07-22 的保存期限截止日為 2026-06-22。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- 等待 Task PR 建立與 review；核准並合併至 `feature/phase4` 後，才能將兩支媒體下載 API 與本 Task 標記 DONE。
+
+---
+
 ## 2026-07-16 10:56
 
 Task

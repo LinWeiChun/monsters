@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import com.monsters.exception.common.BusinessException;
 import com.monsters.exception.common.PayloadTooLargeException;
+import com.monsters.exception.common.ResourceNotFoundException;
 import com.monsters.exception.common.ValidationException;
 import com.monsters.storage.common.R2Properties;
 import com.monsters.entity.entry.EntryMediaType;
@@ -17,6 +18,7 @@ import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -254,6 +256,77 @@ class R2EntryMediaStorageServiceTest {
         ))
                 .isInstanceOf(ValidationException.class)
                 .hasMessage("Media range is invalid");
+    }
+
+    @Test
+    void downloadShouldTranslateUnsatisfiableRange() {
+        S3Client s3Client = mock(S3Client.class);
+        when(s3Client.getObject(any(GetObjectRequest.class))).thenThrow(
+                S3Exception.builder()
+                        .statusCode(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE.value())
+                        .message("private bucket detail")
+                        .build()
+        );
+        R2EntryMediaStorageService service = service(
+                s3Client,
+                mock(MediaDurationProbe.class),
+                configuredProperties()
+        );
+
+        assertThatThrownBy(() -> service.download(
+                "entries/media/7/video/key.mp4",
+                "bytes=100-200"
+        )).isInstanceOfSatisfying(BusinessException.class, exception -> {
+            assertThat(exception.getStatus())
+                    .isEqualTo(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
+            assertThat(exception).hasMessage("Media range is not satisfiable");
+        });
+    }
+
+    @Test
+    void downloadShouldHideMissingObjectAsNotFound() {
+        S3Client s3Client = mock(S3Client.class);
+        when(s3Client.getObject(any(GetObjectRequest.class))).thenThrow(
+                S3Exception.builder()
+                        .statusCode(HttpStatus.NOT_FOUND.value())
+                        .message("private bucket detail")
+                        .build()
+        );
+        R2EntryMediaStorageService service = service(
+                s3Client,
+                mock(MediaDurationProbe.class),
+                configuredProperties()
+        );
+
+        assertThatThrownBy(() -> service.download(
+                "entries/media/7/video/key.mp4",
+                null
+        )).isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Entry media not found")
+                .hasMessageNotContaining("private bucket detail");
+    }
+
+    @Test
+    void downloadShouldHideR2FailureDetails() {
+        S3Client s3Client = mock(S3Client.class);
+        when(s3Client.getObject(any(GetObjectRequest.class))).thenThrow(
+                S3Exception.builder()
+                        .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .message("private bucket detail")
+                        .build()
+        );
+        R2EntryMediaStorageService service = service(
+                s3Client,
+                mock(MediaDurationProbe.class),
+                configuredProperties()
+        );
+
+        assertThatThrownBy(() -> service.download(
+                "entries/media/7/video/key.mp4",
+                null
+        )).isInstanceOf(BusinessException.class)
+                .hasMessage("Entry media download failed")
+                .hasMessageNotContaining("private bucket detail");
     }
 
     @Test
