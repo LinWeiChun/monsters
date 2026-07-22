@@ -9,6 +9,7 @@ enum AppNavigationDestination {
   community,
   interaction,
   annoyance,
+  diary,
   profile,
 }
 

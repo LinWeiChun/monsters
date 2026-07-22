@@ -8,6 +8,74 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-22 11:47 PHASE4-DIARY-WEB-CHAT
+
+Task
+Phase 4 依 Penpot `Diary Flow / Web` 實作 Flutter Web 日記聊天室（REVIEW）
+
+執行者
+Codex
+
+### 完成內容
+
+- 確認 Entry 共用前端 Task PR #73 已合併至 `feature/phase4`，將前一個 Task 轉為 DONE。
+- 依 Penpot `WEB / Diary Flow / Web` 的 9 個 Phase 4 狀態建立 `/diaries/new` Web 日記流程，完成引導、記錄方式、內容、optional 繪圖、分數、分享、確認、送出與安全保存畫面。
+- 建立 Diary 獨立 draft state、Riverpod controller、Dio Repository、response DTO、review 與 completed 元件；未匯入 Annoyance 專屬 Widget 或型別。
+- 重用 Entry 共用媒體、畫布、分數、分享與 Responsive flow shell，並為共用內容輸入及繪圖選擇元件加入可參數化文案與 2000 字上限。
+- 串接 `POST /api/diaries` multipart request；文字只送 content，媒體送 contentFile，optional 心情圖送 drawingFile，失敗時保留草稿。
+- Phase 4 完成頁只顯示安全保存、分數與分享狀態，不顯示假獎勵或假怪獸。
+
+### 修改／新增／刪除檔案
+
+- 新增 `frontend/lib/models/diary_draft.dart`、`diary_response.dart`。
+- 新增 `frontend/lib/providers/diary_chat_provider.dart`、`diary_media_provider.dart` 與 `frontend/lib/repositories/diary_repository.dart`。
+- 新增 `frontend/lib/pages/diary_chat_page.dart`、`frontend/lib/widgets/diary/` 與 `frontend/lib/widgets/entry/entry_chat_bubble.dart`。
+- 修改 Entry 共用內容輸入、繪圖選擇、Navigation destination 與 go_router 路由。
+- 新增 Diary Provider／Repository／Page 測試並更新 Router 測試。
+- 修改 `docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv`。
+- 未刪除檔案，未修改 `system_data/` 或 `log/CHANGE_HISTORY.xlsx`。
+
+### system_data/ 參考結果
+
+- 參考舊 `diaryChat.dart` 的聊天式引導、文字／圖片／錄音／影片、optional 心情圖、分數與分享流程。
+- 保留舊系統的使用者流程意圖；未沿用大型 `setState` 頁面、全域帳號、直接 HTTP Repository、Base64 JSON 媒體、硬編碼 URL 或送出後假獎勵。
+- 正式 Project／API／Database／UI／Coding Standard 與 Penpot contract 優先，採 Riverpod、Dio Repository、go_router 與共用 Entry Responsive 架構。
+
+### API 異動
+
+- 未修改 Backend endpoint 或 API contract。
+- Flutter 新增既有 `POST /api/diaries` multipart contract 串接；Phase 4 response `reward` 保持 null。
+
+### Database 異動
+
+- 無 schema、SQL 或 Migration 異動。
+
+### 文件更新
+
+- `docs/UI_SPEC.md` 補充 Diary Web 實作路徑、獨立資料層、Responsive 驗收與首頁入口開放時機。
+- `docs/TASKS.md` 將 PR #73 共用前端 Task 轉為 DONE，並記錄 Diary Web Task 的 TODO → IN PROGRESS → REVIEW。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次實作與驗證。
+
+### 測試方式與結果
+
+- `dart analyze`：No issues found。
+- Diary Provider／Repository／Web RWD／路由定向測試：15 tests passed。
+- `flutter test --no-pub`：148 tests passed。
+- `flutter build web --no-pub`：成功，產出 `build/web`；僅有既有 CupertinoIcons 字型提示與 Wasm 建議，未造成 build 失敗。
+- `git diff --check`：通過。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；2026-07-22 的保存期限截止日為 2026-06-22。
+- `CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv` 最早正式紀錄皆為 2026-06-29，無超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- 等待 Task PR 建立與 review；合併至 `feature/phase4` 後，才能將 Diary Web Task 標記 DONE。
+- Diary Mobile Penpot 適配、首頁入口解除「即將開放」與 Phase 4 最終整合驗收仍屬後續 Task。
+
+---
+
 ## 2026-07-22 11:04 PHASE4-ENTRY-FRONTEND-FOUNDATION
 
 Task

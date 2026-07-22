@@ -1115,3 +1115,10 @@
 2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Test,frontend/test,新增與修改,驗證 Entry 共用元件 Adapter 與 Annoyance regression,Codex,否,否,是,否,Analyze 通過且 136 tests passed 與 Web build 成功
 2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Documentation,docs/UI_SPEC.md 與 docs/TASKS.md,修改,同步 Entry 共用路徑與 6 項 DONE 及 1 項 REVIEW,Codex,否,否,是,否,本 Task 維持 REVIEW 待 PR 合併
 2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增 Entry frontend foundation 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
+2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Frontend,frontend/lib/models 與 frontend/lib/providers,新增,建立 Diary 獨立 draft response 與 Riverpod 狀態流程,Codex,否,否,是,否,不依賴 Annoyance 專屬型別
+2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Frontend,frontend/lib/repositories/diary_repository.dart,新增,串接 POST diaries multipart 建立日記,Codex,是,否,是,否,沿用既有 API contract
+2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Frontend,frontend/lib/pages/diary_chat_page.dart 與 frontend/lib/widgets/diary,新增,依 Penpot 建立 Diary Web 九個狀態與專屬確認完成畫面,Codex,否,否,是,否,1200 至 1920px RWD
+2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Frontend,frontend/lib/widgets/entry 與 frontend/lib/routes,修改,參數化共用內容繪圖文案並新增 diaries new 路由,Codex,否,否,是,否,首頁入口仍待 Phase 4 完成
+2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Test,frontend/test,新增與修改,驗證 Diary 狀態 API Web RWD 完成頁與路由,Codex,否,否,是,否,Analyze 通過 148 tests passed 與 Web build 成功
+2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Documentation,docs/UI_SPEC.md 與 docs/TASKS.md,修改,同步 Diary Web 實作並將 PR 73 共用 Task 轉為 DONE,Codex,否,否,是,否,本 Task 維持 REVIEW 待 PR 合併
+2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增 Diary Web 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
