@@ -24,6 +24,7 @@ class EntryContentInput extends StatefulWidget {
     this.textHint = '把想說的話慢慢寫下來…',
     this.maxTextLength,
     this.continueLabel = '使用這個內容',
+    this.showTitle = true,
     super.key,
   });
 
@@ -41,6 +42,7 @@ class EntryContentInput extends StatefulWidget {
   final String textHint;
   final int? maxTextLength;
   final String continueLabel;
+  final bool showTitle;
 
   @override
   State<EntryContentInput> createState() => _EntryContentInputState();
@@ -91,8 +93,10 @@ class _EntryContentInputState extends State<EntryContentInput> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(_title, style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.sm),
+            if (widget.showTitle) ...[
+              Text(_title, style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: AppSpacing.sm),
+            ],
             if (widget.method == EntryRecordMethod.text)
               TextField(
                 key: Key('${widget.keyPrefix}TextContentField'),

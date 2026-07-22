@@ -67,6 +67,31 @@ void main() {
     expect(controller.state.step, DiaryChatStep.intro);
   });
 
+  test('keeps Mobile selections in place until the user confirms', () {
+    final controller = DiaryChatController();
+    addTearDown(controller.dispose);
+
+    controller.begin();
+    controller.chooseRecordMethod(DiaryRecordMethod.text);
+    expect(controller.state.step, DiaryChatStep.recordMethod);
+    expect(controller.state.recordMethod, DiaryRecordMethod.text);
+    controller.confirmRecordMethod();
+
+    controller.updateTextContent('今天值得記下來');
+    controller.confirmContent();
+    controller.selectDrawingChoice(false);
+    controller.chooseScore(3);
+    expect(controller.state.step, DiaryChatStep.score);
+    expect(controller.state.score, 3);
+    controller.confirmScore();
+
+    controller.chooseSharing(false);
+    expect(controller.state.step, DiaryChatStep.sharing);
+    expect(controller.state.isShared, isFalse);
+    controller.confirmSharing();
+    expect(controller.state.step, DiaryChatStep.review);
+  });
+
   test('submits a complete diary and keeps Phase 4 reward null', () async {
     final repository = _FakeDiaryRepository();
     final controller = DiaryChatController(repository);

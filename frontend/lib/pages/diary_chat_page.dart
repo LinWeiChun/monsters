@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models/diary_draft.dart';
+import '../layout/responsive_layout.dart';
 import '../providers/diary_chat_provider.dart';
 import '../providers/diary_media_provider.dart';
 import '../routes/app_routes.dart';
@@ -10,6 +11,7 @@ import '../services/entry_media_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/diary/diary_completed_card.dart';
+import '../widgets/diary/diary_mobile_flow.dart';
 import '../widgets/diary/diary_review_card.dart';
 import '../widgets/entry/drawing_choice_card.dart';
 import '../widgets/entry/drawing_preview_card.dart';
@@ -39,44 +41,63 @@ class _DiaryChatPageState extends ConsumerState<DiaryChatPage> {
     final controller = ref.read(diaryChatControllerProvider.notifier);
     final presentation = _presentationFor(state.step);
 
+    final wideFlow =
+        state.step == DiaryChatStep.drawing
+            ? SafeArea(
+              child: MoodDrawingCanvas(
+                onCompleted: controller.saveDrawing,
+                onCancel: controller.cancelDrawing,
+                exportPng: widget.drawingExporter,
+              ),
+            )
+            : EntryFlowShell(
+              keyPrefix: 'diary',
+              compactTitle: '寫一篇日記',
+              activeDestination: AppNavigationDestination.diary,
+              stepLabel: presentation.stepLabel,
+              progress: presentation.progress,
+              flowTitle: presentation.flowTitle,
+              flowCaption: '不用整理好情緒，貘會陪你慢慢記。',
+              panelTitle: presentation.panelTitle,
+              panelSubtitle: presentation.panelSubtitle,
+              messages: _buildMessages(state),
+              operation: _buildInteractionPanel(
+                state,
+                controller,
+                mediaService,
+              ),
+              onHome: () => context.goNamed(AppRoute.home),
+              onPrimaryAction: () => context.pushNamed(AppRoute.annoyanceChat),
+              onBack: () => _returnToHome(context),
+              onProfile: () => context.pushNamed(AppRoute.profile),
+              onNotification: () => _showUnavailable(context, '通知'),
+              onUnavailable: (feature) => _showUnavailable(context, feature),
+              onRestart: controller.restart,
+              canRestart: state.step != DiaryChatStep.intro,
+              privacyMessage: '●  可隨時儲存，預設只有自己看得見',
+            );
+
     return Scaffold(
       backgroundColor: AppColors.entryBackground,
-      body:
-          state.step == DiaryChatStep.drawing
-              ? SafeArea(
-                child: MoodDrawingCanvas(
-                  onCompleted: controller.saveDrawing,
-                  onCancel: controller.cancelDrawing,
-                  exportPng: widget.drawingExporter,
-                ),
-              )
-              : EntryFlowShell(
-                keyPrefix: 'diary',
-                compactTitle: '寫一篇日記',
-                activeDestination: AppNavigationDestination.diary,
-                stepLabel: presentation.stepLabel,
-                progress: presentation.progress,
-                flowTitle: presentation.flowTitle,
-                flowCaption: '不用整理好情緒，貘會陪你慢慢記。',
-                panelTitle: presentation.panelTitle,
-                panelSubtitle: presentation.panelSubtitle,
-                messages: _buildMessages(state),
-                operation: _buildInteractionPanel(
-                  state,
-                  controller,
-                  mediaService,
-                ),
-                onHome: () => context.goNamed(AppRoute.home),
-                onPrimaryAction:
-                    () => context.pushNamed(AppRoute.annoyanceChat),
-                onBack: () => _returnToHome(context),
-                onProfile: () => context.pushNamed(AppRoute.profile),
-                onNotification: () => _showUnavailable(context, '通知'),
-                onUnavailable: (feature) => _showUnavailable(context, feature),
-                onRestart: controller.restart,
-                canRestart: state.step != DiaryChatStep.intro,
-                privacyMessage: '●  可隨時儲存，預設只有自己看得見',
-              ),
+      body: ResponsiveLayout(
+        mobile:
+            (context, constraints) => DiaryMobileFlow(
+              state: state,
+              controller: controller,
+              mediaService: mediaService,
+              stepLabel: presentation.mobileStepLabel,
+              progress: presentation.progress,
+              title: presentation.panelTitle,
+              subtitle: presentation.mobileSubtitle,
+              onExit: () => _returnToHome(context),
+              onHome: () => context.goNamed(AppRoute.home),
+              onProfile: () => context.pushNamed(AppRoute.profile),
+              onUnavailable: (feature) => _showUnavailable(context, feature),
+              drawingExporter: widget.drawingExporter,
+            ),
+        tablet: (context, constraints) => wideFlow,
+        desktop: (context, constraints) => wideFlow,
+      ),
     );
   }
 
@@ -293,6 +314,7 @@ class _DiaryChatPageState extends ConsumerState<DiaryChatPage> {
         flowTitle: '今天想留下什麼？',
         panelTitle: '今天想留下什麼？',
         panelSubtitle: '約需 2–4 分鐘，過程中可以返回修改。',
+        mobileSubtitle: '不用整理好情緒，貘會陪你慢慢記。',
       ),
       DiaryChatStep.recordMethod => const _DiaryStepPresentation(
         stepLabel: '2 / 8　記錄方式',
@@ -300,6 +322,7 @@ class _DiaryChatPageState extends ConsumerState<DiaryChatPage> {
         flowTitle: '想用哪種方式記錄？',
         panelTitle: '想用哪種方式記錄？',
         panelSubtitle: '目前先選擇一種主要記錄方式，之後仍可編輯。',
+        mobileSubtitle: '目前先選擇一種主要記錄方式，之後仍可編輯。',
       ),
       DiaryChatStep.content => const _DiaryStepPresentation(
         stepLabel: '3 / 8　輸入內容',
@@ -307,6 +330,7 @@ class _DiaryChatPageState extends ConsumerState<DiaryChatPage> {
         flowTitle: '把今天寫下來',
         panelTitle: '把今天寫下來',
         panelSubtitle: '不用完整，也不必寫得漂亮。',
+        mobileSubtitle: '不用完整，也不必寫得漂亮。',
       ),
       DiaryChatStep.drawingDecision => const _DiaryStepPresentation(
         stepLabel: '4 / 8　畫心情',
@@ -314,6 +338,7 @@ class _DiaryChatPageState extends ConsumerState<DiaryChatPage> {
         flowTitle: '要畫下現在的心情嗎？',
         panelTitle: '要畫下現在的心情嗎？',
         panelSubtitle: '用顏色補充文字說不出的感受。',
+        mobileSubtitle: '用顏色補充文字說不出的感受。',
       ),
       DiaryChatStep.drawing => const _DiaryStepPresentation(
         stepLabel: '5 / 8　畫布',
@@ -321,6 +346,7 @@ class _DiaryChatPageState extends ConsumerState<DiaryChatPage> {
         flowTitle: '畫下此刻的心情',
         panelTitle: '畫下此刻的心情',
         panelSubtitle: '選擇顏色，用滑鼠或觸控筆自由畫。',
+        mobileSubtitle: '選擇顏色，用手指自由畫。',
       ),
       DiaryChatStep.score => const _DiaryStepPresentation(
         stepLabel: '6 / 8　心情分數',
@@ -328,6 +354,7 @@ class _DiaryChatPageState extends ConsumerState<DiaryChatPage> {
         flowTitle: '現在的心情是幾分？',
         panelTitle: '現在的心情是幾分？',
         panelSubtitle: '分數沒有好壞，只代表此刻感受。',
+        mobileSubtitle: '分數沒有好壞，只代表此刻感受。',
       ),
       DiaryChatStep.sharing => const _DiaryStepPresentation(
         stepLabel: '7 / 8　分享設定',
@@ -335,6 +362,7 @@ class _DiaryChatPageState extends ConsumerState<DiaryChatPage> {
         flowTitle: '要把日記分享出去嗎？',
         panelTitle: '要把日記分享出去嗎？',
         panelSubtitle: '分享設定之後可以隨時更改。',
+        mobileSubtitle: '分享設定之後可以隨時更改。',
       ),
       DiaryChatStep.review ||
       DiaryChatStep.submitting => const _DiaryStepPresentation(
@@ -343,6 +371,7 @@ class _DiaryChatPageState extends ConsumerState<DiaryChatPage> {
         flowTitle: '確認今天的日記',
         panelTitle: '確認今天的日記',
         panelSubtitle: '最後看一次，儲存後仍可編輯。',
+        mobileSubtitle: '最後看一次，送出後仍可編輯。',
       ),
       DiaryChatStep.completed => const _DiaryStepPresentation(
         stepLabel: '完成',
@@ -350,6 +379,7 @@ class _DiaryChatPageState extends ConsumerState<DiaryChatPage> {
         flowTitle: '日記已好好收進來了',
         panelTitle: '日記已好好收進來了',
         panelSubtitle: '謝謝你願意照顧今天的感受。',
+        mobileSubtitle: '謝謝你願意照顧今天的感受。',
       ),
     };
   }
@@ -362,6 +392,7 @@ class _DiaryStepPresentation {
     required this.flowTitle,
     required this.panelTitle,
     required this.panelSubtitle,
+    required this.mobileSubtitle,
   });
 
   final String stepLabel;
@@ -369,4 +400,9 @@ class _DiaryStepPresentation {
   final String flowTitle;
   final String panelTitle;
   final String panelSubtitle;
+  final String mobileSubtitle;
+
+  String get mobileStepLabel {
+    return stepLabel.split('　').first.replaceAll(' ', '');
+  }
 }
