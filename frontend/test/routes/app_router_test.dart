@@ -54,4 +54,18 @@ void main() {
     expect(find.text('新增煩惱'), findsOneWidget);
     expect(find.byKey(const Key('annoyanceChatStartButton')), findsOneWidget);
   });
+
+  testWidgets('supports direct diary chat route', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp.router(
+          routerConfig: createAppRouter(initialLocation: AppPath.diaryChat),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('diaryResponsiveShell')), findsOneWidget);
+    expect(find.byKey(const Key('diaryChatStartButton')), findsOneWidget);
+  });
 }

@@ -22,6 +22,8 @@ class EntryContentInput extends StatefulWidget {
     this.keyPrefix = 'entry',
     this.textLabel = '記錄內容',
     this.textHint = '把想說的話慢慢寫下來…',
+    this.maxTextLength,
+    this.continueLabel = '使用這個內容',
     super.key,
   });
 
@@ -37,6 +39,8 @@ class EntryContentInput extends StatefulWidget {
   final String keyPrefix;
   final String textLabel;
   final String textHint;
+  final int? maxTextLength;
+  final String continueLabel;
 
   @override
   State<EntryContentInput> createState() => _EntryContentInputState();
@@ -95,6 +99,7 @@ class _EntryContentInputState extends State<EntryContentInput> {
                 controller: _textController,
                 minLines: 4,
                 maxLines: 8,
+                maxLength: widget.maxTextLength,
                 textInputAction: TextInputAction.newline,
                 decoration: InputDecoration(
                   labelText: widget.textLabel,
@@ -145,7 +150,7 @@ class _EntryContentInputState extends State<EntryContentInput> {
                       ? widget.onContinue
                       : null,
               icon: const Icon(Icons.arrow_forward),
-              label: const Text('使用這個內容'),
+              label: Text(widget.continueLabel),
             ),
           ],
         ),

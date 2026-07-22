@@ -247,9 +247,13 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] TODO：確認 PR #72 已合併，重讀 Diary UI contract、舊系統流程與 Annoyance 可重用前端架構
 - [x] IN PROGRESS：抽出 Entry 共用前端元件、Responsive flow shell 與媒體 Adapter，並維持 Annoyance 行為相容
 - [x] REVIEW：Entry 共用元件與媒體 Adapter 定向回歸 35 項、Flutter Analyze、136 項完整測試與 Web build 通過
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（PR #73 已合併至 `feature/phase4`）
+- [x] 抽出 Entry 共用前端元件、Responsive flow shell 與媒體 Adapter（DONE：PR #73 已合併至 `feature/phase4`）
+- [x] TODO：確認 PR #73 已合併，重讀 Diary UI／API contract、舊系統流程與 Penpot `Diary Flow / Web`
+- [x] IN PROGRESS：建立 Diary 獨立 draft／Provider／Repository／DTO，串接 Entry 共用元件與 `/diaries/new` Web 流程
+- [x] REVIEW：Penpot Web 文案、1200／1440／1920px RWD、multipart 建立流程、Flutter Analyze、148 項完整測試與 Web build 通過
 - [ ] DONE：同步文件與 Log，完成 Git commit、push 與 task PR
-- [ ] 抽出 Entry 共用前端元件、Responsive flow shell 與媒體 Adapter（REVIEW：實作、測試、文件與 Log 完成；待 Task PR 合併）
-- [ ] 依 Penpot `Diary Flow / Web` 實作 Flutter Web 日記聊天室並先完成 RWD 驗收
+- [ ] 依 Penpot `Diary Flow / Web` 實作 Flutter Web 日記聊天室並先完成 RWD 驗收（REVIEW：實作、測試、文件與 Log 完成；待 Task PR 合併）
 - [ ] 依 Penpot `Diary Flow / Mobile` 適配 Flutter Mobile 日記聊天室
 - [ ] Flutter 日記分數選擇
 - [ ] Phase 4 完成頁保持 `reward = null`，Phase 6 再串接真實獎勵

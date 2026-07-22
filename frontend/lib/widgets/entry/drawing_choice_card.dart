@@ -7,11 +7,17 @@ class DrawingChoiceCard extends StatelessWidget {
   const DrawingChoiceCard({
     required this.onSelected,
     this.keyPrefix = 'entry',
+    this.title = '想畫一張心情圖嗎？',
+    this.acceptLabel = '想畫',
+    this.skipLabel = '先不用',
     super.key,
   });
 
   final ValueChanged<bool> onSelected;
   final String keyPrefix;
+  final String title;
+  final String acceptLabel;
+  final String skipLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +28,7 @@ class DrawingChoiceCard extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('想畫一張心情圖嗎？', style: Theme.of(context).textTheme.titleMedium),
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: AppSpacing.md),
             Wrap(
               alignment: WrapAlignment.center,
@@ -33,13 +39,13 @@ class DrawingChoiceCard extends StatelessWidget {
                   key: Key('${keyPrefix}DrawingYesButton'),
                   onPressed: () => onSelected(true),
                   icon: const Icon(Icons.draw_outlined),
-                  label: const Text('想畫'),
+                  label: Text(acceptLabel),
                 ),
                 OutlinedButton.icon(
                   key: Key('${keyPrefix}DrawingNoButton'),
                   onPressed: () => onSelected(false),
                   icon: const Icon(Icons.skip_next),
-                  label: const Text('先不用'),
+                  label: Text(skipLabel),
                 ),
               ],
             ),
