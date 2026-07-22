@@ -278,6 +278,77 @@ class DiaryServiceTest {
     }
 
     @Test
+    void updateSharingShouldPersistChangedStateAndReturnResponse() {
+        Entry entry = entry();
+        Mood mood = mood();
+        DiaryResponse expected = response(entry);
+        prepareUser();
+        when(entryRepository.findByIdAndUserIdAndEntryTypeAndDeletedFalse(
+                10L,
+                1L,
+                EntryType.DIARY
+        )).thenReturn(Optional.of(entry));
+        when(entryRepository.saveAndFlush(entry)).thenReturn(entry);
+        when(moodRepository.findById(3L)).thenReturn(Optional.of(mood));
+        when(entryMediaRepository.findAllByEntryIdAndDeletedFalseOrderByDisplayOrderAsc(10L))
+                .thenReturn(List.of());
+        when(diaryMapper.toResponse(entry, mood, List.of())).thenReturn(expected);
+
+        assertThat(service().updateSharing(1L, 10L, true)).isSameAs(expected);
+
+        assertThat(entry.isShared()).isTrue();
+        verify(entryRepository).saveAndFlush(entry);
+    }
+
+    @Test
+    void updateSharingShouldBeIdempotentWhenStateIsUnchanged() {
+        Entry entry = entry();
+        Mood mood = mood();
+        DiaryResponse expected = response(entry);
+        prepareUser();
+        when(entryRepository.findByIdAndUserIdAndEntryTypeAndDeletedFalse(
+                10L,
+                1L,
+                EntryType.DIARY
+        )).thenReturn(Optional.of(entry));
+        when(moodRepository.findById(3L)).thenReturn(Optional.of(mood));
+        when(entryMediaRepository.findAllByEntryIdAndDeletedFalseOrderByDisplayOrderAsc(10L))
+                .thenReturn(List.of());
+        when(diaryMapper.toResponse(entry, mood, List.of())).thenReturn(expected);
+
+        assertThat(service().updateSharing(1L, 10L, false)).isSameAs(expected);
+
+        verify(entryRepository, never()).saveAndFlush(any(Entry.class));
+    }
+
+    @Test
+    void updateSharingShouldRejectMissingStateBeforeRepositoryAccess() {
+        assertThatThrownBy(() -> service().updateSharing(1L, 10L, null))
+                .isInstanceOf(ValidationException.class)
+                .hasMessage("Shared state is required");
+
+        verify(userRepository, never()).findByIdAndDeletedFalse(anyLong());
+        verify(entryRepository, never()).findByIdAndUserIdAndEntryTypeAndDeletedFalse(
+                anyLong(), anyLong(), any()
+        );
+    }
+
+    @Test
+    void updateSharingShouldHideOwnershipMismatchAsNotFound() {
+        prepareUser();
+        when(entryRepository.findByIdAndUserIdAndEntryTypeAndDeletedFalse(
+                10L,
+                1L,
+                EntryType.DIARY
+        )).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service().updateSharing(1L, 10L, true))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Diary not found");
+        verify(entryRepository, never()).saveAndFlush(any(Entry.class));
+    }
+
+    @Test
     void findAllShouldApplyOwnerFilterSortAndBatchMap() {
         prepareUser();
         Entry first = entry(10L, "first");
