@@ -1,10 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../services/annoyance_media_service.dart';
+import '../services/entry_media_service.dart';
 
-final annoyanceMediaServiceProvider =
-    Provider.autoDispose<AnnoyanceMediaService>((ref) {
-      final service = DefaultAnnoyanceMediaService();
-      ref.onDispose(service.dispose);
-      return service;
-    });
+final annoyanceMediaServiceProvider = Provider.autoDispose<EntryMediaService>((
+  ref,
+) {
+  final service = DefaultEntryMediaService(recordingFilePrefix: 'annoyance');
+  ref.onDispose(service.dispose);
+  return service;
+});

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../models/annoyance_drawing.dart';
+import '../../models/entry_drawing.dart';
 
 class MoodDrawingPainter extends CustomPainter {
   const MoodDrawingPainter({required this.strokes});

@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import '../../models/annoyance_drawing.dart';
+import '../../models/entry_drawing.dart';
 import 'mood_drawing_painter.dart';
 
 class MoodDrawingExporter {
@@ -12,7 +12,7 @@ class MoodDrawingExporter {
   static Future<Uint8List> renderPng(List<MoodDrawingStroke> strokes) async {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
-    const dimension = AnnoyanceDrawingLimits.outputDimension;
+    const dimension = EntryDrawingLimits.outputDimension;
     final size = Size.square(dimension.toDouble());
     MoodDrawingPainter(strokes: strokes).paint(canvas, size);
     final picture = recorder.endRecording();

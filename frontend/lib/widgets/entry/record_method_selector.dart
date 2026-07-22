@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
 
-import '../../models/annoyance_draft.dart';
+import '../../models/entry_record.dart';
 import '../../theme/app_spacing.dart';
 
 class RecordMethodSelector extends StatelessWidget {
-  const RecordMethodSelector({required this.onSelected, super.key});
+  const RecordMethodSelector({
+    required this.onSelected,
+    this.keyPrefix = 'entry',
+    super.key,
+  });
 
-  final ValueChanged<AnnoyanceRecordMethod> onSelected;
+  final ValueChanged<EntryRecordMethod> onSelected;
+  final String keyPrefix;
 
-  static const _icons = <AnnoyanceRecordMethod, IconData>{
-    AnnoyanceRecordMethod.text: Icons.notes,
-    AnnoyanceRecordMethod.image: Icons.image_outlined,
-    AnnoyanceRecordMethod.audio: Icons.mic_none,
-    AnnoyanceRecordMethod.video: Icons.videocam_outlined,
+  static const _icons = <EntryRecordMethod, IconData>{
+    EntryRecordMethod.text: Icons.notes,
+    EntryRecordMethod.image: Icons.image_outlined,
+    EntryRecordMethod.audio: Icons.mic_none,
+    EntryRecordMethod.video: Icons.videocam_outlined,
   };
 
   @override
@@ -24,11 +29,11 @@ class RecordMethodSelector extends StatelessWidget {
         spacing: AppSpacing.sm,
         runSpacing: AppSpacing.sm,
         children: [
-          for (final method in AnnoyanceRecordMethod.values)
+          for (final method in EntryRecordMethod.values)
             SizedBox(
               width: 136,
               child: OutlinedButton.icon(
-                key: Key('annoyanceRecordMethod${method.apiValue}'),
+                key: Key('${keyPrefix}RecordMethod${method.apiValue}'),
                 onPressed: () => onSelected(method),
                 icon: Icon(_icons[method]),
                 label: Text(method.label),

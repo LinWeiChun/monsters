@@ -1108,3 +1108,10 @@
 2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Documentation,docs/TASKS.md,修改,標記 Diary sharing DONE 並記錄雙媒體下載 API 至 REVIEW,Codex,否,否,否,否,等待 Task PR review
 2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Documentation,log/CHANGE_LOG.md,修改,新增 Entry media download 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
 2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Entry media download 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改
+2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Frontend,frontend/lib/models/entry_*.dart,新增,建立 Entry 共用記錄方式媒體與心情繪圖型別,Codex,否,否,是,否,Annoyance 保留相容別名
+2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Frontend,frontend/lib/services/entry_media_*.dart,新增,建立 Entry 共用媒體服務驗證與跨平台 Adapter,Codex,否,否,是,否,recordingFilePrefix 區分 flow
+2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Frontend,frontend/lib/widgets/entry,新增與移轉,抽出內容輸入媒體預覽繪圖分數分享與 Responsive shell,Codex,否,否,是,否,keyPrefix 保留 Annoyance 測試契約
+2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Frontend,frontend/lib/pages/annoyance_chat_page.dart,修改,Annoyance 改用 Entry 共用元件與媒體層,Codex,否,否,是,否,既有流程行為不變
+2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Test,frontend/test,新增與修改,驗證 Entry 共用元件 Adapter 與 Annoyance regression,Codex,否,否,是,否,Analyze 通過且 136 tests passed 與 Web build 成功
+2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Documentation,docs/UI_SPEC.md 與 docs/TASKS.md,修改,同步 Entry 共用路徑與 6 項 DONE 及 1 項 REVIEW,Codex,否,否,是,否,本 Task 維持 REVIEW 待 PR 合併
+2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增 Entry frontend foundation 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
