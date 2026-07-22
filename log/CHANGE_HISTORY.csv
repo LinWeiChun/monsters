@@ -1098,3 +1098,13 @@
 2026-07-22,09:29,PHASE4-DIARY-SHARING,Documentation,docs/TASKS.md,修改,標記 Diary update DONE 並記錄分享 API TODO 至 REVIEW,Codex,否,否,否,否,等待 Task PR review
 2026-07-22,09:29,PHASE4-DIARY-SHARING,Documentation,log/CHANGE_LOG.md,修改,新增 Diary sharing 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
 2026-07-22,09:29,PHASE4-DIARY-SHARING,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Diary sharing 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改
+2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Backend,backend/src/main/java/com/monsters/controller/entry/EntryMediaController.java,新增,建立 Annoyance 與 Diary binary media download endpoints,Codex,是,否,否,否,完整 200 與 Range 206
+2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Backend,backend/src/main/java/com/monsters/service/entry,新增,建立共用 owner 或分享授權與 private R2 下載流程,Codex,是,否,否,否,未授權與 media relation 不符統一 404
+2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Backend,backend/src/main/java/com/monsters/repository/entry/EntryRepository.java,修改,新增 entry type 與 soft delete scoped 查詢,Codex,是,否,否,否,支援共用媒體授權
+2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Configuration,backend/src/main/resources/application.yml,修改,允許 Range 並公開媒體 response headers,Codex,是,否,是,否,支援 Flutter Web 跨網域播放
+2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Test,backend/src/test/java/com/monsters,新增與修改,驗證 owner 分享 404 200 206 416 500 CORS 與 R2,Codex,是,否,否,否,Backend 259 tests passed
+2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Documentation,README.md 與 backend/README.md,修改,同步 Range CORS 環境變數預設值,Codex,否,否,否,否,無部署值硬編碼
+2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Documentation,docs/API_SPEC.md,修改,同步媒體下載所需 CORS headers,Codex,是,否,否,否,既有 endpoint contract 不變
+2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Documentation,docs/TASKS.md,修改,標記 Diary sharing DONE 並記錄雙媒體下載 API 至 REVIEW,Codex,否,否,否,否,等待 Task PR review
+2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Documentation,log/CHANGE_LOG.md,修改,新增 Entry media download 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
+2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Entry media download 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改

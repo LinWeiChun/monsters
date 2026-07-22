@@ -146,8 +146,8 @@ CORS 僅套用於：
 |---|---|---|
 | app.cors.allowed-origin-patterns | CORS_ALLOWED_ORIGIN_PATTERNS | http://localhost:*,http://127.0.0.1:* |
 | app.cors.allowed-methods | CORS_ALLOWED_METHODS | GET,POST,PUT,PATCH,DELETE,OPTIONS |
-| app.cors.allowed-headers | CORS_ALLOWED_HEADERS | Authorization,Content-Type |
-| app.cors.exposed-headers | CORS_EXPOSED_HEADERS | Authorization |
+| app.cors.allowed-headers | CORS_ALLOWED_HEADERS | Authorization,Content-Type,Range |
+| app.cors.exposed-headers | CORS_EXPOSED_HEADERS | Authorization,Accept-Ranges,Content-Length,Content-Range |
 | app.cors.allow-credentials | CORS_ALLOW_CREDENTIALS | true |
 | app.cors.max-age | CORS_MAX_AGE | 3600 |
 
