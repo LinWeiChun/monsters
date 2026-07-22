@@ -7060,3 +7060,63 @@ Codex
 ### 待確認事項
 
 - Task PR 合併至 `feature/phase4` 後，下一個 Task 為修改日記 API。
+
+---
+
+## 2026-07-22 09:05 PHASE4-DIARY-UPDATE
+
+Task
+Phase 4 修改日記 API（REVIEW）
+
+執行者
+Codex
+
+### 完成內容
+
+- 實作 `PUT /api/diaries/{id}` multipart 完整修改流程，僅允許目前 JWT 使用者修改自己的未刪除 DIARY entry。
+- 主要記錄方式必須是 TEXT、IMAGE、AUDIO、VIDEO 其中一種；文字日記不得附主要媒體，媒體日記必須在新檔與同類型既有媒體 ID 中擇一。
+- 可保留既有主要媒體或心情圖；傳入新檔時會取代對應媒體；未傳新心情圖與既有心情圖 ID 時移除心情圖。
+- 僅接受屬於該日記且類型正確的既有媒體 ID；資料不存在、已刪除、類型不符或 owner 不符時維持既有的 404／400 行為。
+- 新媒體在資料庫交易失敗時會清理；被取代的 private R2 舊物件僅在交易成功後 best-effort 清理，清理失敗不回滾成功的資料庫交易。
+
+### 修改／新增／刪除檔案
+
+- 修改 `backend/src/main/java/com/monsters/controller/diary/DiaryController.java`。
+- 新增 `backend/src/main/java/com/monsters/dto/diary/UpdateDiaryRequest.java`。
+- 修改 `backend/src/main/java/com/monsters/service/diary/DiaryService.java`、`DiaryPersistenceService.java`，並新增 `UpdatedDiary.java`。
+- 新增或修改 Diary DTO、Controller、Service、Persistence 單元測試。
+- 修改 `docs/TASKS.md`、`log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv`。
+- 未刪除檔案，亦未修改 `system_data/`。
+
+### system_data/ 參考結果
+
+- 參考系統手冊與舊 Diary 流程的文字、圖片、錄音、影片、optional 心情圖、1 至 5 分與分享業務意圖。
+- 更新行為沿用新版 Annoyance 的 owner 驗證、媒體替換、資料庫交易與 private R2 補償模式；未沿用舊系統的 account path parameter、公開檔案路徑或舊分層程式。
+
+### API 異動
+
+- 實作既有 contract 的 `PUT /api/diaries/{id}`，成功回傳 HTTP 200 與 `ApiResponse<DiaryResponse>`。
+- `docs/API_SPEC.md` 已完整定義 request parts、既有媒體 ID 與替換規則，本次未變更 contract。
+
+### Database 異動
+
+- 無 schema、SQL 或 Migration 異動；沿用共用 `entries` 與 `entry_media` 的 soft-delete 欄位。
+
+### 文件更新
+
+- `docs/TASKS.md` 記錄 TODO → IN PROGRESS → REVIEW。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次實作與驗證。
+
+### 測試方式與結果
+
+- Diary DTO／Controller／Service／Persistence targeted Gradle tests：BUILD SUCCESSFUL。
+- `./gradlew test`：BUILD SUCCESSFUL。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；保存期限截止日為 2026-06-22。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- 等待 Task PR 建立與 review；核准並合併至 `feature/phase4` 後，才能將本 Task 標記 DONE 並開始分享／取消分享日記 API。

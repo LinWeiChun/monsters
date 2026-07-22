@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import com.monsters.dto.diary.CreateDiaryRequest;
 import com.monsters.entity.entry.Entry;
+import com.monsters.entity.entry.EntryMedia;
 import com.monsters.entity.entry.EntryMediaType;
 import com.monsters.repository.entry.EntryMediaRepository;
 import com.monsters.repository.entry.EntryRepository;
@@ -15,6 +16,7 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -94,6 +96,67 @@ class DiaryPersistenceServiceTest {
             assertThat(media.getDurationSeconds()).isEqualByComparingTo("12.500");
         });
         verify(entryMediaRepository).saveAllAndFlush(any());
+    }
+
+    @Test
+    void updateShouldSoftDeleteReplacedMediaAndReturnActiveMedia() {
+        Entry entry = Entry.diary(
+                1L,
+                3L,
+                null,
+                false,
+                LocalDateTime.of(2026, 7, 22, 10, 0)
+        );
+        ReflectionTestUtils.setField(entry, "id", 10L);
+        EntryMedia oldImage = media(21L, EntryMediaType.IMAGE, "entries/media/1/image/old.png", 0);
+        EntryMedia drawing = media(22L, EntryMediaType.DRAWING, "entries/media/1/drawing/keep.webp", 1);
+        List<NewDiaryMedia> newMedia = List.of(new NewDiaryMedia(
+                EntryMediaType.AUDIO,
+                new StoredEntryMedia(
+                        "entries/media/1/audio/new.mp3",
+                        "audio/mpeg",
+                        1024,
+                        new BigDecimal("12.500")
+                ),
+                0
+        ));
+        when(entryRepository.saveAndFlush(any(Entry.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(entryMediaRepository.saveAllAndFlush(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        UpdatedDiary updated = service().update(
+                entry,
+                3L,
+                null,
+                true,
+                LocalDateTime.of(2026, 7, 22, 12, 0),
+                List.of(oldImage, drawing),
+                Set.of(22L),
+                newMedia
+        );
+
+        assertThat(entry.isShared()).isTrue();
+        assertThat(entry.getOccurredAt()).isEqualTo(LocalDateTime.of(2026, 7, 22, 12, 0));
+        assertThat(oldImage.isDeleted()).isTrue();
+        assertThat(drawing.isDeleted()).isFalse();
+        assertThat(updated.media())
+                .extracting(EntryMedia::getMediaType)
+                .containsExactly(EntryMediaType.AUDIO, EntryMediaType.DRAWING);
+        assertThat(updated.removedObjectKeys()).containsExactly("entries/media/1/image/old.png");
+        verify(entryMediaRepository).saveAllAndFlush(List.of(oldImage));
+    }
+
+    private EntryMedia media(Long id, EntryMediaType type, String objectKey, int displayOrder) {
+        EntryMedia media = new EntryMedia(
+                10L,
+                type,
+                objectKey,
+                type == EntryMediaType.IMAGE ? "image/png" : "image/webp",
+                1,
+                null,
+                displayOrder
+        );
+        ReflectionTestUtils.setField(media, "id", id);
+        return media;
     }
 
     private DiaryPersistenceService service() {

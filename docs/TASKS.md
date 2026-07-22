@@ -228,6 +228,10 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] REVIEW：執行 Repository／Service／Controller 查詢測試、Backend 完整測試與契約檢查
 - [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR
 - [x] 查詢日記 API（DONE：owner-scoped 列表／單筆、分頁、分享篩選、穩定排序與批次 media mapping）
+- [x] TODO：確認 PR #69 已合併、重讀 Diary update contract、既有 Annoyance 更新流程與 private R2 清理規則
+- [x] IN PROGRESS：實作 `PUT /api/diaries/{id}` multipart 完整修改、既有媒體保留／替換與 transaction 補償流程
+- [x] REVIEW：執行 Diary DTO／Controller／Service／Persistence 測試與 Backend 完整測試，確認 owner-scoped、媒體組合與清理行為
+- [ ] DONE：同步文件與 Log，完成 Git commit、push 與 task PR
 - [ ] 修改日記 API
 - [ ] 分享 / 取消分享日記 API
 - [ ] 下載日記媒體 API
