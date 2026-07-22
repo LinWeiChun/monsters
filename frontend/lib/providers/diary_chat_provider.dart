@@ -110,8 +110,15 @@ class DiaryChatController extends StateNotifier<DiaryChatState> {
     if (state.step != DiaryChatStep.recordMethod) {
       return;
     }
+    chooseRecordMethod(recordMethod);
+    confirmRecordMethod();
+  }
+
+  void chooseRecordMethod(DiaryRecordMethod recordMethod) {
+    if (state.step != DiaryChatStep.recordMethod) {
+      return;
+    }
     state = state.copyWith(
-      step: DiaryChatStep.content,
       recordMethod: recordMethod,
       clearContentText: true,
       clearContentMedia: true,
@@ -122,6 +129,14 @@ class DiaryChatController extends StateNotifier<DiaryChatState> {
       clearCreatedDiary: true,
       clearSubmitError: true,
     );
+  }
+
+  void confirmRecordMethod() {
+    if (state.step != DiaryChatStep.recordMethod ||
+        state.recordMethod == null) {
+      return;
+    }
+    state = state.copyWith(step: DiaryChatStep.content);
   }
 
   void updateTextContent(String content) {
@@ -207,8 +222,15 @@ class DiaryChatController extends StateNotifier<DiaryChatState> {
     if (state.step != DiaryChatStep.score || !diaryScores.contains(score)) {
       return;
     }
+    chooseScore(score);
+    confirmScore();
+  }
+
+  void chooseScore(int score) {
+    if (state.step != DiaryChatStep.score || !diaryScores.contains(score)) {
+      return;
+    }
     state = state.copyWith(
-      step: DiaryChatStep.sharing,
       score: score,
       clearSharing: true,
       clearCreatedDiary: true,
@@ -216,16 +238,37 @@ class DiaryChatController extends StateNotifier<DiaryChatState> {
     );
   }
 
+  void confirmScore() {
+    if (state.step != DiaryChatStep.score || state.score == null) {
+      return;
+    }
+    state = state.copyWith(step: DiaryChatStep.sharing);
+  }
+
   void selectSharing(bool isShared) {
     if (state.step != DiaryChatStep.sharing) {
       return;
     }
+    chooseSharing(isShared);
+    confirmSharing();
+  }
+
+  void chooseSharing(bool isShared) {
+    if (state.step != DiaryChatStep.sharing) {
+      return;
+    }
     state = state.copyWith(
-      step: DiaryChatStep.review,
       isShared: isShared,
       clearCreatedDiary: true,
       clearSubmitError: true,
     );
+  }
+
+  void confirmSharing() {
+    if (state.step != DiaryChatStep.sharing || state.isShared == null) {
+      return;
+    }
+    state = state.copyWith(step: DiaryChatStep.review);
   }
 
   Future<void> submit() async {

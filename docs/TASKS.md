@@ -252,9 +252,13 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] TODO：確認 PR #73 已合併，重讀 Diary UI／API contract、舊系統流程與 Penpot `Diary Flow / Web`
 - [x] IN PROGRESS：建立 Diary 獨立 draft／Provider／Repository／DTO，串接 Entry 共用元件與 `/diaries/new` Web 流程
 - [x] REVIEW：Penpot Web 文案、1200／1440／1920px RWD、multipart 建立流程、Flutter Analyze、148 項完整測試與 Web build 通過
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（PR #74 已合併至 `feature/phase4`）
+- [x] 依 Penpot `Diary Flow / Web` 實作 Flutter Web 日記聊天室並先完成 RWD 驗收（DONE：PR #74 已合併至 `feature/phase4`）
+- [x] TODO：確認 PR #74 已合併，重讀 Diary Mobile 正式規格、舊系統流程與 Penpot `Diary Flow / Mobile`
+- [x] IN PROGRESS：校正 Penpot 單一主要記錄方式文案，建立 390×844 Mobile 畫布並沿用既有 Diary 狀態與 API
+- [x] REVIEW：驗證 320／390／500／599px、逐步確認、心情畫布、Phase 4 完成頁、Flutter Analyze、156 項完整測試與 Web build
 - [ ] DONE：同步文件與 Log，完成 Git commit、push 與 task PR
-- [ ] 依 Penpot `Diary Flow / Web` 實作 Flutter Web 日記聊天室並先完成 RWD 驗收（REVIEW：實作、測試、文件與 Log 完成；待 Task PR 合併）
-- [ ] 依 Penpot `Diary Flow / Mobile` 適配 Flutter Mobile 日記聊天室
+- [ ] 依 Penpot `Diary Flow / Mobile` 適配 Flutter Mobile 日記聊天室（REVIEW：實作、測試、文件與 Log 完成；待 Task PR 合併）
 - [ ] Flutter 日記分數選擇
 - [ ] Phase 4 完成頁保持 `reward = null`，Phase 6 再串接真實獎勵
 - [ ] 測試

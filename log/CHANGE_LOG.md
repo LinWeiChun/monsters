@@ -8,6 +8,74 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-22 14:49 PHASE4-DIARY-MOBILE-CHAT
+
+Task
+Phase 4 依 Penpot `Diary Flow / Mobile` 適配 Flutter Mobile 日記聊天室（REVIEW）
+
+執行者
+Codex
+
+### 完成內容
+
+- 確認 Diary Web Task PR #74 已合併至 `feature/phase4`，將前一個 Task 轉為 DONE。
+- 依使用者確認維持「一種主要記錄方式＋一張 optional 心情圖」，並將 Penpot `Diary / Mobile / 02 記錄方式` 的衝突文案同步為正式規格。
+- 新增 390×844 Diary Mobile 專屬畫布，完成引導、記錄方式、內容、繪圖決定、畫布、分數、分享、確認、送出與 Phase 4 完成頁。
+- Mobile 320px 至 599px 使用 `ResponsiveFixedCanvas` 等比例填滿 viewport，縮放高度超過 viewport 時可垂直捲動；Tablet／Desktop 仍使用既有 Responsive flow。
+- 沿用既有 Diary draft、Riverpod Controller、Repository、媒體 Adapter 與 `POST /api/diaries` contract；Mobile 記錄方式、分數與分享採選擇後明確確認，Web／Tablet 行為保持相容。
+- Phase 4 Mobile 完成頁只顯示安全保存、心情分數與分享狀態，未顯示假獎勵。
+
+### 修改／新增／刪除檔案
+
+- 新增 `frontend/lib/widgets/diary/diary_mobile_flow.dart`。
+- 修改 `frontend/lib/pages/diary_chat_page.dart`、`frontend/lib/providers/diary_chat_provider.dart`。
+- 修改 `frontend/lib/widgets/diary/diary_review_card.dart`、`frontend/lib/widgets/entry/entry_content_input.dart`，加入不影響既有呼叫端的 optional 標題控制。
+- 修改 `frontend/test/diary_chat_page_test.dart`、`frontend/test/providers/diary_chat_provider_test.dart`。
+- 修改 `docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`。
+- 未刪除檔案，未修改 `system_data/` 或 `log/CHANGE_HISTORY.xlsx`。
+- `frontend/pubspec.lock` 與 `frontend/tool/run_web_local.ps1` 為 Task 開始前既有未提交修改，本次完整保留且不納入 Commit。
+
+### system_data/ 參考結果
+
+- 參考舊 `diaryChat.dart` 的聊天引導、單一文字／圖片／錄音／影片、optional 心情圖、分數與分享流程。
+- 未沿用舊系統大型 `setState`、直接 HTTP、Base64 JSON 媒體、全域帳號或硬編碼環境設定。
+- 正式 Project／API／Database／UI／Coding Standard 與 Penpot contract 優先；舊系統僅保留流程意圖。
+
+### API 異動
+
+- Backend endpoint 與 API contract 無異動。
+- Flutter Mobile 沿用既有 `POST /api/diaries` multipart contract；每篇日記只送一種主要內容與 optional `drawingFile`，Phase 4 response `reward` 保持 null。
+
+### Database 異動
+
+- 無 schema、SQL 或 Migration 異動。
+
+### 文件更新
+
+- `docs/UI_SPEC.md` 補充 Diary Mobile 390×844 畫布、320px 至 599px 縮放、逐步確認與單一主要記錄方式。
+- `docs/TASKS.md` 將 PR #74 Web Task 轉為 DONE，並記錄 Mobile Task 的 TODO → IN PROGRESS → REVIEW。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次實作與驗證。
+
+### 測試方式與結果
+
+- `dart analyze`：No issues found。
+- Diary Mobile Provider／Widget 與 Web 回歸定向測試：18 tests passed。
+- Mobile viewport：320×700、390×844、500×900、599×900 通過；Web 1200×800、1440×900、1920×1080 回歸通過。
+- `flutter test --no-pub`：156 tests passed。
+- `flutter build web --no-pub`：成功，產出 `build/web`；僅有既有 CupertinoIcons 字型提示與 Wasm 建議，未造成 build 失敗。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；2026-07-22 的保存期限截止日為 2026-06-22。
+- `CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv` 最早正式紀錄皆為 2026-06-29，無超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- 等待 Task PR 建立與 review；合併至 `feature/phase4` 後，才能將 Diary Mobile Task 標記 DONE。
+- Flutter 日記分數選擇、Phase 4 `reward = null` 最終確認、首頁入口開放與 Phase 4 整合驗收仍依後續 Task 處理。
+
+---
+
 ## 2026-07-22 11:47 PHASE4-DIARY-WEB-CHAT
 
 Task

@@ -8,11 +8,13 @@ class DiaryReviewCard extends StatelessWidget {
   const DiaryReviewCard({
     required this.state,
     required this.onSubmit,
+    this.showTitle = true,
     super.key,
   });
 
   final DiaryChatState state;
   final VoidCallback onSubmit;
+  final bool showTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -23,8 +25,10 @@ class DiaryReviewCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('確認今天的日記', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.md),
+            if (showTitle) ...[
+              Text('確認今天的日記', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: AppSpacing.md),
+            ],
             _ReviewRow(label: '記錄方式', value: state.recordMethod?.label ?? '-'),
             _ReviewRow(label: '日記內容', value: _contentSummary()),
             _ReviewRow(
