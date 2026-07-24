@@ -1135,4 +1135,4 @@
 2026-07-24,10:08,PHASE4-ENTRY-REWARD-NULL,Test,backend/src/test/java/com/monsters/dto/entry/EntryRewardContractTest.java,新增,驗證 Annoyance Diary JSON 明確包含 reward null 並拒絕提早發放,Codex,是,否,否,否,3 項定向與 262 項 Backend 完整測試通過
 2026-07-24,10:08,PHASE4-ENTRY-REWARD-NULL,Test,frontend/test/annoyance_chat_page_test.dart 與 Diary Reward 相關測試,修改,驗證 Repository Provider 與 Web Mobile 完成頁不顯示舊獎勵,Codex,否,否,否,否,44 項定向與 159 項完整測試通過 Analyze 及 Web build 成功
 2026-07-24,10:08,PHASE4-ENTRY-REWARD-NULL,Documentation,docs/API_SPEC.md docs/UI_SPEC.md docs/TASKS.md,修改,同步 reward null key 與禁止舊獎勵完成頁規格,Codex,是,否,是,否,將 PR #76 日記分數 Task 轉為 DONE
-2026-07-24,10:08,PHASE4-ENTRY-REWARD-NULL,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增 Reward 修正工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
+2026-07-24,10:08,PHASE4-ENTRY-REWARD-NULL,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增 Reward 修正工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log；Draft PR #77 已建立且 Task 維持 REVIEW

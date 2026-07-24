@@ -267,8 +267,8 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] TODO：確認 PR #76 已合併，重讀 Annoyance／Diary Reward 正式規格及舊系統立即抽怪獸流程
 - [x] IN PROGRESS：修正 Annoyance／Diary Response JSON 明確保留 `reward: null`，拒絕 Phase 6 前的非 null Reward，補強 Flutter 完成頁防回歸
 - [x] REVIEW：Backend Reward contract 3 項與 262 項完整測試、Flutter Reward 定向 44 項、Analyze、159 項完整測試及 Web build 通過
-- [ ] DONE：同步文件與 Log，完成 Git commit、push 與 task PR
-- [ ] Phase 4 完成頁保持 `reward = null`，Phase 6 再串接真實獎勵（REVIEW：含 Phase 3 煩惱 Reward；實作與驗證完成，待 task PR 合併）
+- [ ] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（Draft PR #77 已建立，待轉 Ready 與合併）
+- [ ] Phase 4 完成頁保持 `reward = null`，Phase 6 再串接真實獎勵（REVIEW：含 Phase 3 煩惱 Reward；Draft PR #77 已建立，待轉 Ready 與合併）
 - [ ] 測試
 
 ---

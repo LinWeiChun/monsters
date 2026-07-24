@@ -73,7 +73,7 @@ Codex
 
 ### 待確認事項
 
-- 本 Task 維持 REVIEW；task PR 合併至 `feature/phase4` 後才能標記 DONE。
+- 本 Task 維持 REVIEW；Draft PR #77 已建立，待轉 Ready 並合併至 `feature/phase4` 後才能標記 DONE。
 - Phase 6 實作真實 Reward 時，需明確調整 DTO guard、API contract、Database 關聯與完成頁 UI，不得只移除 null。
 
 ---
