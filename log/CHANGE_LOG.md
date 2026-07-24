@@ -8,6 +8,66 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-24 09:13 PHASE4-DIARY-SCORE
+
+Task
+Phase 4 Flutter 日記分數選擇（REVIEW）
+
+執行者
+Codex
+
+### 完成內容
+
+- 確認 Diary Mobile Task PR #75 已合併至 `feature/phase4`，將前一個 Task 轉為 DONE。
+- 稽核既有 Diary Web／Tablet 共用 `MoodScoreSelector` 與 Mobile 分數流程，確認皆使用 `moodPoint_1.png`～`moodPoint_5.png`、1 至 5 分及中性分數文案。
+- 確認 Web／Tablet 選擇後直接前進，Mobile 選擇後需明確確認，三種 window class 共用同一個 Diary state 與 1-based 整數。
+- 既有正式功能已符合規格，本次未重寫 Widget、Provider 或 Repository；改以獨立測試補齊 1／5 邊界、0／6 拒絕、五個選項、語意標籤及 multipart 實際內容。
+
+### 修改／新增／刪除檔案
+
+- 修改 `frontend/test/widgets/mood_score_selector_test.dart`、`frontend/test/providers/diary_chat_provider_test.dart`、`frontend/test/repositories/diary_repository_test.dart`。
+- 修改 `docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`。
+- 未新增或刪除檔案，未修改正式功能程式、`system_data/` 或 `log/CHANGE_HISTORY.xlsx`。
+
+### system_data/ 參考結果
+
+- 參考舊 `diaryChat.dart` 的 `emotionGradeMembers` 與 `indexOf` 流程，確認舊系統顯示的 1 至 5 分會對應為 1-based 整數，並沿用 `moodPoint_1.png`～`moodPoint_5.png` 的設計意圖。
+- 未沿用舊系統大型 `setState`、直接 HTTP、Base64 JSON 媒體、全域帳號或硬編碼環境設定。
+
+### API 異動
+
+- 無 endpoint 或 API contract 異動。
+- 新增測試直接檢查 multipart `request.json`，確認邊界值 1 與 5 會原值寫入 `score`，不轉為 0-based index 或 mood lookup ID。
+
+### Database 異動
+
+- 無 schema、SQL 或 Migration 異動；沿用 `moods.score` 的 1 至 5 唯一值規格。
+
+### 文件更新
+
+- `docs/UI_SPEC.md` 補充日記分數圖片、無障礙名稱、Web／Mobile 互動差異及 1-based multipart 規則。
+- `docs/TASKS.md` 將 PR #75 Mobile Task 轉為 DONE，並記錄本 Task 的 TODO → IN PROGRESS → REVIEW。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次驗收與保存期限檢查。
+
+### 測試方式與結果
+
+- 日記分數 Widget／Provider／Repository 定向測試：12 tests passed。
+- `flutter analyze --no-pub`：No issues found。
+- `flutter test --no-pub`：159 tests passed。
+- `flutter build web --no-pub`：成功，產出 `build/web`；僅有既有 CupertinoIcons 字型提示與 Wasm 建議，未造成 build 失敗。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；2026-07-24 的保存期限截止日為 2026-06-24。
+- `CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv` 最早正式紀錄皆為 2026-06-29，無超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- 本 Task 完成功能與驗收後維持 REVIEW；task PR 合併至 `feature/phase4` 後才能標記 DONE。
+- 下一個 Task 為確認 Phase 4 完成頁持續保持 `reward = null`，Phase 6 再串接真實獎勵。
+
+---
+
 ## 2026-07-22 14:49 PHASE4-DIARY-MOBILE-CHAT
 
 Task

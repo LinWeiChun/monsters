@@ -162,6 +162,8 @@ Penpot `Diary / Mobile / 02 記錄方式` 的說明已由「可混合使用」�
 
 媒體 MIME type、大小、長度、private R2、JWT download URL 與 HTTP Range 規則全部沿用新增煩惱規格；每筆日記限一個主要媒體與一張 optional 心情圖。Web 不支援的來源需提供可理解的替代選取方式，不得阻斷文字日記或檔案上傳。
 
+日記分數固定使用 `moodPoint_1.png`～`moodPoint_5.png` 呈現 1 至 5 分，圖片只作輔助，無障礙名稱使用中性分數。Web／Tablet 選擇後直接前進，Mobile 先保留選項再按鈕確認；三種 window class 共用同一個 1-based 整數狀態。Flutter 送出的 multipart `request` 必須直接帶入 1 至 5，不得轉為 0-based index 或傳送 mood lookup ID；0 與 6 等範圍外值不得改變選擇。
+
 Phase 4 完成頁只顯示日記已安全保存、分數與分享狀態；API `reward` 為 `null`，不得顯示假怪獸、連續天數禮物或尚未完成的歷史頁導向。日記獎勵於 Phase 6 串接。
 
 Desktop 以共用 Navbar 與 1200px 內容區呈現雙欄流程；Tablet `600px - 1199px` 使用 compact flow；Mobile `< 600px` 依 Mobile Penpot 改為單欄。三種 window class 必須共用同一狀態機與資料層。

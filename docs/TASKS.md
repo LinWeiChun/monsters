@@ -257,9 +257,13 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] TODO：確認 PR #74 已合併，重讀 Diary Mobile 正式規格、舊系統流程與 Penpot `Diary Flow / Mobile`
 - [x] IN PROGRESS：校正 Penpot 單一主要記錄方式文案，建立 390×844 Mobile 畫布並沿用既有 Diary 狀態與 API
 - [x] REVIEW：驗證 320／390／500／599px、逐步確認、心情畫布、Phase 4 完成頁、Flutter Analyze、156 項完整測試與 Web build
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（PR #75 已合併至 `feature/phase4`）
+- [x] 依 Penpot `Diary Flow / Mobile` 適配 Flutter Mobile 日記聊天室（DONE：PR #75 已合併至 `feature/phase4`）
+- [x] TODO：確認 PR #75 已合併，重讀 Diary 分數正式規格、舊系統 1-based 對應與 Penpot Mobile 分數畫板
+- [x] IN PROGRESS：稽核共用 `MoodScoreSelector`、Diary Web／Mobile 狀態與 multipart `score` contract
+- [x] REVIEW：驗證 1／5 邊界、0／6 拒絕、五個圖片選項、語意標籤、multipart 實際分數、Flutter Analyze、159 項完整測試與 Web build
 - [ ] DONE：同步文件與 Log，完成 Git commit、push 與 task PR
-- [ ] 依 Penpot `Diary Flow / Mobile` 適配 Flutter Mobile 日記聊天室（REVIEW：實作、測試、文件與 Log 完成；PR #75 待合併）
-- [ ] Flutter 日記分數選擇
+- [ ] Flutter 日記分數選擇（REVIEW：既有功能與獨立驗收完成；待 task PR 合併）
 - [ ] Phase 4 完成頁保持 `reward = null`，Phase 6 再串接真實獎勵
 - [ ] 測試
 

@@ -92,6 +92,31 @@ void main() {
     expect(controller.state.step, DiaryChatStep.review);
   });
 
+  test(
+    'Mobile score accepts one-based boundaries and rejects invalid values',
+    () {
+      final controller = DiaryChatController();
+      addTearDown(controller.dispose);
+      _reachScoreStep(controller);
+
+      controller.chooseScore(0);
+      expect(controller.state.score, isNull);
+      controller.chooseScore(6);
+      expect(controller.state.score, isNull);
+
+      controller.chooseScore(1);
+      expect(controller.state.score, 1);
+      expect(controller.state.step, DiaryChatStep.score);
+
+      controller.chooseScore(5);
+      expect(controller.state.score, 5);
+      expect(controller.state.step, DiaryChatStep.score);
+
+      controller.confirmScore();
+      expect(controller.state.step, DiaryChatStep.sharing);
+    },
+  );
+
   test('submits a complete diary and keeps Phase 4 reward null', () async {
     final repository = _FakeDiaryRepository();
     final controller = DiaryChatController(repository);
