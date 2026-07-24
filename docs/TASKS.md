@@ -262,8 +262,8 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] TODO：確認 PR #75 已合併，重讀 Diary 分數正式規格、舊系統 1-based 對應與 Penpot Mobile 分數畫板
 - [x] IN PROGRESS：稽核共用 `MoodScoreSelector`、Diary Web／Mobile 狀態與 multipart `score` contract
 - [x] REVIEW：驗證 1／5 邊界、0／6 拒絕、五個圖片選項、語意標籤、multipart 實際分數、Flutter Analyze、159 項完整測試與 Web build
-- [ ] DONE：同步文件與 Log，完成 Git commit、push 與 task PR
-- [ ] Flutter 日記分數選擇（REVIEW：既有功能與獨立驗收完成；待 task PR 合併）
+- [ ] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（PR #76 已建立，待合併）
+- [ ] Flutter 日記分數選擇（REVIEW：既有功能與獨立驗收完成；PR #76 待合併）
 - [ ] Phase 4 完成頁保持 `reward = null`，Phase 6 再串接真實獎勵
 - [ ] 測試
 

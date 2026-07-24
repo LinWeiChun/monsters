@@ -63,7 +63,7 @@ Codex
 
 ### 待確認事項
 
-- 本 Task 完成功能與驗收後維持 REVIEW；task PR 合併至 `feature/phase4` 後才能標記 DONE。
+- Task PR #76 已建立且無合併衝突；合併至 `feature/phase4` 後才能將本 Task 標記 DONE。
 - 下一個 Task 為確認 Phase 4 完成頁持續保持 `reward = null`，Phase 6 再串接真實獎勵。
 
 ---
