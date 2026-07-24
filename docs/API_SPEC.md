@@ -820,7 +820,7 @@ Parts：
 - `categoryCode` 必須為已啟用的 annoyance type code。
 - `recordMethod = TEXT` 時 `content` 必填且不得傳 `contentFile`；其餘方式 `content` 必須為 null，並需傳入相符 MIME type 的 `contentFile`。
 - `score` 必須為 1 至 5；`isShared` 未傳時為 false；`occurredAt` 未傳時由後端設定。
-- Phase 3 建立成功不發放怪獸；`reward` 固定回傳 null，Phase 6 再串接真實獎勵。
+- Phase 3 建立成功不發放怪獸；`reward` 固定回傳 null，Phase 6 再串接真實獎勵。Response JSON 必須保留 `"reward": null`，不得因值為 null 而省略欄位。
 
 Response data：
 
@@ -999,7 +999,7 @@ Parts：
 
 - `recordMethod = TEXT` 時 `content` 必填且不得傳 `contentFile`；其餘方式 `content` 必須為 null，並需傳入相符 MIME type 的 `contentFile`。
 - `score` 必須為 1 至 5；`isShared` 未傳時為 false；`occurredAt` 未傳時由後端設定。
-- 建立成功回傳 201。Phase 4 不發放怪獸或其他獎勵，`reward` 固定回傳 null；Phase 6 再串接真實獎勵。
+- 建立成功回傳 201。Phase 4 不發放怪獸或其他獎勵，`reward` 固定回傳 null；Phase 6 再串接真實獎勵。Response JSON 必須保留 `"reward": null`，不得因值為 null 而省略欄位。
 
 Response data：
 

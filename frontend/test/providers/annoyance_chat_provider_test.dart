@@ -202,6 +202,7 @@ void main() {
 
     expect(controller.state.step, AnnoyanceChatStep.completed);
     expect(controller.state.createdAnnoyance?.id, 101);
+    expect(controller.state.createdAnnoyance?.reward, isNull);
     expect(repository.createCount, 1);
     expect(repository.lastIsShared, isTrue);
     expect(repository.lastScore, 3);

@@ -113,7 +113,7 @@
 
 煩惱媒體存放於獨立的 private R2 bucket。Flutter 只能使用 API 回傳的 Backend download URL 並附帶 JWT 讀取，不得組合 R2 bucket URL 或保存 object key；錄音與影片播放器需支援 Backend 的 HTTP Range response。
 
-Phase 3 完成頁不顯示假怪獸獎勵；真實獎勵與圖鑑導向於 Phase 6 串接。
+Phase 3 完成頁不顯示假怪獸獎勵，不得沿用舊系統「恭喜你獲得一隻怪獸」或「查看圖鑑」操作；真實獎勵與圖鑑導向於 Phase 6 串接。
 
 聊天室入口使用 `/annoyances/new`，由首頁「新增煩惱」進入。聊天室基礎 Task 建立聊天泡泡、不可變草稿狀態、上一步／重新開始操作，以及 `intro → category → recordMethod → content` 的結構化推進；content 之後的媒體選取、繪圖、分數、分享、摘要與送出依後續 Phase 3 Task 接續同一狀態機，不得另建平行流程。
 
@@ -164,7 +164,7 @@ Penpot `Diary / Mobile / 02 記錄方式` 的說明已由「可混合使用」�
 
 日記分數固定使用 `moodPoint_1.png`～`moodPoint_5.png` 呈現 1 至 5 分，圖片只作輔助，無障礙名稱使用中性分數。Web／Tablet 選擇後直接前進，Mobile 先保留選項再按鈕確認；三種 window class 共用同一個 1-based 整數狀態。Flutter 送出的 multipart `request` 必須直接帶入 1 至 5，不得轉為 0-based index 或傳送 mood lookup ID；0 與 6 等範圍外值不得改變選擇。
 
-Phase 4 完成頁只顯示日記已安全保存、分數與分享狀態；API `reward` 為 `null`，不得顯示假怪獸、連續天數禮物或尚未完成的歷史頁導向。日記獎勵於 Phase 6 串接。
+Phase 4 完成頁只顯示日記已安全保存、分數與分享狀態；API `reward` 為 `null`，不得顯示舊系統「恭喜你獲得一隻怪獸」、「查看圖鑑」、連續天數禮物或尚未完成的歷史頁導向。日記獎勵於 Phase 6 串接。
 
 Desktop 以共用 Navbar 與 1200px 內容區呈現雙欄流程；Tablet `600px - 1199px` 使用 compact flow；Mobile `< 600px` 依 Mobile Penpot 改為單欄。三種 window class 必須共用同一狀態機與資料層。
 

@@ -209,6 +209,8 @@ void main() {
     expect(find.text('私人日記\n已安全保存'), findsOneWidget);
     expect(find.byKey(const Key('mobileAppBottomNavigation')), findsOneWidget);
     expect(find.textContaining('獎勵'), findsNothing);
+    expect(find.textContaining('恭喜你獲得'), findsNothing);
+    expect(find.text('查看圖鑑'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -258,7 +260,8 @@ void main() {
     expect(find.text('日記已好好收進來了'), findsWidgets);
     expect(find.text('私人日記已安全保存'), findsOneWidget);
     expect(find.textContaining('獎勵'), findsNothing);
-    expect(find.textContaining('恭喜獲得'), findsNothing);
+    expect(find.textContaining('恭喜你獲得'), findsNothing);
+    expect(find.text('查看圖鑑'), findsNothing);
   });
 }
 

@@ -287,6 +287,9 @@ void main() {
 
     expect(find.byKey(const Key('annoyanceCompletedCard')), findsOneWidget);
     expect(find.textContaining('101'), findsOneWidget);
+    expect(find.textContaining('獎勵'), findsNothing);
+    expect(find.textContaining('恭喜你獲得'), findsNothing);
+    expect(find.text('查看圖鑑'), findsNothing);
     expect(find.byKey(const Key('annoyanceChatBackButton')), findsNothing);
   });
 }
