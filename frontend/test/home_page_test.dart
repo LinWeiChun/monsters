@@ -155,6 +155,20 @@ void main() {
     expect(find.byKey(const Key('annoyanceChatStartButton')), findsOneWidget);
   });
 
+  for (final size in const [Size(390, 844), Size(900, 700), Size(1440, 900)]) {
+    testWidgets('home diary action opens diary chat at $size', (tester) async {
+      await pumpHome(tester, size);
+
+      final diaryButton = find.byKey(const Key('homeDiaryChatButton'));
+      await tester.ensureVisible(diaryButton);
+      await tester.pumpAndSettle();
+      await tester.tap(diaryButton);
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('diaryChatStartButton')), findsOneWidget);
+    });
+  }
+
   testWidgets('mobile notification shows coming soon feedback', (tester) async {
     await pumpHome(tester, const Size(390, 844));
 

@@ -267,8 +267,13 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] TODO：確認 PR #76 已合併，重讀 Annoyance／Diary Reward 正式規格及舊系統立即抽怪獸流程
 - [x] IN PROGRESS：修正 Annoyance／Diary Response JSON 明確保留 `reward: null`，拒絕 Phase 6 前的非 null Reward，補強 Flutter 完成頁防回歸
 - [x] REVIEW：Backend Reward contract 3 項與 262 項完整測試、Flutter Reward 定向 44 項、Analyze、159 項完整測試及 Web build 通過
-- [ ] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（Draft PR #77 已建立，待轉 Ready 與合併）
-- [ ] Phase 4 完成頁保持 `reward = null`，Phase 6 再串接真實獎勵（REVIEW：含 Phase 3 煩惱 Reward；Draft PR #77 已建立，待轉 Ready 與合併）
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（PR #77 已合併至 `feature/phase4`）
+- [x] Phase 4 完成頁保持 `reward = null`，Phase 6 再串接真實獎勵（DONE：含 Phase 3 煩惱 Reward；PR #77 已合併至 `feature/phase4`）
+- [x] TODO：確認 PR #77 已合併，重讀首頁日記入口正式規格、既有 `/diaries/new` 路由與舊系統首頁導向
+- [x] IN PROGRESS：將 Desktop／Tablet／Mobile 首頁日記入口統一導向 `AppRoute.diaryChat`，補齊路由回歸測試
+- [x] REVIEW：首頁三種 window class 日記導向與 17 項首頁測試、Flutter Analyze、162 項完整測試及 Web build 通過
+- [ ] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（Draft PR #78 已建立，待轉 Ready 與合併）
+- [ ] Flutter 首頁導入紀錄日記（REVIEW：Desktop／Tablet／Mobile 實作與驗證完成；Draft PR #78 已建立，待轉 Ready 與合併）
 - [ ] 測試
 
 ---

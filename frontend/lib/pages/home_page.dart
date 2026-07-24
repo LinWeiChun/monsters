@@ -27,6 +27,7 @@ class HomePage extends ConsumerWidget {
             (context, constraints) => _DesktopHomeCanvas(
               greetingName: greetingName,
               onAddAnnoyance: () => context.pushNamed(AppRoute.annoyanceChat),
+              onAddDiary: () => context.pushNamed(AppRoute.diaryChat),
               onProfile: () => context.pushNamed(AppRoute.profile),
               onNotification:
                   () => _showUnavailableMessage(context, feature: '通知'),
@@ -38,6 +39,7 @@ class HomePage extends ConsumerWidget {
             (context, constraints) => _TabletHomeCanvas(
               greetingName: greetingName,
               onAddAnnoyance: () => context.pushNamed(AppRoute.annoyanceChat),
+              onAddDiary: () => context.pushNamed(AppRoute.diaryChat),
               onProfile: () => context.pushNamed(AppRoute.profile),
               onUnavailable: () => _showUnavailableMessage(context),
             ),
@@ -49,6 +51,7 @@ class HomePage extends ConsumerWidget {
               child: _MobileHomeCanvas(
                 greetingName: greetingName,
                 onAddAnnoyance: () => context.pushNamed(AppRoute.annoyanceChat),
+                onAddDiary: () => context.pushNamed(AppRoute.diaryChat),
                 onProfile: () => context.pushNamed(AppRoute.profile),
                 onNotification:
                     () => _showUnavailableMessage(context, feature: '通知'),
@@ -66,6 +69,7 @@ class _DesktopHomeCanvas extends StatelessWidget {
   const _DesktopHomeCanvas({
     required this.greetingName,
     required this.onAddAnnoyance,
+    required this.onAddDiary,
     required this.onProfile,
     required this.onNotification,
     required this.onUnavailable,
@@ -73,6 +77,7 @@ class _DesktopHomeCanvas extends StatelessWidget {
 
   final String greetingName;
   final VoidCallback onAddAnnoyance;
+  final VoidCallback onAddDiary;
   final VoidCallback onProfile;
   final VoidCallback onNotification;
   final ValueChanged<String> onUnavailable;
@@ -162,6 +167,7 @@ class _DesktopHomeCanvas extends StatelessWidget {
                                 flex: 10,
                                 child: _DesktopActionColumn(
                                   onAddAnnoyance: onAddAnnoyance,
+                                  onAddDiary: onAddDiary,
                                   onUnavailable: () => onUnavailable('此功能'),
                                 ),
                               ),
@@ -185,12 +191,14 @@ class _TabletHomeCanvas extends StatelessWidget {
   const _TabletHomeCanvas({
     required this.greetingName,
     required this.onAddAnnoyance,
+    required this.onAddDiary,
     required this.onProfile,
     required this.onUnavailable,
   });
 
   final String greetingName;
   final VoidCallback onAddAnnoyance;
+  final VoidCallback onAddDiary;
   final VoidCallback onProfile;
   final VoidCallback onUnavailable;
 
@@ -238,6 +246,7 @@ class _TabletHomeCanvas extends StatelessWidget {
                       const SizedBox(height: 24),
                       _DesktopActionColumn(
                         onAddAnnoyance: onAddAnnoyance,
+                        onAddDiary: onAddDiary,
                         onUnavailable: onUnavailable,
                       ),
                     ],
@@ -501,10 +510,12 @@ class _DesktopHeroPanel extends StatelessWidget {
 class _DesktopActionColumn extends StatelessWidget {
   const _DesktopActionColumn({
     required this.onAddAnnoyance,
+    required this.onAddDiary,
     required this.onUnavailable,
   });
 
   final VoidCallback onAddAnnoyance;
+  final VoidCallback onAddDiary;
   final VoidCallback onUnavailable;
 
   @override
@@ -523,10 +534,11 @@ class _DesktopActionColumn extends StatelessWidget {
             ),
             SizedBox(height: gap),
             _DesktopActionTile(
+              key: const Key('homeDiaryChatButton'),
               icon: '✦',
               title: '寫一篇日記',
               caption: '把今天的片段收藏起來',
-              onTap: onUnavailable,
+              onTap: onAddDiary,
             ),
             SizedBox(height: gap),
             _DesktopActionTile(
@@ -822,6 +834,7 @@ class _MobileHomeCanvas extends StatelessWidget {
   const _MobileHomeCanvas({
     required this.greetingName,
     required this.onAddAnnoyance,
+    required this.onAddDiary,
     required this.onProfile,
     required this.onNotification,
     required this.onUnavailable,
@@ -829,6 +842,7 @@ class _MobileHomeCanvas extends StatelessWidget {
 
   final String greetingName;
   final VoidCallback onAddAnnoyance;
+  final VoidCallback onAddDiary;
   final VoidCallback onProfile;
   final VoidCallback onNotification;
   final ValueChanged<String> onUnavailable;
@@ -884,14 +898,15 @@ class _MobileHomeCanvas extends StatelessWidget {
         _CollectionPanel.mobile(onUnavailable: () => onUnavailable('怪獸收藏')),
         _MobilePrimaryAction(onTap: onAddAnnoyance),
         _MobileQuickAction(
+          key: const Key('homeDiaryChatButton'),
           left: 16,
           icon: '✦',
           title: '寫日記',
-          caption: '即將開放',
+          caption: '開始記錄',
           background: AppColors.homeSurface,
           border: AppColors.homeBorder,
           iconColor: AppColors.homePrimary,
-          onTap: () => onUnavailable('寫日記'),
+          onTap: onAddDiary,
         ),
         _MobileQuickAction(
           left: 138,
@@ -1163,6 +1178,7 @@ class _MobileQuickAction extends StatelessWidget {
     required this.onTap,
     this.titleColor,
     this.captionColor,
+    super.key,
   });
 
   final double left;
