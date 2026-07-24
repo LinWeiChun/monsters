@@ -8,6 +8,69 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-24 10:48 PHASE4-HOME-DIARY-ENTRY
+
+Task
+Phase 4 Flutter 首頁導入紀錄日記（REVIEW）
+
+執行者
+Codex
+
+### 完成內容
+
+- 確認前一個 Reward Task PR #77 已合併至 `feature/phase4`，將該 Task 轉為 DONE。
+- 比對正式 UI／Project 規格、既有 `AppRoute.diaryChat` 與舊系統首頁流程，確認首頁應直接導向 `/diaries/new`。
+- 將 Desktop、Tablet、Mobile 首頁日記行動統一接至 `context.pushNamed(AppRoute.diaryChat)`。
+- 新增共用 `homeDiaryChatButton` 測試 key，並將 Mobile 日記卡片的「即將開放」改為「開始記錄」。
+- 補齊 390px Mobile、900px Tablet、1440px Desktop 的首頁日記導向回歸測試；Tablet 測試會先將可捲動區中的卡片移入可視範圍再點擊。
+
+### 修改／新增／刪除檔案
+
+- 修改 `frontend/lib/pages/home_page.dart`、`frontend/test/home_page_test.dart`。
+- 修改 `docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`。
+- 未新增或刪除檔案，未修改 `system_data/`、API、Database、Penpot 或 `log/CHANGE_HISTORY.xlsx`。
+- 既有未提交的 `frontend/pubspec.lock`、`frontend/tool/run_web_local.ps1` 已保留，不納入本 Task。
+- 本機 `frontend/tool/verify.ps1` 仍未由 Git 追蹤。
+
+### system_data/ 參考結果
+
+- 舊 `system_data/front-end/monsters_front_end/lib/pages/home.dart` 的日記按鈕使用 `Navigator.push` 直接建立 `diaryChat`，確認舊流程同樣由首頁進入日記。
+- 新版未沿用舊 `MaterialPageRoute` 與舊 Widget 命名，改用正式的 GoRouter named route。
+
+### API 異動
+
+- 無 API endpoint、request、response 或驗證規則異動；本 Task 只啟用既有 `/diaries/new` 前端入口。
+
+### Database 異動
+
+- 無 schema、SQL、Migration 或資料異動。
+
+### 文件更新
+
+- `docs/UI_SPEC.md` 將首頁日記入口由「即將開放」更新為 Desktop／Tablet／Mobile 可操作，並記錄 named route contract。
+- `docs/TASKS.md` 將 PR #77 Reward Task 轉為 DONE，記錄本 Task 的 TODO → IN PROGRESS → REVIEW。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次首頁導向與驗證。
+
+### 測試方式與結果
+
+- `home_page_test.dart`：17 tests passed，包含三種 window class 的日記導向。
+- Flutter Analyze：No issues found，4.9 秒。
+- Flutter 完整測試：162 tests passed。
+- Flutter Web Build：成功，122.7 秒；既有 CupertinoIcons 字型提示與 Wasm 建議未造成失敗。
+- 現有 Web 開發伺服器持有 Flutter 啟動器鎖；驗證改用同一 Flutter SDK 的 tool snapshot 並設定 reentrant lock，未停止或干擾現有伺服器。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv`；2026-07-24 的保存期限截止日為 2026-06-24。
+- 最早正式紀錄為 2026-06-29，無超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- 本 Task 維持 REVIEW；task PR 合併至 `feature/phase4` 後才能標記 DONE。
+- Phase 4 最後的整合「測試」Task 仍待執行。
+
+---
+
 ## 2026-07-24 10:08 PHASE4-ENTRY-REWARD-NULL
 
 Task

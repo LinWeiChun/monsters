@@ -154,7 +154,7 @@ Diary 前端需抽出並重用 Phase 3 Entry 共用元件與平台 Adapter，包
 
 Entry 共用前端基礎位於 `frontend/lib/models/entry_*.dart`、`frontend/lib/services/entry_media_*.dart` 與 `frontend/lib/widgets/entry/`。共用 Widget 以 `keyPrefix`、標題與語意文案區分 Annoyance／Diary，媒體 Service 以 `recordingFilePrefix` 區分錄音暫存檔；Annoyance 已改為直接使用這些共用元件並保留原測試 key。Diary 後續只能依賴 Entry 共用層，不得匯入 `widgets/annoyance/` 或 Annoyance 媒體型別。
 
-Flutter Web 實作位於 `frontend/lib/pages/diary_chat_page.dart`，並以 `diary_draft.dart`、`diary_chat_provider.dart`、`diary_repository.dart`、`diary_response.dart` 與 `widgets/diary/` 維持 Diary 專屬狀態、API 與確認／完成畫面。`/diaries/new` 已可直接進入；首頁入口須等 Phase 4 Web／Mobile 與剩餘驗收完成後再解除「即將開放」。Web 已驗收 1200、1440、1920px，不得以固定 1440px canvas 取代 Responsive flow。
+Flutter Web 實作位於 `frontend/lib/pages/diary_chat_page.dart`，並以 `diary_draft.dart`、`diary_chat_provider.dart`、`diary_repository.dart`、`diary_response.dart` 與 `widgets/diary/` 維持 Diary 專屬狀態、API 與確認／完成畫面。`/diaries/new` 已可直接進入；首頁 Desktop／Tablet／Mobile 的 `homeDiaryChatButton` 統一以 `context.pushNamed(AppRoute.diaryChat)` 導向日記聊天室，不再顯示「即將開放」。Web 已驗收 1200、1440、1920px，不得以固定 1440px canvas 取代 Responsive flow。
 
 Flutter Mobile 以 `frontend/lib/widgets/diary/diary_mobile_flow.dart` 實作 Penpot 390×844 單欄畫布，並透過 `ResponsiveFixedCanvas` 在 320px 至 599px 等比例填滿 viewport 寬度；縮放後高度超過 viewport 時允許垂直捲動，不得在 391px 至 599px 保留靠左的固定 390px 留白。Mobile 依 `01` 至 `08` 與 `09 Completed / Phase 4` 呈現品牌、步驟、進度、標題、說明、主要操作及完成頁底部導覽。記錄方式、分數與分享選擇在 Mobile 先保存選項，再由明確的下一步按鈕確認；Web／Tablet 保留既有快速選擇行為，三種 window class 仍共用同一份 `DiaryChatState`、Controller、Repository 與 API contract。
 
@@ -809,8 +809,9 @@ Logo 規範：
 - `HomePage` Web 版改為 `LayoutBuilder + Column / Row / Expanded / ConstrainedBox` 的相對 layout；Mobile 版仍保留 390 x 844 Penpot canvas。
 - Home 色彩集中於 `frontend/lib/theme/app_colors.dart` 的 `home*` token，page 不直接宣告色碼。
 - 主要行動 `homeAnnoyanceChatButton` 使用 `context.pushNamed(AppRoute.annoyanceChat)`，讓明確返回按鈕保留上一頁。
+- 日記行動 `homeDiaryChatButton` 在 Desktop／Tablet／Mobile 使用 `context.pushNamed(AppRoute.diaryChat)`，導向 `/diaries/new` 並保留首頁於返回堆疊。
 - Mobile 右上角通知按鈕不再重複提供個人資料入口；底部 `mobileNavProfile` 導向 `profile`。
-- 尚未開放的 diary / history / collection / community / interaction 入口顯示具名的「即將開放」訊息。
+- 尚未開放的 history / collection / community / interaction 入口顯示具名的「即將開放」訊息。
 - `homeAnimatedMonster`、`homeAnimatedMonsterIdle`、`homeAnimatedMonsterReacting` 測試 key 保留，降低既有測試與互動行為破壞。
 ---
 

@@ -1136,3 +1136,7 @@
 2026-07-24,10:08,PHASE4-ENTRY-REWARD-NULL,Test,frontend/test/annoyance_chat_page_test.dart 與 Diary Reward 相關測試,修改,驗證 Repository Provider 與 Web Mobile 完成頁不顯示舊獎勵,Codex,否,否,否,否,44 項定向與 159 項完整測試通過 Analyze 及 Web build 成功
 2026-07-24,10:08,PHASE4-ENTRY-REWARD-NULL,Documentation,docs/API_SPEC.md docs/UI_SPEC.md docs/TASKS.md,修改,同步 reward null key 與禁止舊獎勵完成頁規格,Codex,是,否,是,否,將 PR #76 日記分數 Task 轉為 DONE
 2026-07-24,10:08,PHASE4-ENTRY-REWARD-NULL,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增 Reward 修正工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log；Draft PR #77 已建立且 Task 維持 REVIEW
+2026-07-24,10:48,PHASE4-HOME-DIARY-ENTRY,Frontend,frontend/lib/pages/home_page.dart,修改,啟用 Desktop Tablet Mobile 首頁日記行動並導向 AppRoute diaryChat,Codex,否,否,是,否,Mobile 文案由即將開放改為開始記錄
+2026-07-24,10:48,PHASE4-HOME-DIARY-ENTRY,Test,frontend/test/home_page_test.dart,修改,驗證 390px 900px 1440px 首頁日記入口與既有首頁回歸,Codex,否,否,否,否,17 項定向與 162 項完整測試通過 Analyze 及 Web build 成功
+2026-07-24,10:48,PHASE4-HOME-DIARY-ENTRY,Documentation,docs/UI_SPEC.md docs/TASKS.md,修改,同步首頁日記 named route contract 並將 PR 77 Reward Task 轉為 DONE,Codex,否,否,是,否,本 Task 維持 REVIEW 待 task PR 合併
+2026-07-24,10:48,PHASE4-HOME-DIARY-ENTRY,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增首頁日記入口工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
