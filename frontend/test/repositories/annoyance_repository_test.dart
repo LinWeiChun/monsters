@@ -29,6 +29,7 @@ void main() {
     );
 
     expect(response.id, 101);
+    expect(response.reward, isNull);
     expect(adapter.path, '/annoyances');
     expect(adapter.method, 'POST');
     expect(adapter.formData, isNotNull);

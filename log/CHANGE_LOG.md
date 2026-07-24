@@ -8,6 +8,76 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-24 10:08 PHASE4-ENTRY-REWARD-NULL
+
+Task
+Phase 4 日記與 Phase 3 煩惱完成頁保持 `reward = null`（REVIEW）
+
+執行者
+Codex
+
+### 完成內容
+
+- 確認 Reward 前一個 Task PR #76 已合併至 `feature/phase4`，將日記分數 Task 轉為 DONE。
+- 比對正式 Project／API／UI／Decision 與舊系統手冊，確認煩惱 Phase 3、日記 Phase 4 都不得發放怪獸或顯示舊獎勵彈窗，真實獎勵延至 Phase 6。
+- 發現既有 Mapper 雖回傳 null，但 Jackson 會忽略 `Void reward`，導致實際 JSON 缺少 `reward` key。
+- 將 Annoyance／Diary Response 的 Reward 改為明確永遠序列化，並在 compact constructor 拒絕任何 Phase 6 前的非 null 值。
+- 補強 Flutter Repository、Provider、Web／Mobile 完成頁測試，確認 `reward` 保持 null，且不顯示「獎勵」、「恭喜你獲得」或「查看圖鑑」。
+
+### 修改／新增／刪除檔案
+
+- 修改 `backend/src/main/java/com/monsters/dto/annoyance/AnnoyanceResponse.java`、`backend/src/main/java/com/monsters/dto/diary/DiaryResponse.java`。
+- 新增 `backend/src/test/java/com/monsters/dto/entry/EntryRewardContractTest.java`。
+- 修改 `frontend/test/annoyance_chat_page_test.dart`、`frontend/test/diary_chat_page_test.dart`。
+- 修改 `frontend/test/providers/annoyance_chat_provider_test.dart`、`frontend/test/repositories/annoyance_repository_test.dart`。
+- 修改 `docs/API_SPEC.md`、`docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`。
+- 未刪除檔案，未修改 `system_data/`、Database 檔案、Penpot 或 `log/CHANGE_HISTORY.xlsx`。
+- 本機 `frontend/tool/verify.ps1` 仍由 `.git/info/exclude` 忽略，未納入本次 Commit。
+
+### system_data/ 參考結果
+
+- 系統手冊第 124 頁與第 128 頁分別顯示舊煩惱、舊日記新增後可能立即出現「恭喜你獲得一隻怪獸」與「查看圖鑑」彈窗。
+- 參考舊 `annoyanceChat.dart`、`diaryChat.dart` 的 `newMonster`、`newMonsterGroup` 與 `PresentWidget` 流程，確認新版正式規格刻意延後此功能。
+- 未沿用舊系統立即抽怪獸、直接 HTTP、全域帳號或硬編碼設定。
+
+### API 異動
+
+- Endpoint 與 request contract 無異動。
+- 修正 Annoyance／Diary response serialization，使 Phase 3／4 JSON 明確包含 `"reward": null`，不再省略欄位。
+- DTO 在 Phase 6 前拒絕任何非 null Reward，避免提早發放假獎勵。
+
+### Database 異動
+
+- 無 schema、SQL 或 Migration 異動；本 Task 不新增獎勵資料或使用者怪獸關聯。
+
+### 文件更新
+
+- `docs/API_SPEC.md` 明確要求 null Reward key 不得省略。
+- `docs/UI_SPEC.md` 明確禁止煩惱／日記完成頁顯示舊獎勵文案與圖鑑操作。
+- `docs/TASKS.md` 將 PR #76 日記分數 Task 轉為 DONE，記錄本 Task 的 TODO → IN PROGRESS → REVIEW。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次修正與驗證。
+
+### 測試方式與結果
+
+- Backend Reward contract 定向測試：3 tests passed。
+- Backend `gradlew test --no-daemon`：262 tests passed。
+- Flutter Annoyance／Diary Reward 定向測試：44 tests passed。
+- Flutter Analyze：No issues found，10.9 秒。
+- Flutter完整測試：159 tests passed，57.4 秒。
+- Flutter Web Build：成功，95.6 秒；僅有既有 CupertinoIcons 字型提示與 Wasm 建議，未造成失敗。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；2026-07-24 的保存期限截止日為 2026-06-24。
+- `CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv` 最早正式紀錄皆為 2026-06-29，無超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- 本 Task 維持 REVIEW；Draft PR #77 已建立，待轉 Ready 並合併至 `feature/phase4` 後才能標記 DONE。
+- Phase 6 實作真實 Reward 時，需明確調整 DTO guard、API contract、Database 關聯與完成頁 UI，不得只移除 null。
+
+---
+
 ## 2026-07-24 09:13 PHASE4-DIARY-SCORE
 
 Task
