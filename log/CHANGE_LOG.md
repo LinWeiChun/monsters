@@ -66,7 +66,7 @@ Codex
 
 ### 待確認事項
 
-- 本 Task 維持 REVIEW；task PR 合併至 `feature/phase4` 後才能標記 DONE。
+- 本 Task 維持 REVIEW；Draft PR #78 已建立，待轉 Ready 並合併至 `feature/phase4` 後才能標記 DONE。
 - Phase 4 最後的整合「測試」Task 仍待執行。
 
 ---

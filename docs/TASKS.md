@@ -272,8 +272,8 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] TODO：確認 PR #77 已合併，重讀首頁日記入口正式規格、既有 `/diaries/new` 路由與舊系統首頁導向
 - [x] IN PROGRESS：將 Desktop／Tablet／Mobile 首頁日記入口統一導向 `AppRoute.diaryChat`，補齊路由回歸測試
 - [x] REVIEW：首頁三種 window class 日記導向與 17 項首頁測試、Flutter Analyze、162 項完整測試及 Web build 通過
-- [ ] DONE：同步文件與 Log，完成 Git commit、push 與 task PR
-- [ ] Flutter 首頁導入紀錄日記（REVIEW：Desktop／Tablet／Mobile 實作與驗證完成，待 task PR 合併）
+- [ ] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（Draft PR #78 已建立，待轉 Ready 與合併）
+- [ ] Flutter 首頁導入紀錄日記（REVIEW：Desktop／Tablet／Mobile 實作與驗證完成；Draft PR #78 已建立，待轉 Ready 與合併）
 - [ ] 測試
 
 ---
