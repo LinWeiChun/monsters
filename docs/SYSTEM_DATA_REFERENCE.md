@@ -2,6 +2,8 @@
 
 # system_data 參考資料盤點
 
+> 本文件只記錄舊系統事實與可參考脈絡，不是目標規格。舊系統中的 Account、伺服器密碼鎖、公開頭貼、隨機怪獸、按愛心、深度心理測驗與 SharedPreferences 登入方式，均已由 2026-07-26 grilling 決策取代；實作前須以 `CONTEXT.md`、正式 Spec、`DECISIONS.md` 與 ADR 為準。
+
 初次確認日期：2026-07-03
 
 Phase 3 煩惱功能複核日期：2026-07-10

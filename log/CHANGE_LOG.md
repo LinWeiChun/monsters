@@ -8,6 +8,88 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-26 10:57
+
+Task
+DOC-013 Grilling 決策與領域模型文件化（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 依序檢查 AGENTS、system_data、正式規格、Git status／diff／log、主要模組、TODO／FIXME、測試與功能完成狀態。
+- 以 grilling 與 domain-modeling 逐項確認產品、年齡、隱私、身分、資料生命週期、匿名社群、內容、怪獸、平台、營運與發布決策。
+- 建立 `CONTEXT.md`，統一 Member、Entry、Emotional Load、Community Post、Self Exploration、Community Eligibility 等領域詞彙。
+- 建立 8 份 ADR，記錄非醫療私人核心、年齡資格、工作階段、本機隱私鎖、Entry／Community Post、資料生命週期、社群治理、內容審閱、固定獎勵與版本化平台基礎。
+- 將核准結果同步至 AGENTS、README、Project、Database、API、UI、Coding Standard、Decisions 與 Tasks。
+- 新增 Phase 4.5 基礎安全與領域模型工作清單，並明確阻擋 Phase 5 以後功能。
+- 保留 `feature/phase4` 30 個候選 Commit 的現況，不執行 merge、rebase、cherry-pick 或程式修改。
+- 檢查 Log 保存期限；最早紀錄為 2026-06-29，未早於 2026-06-26，因此未刪除 Log。
+
+### Added
+
+- `CONTEXT.md`
+- `docs/adr/0001-non-medical-private-core.md`
+- `docs/adr/0002-age-and-community-eligibility.md`
+- `docs/adr/0003-session-and-local-privacy-lock.md`
+- `docs/adr/0004-entry-and-community-post-boundary.md`
+- `docs/adr/0005-data-lifecycle-and-recovery.md`
+- `docs/adr/0006-governed-closed-community.md`
+- `docs/adr/0007-reviewed-content-and-deterministic-rewards.md`
+- `docs/adr/0008-versioned-platform-foundation.md`
+
+### Modified
+
+- `AGENTS.md`
+- `README.md`
+- `docs/PROJECT_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/API_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/CODING_STANDARD.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `docs/SYSTEM_DATA_REFERENCE.md`
+- `docs/PHASE2_TEST_REPORT.md`
+- `docs/PHASE3_ANNOYANCE_DESIGN_PROPOSAL.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- 文件工作，未執行程式 Compile／Test。
+- 執行 Markdown／Git whitespace、內部連結、目標規格關鍵字與文件交叉一致性檢查。
+- 本次新增的 14 筆 `DOC-013` CSV 紀錄皆符合 13 欄現行格式；既有 41 筆 9 欄歷史紀錄與修改前相同，本次未擴大範圍改寫。
+
+### system_data Reference
+
+- 參考系統手冊、系統簡介、舊會員、煩惱、日記、怪獸、社群與互動流程。
+- 未沿用舊 Account、空密碼 OAuth、SharedPreferences Token、公開頭貼、server PIN、Base64 媒體、隨機怪獸與未治理社群。
+- 未修改、搬移、刪除或格式化 `system_data/`。
+
+### API
+
+- 文件目標改為 `/api/v1`、UUID public ID、OpenAPI、stable error code、optimistic version、idempotency、短效 JWT Access＋opaque Refresh Session。
+- 本次未修改 Backend endpoint。
+
+### Database
+
+- 文件核准 Flyway、target schema、Community Post、Session、Guardian Consent、Outbox、Deletion／Export／Audit 等 Migration 方向。
+- 本次未修改 Schema 或執行 Migration。
+
+### UI
+
+- 文件核准 Email-only login、年齡／Guardian Consent、本機 Privacy Lock、optional Emotional Load、30 日 Emotional Trace、Monster Avatar、封閉成人社群與無障礙邊界。
+- 本次未修改 Flutter 程式或 Penpot。
+
+### Pending
+
+- DOC-013 文件 Review 與 PR。
+- 後續另行 Review／整合 `feature/phase4`；本 Task 明確不執行 Phase 4 整合。
+
+---
+
 ## 2026-07-16 10:56
 
 Task
