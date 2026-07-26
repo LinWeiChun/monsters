@@ -1,5 +1,7 @@
 # Phase 2 Test Report
 
+> Historical report：本文件只證明 Phase 2 當時實作與測試結果。Account 登入、公開頭貼上傳、JWT／SharedPreferences session 與伺服器密碼鎖已列入 Phase 4.5 Migration，不能視為目前目標契約。
+
 ## Scope
 
 Phase 2 covers member authentication and user profile features:

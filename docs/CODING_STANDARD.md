@@ -2,7 +2,7 @@
 
 # 貘nsters 程式設計規範（Coding Standard）
 
-> Version：v3.1
+> Version：v3.2
 >
 > 本文件規範 **貘nsters** 專案所有程式碼撰寫標準。
 >
@@ -73,14 +73,15 @@
 若本文件與其他規格發生衝突，依照以下優先順序：
 
 1. AGENTS.md
-2. PROJECT_SPEC.md
-3. DATABASE_SPEC.md
-4. API_SPEC.md
-5. UI_SPEC.md
-6. CODING_STANDARD.md
-7. DECISIONS.md
-8. TASKS.md
-9. system_data/
+2. CONTEXT.md（領域詞彙）
+3. PROJECT_SPEC.md
+4. DATABASE_SPEC.md
+5. API_SPEC.md
+6. UI_SPEC.md
+7. CODING_STANDARD.md
+8. DECISIONS.md 與相關 ADR
+9. TASKS.md
+10. system_data/
 
 若仍有衝突：
 
@@ -101,6 +102,19 @@ AI 必須停止開發並詢問使用者。
 - YAGNI（You Aren't Gonna Need It）
 
 不得為未來可能發生的需求預先建立未使用的程式碼。
+
+## 2.0 已核准安全與領域實作基線
+
+- Diary 與 Annoyance 共用 Entry 核心，但使用分離的 Use Case／Command。
+- Community Post 是 Entry 的獨立公開快照，不得以 `Entry.isShared` 直接公開私人資料。
+- 私人分類與情緒負荷皆為 optional；不得用 null 補零或推測使用者狀態。
+- 任何私人文字、媒體、情緒負荷、自我探索結果或搜尋詞不得送往 AI、分析 SDK、廣告、客服工單或第三方監控。
+- 所有 Client 可引用資源使用 UUID public ID；owner、角色與資格由 Backend 驗證，不相信 Client 傳入值。
+- 所有修改 Aggregate 使用 optimistic version；所有可重試命令使用 idempotency key。
+- Email、媒體、匯出、刪除、通知與獎勵使用 Transactional Outbox 與 idempotent Worker，不得只做一次性 best-effort。
+- Web、Android、iOS 的 Credential Store 必須平台分流；任何平台都不得把 JWT、Refresh Token 或完整 Login Result 放入 SharedPreferences。
+- 任何特權角色都不得讀取私人 Entry、模擬會員登入或取得會員 Token。
+- 新功能不得依賴待移除的 `account`、公開頭貼上傳、伺服器 PIN、JWT Refresh Token、隨機怪獸或深度心理測驗模型。
 
 ---
 
@@ -696,7 +710,7 @@ CODING_STANDARD.md
 | HTTP Client | Dio |
 | JSON | json_serializable |
 | Routing | go_router |
-| Local Storage | SharedPreferences |
+| Non-sensitive Local Storage | SharedPreferences |
 | Dependency Injection | Riverpod Provider |
 
 不得自行更換框架。
@@ -928,7 +942,7 @@ Router：
 
 ## 4.9 Local Storage
 
-僅允許：
+非敏感設定可使用：
 
 SharedPreferences：
 
@@ -938,6 +952,7 @@ SharedPreferences：
 - Language
 - Login Flag
 - User Setting
+- Privacy Lock Timeout Preference（不含 PIN）
 
 不得：
 
@@ -947,6 +962,22 @@ SharedPreferences：
 - JWT
 - Refresh Token
 - Secret
+- Login Result
+- Email
+- Birthday
+- Guardian Data
+- Diary / Annoyance / Self Exploration
+- Media bytes、path 或 object key
+
+Credential Store：
+
+- Web Refresh Token：Backend 設定的 `__Host-` HttpOnly、Secure、SameSite Cookie。
+- Web Access Token：記憶體。
+- Android／iOS Refresh Token：Keychain／Keystore 封裝的 Secure Storage。
+- Android／iOS Access Token：記憶體。
+- 本機四位數 PIN：只存在各 App 裝置的安全儲存區，Backend 不得接收。
+
+平台差異必須封裝於 `SessionCredentialStore` 與 Local Privacy Lock Adapter，不得散落在 Page、Repository 或一般 Provider。
 
 ---
 
@@ -1641,12 +1672,12 @@ if()
 
 Pagination。
 
-參數：
+穩定資料流優先使用 cursor；既有 offset API 在 v1 Migration 前可暫時使用：
 
 ```text
-page
+cursor
 
-size
+limit
 
 sort
 ```
@@ -1820,7 +1851,7 @@ diaryId
 Index。
 
 - email
-- account
+- public_id
 - created_at
 - foreign key
 
@@ -1902,21 +1933,16 @@ Controller。
 
 ## 7.10 Migration
 
-Database：
+Database 修改必須使用 Flyway versioned Migration。
 
-修改：
+規則：
 
-必須：
-
-Migration。
-
-不得：
-
-直接：
-
-修改：
-
-正式資料庫。
+- 已於任何共用環境執行的 Migration 不得改寫。
+- 正式環境 Hibernate 只做 schema validation，不自動建立或修改表。
+- 破壞性變更使用 expand／migrate／contract 分階段完成。
+- CI 同時測試空資料庫建立與上一版本升級。
+- Migration 失敗時停止部署；原則上向前修正，不假設 destructive rollback 安全。
+- `database/init/01_schema.sql` 只作新環境基準與參考，不得反覆覆蓋正式資料庫。
 
 ---
 
@@ -1935,7 +1961,7 @@ Unique Constraint。
 ```text
 email
 
-account
+provider + provider_user_id
 ```
 
 ---
@@ -1961,21 +1987,15 @@ Pagination。
 
 ## 8.1 Authentication
 
-登入：
+一般 API 使用 10 分鐘短效 JWT Access Token；Refresh Token 必須是不透明高強度隨機值，Backend 只保存 hash、family、rotation 與 reuse 狀態。
 
-統一：
+Refresh：
 
-JWT。
-
-Token：
-
-需設定：
-
-Expiration。
-
-必要時：
-
-Refresh Token。
+- 每次成功換發後舊 Token 立即失效。
+- 舊 Token 重播時撤銷整個 Token family。
+- 一般工作階段閒置 30 天、絕對 90 天；特權後台閒置 30 分鐘、絕對 8 小時。
+- 角色、密碼、資格或重大安全狀態變更時立即撤銷相關工作階段。
+- 敏感操作使用五分鐘、用途受限且不可延長的 reauthentication credential。
 
 ---
 
@@ -2057,15 +2077,18 @@ GitHub Secrets
 
 檢查：
 
-- MIME Type
+- Client MIME Type
 - Extension
+- 實際 magic bytes／容器格式
+- 能否由對應 decoder 完整解析
 - File Size
+- Audio／Video Duration
+- Malware Scan
+- Metadata Removal
 
-不得：
+媒體必須先進隔離區；只有完成重新處理與掃描的物件才能成為可下載正式媒體。圖片需移除 EXIF／GPS，影音需移除可識別 metadata。
 
-只檢查：
-
-副檔名。
+不得只檢查副檔名、Client MIME 或 `ffprobe` duration 就直接存入正式 bucket。
 
 ---
 
@@ -2076,6 +2099,10 @@ GitHub Secrets
 - Diary
 - Annoyance
 - User Profile
+- Community Post
+- Self Exploration
+- Guardian Consent
+- Data Export
 
 必須：
 
@@ -2088,6 +2115,8 @@ Owner。
 跨帳號：
 
 讀取。
+
+所有 owner、Community Eligibility、角色、封鎖、停權與刪除狀態由 Backend 強制。無權、不存在、已刪除或父子資源不符時，對一般會員使用一致 404。
 
 ---
 
@@ -2102,6 +2131,13 @@ Log：
 - Refresh Token
 - Secret
 - Personal Information
+- Diary／Annoyance／Community Post／Comment 原文
+- Emotional Load、Private Category、Search Query
+- Email、Birthday、Guardian Email
+- Media filename、object key、bytes 或 screenshot
+- Request／Response Body
+
+採欄位白名單，只允許穩定 error code、route template、status、duration、版本、平台與 opaque request ID。監控供應商不得取得未遮罩例外、畫面文字或私人資料。
 
 ---
 
@@ -2566,7 +2602,7 @@ Stack Trace。
 
 ## 10.10 Audit Log
 
-建議：
+必須：
 
 記錄：
 
@@ -2575,10 +2611,16 @@ Stack Trace。
 - Password Change
 - Permission Change
 - Role Change
+- Session Revocation
+- Content Takedown / Appeal
+- Data Export / Deletion Event
+- Legal Hold Change
 
 方便：
 
 Audit。
+
+Audit 必須 append-only，Admin 不得修改或刪除。一般 Log 保存 30 天、安全事件 180 天、管理與審核事件一年；到期清除需監控失敗。
 
 ---
 

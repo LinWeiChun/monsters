@@ -1,6 +1,6 @@
 # 貘nsters（Monsters）
 
-> 一套提供使用者抒發情緒、記錄日記、管理煩惱、社群互動、怪獸蒐集與心理紓壓功能的跨平台系統。
+> 一套面向台灣使用者、以私人情緒記錄與自我照顧為核心的非醫療跨平台系統。
 
 本專案採用 **Flutter + Spring Boot + MySQL** 架構，並以 **AI Assisted Development（AI 輔助開發）** 為核心開發流程。
 
@@ -11,6 +11,18 @@
 * Web
 
 目前前端開發與驗收以 **Flutter Web-first** 為主，Android／iOS 仍維持共用程式相容。Web 畫面必須支援瀏覽器視窗即時縮放，並依 Mobile（小於 600px）、Tablet（600px 至 1199px）、Desktop（1200px 以上）流暢切換，不需重新整理頁面。
+
+---
+
+# 目前狀態
+
+- `develop` 已完成 Phase 0 至 Phase 3。
+- `feature/phase4` 保留日記功能候選成果，但尚未整合至 `develop`。
+- Phase 4 整合完成後，必須先執行「基礎安全與領域模型」階段；完成前暫停 Phase 5 以後功能。
+- 第一個對真實使用者開放的版本是台灣限定、正式資料等級的私人核心封閉測試。
+- 匿名社群必須等檢舉、封鎖、人工審核、申訴、稽核及特權帳號 MFA 完成後才可開啟。
+
+本專案不是醫療、診斷或治療服務。私人日記、煩惱、媒體、情緒負荷與自我探索結果不會被 AI、關鍵字或人工後台自動分析。第一版不採端對端加密，詳細邊界以 [PROJECT_SPEC](docs/PROJECT_SPEC.md)、[CONTEXT](CONTEXT.md) 與 [ADR](docs/adr/) 為準。
 
 ---
 
@@ -53,6 +65,7 @@ Spring Boot
 monsters/
 │
 ├── AGENTS.md
+├── CONTEXT.md
 ├── README.md
 ├── .gitignore
 ├── .github/
@@ -65,7 +78,8 @@ monsters/
 │   ├── UI_SPEC.md
 │   ├── CODING_STANDARD.md
 │   ├── DECISIONS.md
-│   └── TASKS.md
+│   ├── TASKS.md
+│   └── adr/
 │
 ├── frontend/
 │
@@ -96,6 +110,14 @@ AGENTS.md
 
 ↓
 
+CONTEXT.md
+
+↓
+
+system_data/ 系統手冊、系統簡介與參考程式
+
+↓
+
 docs/GIT_RULE.md
 
 ↓
@@ -120,15 +142,11 @@ docs/CODING_STANDARD.md
 
 ↓
 
-docs/DECISIONS.md
+docs/DECISIONS.md 與相關 docs/adr/
 
 ↓
 
 docs/TASKS.md
-
-↓
-
-system_data/ 系統手冊、系統簡介與參考程式
 ```
 
 不得跳過任何步驟。
@@ -144,6 +162,10 @@ system_data/ 系統手冊、系統簡介與參考程式
 
 接著依序閱讀：
 
+CONTEXT.md
+system_data/系統手冊
+system_data/系統簡介
+system_data/參考程式 或 system_data/ 內既有程式
 docs/GIT_RULE.md
 docs/PROJECT_SPEC.md
 docs/DATABASE_SPEC.md
@@ -151,10 +173,8 @@ docs/API_SPEC.md
 docs/UI_SPEC.md
 docs/CODING_STANDARD.md
 docs/DECISIONS.md
+docs/adr/ 中與任務相關的 ADR
 docs/TASKS.md
-system_data/系統手冊
-system_data/系統簡介
-system_data/參考程式 或 system_data/ 內既有程式
 
 閱讀完成後，確認目前應執行的 Task。
 
@@ -219,12 +239,14 @@ chore:
 | 文件                        | 用途             |
 | ------------------------- | -------------- |
 | AGENTS.md                 | AI 開發規範（最高優先權） |
+| CONTEXT.md                | 領域共同語言         |
 | PROJECT_SPEC.md           | 專案需求規格         |
 | DATABASE_SPEC.md          | 資料庫設計          |
 | API_SPEC.md               | REST API 規格    |
 | UI_SPEC.md                | Flutter UI 規格  |
 | CODING_STANDARD.md        | Coding Style   |
 | TASKS.md                  | AI 開發任務        |
+| docs/adr/                 | 難以逆轉的架構決策      |
 | CHANGE_LOG.md             | 專案異動紀錄         |
 | CHANGE_HISTORY.csv / xlsx | 專案異動歷程         |
 
@@ -369,6 +391,8 @@ docker compose down
 
 ## 環境變數
 
+下表記錄 `develop` 目前可用的環境變數。標為「待淘汰」的設定只供 Phase 4.5 Migration 與回歸測試，不得用於新功能；核准目標值以 `docs/API_SPEC.md` 與 `docs/DECISIONS.md` 為準。
+
 | 變數 | 用途 | 預設值 |
 |------|------|--------|
 | `SPRING_PROFILES_ACTIVE` | Spring Boot profile | `dev` |
@@ -389,13 +413,13 @@ docker compose down
 | `CORS_MAX_AGE` | preflight cache 秒數 | `3600` |
 | `JWT_ISSUER` | JWT issuer | `monsters` |
 | `JWT_SECRET` | JWT 簽章密鑰 | 空字串，正式環境必須提供 |
-| `JWT_ACCESS_TOKEN_EXPIRATION_SECONDS` | Access token 有效秒數 | `3600` |
-| `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` | Refresh token 有效秒數 | `2592000`（30 天，rotation） |
+| `JWT_ACCESS_TOKEN_EXPIRATION_SECONDS` | 現行 Access token 有效秒數；Phase 4.5 目標改為 600 秒 | `3600` |
+| `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` | 待淘汰 JWT Refresh token 有效秒數；目標改為 opaque session | `2592000`（30 天，rotation） |
 | `R2_ACCOUNT_ID` | Cloudflare R2 Account ID | 空字串，使用 R2 前必須提供 |
 | `R2_ACCESS_KEY_ID` | R2 S3 Access Key ID | 空字串，使用 R2 前必須提供 |
 | `R2_SECRET_ACCESS_KEY` | R2 S3 Secret Access Key | 空字串，使用 R2 前必須提供 |
-| `R2_BUCKET` | Public avatar bucket | 空字串，頭貼上傳前必須提供 |
-| `R2_PUBLIC_BASE_URL` | Public avatar URL base | 空字串，頭貼上傳前必須提供 |
+| `R2_BUCKET` | 待淘汰的公開頭貼 bucket；新功能不得使用 | 空字串 |
+| `R2_PUBLIC_BASE_URL` | 待淘汰的公開頭貼 URL；新功能不得使用 | 空字串 |
 | `R2_ENTRY_MEDIA_BUCKET` | Private entry media bucket | 空字串，煩惱媒體上傳前必須提供且不得開啟 public access |
 | `R2_ENTRY_MEDIA_KEY_PREFIX` | Private entry media object prefix | `entries/media` |
 | `FFPROBE_PATH` | ffprobe executable | `ffprobe` |
