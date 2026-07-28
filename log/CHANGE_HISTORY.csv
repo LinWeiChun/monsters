@@ -1147,4 +1147,4 @@
 2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Frontend,frontend/lib/models pages widgets,新增與修改,還原 private 暫存媒體並更新暫存狀態與重新開始確認,Codex,否,否,是,否,離開頁面不刪除草稿
 2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Test,backend/src/test 與 frontend/test,新增與修改,驗證恢復續存 endpoint owner 清理競爭送出與既有回歸,Codex,是,是,是,否,Backend 275 tests 與 Flutter 166 tests 通過
 2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Documentation,docs/PROJECT_SPEC.md docs/API_SPEC.md docs/DATABASE_SPEC.md docs/UI_SPEC.md docs/DECISIONS.md docs/TASKS.md,修改,同步持久草稿 API Database UI Decision 與 Task 狀態,Codex,是,是,是,是,PR 78 首頁 Task 已轉 DONE
-2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增持久草稿工作報告與保存期限檢查,Codex,否,否,否,否,三種 Log 最早 2026-06-29 無過期紀錄
+2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增持久草稿工作報告與保存期限檢查,Codex,否,否,否,否,三種 Log 最早 2026-06-29 無過期紀錄；Draft PR #81 已建立

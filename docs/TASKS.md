@@ -277,8 +277,8 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] TODO：確認日記／煩惱現有 Provider 僅保存記憶體狀態、舊系統無草稿 API，並完成兩方案評估
 - [x] IN PROGRESS：依使用者選定方案建立持久草稿 API、資料表、private R2 暫存媒體、30 天清理與 Flutter 自動恢復
 - [x] REVIEW：完成恢復、續存、送出、放棄、逾期重試與續存競爭保護測試；Backend 275 項、Flutter 166 項、Analyze 與 Web build 通過
-- [ ] DONE：同步 Penpot、正式規格、Migration、Log，完成 Commit、Push 與 Task PR
-- [ ] 日記／煩惱持久草稿與媒體暫存機制（REVIEW：實作、Penpot、規格、Migration 與完整驗證已完成，待 Task PR 合併）
+- [ ] DONE：同步 Penpot、正式規格、Migration、Log，完成 Commit、Push 與 Task PR（Draft PR #81 已建立，待轉 Ready 與合併）
+- [ ] 日記／煩惱持久草稿與媒體暫存機制（REVIEW：實作與完整驗證已完成；Draft PR #81 待 review 與合併）
 - [ ] 測試
 
 ---

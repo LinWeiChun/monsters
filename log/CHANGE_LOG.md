@@ -81,7 +81,7 @@ Codex
 
 ### 待確認事項
 
-- 本 Task 維持 REVIEW；完成 Commit、Push 與 Task PR 後，仍需待 PR 合併至 `feature/phase4` 才能標記 DONE。
+- 本 Task 維持 REVIEW；Commit、Push 與 Draft PR #81 已完成，待轉 Ready 並合併至 `feature/phase4` 後才能標記 DONE。
 - 部署前需在實際 MySQL 先套用 `database/migrations/20260724_01_add_entry_drafts.sql`，並確認 Backend 的 private R2 設定可用。
 
 ---
