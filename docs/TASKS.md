@@ -13,7 +13,7 @@ Phase 4 整合
 → Phase 8 經審閱互動內容
 → Phase 9 使用說明與回饋
 → Phase 10 私人核心封閉測試
-→ Phase 7 匿名社群治理與功能
+→ Phase 7 公開暱稱社群治理與功能
 → Phase 10 正式發布驗證
 ```
 
@@ -37,6 +37,21 @@ Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封�
 
 - 本文件 Task 不整合或修改 `feature/phase4` 程式碼。
 - `feature/phase4` 整合完成後，必須先完成 Phase 4.5；Phase 5 以後功能在此前維持 blocked。
+
+---
+
+## DOC-015：註冊、登入與會員管理完整需求規格（2026-07-28）
+
+- [x] TODO：接續需求訪談交接，完成第 26–38 題並確認共同理解。
+- [x] IN PROGRESS：整理完整需求、驗收條件、測試矩陣、`develop` 現況差距與分階段實作順序。
+- [x] REVIEW：建立正式規格，並依使用者決策將匿名社群調整為受治理的公開暱稱社群。
+- [ ] DONE：文件交叉一致性 Review、Git Commit／Push／PR 與合併流程完成。
+
+限制：
+
+- 本 Task 只修改文件，不實作 Migration、API、Database、Flutter、Email、Admin UI 或部署。
+- 公開暱稱非唯一，不得用於登入、owner 判斷或取得私人 Profile。
+- 社群 Feature Flag 在 Governance Gate 與特權 MFA 完成前維持關閉。
 
 ---
 

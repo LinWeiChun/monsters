@@ -5,6 +5,8 @@
 > 來源：2026-07-26 Grilling 核准基線與 `to-spec` 文件化
 > 前置條件：Phase 4 候選成果完成 Review、整合測試並正式合併至 `develop`
 
+> 註冊、登入與會員管理第 1–38 題細節及 2026-07-28 公開暱稱社群決策以 [`REGISTRATION_LOGIN_MEMBER_MANAGEMENT_SPEC.md`](REGISTRATION_LOGIN_MEMBER_MANAGEMENT_SPEC.md) 為準。
+
 ## Problem Statement
 
 目前 `develop` 與 `feature/phase4` 保留多項歷史契約，包括使用者可見 `account`、JWT Refresh Token、SharedPreferences 憑證、伺服器四位數 PIN、公開頭貼上傳、`Entry.isShared`、必填分類／分數及隨機獎勵。這些契約與已核准的非醫療私人核心、年齡資格、資料生命週期、封閉社群及平台安全邊界不一致。
@@ -92,6 +94,7 @@ Phase 4.5 完成後，舊契約只保留為 Migration 或歷史測試依據，�
 - App Privacy Lock 為裝置本機功能；Backend 不接收、保存或驗證 PIN。
 - Diary 與 Annoyance 共用 Entry Aggregate，但保留分離 Use Case／Command。
 - Community Post 是 Entry 的版本化公開快照，不以 `isShared` 直接公開 Entry。
+- Public Nickname 為2–30 Unicode、非唯一且不可登入的跨貼文顯示身分；首次社群公開前必須明確確認。
 - Media 先進 quarantine，完成真實格式解析、重新處理、metadata 移除與 malware scan 後才可使用。
 - 資料刪除、取消分享、Session 撤銷與停權建立可於 Restore 後重播的 marker。
 - Database 使用 Flyway immutable version Migration 與 expand／migrate／contract。
@@ -118,7 +121,7 @@ Phase 4.5 完成後，舊契約只保留為 Migration 或歷史測試依據，�
 
 - 不在本規格整合或修改 `feature/phase4` 候選程式。
 - 不實作 Phase 5 Emotional Trace、Phase 6 Monster Unlock、Phase 8 內容活動或 Phase 9 回饋功能。
-- 不開放 Phase 7 匿名社群；Phase 4.5 只建立資格、角色、快照與 Feature Flag 基礎。
+- 不開放 Phase 7 公開暱稱社群；Phase 4.5 只建立資格、公開暱稱、角色、快照與 Feature Flag 基礎。
 - 不導入 E2EE、Kubernetes、跨區多主、專用 Message Broker 或持久裝置指紋。
 - 不選定 SMTP、R2、CAPTCHA 或監控供應商。
 - 不修改 `system_data/`。

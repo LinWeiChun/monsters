@@ -2,7 +2,7 @@
 
 # 貘nsters Flutter UI 規格
 
-> Phase 4.5 的 Web／Android／iOS 使用者故事與驗收接縫以 [`PHASE4_5_FOUNDATION_SPEC.md`](PHASE4_5_FOUNDATION_SPEC.md) 為準；本文件保存正式 UI 行為。
+> Phase 4.5 的 Web／Android／iOS 使用者故事與驗收接縫以 [`PHASE4_5_FOUNDATION_SPEC.md`](PHASE4_5_FOUNDATION_SPEC.md) 為準；註冊、登入、會員管理與公開暱稱 UI 狀態以 [`REGISTRATION_LOGIN_MEMBER_MANAGEMENT_SPEC.md`](REGISTRATION_LOGIN_MEMBER_MANAGEMENT_SPEC.md) 為準；本文件保存正式 UI 行為。
 
 > 狀態說明：2026-07-26 grilling 決策為目標 UI 契約。Phase 2／3 與 `feature/phase4` 的既有畫面敘述仍保留作 Migration 參考；凡涉及 Account 登入、上傳個人頭貼、伺服器密碼鎖、分數／分類必填、boolean 分享、最近七筆、隨機怪獸、公開人氣或深度心理測驗者，必須在基礎安全階段改為本文件的新規則。
 
@@ -76,7 +76,7 @@
 
 - 確認 Google Email 已驗證
 - Google Email 與既有會員相同時，引導先登入既有方式並明確連結，不自動合併
-- 設定私人暱稱、服務地區、生日與必要同意
+- 設定公開暱稱、服務地區、生日與必要同意；首次社群公開前另行確認暱稱將跨貼文顯示
 - 依年齡進入成人或監護人同意流程
 
 ### 2.5 主頁面
@@ -150,7 +150,7 @@ Phase 3 完成頁不顯示假怪獸獎勵，不得沿用舊系統「恭喜你獲
 
 情緒負荷 Task 使用 `MoodScoreSelector` 同時顯示數字與「較輕」至「較重」的非診斷式文字，1 代表較輕、5 代表較重，另提供「這次不評分」。圖片只能作輔助，不得把分數稱為快樂、心理健康或疾病嚴重度；略過時保存 null，情緒足跡不得補零。
 
-分享 Task 使用 `ShareChoiceCard` 顯示「保持私人」與「建立匿名公開快照」。選擇分享後必須逐項預覽實際公開文字、媒體與公開主題；情緒負荷、私人分類、原始日期與版本歷史預設不公開。每次分享都需主動確認，不能只改 boolean 或沿用上次選擇。
+分享 Task 使用 `ShareChoiceCard` 顯示「保持私人」與「建立暱稱社群公開快照」。選擇分享後必須逐項預覽實際公開文字、媒體、公開主題與公開暱稱；情緒負荷、私人分類、原始日期與版本歷史預設不公開。首次公開暱稱及每次分享都需主動確認，不能只改 boolean 或沿用上次選擇。
 
 煩惱摘要送出 Task 使用 `AnnoyanceReviewCard` 顯示類別、記錄方式、主要內容、心情圖、分數與分享狀態。送出前完成最後一次草稿同步，再由 `AnnoyanceRepository` 呼叫 `POST /api/annoyances/draft/submit`；送出中進入 `submitting` 狀態並禁止上一步與重複送出。成功後保存 `AnnoyanceResponse` 並顯示 `AnnoyanceCompletedCard`，Phase 3 僅呈現建立成功與分享狀態，不顯示假怪獸獎勵；失敗時返回 `review`、保留伺服器草稿並顯示 API 錯誤訊息。
 
@@ -223,10 +223,11 @@ Desktop 以共用 Navbar 與 1200px 內容區呈現雙欄流程；Tablet `600px 
 
 - 僅成年且具社群資格的已登入會員可進入；未成年人與未登入者不得預覽內容
 - 依時間與公開主題瀏覽 Community Post，不提供全文搜尋或熱門排行
+- 顯示會員已確認公開的暱稱；可跨貼文辨識，但不得連結 Email、會員 UUID、生日、私人 Profile 或私人頭貼
 - 送出或取消單一「支持」，其他讀者不看到公開總數
 - 查看與新增單層留言，不提供私訊、追蹤、標記或巢狀回覆
 - 檢舉、封鎖、取消分享與申訴入口
-- 封鎖後立即隱藏被封鎖會員的貼文與留言，但不得顯示其帳號、固定匿名 ID 或跨貼文 Profile
+- 封鎖後立即隱藏被封鎖會員的貼文與留言；處置紀錄可顯示當時公開暱稱，但不得顯示其帳號、Email、會員 UUID 或私人 Profile
 - 敏感媒體預設遮蔽，音訊不自動播放；顯示「檢舉不是緊急求助管道」
 - 作者取消分享後整個討論立即不可用；重新分享不恢復舊留言
 
@@ -471,7 +472,7 @@ REST API
 註冊頁支援：
 
 - Email 輸入與格式驗證
-- 暱稱輸入與長度驗證
+- 初始註冊不收暱稱；Email 驗證後的 Eligibility 流程才收 2–30 Unicode公開暱稱
 - 15 至 128 Unicode 密碼輸入、確認與弱密碼錯誤提示
 - 呼叫 `POST /api/v1/auth/register`
 - Loading 狀態
@@ -525,8 +526,8 @@ REST API
 個人資料頁支援：
 
 - 呼叫 `GET /api/users/me` 查詢目前登入使用者個人資料
-- 顯示已取得貘怪頭貼、私人暱稱、Email、服務地區、生日與資格狀態，不顯示 `account`
-- 修改私人暱稱；Email 使用獨立 reauth＋驗證流程
+- 顯示已取得貘怪頭貼、公開暱稱、Email、服務地區、生日與資格狀態，不顯示 `account`
+- 修改公開暱稱；Email 使用獨立 reauth＋驗證流程。首次社群公開前需預覽並確認暱稱，修改後既有社群內容顯示新暱稱
 - 從已取得圖鑑選擇頭貼，不提供圖片上傳
 - 生日完成資格確認後鎖定；更正需走 reauth 與人工申請
 - 生日欄位為唯讀文字輸入外觀，點擊後開啟 Flutter 內建日曆；不得要求使用者手動輸入日期格式
@@ -919,7 +920,7 @@ Logo 規範：
 ### Desktop Navbar（`>= 1200px`）
 
 - Home、Profile、Annoyance 必須共用 `AppTopNavigation`，不得各頁複製 Navbar。
-- 固定選項依序為 Logo／陪伴首頁、心的軌跡、怪獸收藏、匿名社群、互動區、記下現在的心情、通知、個人資料。
+- 固定選項依序為 Logo／陪伴首頁、心的軌跡、怪獸收藏、暱稱社群、互動區、記下現在的心情、通知、個人資料。
 - 已完成入口使用正式 route；尚未完成入口顯示具名「即將開放」，不得建立空白頁或假 route。
 - Navbar 使用 `Row`、`Spacer` 與 viewport 衍生間距；1200 至 1920px 不得 overflow 或留下固定畫布空白。
 - Profile 的儲存與登出為頁面操作，放在共用 Navbar 下方的 Profile action bar，不混入全站導覽設定。

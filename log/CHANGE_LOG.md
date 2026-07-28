@@ -8,6 +8,77 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-28 17:36
+
+Task
+DOC-015 註冊、登入與會員管理完整需求規格（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 接續需求訪談第 26–38 題，使用者確認已達成共同理解。
+- 建立註冊、登入、會員生命週期、公開暱稱、Admin、匯出與刪除的完整需求文件。
+- 整理 20 項功能驗收條件、32 類測試矩陣、`develop` 現況差距及六階段實作順序。
+- 依使用者決策將匿名社群調整為受治理的公開暱稱社群；ADR-0009 取代 ADR-0006 的跨貼文匿名身分。
+- 同步 AGENTS、README、共同語言、ADR、Project、Database、API、UI、Decisions、Phase 4.5 與 Tasks。
+- 檢查 Log 保存期限；最早紀錄為 2026-06-29，未早於 2026-06-28，因此未刪除 Log。
+
+### Added
+
+- `docs/REGISTRATION_LOGIN_MEMBER_MANAGEMENT_SPEC.md`
+- `docs/adr/0009-public-nickname-governed-community.md`
+
+### Modified
+
+- `AGENTS.md`
+- `CONTEXT.md`
+- `README.md`
+- `docs/adr/0004-entry-and-community-post-boundary.md`
+- `docs/adr/0006-governed-closed-community.md`
+- `docs/DECISIONS.md`
+- `docs/PROJECT_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/API_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/PHASE4_5_FOUNDATION_SPEC.md`
+- `docs/TASKS.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- 文件工作，不執行程式 Compile／Test。
+- 執行 Markdown 連結、標題、關鍵決策、CSV 欄數、Git whitespace 與文件 diff 檢查。
+
+### system_data Reference
+
+- 只讀參考舊註冊、登入與會員 API／Repository 流程。
+- 舊 `account`、空密碼 Google 登入、SharedPreferences 登入狀態與 server PIN 只作差距證據，不沿用為目標規格。
+- 未修改、搬移、刪除或格式化 `system_data/`。
+
+### API
+
+- 文件定義 Auth、Member、Admin 與 Data Rights 的 Status／error matrix、continuation credential、opaque Session family 與受控 PII lookup。
+- 本次未修改 Backend endpoint。
+
+### Database
+
+- 文件定義會員狀態、Eligibility、公開暱稱、Session、Permission、Export、Deletion 與 Legal Hold 目標資料需求。
+- 本次未修改 Schema 或執行 Migration。
+
+### UI
+
+- 文件定義註冊、登入、Eligibility、公開暱稱確認、Session 管理、受限狀態與 Data Rights UI 要求。
+- 本次未修改 Flutter 或 Penpot。
+
+### Pending
+
+- DOC-015 文件 Review 與 Git／PR 流程。
+- 所有程式、Schema、OpenAPI 與 UI 實作需另行拆 Task。
+
+---
+
 ## 2026-07-28 15:32
 
 Task

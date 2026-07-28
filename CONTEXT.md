@@ -24,6 +24,10 @@ _Avoid_: 角色、會員等級
 Moderator、Admin 或 Content Reviewer 等具有受限後台職責的角色；任何特權角色都不能查看私人內容。
 _Avoid_: 超級使用者、私人資料管理員
 
+**公開暱稱（Public Nickname）**：
+會員在私人介面與封閉社群共同使用、可跨貼文辨識但不具唯一性的顯示名稱；它不能用於登入、owner 判斷或取得私人 Profile。
+_Avoid_: 帳號、匿名代號、會員 ID
+
 ## 私人記錄
 
 **紀錄（Entry）**：
@@ -53,7 +57,7 @@ _Avoid_: 自動標籤、公開主題
 ## 分享與社群
 
 **公開快照（Community Post）**：
-會員逐項確認後，從 Entry 發布到封閉匿名社群的獨立內容版本。
+會員逐項確認後，從 Entry 發布到封閉暱稱社群的獨立內容版本。
 _Avoid_: Entry 分享旗標、同步副本
 
 **公開主題（Public Topic）**：
@@ -64,9 +68,9 @@ _Avoid_: 私人分類
 立即停止 Community Post 及其討論公開可見，並開始公開資料清除生命週期。
 _Avoid_: 刪除私人原文
 
-**匿名社群（Anonymous Community）**：
-只對具 Community Eligibility 的會員開放、對外不可連結作者但平台內部可問責的封閉空間。
-_Avoid_: 公開論壇、無法追責的匿名網路
+**暱稱社群（Nickname Community）**：
+只對具 Community Eligibility 的會員開放、以公開暱稱形成可辨識身分且平台內部可問責的封閉空間；不公開 Email、會員 UUID 或私人 Profile。
+_Avoid_: 匿名社群、公開論壇、真實姓名社群、無法追責的匿名網路
 
 **支持（Support Reaction）**：
 不公開人氣總數、沒有負向評分的單一正向社群反應。
