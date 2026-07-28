@@ -18,6 +18,8 @@
 
 目前前端開發優先順序為 Web-first：新 UI 先以 Web 瀏覽器完成與驗收 Responsive Web Design，再確認 Flutter 共用程式於 Android／iOS 可執行。Web-first 僅代表本階段開發與驗收優先目標，不取消三平台支援。
 
+自 Phase 4 起，所有新增或調整 UI 的 Phase 均採 Penpot design-first：先完成或更新 Web／Mobile 畫板與必要狀態，再依 Penpot 實作 Flutter。Web 畫板為第一實作與驗收來源，Mobile 畫板保留作為後續跨平台適配依據；需求或流程異動時，必須先同步 Penpot，再同步 UI 規格與程式。
+
 ## 二、核心使用者
 
 1. 想以私人方式記錄生活、煩惱與當下感受的台灣使用者。
@@ -85,17 +87,23 @@ Phase 3 不發放怪獸獎勵；後續只依透明、固定且不重複的解鎖
 
 ### 3.4 日記功能
 
-使用者可以新增、查詢、修改日記，並以獨立公開快照分享。Diary 與 Annoyance 共用 Entry 核心，但使用不同建立與修改情境。
+使用者可以新增、查詢、修改與分享日記。每筆日記使用文字、圖片、錄音或影片其中一種主要記錄方式，並可選擇略過繪圖或另外附加一張心情圖；日記預設為私人。
 
 新增日記流程：
 
-1. 進入日記聊天室
+1. 由 `/diaries/new` 進入日記聊天室與引導頁
 2. 選擇記錄方式
-3. 輸入日記內容
-4. 選擇是否畫心情
-5. 記錄情緒負荷或略過
-6. 選擇是否建立匿名社群公開快照
-7. 顯示已達成的固定解鎖里程碑
+3. 輸入文字或選取一個主要媒體
+4. 選擇畫心情或略過
+5. 需要時使用心情畫布
+6. 記錄 1 至 5 分的心情分數
+7. 選擇是否分享，預設為私人
+8. 檢視摘要並送出
+9. 顯示日記安全保存完成結果
+
+Phase 4 不發放怪獸或其他獎勵，API 的 `reward` 固定回傳 `null`，完成頁不得顯示假獎勵；日記獎勵於 Phase 6 串接。
+
+Phase 4 UI 以 Penpot `WEB / Diary Flow / Web` 為第一實作與驗收來源，並參考已完成的 `Web / Companion Home` 與 `Annoyance Flow / Web`，對齊共用 Navbar、1200px 內容區、桌面雙欄、字級、間距、色彩、圓角、陰影、按鈕與 Responsive breakpoint。`APP / Diary Flow / Mobile` 保留作為後續 Mobile 適配來源。
 
 ### 3.5 歷史記錄
 
@@ -210,6 +218,7 @@ Phase 3 不發放怪獸獎勵；後續只依透明、固定且不重複的解鎖
 
 - Flutter 專案需支援 Android、iOS、Web。
 - 現階段前端採 Web-first 開發與驗收；平台共用功能不得因 Web 優先而移除 Android／iOS 入口。
+- Phase 4 與後續 UI Task 必須先完成 Penpot Web／Mobile 畫板；Web 畫板先完成實作與驗收，再以同一份 Flutter 業務與狀態邏輯適配 Mobile。
 - 共用 Responsive breakpoint 固定為 Mobile `< 600px`、Tablet `600px - 1199px`、Desktop `>= 1200px`。
 - Web 版若有平台限制，需提供替代方案或明確說明。
 - 某平台對真實使用者開放前，必須通過該平台完整端對端與真實裝置驗證；刪除、匯出與安全功能不得以「開發中」代替。

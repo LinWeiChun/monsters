@@ -231,19 +231,26 @@ Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封�
 
 ## Phase 4：日記功能
 
-狀態：`feature/phase4` 目前比 `develop` 多 30 個 Commit，包含日記候選成果；尚未正式整合。本次 DOC-013 不執行 Phase 4 merge，也不把候選成果標記為 `develop` 已完成。
-
-- [ ] 檢查 `system_data/` 中舊日記、聊天室、心情分數與分享流程
-- [ ] 整理可參考的欄位與 UI 流程
+- [x] 檢查 `system_data/` 中舊日記、聊天室、心情分數與分享流程
+- [x] 整理可參考的欄位與 UI 流程
 - [ ] 依新版 Entry 架構與 API 規格重新實作
 
-- [ ] 建立 diary Entity / DTO / Repository / Service / Controller
+- [x] TODO：盤點 Phase 4 DoR、舊系統參考、既有 Entry／R2 架構、Diary API 與 Penpot 畫板缺口
+- [x] IN PROGRESS：依使用者全選方案 A、Penpot design-first、Web-first 與既有頁面樣式完成 Diary contract
+- [x] REVIEW：檢查 Project／API／UI／Decision／Task／Log 與 Penpot 畫板一致性
+- [x] DONE：完成 contract-first 文件、Penpot Web／Mobile 狀態修正、驗證與 Git 流程
+
+- [ ] 擴充共用 Entry diary factory／update，建立 Diary DTO / Mapper / Repository / Service / Controller
 - [ ] 新增日記 API
 - [ ] 查詢日記 API
 - [ ] 修改日記 API
 - [ ] 分享 / 取消分享日記 API
-- [ ] Flutter 新增日記聊天室
+- [ ] 下載日記媒體 API
+- [ ] 抽出 Entry 共用前端元件、Responsive flow shell 與媒體 Adapter
+- [ ] 依 Penpot `Diary Flow / Web` 實作 Flutter Web 日記聊天室並先完成 RWD 驗收
+- [ ] 依 Penpot `Diary Flow / Mobile` 適配 Flutter Mobile 日記聊天室
 - [ ] Flutter 日記分數選擇
+- [ ] Phase 4 完成頁保持 `reward = null`，Phase 6 再串接真實獎勵
 - [ ] 測試
 
 ---
@@ -307,6 +314,7 @@ Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封�
 
 ## Phase 5：歷史記錄與心的軌跡
 
+- [ ] 先確認／更新 Penpot History & Heart Web／Mobile 畫板，Web-first 完成實作與驗收
 狀態：BLOCKED，等待 Phase 4.5 完成。
 
 - [ ] 檢查 `system_data/` 中舊歷史記錄、心情分數與圖表呈現邏輯
@@ -325,6 +333,7 @@ Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封�
 
 ## Phase 6：怪獸圖鑑
 
+- [ ] 先確認／更新 Penpot Monster Collection Web／Mobile 畫板，Web-first 完成實作與驗收
 狀態：BLOCKED，等待 Phase 4.5 完成。
 
 - [ ] 檢查 `system_data/` 中舊怪獸、怪獸群組、素材與換裝邏輯
@@ -399,6 +408,7 @@ Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封�
 
 ## Phase 9：使用說明、回饋與分享
 
+- [ ] 先確認／更新 Penpot Help & Feedback Web／Mobile 畫板，Web-first 完成實作與驗收
 - [ ] 檢查 `system_data/` 中舊使用說明、回饋與分享流程
 - [ ] 整理可參考的文案、入口與資料欄位
 - [ ] 依新版 UI 與 API 規格重新實作
@@ -413,6 +423,7 @@ Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封�
 
 ## Phase 10：跨平台與部署
 
+- [ ] 最終 UI 或 RWD 調整先同步 Penpot Web／Mobile 畫板，再進行跨平台驗收
 - [ ] 檢查 `system_data/` 中舊環境設定、平台差異與部署相關參考
 - [ ] 排除舊系統金鑰、憑證、jar、metadata 與 build artifact
 - [ ] 依新版環境變數、部署與 Git 規範重新整理

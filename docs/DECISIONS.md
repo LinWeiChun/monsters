@@ -183,6 +183,11 @@
 | Backend package layout | 全面採 layer-first `com.monsters.<layer>.<module>`；`common` 作為共用模組名，`MonstersApplication` 維持在 `com.monsters` |
 | Web／Mobile 導覽 | 採使用者選定 Web 方案 A、Mobile 方案 1：Desktop Home／Profile／Annoyance 共用完整 Navbar；Mobile 保留共用底部選單，「我的」為 Profile 唯一主要入口，首頁右上角改為通知 |
 | 頁面切換效果 | 一般前進與導覽切換直接換頁、無左右位移；明確返回按鈕使用 navigation pop，當前頁面以 220ms 向右退出 |
+| Phase 4 日記獎勵 | 採方案 A：Phase 4 只保存日記並顯示完成結果，API `reward` 固定回傳 `null`；真實怪獸或其他獎勵延至 Phase 6 串接 |
+| Phase 4 Entry 前端重用 | 採方案 A：抽出並重用 Annoyance 的 Entry 共用 UI 元件、Responsive flow shell 與媒體 Adapter；Diary 維持獨立 draft state、Provider、Repository、DTO、review 與完成元件 |
+| Phase 4 日記繪圖 | 採方案 A：心情圖為 optional；使用者可選擇繪圖或略過，每筆最多一張心情圖 |
+| Phase 4 起 UI 設計流程 | 採 Penpot design-first；所有後續含 UI 的 Phase 先完成或更新 Web／Mobile 畫板及狀態，再同步 UI 規格與 Flutter 實作 |
+| Phase 4 起 UI 驗收順序 | 採 Web-first：Penpot Web 畫板為第一實作與驗收來源，Mobile 畫板保留並於 Web 驗收後適配；新畫面需對齊已完成頁面的導覽、版型與視覺 token |
 
 ## 二、已核准套件與工具
 

@@ -28,6 +28,13 @@
 
 前端功能 Task 預設需以 Flutter 共用程式實作，並確認 Web、Android、iOS 三平台皆可使用。若功能涉及平台差異，例如檔案選取、通知、相機、外部連結或權限，必須在同一 Task 內補齊三平台處理或明確記錄平台限制與替代方案。
 
+### 1.1 Penpot design-first 與 Web-first 驗收
+
+- 自 Phase 4 起，所有包含 UI 的 Phase 必須先在 Penpot 完成或更新 Web／Mobile 畫板與必要狀態，才能進入 Flutter UI 實作。
+- Web 畫板是第一實作與驗收來源；先完成 Desktop 與 Responsive Web Design，再沿用同一份 Flutter 業務、狀態與資料層適配 Mobile 畫板。
+- Penpot 畫板必須參考已完成頁面的共用視覺語言，包括 Navbar／底部導覽、內容最大寬度、網格、字級、間距、色彩、圓角、陰影、卡片及按鈕層級，不得為單一 Phase 建立不相容的平行樣式。
+- 流程、狀態或 UI 決策異動時，先更新 Penpot，再同步本文件與程式；交付前需匯出或實際檢視畫板，確認無溢位、遮擋及錯誤文案。
+
 ## 二、主要頁面
 
 ### 2.1 初始頁面
@@ -145,15 +152,34 @@ Phase 3 完成頁不顯示假怪獸獎勵；真實獎勵與圖鑑導向於 Phase
 
 ### 2.8 新增日記聊天室
 
-流程：
+設計與驗收來源：
 
-1. 怪獸引導對話
-2. 選擇記錄方式
-3. 輸入內容
-4. 選擇是否畫心情
-5. 記錄情緒負荷或略過
-6. 保持私人，或逐項確認建立匿名公開快照
-7. 顯示建立結果與已達成的固定解鎖里程碑，不顯示隨機抽取
+- 第一實作與驗收：Penpot `WEB / Diary Flow / Web`，各狀態採 1440×900 Desktop 畫板，Responsive Web 驗收範圍為 1200px 至 1920px。
+- 後續 Mobile 適配：Penpot `APP / Diary Flow / Mobile`，基準畫板為 390×844；Mobile 不先於 Web 實作。
+- Phase 4 使用 `01` 至 `08` 與 `09 Completed / Phase 4` 畫板；`Future Reward / Phase 6` 僅保留為未來設計，不得在 Phase 4 程式顯示。
+- 視覺樣式需對齊已完成的 Penpot `Web / Companion Home` 與 `Annoyance Flow / Web`：共用 Navbar、1200px 內容區、桌面雙欄、暖色卡片、字級階層、間距、圓角、陰影與主要／次要按鈕。
+
+流程與狀態機：
+
+1. 怪獸引導與開始記錄
+2. 選擇文字、錄音、照片或影片其中一種主要記錄方式
+3. 輸入文字或選取一個主要媒體，並提供預覽、移除與重選
+4. 以結構化選項選擇畫心情或先略過
+5. 選擇繪圖時顯示心情畫布；略過時直接進入分數
+6. 使用 `moodPoint_1.png`～`moodPoint_5.png` 選擇 1 至 5 分
+7. 選擇保持私人或分享到社群，預設私人
+8. 檢視摘要並送出；送出中禁止重複操作，失敗時保留草稿
+9. 顯示安全保存完成結果，可返回首頁或再寫一篇日記
+
+狀態依 `intro → recordMethod → content → drawingDecision → drawing（optional）→ score → sharing → review → submitting → completed` 推進。聊天室入口使用 `/diaries/new`，Phase 4 完成後首頁「寫一篇日記」需由開發中狀態改為可操作。
+
+Diary 前端需抽出並重用 Phase 3 Entry 共用元件與平台 Adapter，包括記錄方式、媒體預覽、心情畫布、分數、分享選擇及 Responsive flow shell；Diary 仍維持獨立的 draft state、Provider、Repository、DTO、review 與完成元件，不得直接耦合 Annoyance 專屬類別或 API。
+
+媒體 MIME type、大小、長度、private R2、JWT download URL 與 HTTP Range 規則全部沿用新增煩惱規格；每筆日記限一個主要媒體與一張 optional 心情圖。Web 不支援的來源需提供可理解的替代選取方式，不得阻斷文字日記或檔案上傳。
+
+Phase 4 完成頁只顯示日記已安全保存、分數與分享狀態；API `reward` 為 `null`，不得顯示假怪獸、連續天數禮物或尚未完成的歷史頁導向。日記獎勵於 Phase 6 串接。
+
+Desktop 以共用 Navbar 與 1200px 內容區呈現雙欄流程；Tablet `600px - 1199px` 使用 compact flow；Mobile `< 600px` 依 Mobile Penpot 改為單欄。三種 window class 必須共用同一狀態機與資料層。
 
 ### 2.9 歷史記錄頁面
 
