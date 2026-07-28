@@ -40,6 +40,20 @@ Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封�
 
 ---
 
+## DOC-014：Phase 4.5 `to-spec` 規格化（2026-07-28）
+
+- [x] TODO：閱讀 `to-spec`、Grilling 產出、領域詞彙、ADR、正式規格、既有測試接縫與目前 Task。
+- [x] IN PROGRESS：確認以「註冊／資格 → Session → Entry／Media → Export／Deletion」作為最高層跨平台 E2E 驗收接縫。
+- [x] REVIEW：建立 Phase 4.5 Problem、Solution、52 項 User Stories、Implementation Decisions、Testing Decisions、Out of Scope 與 Further Notes，並同步正式文件與 Log。
+- [ ] DONE：文件交叉一致性 Review 與 Git／PR 流程完成。
+
+限制：
+
+- 本 Task 只修改文件，不整合 `feature/phase4`，不實作 Migration、API、Flutter 或部署。
+- Issue Tracker 發布未包含於本次核准範圍；若後續要求發布，需套用 `ready-for-agent` label。
+
+---
+
 ## 插隊任務：Penpot MCP Web 註冊頁精準修正
 
 - [x] 確認 Penpot MCP 目前選取 `Account / Web / 03 Register / 註冊` board（1440 x 900）。

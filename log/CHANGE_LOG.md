@@ -8,6 +8,71 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-28 15:32
+
+Task
+DOC-014 Phase 4.5 `to-spec` 規格化（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 依 `to-spec` 將 2026-07-26 Grilling 核准基線整理為可交付 Phase 4.5 規格。
+- 使用者確認最高驗收接縫為私人核心跨平台 E2E：註冊／資格、Session、Entry／Media、Export／Deletion。
+- 建立 Problem、Solution、52 項 User Stories、Implementation Decisions、Testing Decisions、Out of Scope 與 Further Notes。
+- 同步 Project、Database、API、UI、Coding Standard、Decisions 與 Tasks 的規格索引。
+- 檢查 Log 保存期限；最早紀錄為 2026-06-29，未早於 2026-06-28，因此未刪除 Log。
+
+### Added
+
+- `docs/PHASE4_5_FOUNDATION_SPEC.md`
+
+### Modified
+
+- `docs/PROJECT_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/API_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/CODING_STANDARD.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- 文件工作，不執行程式 Compile／Test。
+- 執行 Markdown 連結、User Story 數量、關鍵邊界、CSV 欄數、Git whitespace 與文件 diff 檢查。
+
+### system_data Reference
+
+- 沿用 DOC-013 對舊會員、日記、煩惱、媒體、社群及互動流程的盤點結果。
+- 未沿用 Account、SharedPreferences Token、公開頭貼、server PIN、`isShared`、隨機怪獸與未治理社群。
+- 未修改、搬移、刪除或格式化 `system_data/`。
+
+### API
+
+- 文件規格化 `/api/v1`、OpenAPI、UUID public ID、opaque Refresh Session、optimistic version 與 idempotency 驗收。
+- 本次未修改 Backend endpoint。
+
+### Database
+
+- 文件規格化 Flyway、Outbox、資料生命週期、Restore marker 與真實 MySQL 測試接縫。
+- 本次未修改 Schema 或執行 Migration。
+
+### UI
+
+- 文件規格化 Web／Android／iOS Session、資格、Privacy Lock 與私人核心 E2E 行為。
+- 本次未修改 Flutter 或 Penpot。
+
+### Pending
+
+- DOC-014 文件 Review 與 Git／PR 流程。
+- Issue Tracker 發布需使用者另行授權。
+
+---
+
 ## 2026-07-26 10:57
 
 Task

@@ -2,6 +2,8 @@
 
 # 貘nsters Flutter UI 規格
 
+> Phase 4.5 的 Web／Android／iOS 使用者故事與驗收接縫以 [`PHASE4_5_FOUNDATION_SPEC.md`](PHASE4_5_FOUNDATION_SPEC.md) 為準；本文件保存正式 UI 行為。
+
 > 狀態說明：2026-07-26 grilling 決策為目標 UI 契約。Phase 2／3 與 `feature/phase4` 的既有畫面敘述仍保留作 Migration 參考；凡涉及 Account 登入、上傳個人頭貼、伺服器密碼鎖、分數／分類必填、boolean 分享、最近七筆、隨機怪獸、公開人氣或深度心理測驗者，必須在基礎安全階段改為本文件的新規則。
 
 ## 零、跨功能 UI 邊界

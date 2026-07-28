@@ -2,6 +2,8 @@
 
 # 貘nsters REST API 規格
 
+> Phase 4.5 的跨平台 E2E、OpenAPI Contract 與 Session／Entry／Data Rights 驗收範圍以 [`PHASE4_5_FOUNDATION_SPEC.md`](PHASE4_5_FOUNDATION_SPEC.md) 為準；本文件保存正式 API 契約。
+
 > 狀態說明：本文件以「零、已核准 v1 目標契約」為正式目標。第二章以後仍包含 `develop` 目前無版本 API 的實作細節，供 Phase 4 整合與相容 Migration 使用；凡涉及 `/api`、`account`、公開頭貼上傳、JWT Refresh Token、伺服器密碼鎖、`isShared`、分數／分類必填、隨機怪獸或深度心理測驗者，均屬待淘汰基線，不得新增依賴。
 
 ## 零、已核准 v1 目標契約

@@ -1,4 +1,9 @@
 日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
+2026-07-28,15:32,DOC-014,Documentation,docs/PHASE4_5_FOUNDATION_SPEC.md,新增,建立 Phase 4.5 to-spec 完整規格與跨平台 E2E 驗收接縫,Codex,是,是,是,是,文件 only 不執行實作或 Issue 發布
+2026-07-28,15:32,DOC-014,Documentation,docs formal specs,修改,同步 Project Database API UI Coding Standard Decisions 規格索引,Codex,是,是,是,是,正式契約仍以各 Spec 與 ADR 為準
+2026-07-28,15:32,DOC-014,Documentation,docs/TASKS.md,修改,新增 DOC-014 REVIEW 狀態與工作限制,Codex,否,否,否,否,待文件 Review 與 Git PR
+2026-07-28,15:32,DOC-014,Documentation,log/CHANGE_LOG.md,修改,新增 to-spec 文件化工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限無過期 Log
+2026-07-28,15:32,DOC-014,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-014 文件異動歷程,Codex,否,否,否,否,共五筆現行 13 欄紀錄
 2026-07-26,10:57,DOC-013,Documentation,CONTEXT.md,新增,建立 grilling 核准領域共同語言,Codex,否,否,否,否,Member Entry Emotional Load Community Post 等 canonical terms
 2026-07-26,10:57,DOC-013,Documentation,docs/adr/*.md,新增,建立八份難以逆轉的架構決策紀錄,Codex,是,是,是,是,不執行程式或 Phase 4 整合
 2026-07-26,10:57,DOC-013,Documentation,AGENTS.md,修改,升級 v3.4 並加入產品資料邊界與文件閱讀規則,Codex,是,是,是,是,最高層級規範同步
