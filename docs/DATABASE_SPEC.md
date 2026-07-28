@@ -389,6 +389,7 @@ Unique：`user_id, monster_group_id`
 - `entry_type = 'ANNOYANCE'` 時，`annoyance_type_id` 可略過；有值時必須為有效 lookup。
 - Service 依分類 code 與情緒負荷 score 解析 FK；兩者皆可略過，Client 不得傳 lookup ID。
 - 每筆 ANNOYANCE 使用一種主要記錄方式：文字存於 `entries.content`，或一筆 image／audio／video 媒體；另可有一筆 drawing。此組合由 Service 驗證。
+- 每筆 DIARY 同樣只使用一種主要記錄方式：文字存於 `entries.content`，或一筆 image／audio／video 媒體；另可有一筆 optional drawing。Diary Service 依 `moods.score` 解析 FK，Client 不得傳 lookup ID。
 
 ### 3.13 entry_media
 
@@ -418,7 +419,63 @@ Unique：`user_id, monster_group_id`
 - `audio` 與 `video` 必須保存經 `ffprobe` 驗證的正數 `duration_seconds`；其他類型必須為 NULL。
 - 媒體先完成隔離、真實格式解析、重新處理、中繼資料移除與惡意檔案掃描；下載由 Backend 驗證 Entry owner，公開快照則依 Community Post 資格另行授權。
 
-### 3.14 entry_likes（目標由 Community Post 支持取代）
+### 3.14 entry_drafts
+
+日記與煩惱的未完成草稿。草稿與正式 `entries` 分離，允許尚未填齊分類、主要內容、分數或分享設定。
+
+| 欄位 | 型別 | 約束 | 說明 |
+|---|---|---|---|
+| id | BIGINT | PK | 草稿 ID |
+| user_id | BIGINT | FK NOT NULL | 草稿擁有者 |
+| entry_type | VARCHAR(20) | NOT NULL | DIARY 或 ANNOYANCE |
+| current_step | VARCHAR(30) | NOT NULL | 目前流程步驟 |
+| annoyance_type_id | BIGINT | FK NULL | 煩惱分類；DIARY 固定為 NULL |
+| record_method | VARCHAR(20) | NULL | TEXT、IMAGE、AUDIO 或 VIDEO |
+| content | TEXT | NULL | 文字草稿 |
+| wants_drawing | BOOLEAN | NULL | 是否選擇繪製心情圖 |
+| score | TINYINT | NULL | 1 至 5；尚未選擇時為 NULL |
+| is_shared | BOOLEAN | NULL | 是否分享；尚未選擇時為 NULL |
+| expires_at | DATETIME | NOT NULL | 草稿到期時間 |
+| created_at | DATETIME | NOT NULL | 建立時間 |
+| updated_at | DATETIME | NOT NULL | 更新時間 |
+
+規則：
+
+- 每位使用者每種 `entry_type` 最多一筆草稿，unique 為 `(user_id, entry_type)`。
+- 每次有效儲存均將 `expires_at` 延長為目前時間加 30 天。
+- 草稿僅供 owner 存取，不因 `is_shared = true` 而公開。
+- `current_step` 只保存可恢復的流程步驟；`SUBMITTING` 與 `COMPLETED` 不得持久化。
+- `score` 可為 NULL；有值時必須介於 1 至 5。
+- 完成送出時在同一 Database transaction 建立 `entries`／`entry_media` 並刪除草稿資料；不重新上傳媒體。
+
+### 3.15 entry_draft_media
+
+草稿媒體暫存 metadata。實體檔案使用既有 private entry media R2 bucket，Client 不得取得 object key。
+
+| 欄位 | 型別 | 約束 | 說明 |
+|---|---|---|---|
+| id | BIGINT | PK | 草稿媒體 ID |
+| entry_draft_id | BIGINT | FK NOT NULL | 草稿 ID |
+| media_role | VARCHAR(20) | NOT NULL | CONTENT 或 DRAWING |
+| media_type | VARCHAR(30) | NOT NULL | image、audio、video、drawing |
+| object_key | VARCHAR(500) | UNIQUE NOT NULL | Private R2 object key |
+| original_filename | VARCHAR(255) | NOT NULL | 顯示用原始檔名 |
+| content_type | VARCHAR(100) | NOT NULL | 已驗證 MIME type |
+| file_size_bytes | BIGINT | NOT NULL | 檔案大小 bytes |
+| duration_seconds | DECIMAL(10,3) | NULL | 音訊／影片秒數 |
+| created_at | DATETIME | NOT NULL | 建立時間 |
+| updated_at | DATETIME | NOT NULL | 更新時間 |
+
+規則：
+
+- 每筆草稿每個 `media_role` 最多一筆媒體，unique 為 `(entry_draft_id, media_role)`。
+- 新檔案取代或移除既有草稿媒體時，Database transaction 成功後才 best-effort 刪除舊 R2 object。
+- 明確捨棄與定期到期清理先刪除 R2 object，成功後再刪除草稿資料；失敗項目保留供下次重試。
+- 儲存、送出、捨棄與到期清理對既有草稿採 row lock；清理取得鎖後依原 cutoff 再次驗證 `expires_at`，避免刪除同時被續存的草稿。
+- 草稿送出時沿用同一 object key 建立正式 `entry_media`，避免重複上傳大型媒體。
+- 本表為短生命週期暫存資料，不採 soft delete；刪除由 owner 操作、送出 transaction 或到期清理負責。
+
+### 3.16 entry_likes（舊基線；目標由 Community Post 支持取代）
 
 社群貼文按讚。
 
@@ -432,7 +489,7 @@ Unique：`user_id, monster_group_id`
 
 Unique：`entry_id, user_id`
 
-### 3.15 entry_comments（目標由 Community Post 留言取代）
+### 3.17 entry_comments（舊基線；目標由 Community Post 留言取代）
 
 社群貼文留言。
 
@@ -447,7 +504,7 @@ Unique：`entry_id, user_id`
 | is_deleted | BOOLEAN | NOT NULL | 是否刪除 |
 | deleted_at | DATETIME | NULL | 刪除時間 |
 
-### 3.16 answer_books
+### 3.18 answer_books
 
 答案之書。
 
@@ -458,7 +515,7 @@ Unique：`entry_id, user_id`
 | created_at | DATETIME | NOT NULL | 建立時間 |
 | updated_at | DATETIME | NOT NULL | 更新時間 |
 
-### 3.17 daily_tests
+### 3.19 daily_tests
 
 每日測驗題目。
 
@@ -472,7 +529,7 @@ Unique：`entry_id, user_id`
 | created_at | DATETIME | NOT NULL | 建立時間 |
 | updated_at | DATETIME | NOT NULL | 更新時間 |
 
-### 3.18 daily_test_options
+### 3.20 daily_test_options
 
 每日測驗選項。
 
@@ -486,7 +543,7 @@ Unique：`entry_id, user_id`
 | created_at | DATETIME | NOT NULL | 建立時間 |
 | updated_at | DATETIME | NOT NULL | 更新時間 |
 
-### 3.19 user_daily_test_answers
+### 3.21 user_daily_test_answers
 
 使用者每日測驗作答紀錄。
 
@@ -503,7 +560,7 @@ Unique：`entry_id, user_id`
 
 Unique：`user_id, answered_date`
 
-### 3.20 psychological_tests（目標重新命名為 Self Exploration）
+### 3.22 psychological_tests（舊基線；目標重新命名為 Self Exploration）
 
 舊基線心理測驗資源。目標模型不得使用診斷式名稱，並拆為版本化 Self Exploration、Educational Quiz 與 External Resource。
 
@@ -517,7 +574,7 @@ Unique：`user_id, answered_date`
 | created_at | DATETIME | NOT NULL | 建立時間 |
 | updated_at | DATETIME | NOT NULL | 更新時間 |
 
-### 3.21 mind_games
+### 3.23 mind_games
 
 心情小遊戲。
 
@@ -531,7 +588,7 @@ Unique：`user_id, answered_date`
 | created_at | DATETIME | NOT NULL | 建立時間 |
 | updated_at | DATETIME | NOT NULL | 更新時間 |
 
-### 3.22 stress_relief_methods
+### 3.24 stress_relief_methods
 
 紓壓方法。
 
@@ -544,7 +601,7 @@ Unique：`user_id, answered_date`
 | created_at | DATETIME | NOT NULL | 建立時間 |
 | updated_at | DATETIME | NOT NULL | 更新時間 |
 
-### 3.23 stress_relief_method_assets
+### 3.25 stress_relief_method_assets
 
 紓壓方法圖片、音訊或外部資源。
 
@@ -558,7 +615,7 @@ Unique：`user_id, answered_date`
 | created_at | DATETIME | NOT NULL | 建立時間 |
 | updated_at | DATETIME | NOT NULL | 更新時間 |
 
-### 3.24 feedback
+### 3.26 feedback
 
 使用者意見回饋。
 
@@ -583,6 +640,9 @@ Unique：`user_id, answered_date`
 - `users` 1 對多 `user_active_monsters`
 - `users` 1 對多 `entries`
 - `entries` 1 對多 `entry_media`
+- `users` 1 對多 `entry_drafts`
+- `entry_drafts` 1 對多 `entry_draft_media`
+- `annoyance_types` 1 對多 `entry_drafts`
 - `entries` 1 對多 `entry_likes`（舊基線；目標改由 Community Post 承載）
 - `entries` 1 對多 `entry_comments`（舊基線；目標改由 Community Post 承載）
 - `annoyance_types` 1 對多 `entries`
@@ -658,6 +718,9 @@ Unique：`user_id, answered_date`
 - `moods.code`
 - `moods.score`
 - `entry_media.object_key`
+- `entry_drafts(user_id, entry_type)`
+- `entry_draft_media.object_key`
+- `entry_draft_media(entry_draft_id, media_role)`
 - `entry_likes(entry_id, user_id)`
 - `user_daily_test_answers(user_id, answered_date)`
 
@@ -666,10 +729,11 @@ Unique：`user_id, answered_date`
 - 所有 foreign key 欄位
 - `entries(user_id, entry_type, occurred_at)`
 - `entries(entry_type, is_shared, occurred_at)`
+- `entry_drafts(expires_at)`
 - `entry_comments(entry_id, created_at)`
 - `daily_tests(active_date)`
 
-Annoyance 列表的 `page`、`size`、`sort` 由查詢的 `LIMIT`／`OFFSET` 與排序實作，不在任何資料表新增頁碼欄位。
+Annoyance 與 Diary 列表的 `page`、`size`、`sort` 由共用 Entry 查詢的 `LIMIT`／`OFFSET` 與排序實作，不在任何資料表新增頁碼欄位；相同排序值以 entry id 由大至小作為穩定次排序。
 
 ## 七、Migration / Init SQL
 
@@ -692,6 +756,8 @@ Phase 3 annoyance type migration：`database/migrations/20260711_01_add_annoyanc
 Phase 3 private entry media migration：`database/migrations/20260711_02_make_entry_media_private.sql`。此 migration 會在 `entry_media` 已有資料時主動中止；既有資料必須先匯出，另行建立經審查的 public URL → private R2 object key 資料 migration，不得直接將 public URL 原值當成 object key。
 
 Phase 3 mood score migration：`database/migrations/20260711_03_make_mood_score_unique.sql`。此 migration 建立 `moods.score` 唯一約束與 `SCORE_1`～`SCORE_5` seed，並以 `CURRENT_TIMESTAMP` 寫入建立及更新時間；若既有分數重複或 code / score 對應衝突會主動中止，必須先審查與清理資料。
+
+Phase 4 entry draft migration：`database/migrations/20260724_01_add_entry_drafts.sql`。此 migration 建立獨立 `entry_drafts`／`entry_draft_media`，不修改既有正式 entry；可重複執行，既有環境執行後由 Backend 以 30 天保存政策開始管理草稿。
 
 Migration 應包含：
 

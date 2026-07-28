@@ -25,15 +25,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@WebMvcTest(CorsConfigTest.TestController.class)
+@WebMvcTest(CorsConfigTestController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @Import(CorsConfig.class)
 @EnableConfigurationProperties(CorsProperties.class)
 @TestPropertySource(properties = {
         "app.cors.allowed-origin-patterns=http://localhost:*,http://127.0.0.1:*",
         "app.cors.allowed-methods=GET,POST,PUT,PATCH,DELETE,OPTIONS",
-        "app.cors.allowed-headers=Authorization,Content-Type",
-        "app.cors.exposed-headers=Authorization",
+        "app.cors.allowed-headers=Authorization,Content-Type,Range",
+        "app.cors.exposed-headers=Authorization,Accept-Ranges,Content-Length,Content-Range",
         "app.cors.allow-credentials=true",
         "app.cors.max-age=3600"
 })
@@ -57,8 +57,14 @@ class CorsConfigTest {
                 .containsExactly("http://localhost:*", "http://127.0.0.1:*");
         assertThat(corsProperties.allowedMethods())
                 .containsExactly("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
-        assertThat(corsProperties.allowedHeaders()).containsExactly("Authorization", "Content-Type");
-        assertThat(corsProperties.exposedHeaders()).containsExactly("Authorization");
+        assertThat(corsProperties.allowedHeaders())
+                .containsExactly("Authorization", "Content-Type", "Range");
+        assertThat(corsProperties.exposedHeaders()).containsExactly(
+                "Authorization",
+                "Accept-Ranges",
+                "Content-Length",
+                "Content-Range"
+        );
         assertThat(corsProperties.allowCredentials()).isTrue();
         assertThat(corsProperties.maxAge()).isEqualTo(3600);
     }
@@ -68,10 +74,32 @@ class CorsConfigTest {
         mockMvc.perform(options("/api/test-cors")
                         .header(HttpHeaders.ORIGIN, "http://localhost:5173")
                         .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpMethod.GET.name())
-                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, HttpHeaders.AUTHORIZATION))
+                        .header(
+                                HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS,
+                                HttpHeaders.AUTHORIZATION + "," + HttpHeaders.RANGE
+                        ))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:5173"))
-                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true"));
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true"))
+                .andExpect(header().string(
+                        HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS,
+                        org.hamcrest.Matchers.containsString(HttpHeaders.RANGE)
+                ));
+    }
+
+    @Test
+    void allowedOriginShouldExposeMediaResponseHeaders() throws Exception {
+        mockMvc.perform(get("/api/test-cors")
+                        .header(HttpHeaders.ORIGIN, "http://localhost:5173"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(
+                        HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
+                        org.hamcrest.Matchers.allOf(
+                                org.hamcrest.Matchers.containsString(HttpHeaders.ACCEPT_RANGES),
+                                org.hamcrest.Matchers.containsString(HttpHeaders.CONTENT_LENGTH),
+                                org.hamcrest.Matchers.containsString(HttpHeaders.CONTENT_RANGE)
+                        )
+                ));
     }
 
     @Test
@@ -82,13 +110,14 @@ class CorsConfigTest {
                 .andExpect(status().isForbidden());
     }
 
-    @RestController
-    @RequestMapping("/api/test-cors")
-    static class TestController {
+}
 
-        @GetMapping
-        ApiResponse<Map<String, String>> get() {
-            return ApiResponse.success(Map.of("status", "ok"));
-        }
+@RestController
+@RequestMapping("/api/test-cors")
+class CorsConfigTestController {
+
+    @GetMapping
+    ApiResponse<Map<String, String>> get() {
+        return ApiResponse.success(Map.of("status", "ok"));
     }
 }

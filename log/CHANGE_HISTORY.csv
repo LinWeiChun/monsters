@@ -1,4 +1,9 @@
 日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
+2026-07-28,16:09,PHASE4-PR,Git,GitHub PR #83,新增,建立 feature phase4 至 develop 正式整合 PR,Codex,否,否,否,否,OPEN 非 Draft 且 merge state CLEAN
+2026-07-28,15:58,PHASE4-DEVELOP-SYNC,Integration,feature/phase4,合併,同步 develop 四個文件契約 Commit 並解決五個文件衝突,Codex,是,是,是,是,本次只合併文件且不修改程式或 Schema
+2026-07-28,15:58,PHASE4-DEVELOP-SYNC,Documentation,docs/TASKS.md,修改,依 GitHub PR 與完整測試證據更新 Phase 4 任務狀態,Codex,否,否,否,否,PR 66 至 78 與 81 已合併且 Phase 4 維持 REVIEW
+2026-07-28,15:58,PHASE4-DEVELOP-SYNC,Documentation,log/CHANGE_LOG.md,修改,記錄 develop 同步衝突處理整合測試與待辦,Codex,否,否,否,否,Log 保存期限檢查通過
+2026-07-28,15:58,PHASE4-DEVELOP-SYNC,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Phase 4 develop 同步歷程,Codex,否,否,否,否,Backend 275 Flutter 166 Analyze 與 Web build 通過
 2026-07-26,10:57,DOC-013,Documentation,CONTEXT.md,新增,建立 grilling 核准領域共同語言,Codex,否,否,否,否,Member Entry Emotional Load Community Post 等 canonical terms
 2026-07-26,10:57,DOC-013,Documentation,docs/adr/*.md,新增,建立八份難以逆轉的架構決策紀錄,Codex,是,是,是,是,不執行程式或 Phase 4 整合
 2026-07-26,10:57,DOC-013,Documentation,AGENTS.md,修改,升級 v3.4 並加入產品資料邊界與文件閱讀規則,Codex,是,是,是,是,最高層級規範同步
@@ -1071,3 +1076,94 @@
 2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Documentation,docs/TASKS.md,修改,更新 Phase 4 contract 任務與後續 Phase Penpot 檢查,Codex,否,否,是,否,TODO IN PROGRESS REVIEW DONE
 2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Documentation,log/CHANGE_LOG.md,修改,新增 Phase 4 準備工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
 2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Phase 4 contract 與 Penpot 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改
+2026-07-19,07:48,PHASE4-DIARY-CORE,Backend,backend/src/main/java/com/monsters/entity/entry/Entry.java,修改,新增 Diary factory update 與 Entry type invariant,Codex,否,否,否,否,共用 Entry 不新增 Diary Entity
+2026-07-19,07:48,PHASE4-DIARY-CORE,Backend,backend/src/main/java/com/monsters/dto/diary,新增,建立 Diary response media 與 record method DTO,Codex,是,否,否,否,Phase 4 reward 固定 null
+2026-07-19,07:48,PHASE4-DIARY-CORE,Backend,backend/src/main/java/com/monsters/mapper/diary/DiaryMapper.java,新增,建立 Diary response 與 active media mapping,Codex,是,否,否,否,不輸出 private R2 object key
+2026-07-19,07:48,PHASE4-DIARY-CORE,Backend,backend/src/main/java/com/monsters/service/diary/DiaryService.java,新增,建立 owner lookup Mood lookup response 與主要內容驗證,Codex,是,否,否,否,沿用共用 Entry repositories
+2026-07-19,07:48,PHASE4-DIARY-CORE,Backend,backend/src/main/java/com/monsters/controller/diary/DiaryController.java,新增,建立 api diaries Controller 骨架,Codex,是,否,否,否,尚無 endpoint
+2026-07-19,07:48,PHASE4-DIARY-CORE,Test,backend/src/test/java/com/monsters,新增,新增 Diary Controller Mapper Service 單元測試,Codex,是,否,否,否,targeted tests 通過
+2026-07-19,07:48,PHASE4-DIARY-CORE,Test,backend/src/test/java/com/monsters/entity/entry/EntryTest.java,修改,驗證 Diary safe defaults update 與 type invariant,Codex,否,否,否,否,
+2026-07-19,07:48,PHASE4-DIARY-CORE,Test,backend/src/test/java/com/monsters/entity/entry/MoodSchemaTest.java,修改,同步既有 migration timestamp seed assertion,Codex,否,否,否,否,未修改 SQL 行為
+2026-07-19,07:48,PHASE4-DIARY-CORE,Documentation,docs/DATABASE_SPEC.md,修改,補充 Diary Entry media 與 Mood lookup 規則,Codex,否,否,否,否,無 schema 或 Migration 異動
+2026-07-19,07:48,PHASE4-DIARY-CORE,Documentation,docs/TASKS.md,修改,記錄 Diary Core Task 狀態與完成範圍,Codex,否,否,否,否,TODO IN PROGRESS REVIEW DONE
+2026-07-19,07:48,PHASE4-DIARY-CORE,Documentation,log/CHANGE_LOG.md,修改,新增 Diary Core 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
+2026-07-19,07:48,PHASE4-DIARY-CORE,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Diary Core 異動歷史,Codex,否,否,否,否,Backend 216 tests passed
+2026-07-19,08:14,PHASE4-DIARY-CREATE,Backend,backend/src/main/java/com/monsters/dto/diary/CreateDiaryRequest.java,新增,建立 Diary create request validation 與分享預設,Codex,是,否,否,否,score 1 至 5
+2026-07-19,08:14,PHASE4-DIARY-CREATE,Backend,backend/src/main/java/com/monsters/service/diary,新增與修改,建立 Diary multipart orchestration transaction persistence 與 R2 cleanup,Codex,是,否,否,否,沿用 private entry media storage
+2026-07-19,08:14,PHASE4-DIARY-CREATE,Backend,backend/src/main/java/com/monsters/controller/diary/DiaryController.java,修改,實作 POST api diaries endpoint,Codex,是,否,否,否,成功回傳 HTTP 201
+2026-07-19,08:14,PHASE4-DIARY-CREATE,Test,backend/src/test/java/com/monsters,新增與修改,驗證 request controller service transaction media 與 cleanup,Codex,是,否,否,否,Backend 225 tests passed
+2026-07-19,08:14,PHASE4-DIARY-CREATE,Documentation,docs/TASKS.md,修改,記錄新增日記 API TODO 至 DONE 狀態,Codex,否,否,否,否,下一個 Task 為查詢日記 API
+2026-07-19,08:14,PHASE4-DIARY-CREATE,Documentation,log/CHANGE_LOG.md,修改,新增 Diary create 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
+2026-07-19,08:14,PHASE4-DIARY-CREATE,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Diary create 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改
+2026-07-19,08:31,PHASE4-DIARY-QUERY,Backend,backend/src/main/java/com/monsters/controller/diary/DiaryController.java,修改,實作 Diary 列表與單筆 GET endpoints,Codex,是,否,否,否,成功回傳 HTTP 200
+2026-07-19,08:31,PHASE4-DIARY-QUERY,Backend,backend/src/main/java/com/monsters/service/diary/DiaryService.java,修改,建立 owner scoped 分頁篩選排序與批次 response mapping,Codex,是,否,否,否,空列表不執行 lookup 查詢
+2026-07-19,08:31,PHASE4-DIARY-QUERY,Backend,backend/src/main/java/com/monsters/repository/entry/EntryRepository.java,修改,將共用分頁方法更名為 findEntryPage,Codex,是,否,否,否,Annoyance 與 Diary 共用 JPQL
+2026-07-19,08:31,PHASE4-DIARY-QUERY,Test,backend/src/test/java/com/monsters,修改,驗證 Repository Service Controller 與 Annoyance regression,Codex,是,否,否,否,Backend 232 tests passed
+2026-07-19,08:31,PHASE4-DIARY-QUERY,Documentation,docs/DATABASE_SPEC.md,修改,補充 Entry 分頁與穩定次排序規則,Codex,否,否,否,否,無 schema 或 Migration 異動
+2026-07-19,08:31,PHASE4-DIARY-QUERY,Documentation,docs/TASKS.md,修改,記錄查詢日記 API TODO 至 DONE 狀態,Codex,否,否,否,否,下一個 Task 為修改日記 API
+2026-07-19,08:31,PHASE4-DIARY-QUERY,Documentation,log/CHANGE_LOG.md,修改,新增 Diary query 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
+2026-07-19,08:31,PHASE4-DIARY-QUERY,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Diary query 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改
+2026-07-22,09:05,PHASE4-DIARY-UPDATE,Backend,backend/src/main/java/com/monsters/controller/diary/DiaryController.java,修改,實作 PUT api diaries multipart 更新 endpoint,Codex,是,否,否,否,成功回傳 HTTP 200
+2026-07-22,09:05,PHASE4-DIARY-UPDATE,Backend,backend/src/main/java/com/monsters/dto/diary/UpdateDiaryRequest.java,新增,建立 Diary 完整修改 request 與既有媒體 ID 欄位,Codex,是,否,否,否,score 1 至 5
+2026-07-22,09:05,PHASE4-DIARY-UPDATE,Backend,backend/src/main/java/com/monsters/service/diary,新增與修改,建立 Diary 媒體保留替換軟刪除與 R2 清理流程,Codex,是,否,否,否,交易成功後才清理舊物件
+2026-07-22,09:05,PHASE4-DIARY-UPDATE,Test,backend/src/test/java/com/monsters,新增與修改,驗證 update request controller service transaction 與媒體清理,Codex,是,否,否,否,targeted 與完整 Backend tests 通過
+2026-07-22,09:05,PHASE4-DIARY-UPDATE,Documentation,docs/TASKS.md,修改,記錄修改日記 API TODO 至 REVIEW 狀態,Codex,否,否,否,否,等待 Task PR review
+2026-07-22,09:05,PHASE4-DIARY-UPDATE,Documentation,log/CHANGE_LOG.md,修改,新增 Diary update 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
+2026-07-22,09:05,PHASE4-DIARY-UPDATE,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Diary update 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改
+2026-07-22,09:29,PHASE4-DIARY-SHARING,Backend,backend/src/main/java/com/monsters/controller/diary/DiaryController.java,修改,實作 PATCH api diaries id share endpoint,Codex,是,否,否,否,成功回傳 HTTP 200
+2026-07-22,09:29,PHASE4-DIARY-SHARING,Backend,backend/src/main/java/com/monsters/dto/diary/ShareDiaryRequest.java,新增,建立明確分享目標狀態 request 與必填驗證,Codex,是,否,否,否,isShared true 或 false
+2026-07-22,09:29,PHASE4-DIARY-SHARING,Backend,backend/src/main/java/com/monsters/service/diary/DiaryService.java,修改,建立 owner scoped 冪等分享狀態更新流程,Codex,是,否,否,否,狀態改變時才寫入
+2026-07-22,09:29,PHASE4-DIARY-SHARING,Test,backend/src/test/java/com/monsters,新增與修改,驗證 request controller service owner 與冪等行為,Codex,是,否,否,否,targeted 與完整 Backend tests 通過
+2026-07-22,09:29,PHASE4-DIARY-SHARING,Documentation,docs/TASKS.md,修改,標記 Diary update DONE 並記錄分享 API TODO 至 REVIEW,Codex,否,否,否,否,等待 Task PR review
+2026-07-22,09:29,PHASE4-DIARY-SHARING,Documentation,log/CHANGE_LOG.md,修改,新增 Diary sharing 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
+2026-07-22,09:29,PHASE4-DIARY-SHARING,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Diary sharing 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改
+2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Backend,backend/src/main/java/com/monsters/controller/entry/EntryMediaController.java,新增,建立 Annoyance 與 Diary binary media download endpoints,Codex,是,否,否,否,完整 200 與 Range 206
+2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Backend,backend/src/main/java/com/monsters/service/entry,新增,建立共用 owner 或分享授權與 private R2 下載流程,Codex,是,否,否,否,未授權與 media relation 不符統一 404
+2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Backend,backend/src/main/java/com/monsters/repository/entry/EntryRepository.java,修改,新增 entry type 與 soft delete scoped 查詢,Codex,是,否,否,否,支援共用媒體授權
+2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Configuration,backend/src/main/resources/application.yml,修改,允許 Range 並公開媒體 response headers,Codex,是,否,是,否,支援 Flutter Web 跨網域播放
+2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Test,backend/src/test/java/com/monsters,新增與修改,驗證 owner 分享 404 200 206 416 500 CORS 與 R2,Codex,是,否,否,否,Backend 259 tests passed
+2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Documentation,README.md 與 backend/README.md,修改,同步 Range CORS 環境變數預設值,Codex,否,否,否,否,無部署值硬編碼
+2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Documentation,docs/API_SPEC.md,修改,同步媒體下載所需 CORS headers,Codex,是,否,否,否,既有 endpoint contract 不變
+2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Documentation,docs/TASKS.md,修改,標記 Diary sharing DONE 並記錄雙媒體下載 API 至 REVIEW,Codex,否,否,否,否,等待 Task PR review
+2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Documentation,log/CHANGE_LOG.md,修改,新增 Entry media download 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
+2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Entry media download 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改
+2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Frontend,frontend/lib/models/entry_*.dart,新增,建立 Entry 共用記錄方式媒體與心情繪圖型別,Codex,否,否,是,否,Annoyance 保留相容別名
+2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Frontend,frontend/lib/services/entry_media_*.dart,新增,建立 Entry 共用媒體服務驗證與跨平台 Adapter,Codex,否,否,是,否,recordingFilePrefix 區分 flow
+2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Frontend,frontend/lib/widgets/entry,新增與移轉,抽出內容輸入媒體預覽繪圖分數分享與 Responsive shell,Codex,否,否,是,否,keyPrefix 保留 Annoyance 測試契約
+2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Frontend,frontend/lib/pages/annoyance_chat_page.dart,修改,Annoyance 改用 Entry 共用元件與媒體層,Codex,否,否,是,否,既有流程行為不變
+2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Test,frontend/test,新增與修改,驗證 Entry 共用元件 Adapter 與 Annoyance regression,Codex,否,否,是,否,Analyze 通過且 136 tests passed 與 Web build 成功
+2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Documentation,docs/UI_SPEC.md 與 docs/TASKS.md,修改,同步 Entry 共用路徑與 6 項 DONE 及 1 項 REVIEW,Codex,否,否,是,否,本 Task 維持 REVIEW 待 PR 合併
+2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增 Entry frontend foundation 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
+2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Frontend,frontend/lib/models 與 frontend/lib/providers,新增,建立 Diary 獨立 draft response 與 Riverpod 狀態流程,Codex,否,否,是,否,不依賴 Annoyance 專屬型別
+2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Frontend,frontend/lib/repositories/diary_repository.dart,新增,串接 POST diaries multipart 建立日記,Codex,是,否,是,否,沿用既有 API contract
+2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Frontend,frontend/lib/pages/diary_chat_page.dart 與 frontend/lib/widgets/diary,新增,依 Penpot 建立 Diary Web 九個狀態與專屬確認完成畫面,Codex,否,否,是,否,1200 至 1920px RWD
+2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Frontend,frontend/lib/widgets/entry 與 frontend/lib/routes,修改,參數化共用內容繪圖文案並新增 diaries new 路由,Codex,否,否,是,否,首頁入口仍待 Phase 4 完成
+2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Test,frontend/test,新增與修改,驗證 Diary 狀態 API Web RWD 完成頁與路由,Codex,否,否,是,否,Analyze 通過 148 tests passed 與 Web build 成功
+2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Documentation,docs/UI_SPEC.md 與 docs/TASKS.md,修改,同步 Diary Web 實作並將 PR 73 共用 Task 轉為 DONE,Codex,否,否,是,否,本 Task 維持 REVIEW 待 PR 合併
+2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增 Diary Web 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
+2026-07-22,14:49,PHASE4-DIARY-MOBILE-CHAT,Design,Penpot Diary Flow Mobile,修改,校正記錄方式文案為單一主要記錄方式與 optional 心情圖,Codex,否,否,是,否,與正式 Project Database API 規格一致
+2026-07-22,14:49,PHASE4-DIARY-MOBILE-CHAT,Frontend,frontend/lib/widgets/diary/diary_mobile_flow.dart,新增,建立 Penpot 390x844 Diary Mobile 九狀態畫布,Codex,否,否,是,否,320 至 599px 等比例填滿 viewport
+2026-07-22,14:49,PHASE4-DIARY-MOBILE-CHAT,Frontend,frontend/lib/pages/diary_chat_page.dart 與 frontend/lib/providers/diary_chat_provider.dart,修改,沿用共用狀態 API 並加入 Mobile 選擇後確認流程,Codex,否,否,是,否,Web Tablet 快速選擇行為保持相容
+2026-07-22,14:49,PHASE4-DIARY-MOBILE-CHAT,Test,frontend/test/diary_chat_page_test.dart 與 frontend/test/providers/diary_chat_provider_test.dart,修改,驗證 Mobile RWD 九狀態逐步確認畫布完成頁與 Web 回歸,Codex,否,否,是,否,Analyze 通過 18 項定向與 156 項完整測試 Web build 成功
+2026-07-22,14:49,PHASE4-DIARY-MOBILE-CHAT,Documentation,docs/UI_SPEC.md 與 docs/TASKS.md,修改,同步 Diary Mobile 規格並將 PR 74 Web Task 轉為 DONE,Codex,否,否,是,否,PR #75 已建立且本 Task 維持 REVIEW 待合併
+2026-07-22,14:49,PHASE4-DIARY-MOBILE-CHAT,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增 Diary Mobile 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
+2026-07-24,09:13,PHASE4-DIARY-SCORE,Test,frontend/test/widgets/mood_score_selector_test.dart 與 providers repositories 測試,修改,驗證五個圖片選項語意標籤非法值拒絕與 1 5 邊界 multipart 原值,Codex,否,否,否,否,12 項定向與 159 項完整測試通過 Analyze 與 Web build 成功
+2026-07-24,09:13,PHASE4-DIARY-SCORE,Documentation,docs/UI_SPEC.md 與 docs/TASKS.md,修改,同步 1-based 分數互動 contract 並將 PR 75 Mobile Task 轉為 DONE,Codex,否,否,否,否,PR #76 已建立且本 Task 維持 REVIEW 待合併
+2026-07-24,09:13,PHASE4-DIARY-SCORE,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增日記分數驗收工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
+2026-07-24,10:08,PHASE4-ENTRY-REWARD-NULL,Backend,backend/src/main/java/com/monsters/dto/annoyance/AnnoyanceResponse.java 與 diary/DiaryResponse.java,修改,明確序列化 reward null 並拒絕 Phase 6 前非 null Reward,Codex,是,否,否,否,修正 Jackson 忽略 Void 欄位造成 reward key 缺失
+2026-07-24,10:08,PHASE4-ENTRY-REWARD-NULL,Test,backend/src/test/java/com/monsters/dto/entry/EntryRewardContractTest.java,新增,驗證 Annoyance Diary JSON 明確包含 reward null 並拒絕提早發放,Codex,是,否,否,否,3 項定向與 262 項 Backend 完整測試通過
+2026-07-24,10:08,PHASE4-ENTRY-REWARD-NULL,Test,frontend/test/annoyance_chat_page_test.dart 與 Diary Reward 相關測試,修改,驗證 Repository Provider 與 Web Mobile 完成頁不顯示舊獎勵,Codex,否,否,否,否,44 項定向與 159 項完整測試通過 Analyze 及 Web build 成功
+2026-07-24,10:08,PHASE4-ENTRY-REWARD-NULL,Documentation,docs/API_SPEC.md docs/UI_SPEC.md docs/TASKS.md,修改,同步 reward null key 與禁止舊獎勵完成頁規格,Codex,是,否,是,否,將 PR #76 日記分數 Task 轉為 DONE
+2026-07-24,10:08,PHASE4-ENTRY-REWARD-NULL,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增 Reward 修正工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log；Draft PR #77 已建立且 Task 維持 REVIEW
+2026-07-24,10:48,PHASE4-HOME-DIARY-ENTRY,Frontend,frontend/lib/pages/home_page.dart,修改,啟用 Desktop Tablet Mobile 首頁日記行動並導向 AppRoute diaryChat,Codex,否,否,是,否,Mobile 文案由即將開放改為開始記錄
+2026-07-24,10:48,PHASE4-HOME-DIARY-ENTRY,Test,frontend/test/home_page_test.dart,修改,驗證 390px 900px 1440px 首頁日記入口與既有首頁回歸,Codex,否,否,否,否,17 項定向與 162 項完整測試通過 Analyze 及 Web build 成功
+2026-07-24,10:48,PHASE4-HOME-DIARY-ENTRY,Documentation,docs/UI_SPEC.md docs/TASKS.md,修改,同步首頁日記 named route contract 並將 PR 77 Reward Task 轉為 DONE,Codex,否,否,是,否,本 Task 維持 REVIEW 待 task PR 合併
+2026-07-24,10:48,PHASE4-HOME-DIARY-ENTRY,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增首頁日記入口工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log；Draft PR #78 已建立且 Task 維持 REVIEW
+2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Backend,backend/src/main/java/com/monsters/service/entry 與 dto/entity/repository,新增,建立日記煩惱持久草稿服務 row lock 送出與逾期清理,Codex,是,是,否,是,30 天 owner-only 草稿與 R2 刪除失敗重試
+2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Backend,backend/src/main/java/com/monsters/controller,修改,新增 Diary Annoyance draft CRUD submit 與 owner-only 媒體下載 endpoint,Codex,是,否,否,否,無草稿 GET 回傳 draft null
+2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Database,database/init/01_schema.sql 與 database/migrations/20260724_01_add_entry_drafts.sql,新增與修改,建立 entry_drafts 與 entry_draft_media schema,Codex,否,是,否,是,每位使用者每種類型一份草稿
+2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Frontend,frontend/lib/providers 與 repositories,修改,串接自動暫存還原捨棄送出與序列化 queue,Codex,是,否,是,否,文字 debounce 且送出前 flush
+2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Frontend,frontend/lib/models pages widgets,新增與修改,還原 private 暫存媒體並更新暫存狀態與重新開始確認,Codex,否,否,是,否,離開頁面不刪除草稿
+2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Test,backend/src/test 與 frontend/test,新增與修改,驗證恢復續存 endpoint owner 清理競爭送出與既有回歸,Codex,是,是,是,否,Backend 275 tests 與 Flutter 166 tests 通過
+2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Documentation,docs/PROJECT_SPEC.md docs/API_SPEC.md docs/DATABASE_SPEC.md docs/UI_SPEC.md docs/DECISIONS.md docs/TASKS.md,修改,同步持久草稿 API Database UI Decision 與 Task 狀態,Codex,是,是,是,是,PR 78 首頁 Task 已轉 DONE
+2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增持久草稿工作報告與保存期限檢查,Codex,否,否,否,否,三種 Log 最早 2026-06-29 無過期紀錄；Draft PR #81 已建立

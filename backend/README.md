@@ -57,8 +57,8 @@ Docker Compose 會使用 `mysql` 作為 MySQL service hostname。
 |----------|--------|
 | `CORS_ALLOWED_ORIGIN_PATTERNS` | `http://localhost:*,http://127.0.0.1:*` |
 | `CORS_ALLOWED_METHODS` | `GET,POST,PUT,PATCH,DELETE,OPTIONS` |
-| `CORS_ALLOWED_HEADERS` | `Authorization,Content-Type` |
-| `CORS_EXPOSED_HEADERS` | `Authorization` |
+| `CORS_ALLOWED_HEADERS` | `Authorization,Content-Type,Range` |
+| `CORS_EXPOSED_HEADERS` | `Authorization,Accept-Ranges,Content-Length,Content-Range` |
 | `CORS_ALLOW_CREDENTIALS` | `true` |
 | `CORS_MAX_AGE` | `3600` |
 

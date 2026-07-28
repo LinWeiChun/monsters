@@ -58,7 +58,7 @@
 | Emotional Trace | 最近 30 個本地日曆日，同日平均、缺值留白，可查看原始分數與依類型篩選 |
 | Time Model | 保存 UTC、建立當下本地日期、IANA timezone 與 offset；時區變更不移動舊 Entry 日期 |
 | Concurrency | optimistic version；衝突不自動合併，刪除優先，建立命令需 idempotency |
-| Offline | 第一版不持久化離線私人資料；草稿只在目前執行期間保留 |
+| Offline | 第一版不持久化離線私人資料；尚未同步的本機草稿只在目前執行期間保留，已同步的 owner-scoped 伺服器草稿依 30 天規則保存 |
 | Private Search | 本人主動傳統關鍵字／metadata 篩選；不保存搜尋詞、不做 semantic／AI search |
 | E2EE | 第一版不採端對端加密；使用 HTTPS、private R2、at-rest encryption、最小權限與稽核 |
 | Media Limits | 圖片／drawing 5 MB；錄音 10 MB／5 分鐘；影片 50 MB／60 秒 |
@@ -188,6 +188,7 @@
 | Phase 4 日記繪圖 | 採方案 A：心情圖為 optional；使用者可選擇繪圖或略過，每筆最多一張心情圖 |
 | Phase 4 起 UI 設計流程 | 採 Penpot design-first；所有後續含 UI 的 Phase 先完成或更新 Web／Mobile 畫板及狀態，再同步 UI 規格與 Flutter 實作 |
 | Phase 4 起 UI 驗收順序 | 採 Web-first：Penpot Web 畫板為第一實作與驗收來源，Mobile 畫板保留並於 Web 驗收後適配；新畫面需對齊已完成頁面的導覽、版型與視覺 token |
+| 日記／煩惱持久草稿 | 採獨立 `entry_drafts`／`entry_draft_media`，每位使用者每種類型最多一份草稿；草稿與 private R2 媒體保留 30 天，完成送出時在同一 Database transaction 轉為正式 Entry，放棄或逾期時清理媒體 |
 
 ## 二、已核准套件與工具
 

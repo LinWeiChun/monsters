@@ -2,14 +2,14 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:monsters/models/annoyance_drawing.dart';
-import 'package:monsters/widgets/annoyance/mood_drawing_canvas.dart';
+import 'package:monsters/models/entry_drawing.dart';
+import 'package:monsters/widgets/entry/mood_drawing_canvas.dart';
 
 void main() {
   testWidgets('supports drawing, undo, clear, and PNG completion', (
     tester,
   ) async {
-    AnnoyanceDrawingFile? completedDrawing;
+    EntryDrawingFile? completedDrawing;
     var cancelCount = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -58,7 +58,7 @@ void main() {
     expect(completedDrawing!.sizeBytes, greaterThan(0));
     expect(
       completedDrawing!.sizeBytes,
-      lessThanOrEqualTo(AnnoyanceDrawingLimits.maxBytes),
+      lessThanOrEqualTo(EntryDrawingLimits.maxBytes),
     );
 
     await tester.tap(find.byKey(const Key('moodDrawingCancelButton')));

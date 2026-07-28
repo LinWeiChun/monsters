@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../pages/annoyance_chat_page.dart';
+import '../pages/diary_chat_page.dart';
 import '../pages/home_page.dart';
 import '../pages/login_page.dart';
 import '../pages/password_lock_page.dart';
@@ -55,6 +56,11 @@ GoRouter createAppRouter({String initialLocation = AppPath.splash}) {
         name: AppRoute.annoyanceChat,
         pageBuilder:
             (context, state) => _appPage(state, const AnnoyanceChatPage()),
+      ),
+      GoRoute(
+        path: AppPath.diaryChat,
+        name: AppRoute.diaryChat,
+        pageBuilder: (context, state) => _appPage(state, const DiaryChatPage()),
       ),
     ],
   );

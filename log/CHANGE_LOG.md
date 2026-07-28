@@ -8,6 +8,614 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-28 15:58 PHASE4-DEVELOP-SYNC
+
+Task
+
+Phase 4 同步 `develop` 與任務狀態稽核（REVIEW）
+
+執行者
+
+Codex
+
+### 完成內容
+
+- 確認 `origin/develop` 比 `origin/feature/phase4` 多 4 個文件契約 Commit，將 PR #79／#82 的 grilling 決策、Phase 4 contract、`CONTEXT.md` 與 8 份 ADR 合併至 `feature/phase4`。
+- 解決 `API_SPEC`、`DATABASE_SPEC`、`PROJECT_SPEC`、`UI_SPEC` 與 `CHANGE_LOG` 衝突；以 `/api/v1`、UUID、optional Emotional Load、獨立 Community Post 等新契約為正式目標，保留 Phase 4 既有程式與持久草稿為 Migration baseline。
+- 明確區分未同步本機草稿與 owner-scoped 伺服器草稿：前者不持久化，後者依已核准方案保留 30 天。
+- 即時查核 GitHub：Phase 4 Task PR #66～#78、#81 全部已合併至 `feature/phase4`；DOC-013 的 PR #79 與 Phase 4 contract PR #82 已合併至 `develop`。
+- 將 DOC-013、PR #81 持久草稿 Task 與 Phase 4 整合測試轉為 DONE；Phase 4 整體保留 REVIEW，等待 Phase PR 合併至 `develop`。
+- 保留「依已核准 v1 Entry 架構與 API 規格重新實作」為 Phase 4.5 TODO，未將現有 `/api`、`isShared` 與必填分數實作誤標為完成。
+- 建立正式 Phase PR #83（`feature/phase4 → develop`）；PR 為 OPEN、非 Draft，GitHub merge state 為 CLEAN。
+
+### 修改檔案
+
+- `AGENTS.md`、`CONTEXT.md`、`README.md`
+- `docs/API_SPEC.md`、`docs/DATABASE_SPEC.md`、`docs/PROJECT_SPEC.md`、`docs/UI_SPEC.md`
+- `docs/CODING_STANDARD.md`、`docs/DECISIONS.md`、`docs/TASKS.md`
+- `docs/PHASE2_TEST_REPORT.md`、`docs/PHASE3_ANNOYANCE_DESIGN_PROPOSAL.md`、`docs/SYSTEM_DATA_REFERENCE.md`
+- `docs/adr/0001`～`0008`
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`
+
+### system_data 參考結果
+
+- 本次為分支同步與狀態稽核，未修改、搬移、刪除或格式化 `system_data/`。
+- 沿用 Phase 4 各 Task 已完成的舊系統流程與素材查核結果；新契約明確標示舊 Account、server PIN、boolean 分享與隨機獎勵僅為歷史基線。
+
+### API 異動
+
+- 合併文件中的 `/api/v1`、UUID public ID、OpenAPI、穩定 error code、optimistic version 與 idempotency 目標契約。
+- 保留 Phase 4 既有 `/api` endpoint 與持久草稿 API 為 Migration baseline；本次未修改 Backend endpoint。
+
+### Database 異動
+
+- 合併 Flyway、Community Post、Session、資料生命週期與 Transactional Outbox 目標模型。
+- 保留 `entry_drafts`／`entry_draft_media` 現況與 30 天保存規則；本次未修改 Schema、Migration 或資料。
+
+### UI 異動
+
+- 合併 optional Emotional Load、獨立公開快照、隱私遮罩與本機鎖目標規格。
+- 保留 owner-scoped 伺服器草稿的恢復與失敗重試流程；本次未修改 Flutter UI。
+
+### 測試方式與結果
+
+- Backend `gradlew test`：BUILD SUCCESSFUL，275 tests、0 failures、0 errors、4 skipped，76.7 秒。
+- Flutter Analyze：PASS，無問題，16.1 秒。
+- Flutter完整測試：PASS，166 tests，67.9 秒。
+- Flutter Web build：PASS，114.6 秒。
+- `git diff --cached --check` 與衝突標記檢查：通過。
+
+### Log 保存期限檢查結果
+
+- 以 2026-07-28 為基準檢查 `CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv`；最早紀錄均為 2026-06-29，未早於 2026-06-28。
+- 未發現超過一個月的 Log，未刪除紀錄；`CHANGE_HISTORY.xlsx` 本次未作為紀錄來源且未修改。
+
+### 待確認事項
+
+- Phase PR #83 已建立，等待 Review 與合併至 `develop`；合併完成前 Phase 4 維持 REVIEW。
+- Phase 4.5 必須先完成 v1 契約 Migration，Phase 5 以後功能維持 BLOCKED。
+
+---
+
+## 2026-07-28 15:01 PHASE4-ENTRY-DURABLE-DRAFTS
+
+Task
+Phase 4 日記／煩惱持久草稿與媒體暫存機制（REVIEW）
+
+執行者
+Codex
+
+### 完成內容
+
+- 確認首頁日記入口 PR #78 已合併至 `feature/phase4`，將前一個 Task 轉為 DONE。
+- 依使用者選定方案一，將日記與煩惱的本機記憶體草稿改為 owner-scoped 伺服器持久草稿；每位使用者每種類型只保留一份，儲存後續期 30 天。
+- 新增 restore、save、discard、submit 與草稿媒體下載 API；媒體沿用 private R2 驗證與 object key，送出時在同一 Database transaction 轉為正式 Entry，不重複上傳。
+- Flutter 進入頁面時自動還原步驟、文字、選項與暫存媒體；狀態變更自動暫存、文字採 debounce，送出前等待最後一次同步。
+- 「重新開始」改為先確認再刪除伺服器草稿；一般返回、重新整理或重新登入不刪除草稿。
+- 定期清理採每批 100 筆的 keyset 批次與 30 天期限；單次排程會持續處理後續批次，失敗項目留待下次排程，不會阻塞較新的到期草稿。
+- 儲存、送出、捨棄與清理共用 row lock，清理取得鎖後再次確認到期時間，避免刪除剛被續存的草稿。
+- 明確捨棄或到期清理若刪除 R2 object 失敗，保留 Database metadata 供下次重試。
+- Penpot Diary／Annoyance Web／Mobile 已同步「暫存並繼續」及 30 天跨裝置草稿文案。
+
+### 修改／新增／刪除檔案
+
+- 新增 Backend Entry Draft Entity、DTO、Repository、Persistence／Deletion／Cleanup／Domain Service 與對應單元測試。
+- 修改 Diary、Annoyance 與 Entry Media Controller，新增日記／煩惱草稿與 owner-only 草稿媒體 endpoint。
+- 新增 `frontend/lib/models/entry_draft_snapshot.dart` 與 generated JSON parser；修改 Diary／Annoyance Repository、Provider、頁面及 Entry 共用媒體預覽。
+- 修改 Diary／Annoyance page、provider、repository 測試，涵蓋草稿還原、媒體 metadata 與 durable endpoint。
+- 新增 `database/migrations/20260724_01_add_entry_drafts.sql`，並同步 `database/init/01_schema.sql`。
+- 修改 `docs/PROJECT_SPEC.md`、`docs/API_SPEC.md`、`docs/DATABASE_SPEC.md`、`docs/UI_SPEC.md`、`docs/DECISIONS.md`、`docs/TASKS.md`。
+- 未修改 `system_data/` 或 `log/CHANGE_HISTORY.xlsx`。
+- 既有未提交的 `frontend/pubspec.lock`、`frontend/tool/run_web_local.ps1` 與本 Task 無關的 `.agents/`、`skills-lock.json` 均保留且不納入 Commit。
+- 本機 `frontend/tool/verify.ps1` 繼續由 `.git/info/exclude` 忽略，不納入 Git。
+
+### system_data/ 參考結果
+
+- 參考舊日記／煩惱聊天室的步驟、內容、心情圖、分數與分享流程，確認返回新增頁時應回到原紀錄的業務意圖。
+- 舊系統只有正式新增流程，沒有持久草稿 API、草稿資料表或 private R2 暫存媒體機制。
+- 未沿用舊系統的畫面記憶體狀態、直接 HTTP、account-based owner、Base64／public media 或硬編碼設定。
+
+### API 異動
+
+- 新增 `/api/diaries/draft` 與 `/api/annoyances/draft` 的 GET、multipart PUT、DELETE，以及 `/draft/submit` POST。
+- 新增 `/api/diaries/draft/media/{mediaId}` 與 `/api/annoyances/draft/media/{mediaId}`，只允許目前 owner 以 JWT 下載。
+- 草稿 PUT 接受部分完成狀態及既有暫存媒體 ID；完整記錄組合只在 submit 驗證。
+- 無草稿時 GET 仍回傳 200 與 `{ "draft": null }`；submit 成功沿用既有 Diary／Annoyance 201 response。
+
+### Database 異動
+
+- 新增 `entry_drafts`，以 `(user_id, entry_type)` unique 限制每位使用者每種類型一份草稿，保存步驟、部分欄位與 `expires_at`。
+- 新增 `entry_draft_media`，每個草稿的 CONTENT／DRAWING 各最多一筆，保存 private R2 object metadata。
+- Migration 使用 `CREATE TABLE IF NOT EXISTS`，可重複執行；送出時沿用 object key 建立正式 `entry_media`。
+
+### 文件更新
+
+- Project、API、Database、UI、Decision 已同步 30 天期限、owner-only、跨裝置恢復、submit transaction、R2 清理重試與並行鎖定規則。
+- `docs/TASKS.md` 將 PR #78 首頁 Task 轉為 DONE，並將持久草稿 Task 推進至 REVIEW。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次實作與驗證。
+
+### 測試方式與結果
+
+- Backend `gradlew test`：275 tests，0 failures，4 skipped，BUILD SUCCESSFUL。
+- Flutter Analyze：PASS，31.3 秒。
+- Flutter完整測試：166 tests passed，50.1 秒。
+- Flutter Web Build：PASS，132.7 秒；既有 CupertinoIcons 字型提示與 Wasm 建議未造成失敗。
+- 草稿 Provider／Repository 定向測試：24 tests passed；Backend 草稿 Service、Deletion 與 Controller 定向測試通過。
+- Docker Desktop 未執行，因此未執行真實 MySQL／R2 端到端；Schema、Migration、transaction、storage cleanup 與 API 行為由靜態檢查及隔離測試涵蓋。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；2026-07-28 的保存期限截止日為 2026-06-28。
+- 三者最早正式紀錄皆為 2026-06-29，無超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 維持只讀且未修改。
+
+### 待確認事項
+
+- 本 Task 維持 REVIEW；Commit、Push 與 Draft PR #81 已完成，待轉 Ready 並合併至 `feature/phase4` 後才能標記 DONE。
+- 部署前需在實際 MySQL 先套用 `database/migrations/20260724_01_add_entry_drafts.sql`，並確認 Backend 的 private R2 設定可用。
+
+---
+
+## 2026-07-24 10:48 PHASE4-HOME-DIARY-ENTRY
+
+Task
+Phase 4 Flutter 首頁導入紀錄日記（REVIEW）
+
+執行者
+Codex
+
+### 完成內容
+
+- 確認前一個 Reward Task PR #77 已合併至 `feature/phase4`，將該 Task 轉為 DONE。
+- 比對正式 UI／Project 規格、既有 `AppRoute.diaryChat` 與舊系統首頁流程，確認首頁應直接導向 `/diaries/new`。
+- 將 Desktop、Tablet、Mobile 首頁日記行動統一接至 `context.pushNamed(AppRoute.diaryChat)`。
+- 新增共用 `homeDiaryChatButton` 測試 key，並將 Mobile 日記卡片的「即將開放」改為「開始記錄」。
+- 補齊 390px Mobile、900px Tablet、1440px Desktop 的首頁日記導向回歸測試；Tablet 測試會先將可捲動區中的卡片移入可視範圍再點擊。
+
+### 修改／新增／刪除檔案
+
+- 修改 `frontend/lib/pages/home_page.dart`、`frontend/test/home_page_test.dart`。
+- 修改 `docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`。
+- 未新增或刪除檔案，未修改 `system_data/`、API、Database、Penpot 或 `log/CHANGE_HISTORY.xlsx`。
+- 既有未提交的 `frontend/pubspec.lock`、`frontend/tool/run_web_local.ps1` 已保留，不納入本 Task。
+- 本機 `frontend/tool/verify.ps1` 仍未由 Git 追蹤。
+
+### system_data/ 參考結果
+
+- 舊 `system_data/front-end/monsters_front_end/lib/pages/home.dart` 的日記按鈕使用 `Navigator.push` 直接建立 `diaryChat`，確認舊流程同樣由首頁進入日記。
+- 新版未沿用舊 `MaterialPageRoute` 與舊 Widget 命名，改用正式的 GoRouter named route。
+
+### API 異動
+
+- 無 API endpoint、request、response 或驗證規則異動；本 Task 只啟用既有 `/diaries/new` 前端入口。
+
+### Database 異動
+
+- 無 schema、SQL、Migration 或資料異動。
+
+### 文件更新
+
+- `docs/UI_SPEC.md` 將首頁日記入口由「即將開放」更新為 Desktop／Tablet／Mobile 可操作，並記錄 named route contract。
+- `docs/TASKS.md` 將 PR #77 Reward Task 轉為 DONE，記錄本 Task 的 TODO → IN PROGRESS → REVIEW。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次首頁導向與驗證。
+
+### 測試方式與結果
+
+- `home_page_test.dart`：17 tests passed，包含三種 window class 的日記導向。
+- Flutter Analyze：No issues found，4.9 秒。
+- Flutter 完整測試：162 tests passed。
+- Flutter Web Build：成功，122.7 秒；既有 CupertinoIcons 字型提示與 Wasm 建議未造成失敗。
+- 現有 Web 開發伺服器持有 Flutter 啟動器鎖；驗證改用同一 Flutter SDK 的 tool snapshot 並設定 reentrant lock，未停止或干擾現有伺服器。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv`；2026-07-24 的保存期限截止日為 2026-06-24。
+- 最早正式紀錄為 2026-06-29，無超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- 本 Task 維持 REVIEW；Draft PR #78 已建立，待轉 Ready 並合併至 `feature/phase4` 後才能標記 DONE。
+- Phase 4 最後的整合「測試」Task 仍待執行。
+
+---
+
+## 2026-07-24 10:08 PHASE4-ENTRY-REWARD-NULL
+
+Task
+Phase 4 日記與 Phase 3 煩惱完成頁保持 `reward = null`（REVIEW）
+
+執行者
+Codex
+
+### 完成內容
+
+- 確認 Reward 前一個 Task PR #76 已合併至 `feature/phase4`，將日記分數 Task 轉為 DONE。
+- 比對正式 Project／API／UI／Decision 與舊系統手冊，確認煩惱 Phase 3、日記 Phase 4 都不得發放怪獸或顯示舊獎勵彈窗，真實獎勵延至 Phase 6。
+- 發現既有 Mapper 雖回傳 null，但 Jackson 會忽略 `Void reward`，導致實際 JSON 缺少 `reward` key。
+- 將 Annoyance／Diary Response 的 Reward 改為明確永遠序列化，並在 compact constructor 拒絕任何 Phase 6 前的非 null 值。
+- 補強 Flutter Repository、Provider、Web／Mobile 完成頁測試，確認 `reward` 保持 null，且不顯示「獎勵」、「恭喜你獲得」或「查看圖鑑」。
+
+### 修改／新增／刪除檔案
+
+- 修改 `backend/src/main/java/com/monsters/dto/annoyance/AnnoyanceResponse.java`、`backend/src/main/java/com/monsters/dto/diary/DiaryResponse.java`。
+- 新增 `backend/src/test/java/com/monsters/dto/entry/EntryRewardContractTest.java`。
+- 修改 `frontend/test/annoyance_chat_page_test.dart`、`frontend/test/diary_chat_page_test.dart`。
+- 修改 `frontend/test/providers/annoyance_chat_provider_test.dart`、`frontend/test/repositories/annoyance_repository_test.dart`。
+- 修改 `docs/API_SPEC.md`、`docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`。
+- 未刪除檔案，未修改 `system_data/`、Database 檔案、Penpot 或 `log/CHANGE_HISTORY.xlsx`。
+- 本機 `frontend/tool/verify.ps1` 仍由 `.git/info/exclude` 忽略，未納入本次 Commit。
+
+### system_data/ 參考結果
+
+- 系統手冊第 124 頁與第 128 頁分別顯示舊煩惱、舊日記新增後可能立即出現「恭喜你獲得一隻怪獸」與「查看圖鑑」彈窗。
+- 參考舊 `annoyanceChat.dart`、`diaryChat.dart` 的 `newMonster`、`newMonsterGroup` 與 `PresentWidget` 流程，確認新版正式規格刻意延後此功能。
+- 未沿用舊系統立即抽怪獸、直接 HTTP、全域帳號或硬編碼設定。
+
+### API 異動
+
+- Endpoint 與 request contract 無異動。
+- 修正 Annoyance／Diary response serialization，使 Phase 3／4 JSON 明確包含 `"reward": null`，不再省略欄位。
+- DTO 在 Phase 6 前拒絕任何非 null Reward，避免提早發放假獎勵。
+
+### Database 異動
+
+- 無 schema、SQL 或 Migration 異動；本 Task 不新增獎勵資料或使用者怪獸關聯。
+
+### 文件更新
+
+- `docs/API_SPEC.md` 明確要求 null Reward key 不得省略。
+- `docs/UI_SPEC.md` 明確禁止煩惱／日記完成頁顯示舊獎勵文案與圖鑑操作。
+- `docs/TASKS.md` 將 PR #76 日記分數 Task 轉為 DONE，記錄本 Task 的 TODO → IN PROGRESS → REVIEW。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次修正與驗證。
+
+### 測試方式與結果
+
+- Backend Reward contract 定向測試：3 tests passed。
+- Backend `gradlew test --no-daemon`：262 tests passed。
+- Flutter Annoyance／Diary Reward 定向測試：44 tests passed。
+- Flutter Analyze：No issues found，10.9 秒。
+- Flutter完整測試：159 tests passed，57.4 秒。
+- Flutter Web Build：成功，95.6 秒；僅有既有 CupertinoIcons 字型提示與 Wasm 建議，未造成失敗。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；2026-07-24 的保存期限截止日為 2026-06-24。
+- `CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv` 最早正式紀錄皆為 2026-06-29，無超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- 本 Task 維持 REVIEW；Draft PR #77 已建立，待轉 Ready 並合併至 `feature/phase4` 後才能標記 DONE。
+- Phase 6 實作真實 Reward 時，需明確調整 DTO guard、API contract、Database 關聯與完成頁 UI，不得只移除 null。
+
+---
+
+## 2026-07-24 09:13 PHASE4-DIARY-SCORE
+
+Task
+Phase 4 Flutter 日記分數選擇（REVIEW）
+
+執行者
+Codex
+
+### 完成內容
+
+- 確認 Diary Mobile Task PR #75 已合併至 `feature/phase4`，將前一個 Task 轉為 DONE。
+- 稽核既有 Diary Web／Tablet 共用 `MoodScoreSelector` 與 Mobile 分數流程，確認皆使用 `moodPoint_1.png`～`moodPoint_5.png`、1 至 5 分及中性分數文案。
+- 確認 Web／Tablet 選擇後直接前進，Mobile 選擇後需明確確認，三種 window class 共用同一個 Diary state 與 1-based 整數。
+- 既有正式功能已符合規格，本次未重寫 Widget、Provider 或 Repository；改以獨立測試補齊 1／5 邊界、0／6 拒絕、五個選項、語意標籤及 multipart 實際內容。
+
+### 修改／新增／刪除檔案
+
+- 修改 `frontend/test/widgets/mood_score_selector_test.dart`、`frontend/test/providers/diary_chat_provider_test.dart`、`frontend/test/repositories/diary_repository_test.dart`。
+- 修改 `docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`。
+- 未新增或刪除檔案，未修改正式功能程式、`system_data/` 或 `log/CHANGE_HISTORY.xlsx`。
+
+### system_data/ 參考結果
+
+- 參考舊 `diaryChat.dart` 的 `emotionGradeMembers` 與 `indexOf` 流程，確認舊系統顯示的 1 至 5 分會對應為 1-based 整數，並沿用 `moodPoint_1.png`～`moodPoint_5.png` 的設計意圖。
+- 未沿用舊系統大型 `setState`、直接 HTTP、Base64 JSON 媒體、全域帳號或硬編碼環境設定。
+
+### API 異動
+
+- 無 endpoint 或 API contract 異動。
+- 新增測試直接檢查 multipart `request.json`，確認邊界值 1 與 5 會原值寫入 `score`，不轉為 0-based index 或 mood lookup ID。
+
+### Database 異動
+
+- 無 schema、SQL 或 Migration 異動；沿用 `moods.score` 的 1 至 5 唯一值規格。
+
+### 文件更新
+
+- `docs/UI_SPEC.md` 補充日記分數圖片、無障礙名稱、Web／Mobile 互動差異及 1-based multipart 規則。
+- `docs/TASKS.md` 將 PR #75 Mobile Task 轉為 DONE，並記錄本 Task 的 TODO → IN PROGRESS → REVIEW。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次驗收與保存期限檢查。
+
+### 測試方式與結果
+
+- 日記分數 Widget／Provider／Repository 定向測試：12 tests passed。
+- `flutter analyze --no-pub`：No issues found。
+- `flutter test --no-pub`：159 tests passed。
+- `flutter build web --no-pub`：成功，產出 `build/web`；僅有既有 CupertinoIcons 字型提示與 Wasm 建議，未造成 build 失敗。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；2026-07-24 的保存期限截止日為 2026-06-24。
+- `CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv` 最早正式紀錄皆為 2026-06-29，無超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- Task PR #76 已建立且無合併衝突；合併至 `feature/phase4` 後才能將本 Task 標記 DONE。
+- 下一個 Task 為確認 Phase 4 完成頁持續保持 `reward = null`，Phase 6 再串接真實獎勵。
+
+---
+
+## 2026-07-22 14:49 PHASE4-DIARY-MOBILE-CHAT
+
+Task
+Phase 4 依 Penpot `Diary Flow / Mobile` 適配 Flutter Mobile 日記聊天室（REVIEW）
+
+執行者
+Codex
+
+### 完成內容
+
+- 確認 Diary Web Task PR #74 已合併至 `feature/phase4`，將前一個 Task 轉為 DONE。
+- 依使用者確認維持「一種主要記錄方式＋一張 optional 心情圖」，並將 Penpot `Diary / Mobile / 02 記錄方式` 的衝突文案同步為正式規格。
+- 新增 390×844 Diary Mobile 專屬畫布，完成引導、記錄方式、內容、繪圖決定、畫布、分數、分享、確認、送出與 Phase 4 完成頁。
+- Mobile 320px 至 599px 使用 `ResponsiveFixedCanvas` 等比例填滿 viewport，縮放高度超過 viewport 時可垂直捲動；Tablet／Desktop 仍使用既有 Responsive flow。
+- 沿用既有 Diary draft、Riverpod Controller、Repository、媒體 Adapter 與 `POST /api/diaries` contract；Mobile 記錄方式、分數與分享採選擇後明確確認，Web／Tablet 行為保持相容。
+- Phase 4 Mobile 完成頁只顯示安全保存、心情分數與分享狀態，未顯示假獎勵。
+
+### 修改／新增／刪除檔案
+
+- 新增 `frontend/lib/widgets/diary/diary_mobile_flow.dart`。
+- 修改 `frontend/lib/pages/diary_chat_page.dart`、`frontend/lib/providers/diary_chat_provider.dart`。
+- 修改 `frontend/lib/widgets/diary/diary_review_card.dart`、`frontend/lib/widgets/entry/entry_content_input.dart`，加入不影響既有呼叫端的 optional 標題控制。
+- 修改 `frontend/test/diary_chat_page_test.dart`、`frontend/test/providers/diary_chat_provider_test.dart`。
+- 修改 `docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`。
+- 未刪除檔案，未修改 `system_data/` 或 `log/CHANGE_HISTORY.xlsx`。
+- `frontend/pubspec.lock` 與 `frontend/tool/run_web_local.ps1` 為 Task 開始前既有未提交修改，本次完整保留且不納入 Commit。
+
+### system_data/ 參考結果
+
+- 參考舊 `diaryChat.dart` 的聊天引導、單一文字／圖片／錄音／影片、optional 心情圖、分數與分享流程。
+- 未沿用舊系統大型 `setState`、直接 HTTP、Base64 JSON 媒體、全域帳號或硬編碼環境設定。
+- 正式 Project／API／Database／UI／Coding Standard 與 Penpot contract 優先；舊系統僅保留流程意圖。
+
+### API 異動
+
+- Backend endpoint 與 API contract 無異動。
+- Flutter Mobile 沿用既有 `POST /api/diaries` multipart contract；每篇日記只送一種主要內容與 optional `drawingFile`，Phase 4 response `reward` 保持 null。
+
+### Database 異動
+
+- 無 schema、SQL 或 Migration 異動。
+
+### 文件更新
+
+- `docs/UI_SPEC.md` 補充 Diary Mobile 390×844 畫布、320px 至 599px 縮放、逐步確認與單一主要記錄方式。
+- `docs/TASKS.md` 將 PR #74 Web Task 轉為 DONE，並記錄 Mobile Task 的 TODO → IN PROGRESS → REVIEW。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次實作與驗證。
+
+### 測試方式與結果
+
+- `dart analyze`：No issues found。
+- Diary Mobile Provider／Widget 與 Web 回歸定向測試：18 tests passed。
+- Mobile viewport：320×700、390×844、500×900、599×900 通過；Web 1200×800、1440×900、1920×1080 回歸通過。
+- `flutter test --no-pub`：156 tests passed。
+- `flutter build web --no-pub`：成功，產出 `build/web`；僅有既有 CupertinoIcons 字型提示與 Wasm 建議，未造成 build 失敗。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；2026-07-22 的保存期限截止日為 2026-06-22。
+- `CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv` 最早正式紀錄皆為 2026-06-29，無超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- Task PR #75 已建立並等待 review；合併至 `feature/phase4` 後，才能將 Diary Mobile Task 標記 DONE。
+- Flutter 日記分數選擇、Phase 4 `reward = null` 最終確認、首頁入口開放與 Phase 4 整合驗收仍依後續 Task 處理。
+
+---
+
+## 2026-07-22 11:47 PHASE4-DIARY-WEB-CHAT
+
+Task
+Phase 4 依 Penpot `Diary Flow / Web` 實作 Flutter Web 日記聊天室（REVIEW）
+
+執行者
+Codex
+
+### 完成內容
+
+- 確認 Entry 共用前端 Task PR #73 已合併至 `feature/phase4`，將前一個 Task 轉為 DONE。
+- 依 Penpot `WEB / Diary Flow / Web` 的 9 個 Phase 4 狀態建立 `/diaries/new` Web 日記流程，完成引導、記錄方式、內容、optional 繪圖、分數、分享、確認、送出與安全保存畫面。
+- 建立 Diary 獨立 draft state、Riverpod controller、Dio Repository、response DTO、review 與 completed 元件；未匯入 Annoyance 專屬 Widget 或型別。
+- 重用 Entry 共用媒體、畫布、分數、分享與 Responsive flow shell，並為共用內容輸入及繪圖選擇元件加入可參數化文案與 2000 字上限。
+- 串接 `POST /api/diaries` multipart request；文字只送 content，媒體送 contentFile，optional 心情圖送 drawingFile，失敗時保留草稿。
+- Phase 4 完成頁只顯示安全保存、分數與分享狀態，不顯示假獎勵或假怪獸。
+
+### 修改／新增／刪除檔案
+
+- 新增 `frontend/lib/models/diary_draft.dart`、`diary_response.dart`。
+- 新增 `frontend/lib/providers/diary_chat_provider.dart`、`diary_media_provider.dart` 與 `frontend/lib/repositories/diary_repository.dart`。
+- 新增 `frontend/lib/pages/diary_chat_page.dart`、`frontend/lib/widgets/diary/` 與 `frontend/lib/widgets/entry/entry_chat_bubble.dart`。
+- 修改 Entry 共用內容輸入、繪圖選擇、Navigation destination 與 go_router 路由。
+- 新增 Diary Provider／Repository／Page 測試並更新 Router 測試。
+- 修改 `docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv`。
+- 未刪除檔案，未修改 `system_data/` 或 `log/CHANGE_HISTORY.xlsx`。
+
+### system_data/ 參考結果
+
+- 參考舊 `diaryChat.dart` 的聊天式引導、文字／圖片／錄音／影片、optional 心情圖、分數與分享流程。
+- 保留舊系統的使用者流程意圖；未沿用大型 `setState` 頁面、全域帳號、直接 HTTP Repository、Base64 JSON 媒體、硬編碼 URL 或送出後假獎勵。
+- 正式 Project／API／Database／UI／Coding Standard 與 Penpot contract 優先，採 Riverpod、Dio Repository、go_router 與共用 Entry Responsive 架構。
+
+### API 異動
+
+- 未修改 Backend endpoint 或 API contract。
+- Flutter 新增既有 `POST /api/diaries` multipart contract 串接；Phase 4 response `reward` 保持 null。
+
+### Database 異動
+
+- 無 schema、SQL 或 Migration 異動。
+
+### 文件更新
+
+- `docs/UI_SPEC.md` 補充 Diary Web 實作路徑、獨立資料層、Responsive 驗收與首頁入口開放時機。
+- `docs/TASKS.md` 將 PR #73 共用前端 Task 轉為 DONE，並記錄 Diary Web Task 的 TODO → IN PROGRESS → REVIEW。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次實作與驗證。
+
+### 測試方式與結果
+
+- `dart analyze`：No issues found。
+- Diary Provider／Repository／Web RWD／路由定向測試：15 tests passed。
+- `flutter test --no-pub`：148 tests passed。
+- `flutter build web --no-pub`：成功，產出 `build/web`；僅有既有 CupertinoIcons 字型提示與 Wasm 建議，未造成 build 失敗。
+- `git diff --check`：通過。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；2026-07-22 的保存期限截止日為 2026-06-22。
+- `CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv` 最早正式紀錄皆為 2026-06-29，無超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- 等待 Task PR 建立與 review；合併至 `feature/phase4` 後，才能將 Diary Web Task 標記 DONE。
+- Diary Mobile Penpot 適配、首頁入口解除「即將開放」與 Phase 4 最終整合驗收仍屬後續 Task。
+
+---
+
+## 2026-07-22 11:04 PHASE4-ENTRY-FRONTEND-FOUNDATION
+
+Task
+Phase 4 Entry 共用前端元件、Responsive flow shell 與媒體 Adapter（REVIEW）
+
+執行者
+Codex
+
+### 完成內容
+
+- 將記錄方式、媒體檔案、心情繪圖等跨 Entry 型別抽至 `entry_record.dart`、`entry_media.dart` 與 `entry_drawing.dart`，Annoyance 草稿保留相容別名。
+- 建立 Entry 共用 media service、validator 與 Web／IO／unsupported platform adapter；以 `recordingFilePrefix` 區分 Annoyance／Diary 錄音暫存檔。
+- 將內容輸入、記錄方式、媒體預覽、繪圖、分數、分享與 Responsive flow shell 移至 `widgets/entry/`。
+- 共用元件以 `keyPrefix`、標題與語意文案支援不同 Entry flow；Annoyance 改用共用元件並保留既有測試 key 與操作行為。
+- 新增 Entry 共用 selector 與 Mobile／Tablet／Desktop shell 測試，並將媒體 validator 與共用 Widget 測試改為 Entry contract。
+- 依狀態稽核結果將 LoginRequest、註冊排版、煩惱／日記媒體下載、媒體 Task closeout 與 App icon／Logo 共 6 項標記 DONE；登入頁排版維持 REVIEW。
+
+### 修改／新增／刪除檔案
+
+- 新增 `frontend/lib/models/entry_*.dart` 與 `frontend/lib/services/entry_media_*.dart`。
+- 將可共用 Widget 從 `frontend/lib/widgets/annoyance/` 移至 `frontend/lib/widgets/entry/`，並參數化 flow-specific key 與文案。
+- 修改 `frontend/lib/pages/annoyance_chat_page.dart`、Annoyance media Provider、相容模型／Service 與 `frontend/lib/theme/app_colors.dart`。
+- 新增 `frontend/test/widgets/entry_shared_components_test.dart`，移轉 Entry media validator 測試並更新共用 Widget 測試。
+- 修改 `docs/UI_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv`。
+- 未修改 `system_data/` 或 `log/CHANGE_HISTORY.xlsx`。
+
+### system_data/ 參考結果
+
+- 參考舊 `diaryChat.dart` 的聊天式引導、文字／圖片／錄音／影片、optional 心情圖、分數與分享流程。
+- 保留可重用的使用者流程與媒體選擇意圖；未沿用舊版 `setState` 大型頁面、全域登入狀態、直接 Repository 呼叫、硬編碼路徑或 `Navigator.push` 分散路由。
+- 正式 Project／API／Database／UI／Coding Standard 優先，Entry 共用層採 Riverpod、Dio Repository、go_router 與 Responsive flow 架構。
+
+### API 異動
+
+- 無 API contract 或 endpoint 異動。
+- 共用媒體前端限制仍與既有 Annoyance／Diary multipart contract 一致。
+
+### Database 異動
+
+- 無 schema、SQL 或 Migration 異動。
+
+### 文件更新
+
+- `docs/UI_SPEC.md` 補充 Entry 共用模型、媒體 Adapter、Widget 路徑與 Diary 不得依賴 Annoyance 專屬層的規則。
+- `docs/TASKS.md` 同步 6 項 DONE、1 項保留 REVIEW，並記錄本 Task 的 TODO → IN PROGRESS → REVIEW。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次實作與驗證。
+
+### 測試方式與結果
+
+- `flutter analyze --no-pub`：No issues found。
+- Entry 共用元件、媒體 validator 與 Annoyance Page／Provider／Repository 定向回歸：35 tests passed。
+- `flutter test --no-pub`：136 tests passed。
+- `flutter build web --no-pub`：成功，產出 `build/web`；僅有既有 CupertinoIcons 字型提示與 Wasm 建議，未造成 build 失敗。
+- `git diff --check`：通過。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；2026-07-22 的保存期限截止日為 2026-06-22。
+- `CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv` 最早正式紀錄皆為 2026-06-29，無超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- 等待 Task PR 建立與 review；合併至 `feature/phase4` 後，才能將 Entry 共用前端基礎 Task 標記 DONE，並開始 Diary Web 聊天室實作。
+- 登入頁 Web／Chrome 視覺驗證仍未完成，因此該項維持 REVIEW。
+
+---
+
+## 2026-07-22 10:04 PHASE4-ENTRY-MEDIA-DOWNLOAD
+
+Task
+Phase 4 下載煩惱／日記媒體 API（REVIEW）
+
+執行者
+Codex
+
+### 完成內容
+
+- 實作 `GET /api/annoyances/{id}/media/{mediaId}` 與 `GET /api/diaries/{id}/media/{mediaId}`，共用 Entry 媒體下載服務。
+- 僅允許有效 JWT 使用者下載；owner 可讀取私密 entry，非 owner 僅能讀取目前為分享狀態的 entry，未授權時以 404 隱藏資源存在性。
+- 媒體必須屬於 path 指定的未刪除 entry，並使用資料庫保存的 `content_type`；response 不輸出 private R2 URL 或 object key。
+- 完整下載回傳 200；單一 Range 下載回傳 206，並設定 `Content-Type`、`Content-Length`、`Accept-Ranges` 與必要的 `Content-Range`。
+- 沿用既有 private R2 Range 下載，補測超出範圍 416、R2 物件不存在 404 與儲存失敗 500 的安全錯誤訊息。
+- CORS 預設允許 `Range` request header，並公開媒體播放器需要讀取的 response headers。
+
+### 修改／新增／刪除檔案
+
+- 新增 `backend/src/main/java/com/monsters/controller/entry/EntryMediaController.java`。
+- 新增 `backend/src/main/java/com/monsters/service/entry/EntryMediaDownloadService.java` 與 `EntryMediaDownloadResult.java`。
+- 修改 `backend/src/main/java/com/monsters/repository/entry/EntryRepository.java` 與 `backend/src/main/resources/application.yml`。
+- 新增或修改 Entry media Controller／Service、Repository、R2 storage 與 CORS 測試。
+- 修改 `README.md`、`backend/README.md`、`docs/API_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv`。
+- 未刪除檔案，亦未修改 `system_data/` 或 `log/CHANGE_HISTORY.xlsx`。
+
+### system_data/ 參考結果
+
+- 舊系統沒有 Diary 媒體下載 API；Annoyance 僅有硬編碼本機路徑的圖片／影片 Base64 prototype，History／Social 則把 Base64 媒體包在 JSON。
+- 保留登入後讀取已分享內容與顯示圖片／影音的業務意圖；未沿用 Base64 JSON、硬編碼路徑、公開檔案位置、缺少授權或不支援 Range 的舊實作。
+- 正式 API、Database、UI 與 Decision 文件優先，採新版 JWT、共用 Entry 與 private R2 串流架構。
+
+### API 異動
+
+- 實作既有 contract 的兩支媒體下載 endpoint；成功回傳 binary stream，而非 `ApiResponse<T>`。
+- 支援完整回應 200 與單一 Range 回應 206；未登入為 401、資源或權限不符為 404、Range 超出物件範圍為 416、R2 失敗為 500。
+- `docs/API_SPEC.md` 的 endpoint contract 不變；僅同步 CORS 預設 header 設定。
+
+### Database 異動
+
+- 無 schema、SQL 或 Migration 異動。
+- 沿用 `entries` 的 owner、entry type、分享與 soft-delete 欄位，以及 `entry_media` 的 entry 關聯、object key、content type 與 soft-delete 欄位。
+
+### 文件更新
+
+- `README.md`、`backend/README.md` 與 `docs/API_SPEC.md` 同步 Range request／response CORS headers。
+- `docs/TASKS.md` 將 PR #71 的 Diary 分享 Task 標記 DONE，並記錄本 Task 的 TODO → IN PROGRESS → REVIEW。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次實作與驗證。
+
+### 測試方式與結果
+
+- Entry media Service／Controller、Entry Repository、CORS 與 R2 storage targeted Gradle tests：BUILD SUCCESSFUL。
+- `./gradlew test`：BUILD SUCCESSFUL，259 tests、0 failures、0 errors、4 skipped。
+- `git diff --check`：通過。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；2026-07-22 的保存期限截止日為 2026-06-22。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- 等待 Task PR 建立與 review；核准並合併至 `feature/phase4` 後，才能將兩支媒體下載 API 與本 Task 標記 DONE。
+---
+
 ## 2026-07-26 10:57
 
 Task
@@ -6650,6 +7258,152 @@ Codex
 
 ---
 
+## 2026-07-19 08:14 PHASE4-DIARY-CREATE
+
+Task
+Phase 4 新增日記 API
+
+執行者
+Codex
+
+### 完成內容
+
+- 新增 `CreateDiaryRequest`，驗證 record method 與 1 至 5 分 score，並將未提供的分享狀態預設為 false。
+- 完成 `POST /api/diaries` multipart endpoint，使用 JWT current user，不接受 Client 傳入 user id。
+- 支援 TEXT、IMAGE、AUDIO、VIDEO 四種互斥主要記錄方式及 optional drawing；媒體沿用 private R2 上傳與既有 MIME／大小／影音長度驗證。
+- 以獨立 Spring transaction 保存共用 `entries` 與 `entry_media`；上傳或 Database 失敗時補償刪除本次已上傳物件。
+- 將 `occurredAt` 正規化為 Asia/Taipei，未提供時使用伺服器目前時間；回應不暴露 R2 object key，Phase 4 `reward` 固定為 null。
+- `docs/TASKS.md` 完整記錄 TODO → IN PROGRESS → REVIEW → DONE，並標記新增日記 API 完成。
+
+### 新增
+
+- `backend/src/main/java/com/monsters/dto/diary/CreateDiaryRequest.java`
+- `backend/src/main/java/com/monsters/service/diary/CreatedDiary.java`
+- `backend/src/main/java/com/monsters/service/diary/DiaryPersistenceService.java`
+- `backend/src/main/java/com/monsters/service/diary/NewDiaryMedia.java`
+- `backend/src/test/java/com/monsters/dto/diary/CreateDiaryRequestTest.java`
+- `backend/src/test/java/com/monsters/service/diary/DiaryPersistenceServiceTest.java`
+
+### 修改
+
+- `backend/src/main/java/com/monsters/controller/diary/DiaryController.java`
+- `backend/src/main/java/com/monsters/service/diary/DiaryService.java`
+- `backend/src/test/java/com/monsters/controller/diary/DiaryControllerTest.java`
+- `backend/src/test/java/com/monsters/service/diary/DiaryServiceTest.java`
+- `docs/TASKS.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### system_data 參考
+
+- 參考舊日記手冊與舊 Backend 的文字、拍照、錄影、錄音、匯入媒體、optional 繪圖、1 至 5 分與分享流程意圖。
+- 新版依正式 contract 改為 multipart、JWT owner、共用 Entry 與 private R2；未沿用舊聊天式 API、Base64／字串媒體、硬編碼 Windows 路徑、Controller 獎勵邏輯或不安全帳號參數。
+- 未修改或納入本 Task 的 `system_data/` 內容；工作樹中既有素材異動由使用者保留。
+
+### API 異動
+
+- 實作 `POST /api/diaries`，Content-Type 為 `multipart/form-data`，包含 JSON `request`、條件必填 `contentFile` 與 optional `drawingFile`。
+- 建立成功回傳 HTTP 201 與 Diary response；正式 API contract 無新增或變更。
+
+### Database 異動
+
+- 無 schema 或 Migration 異動；沿用 `entries`、`entry_media` 與 `moods`。
+
+### 文件更新
+
+- `docs/TASKS.md` 更新 Task 狀態與完成範圍。
+- `docs/API_SPEC.md`、`docs/DATABASE_SPEC.md` 與 `docs/UI_SPEC.md` 既有 contract 已涵蓋本次實作，無需改動。
+
+### 測試方式與結果
+
+- Diary／Entry targeted Gradle tests：BUILD SUCCESSFUL。
+- `./gradlew test`：BUILD SUCCESSFUL，225 tests、0 failures。
+- `git diff --check`：通過。
+
+### Log 保存期限檢查
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；2026-07-19 的保存期限截止日為 2026-06-19。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源，未修改。
+
+### 待確認事項
+
+- Task PR 合併至 `feature/phase4` 後，下一個 Task 為查詢日記 API。
+
+---
+
+## 2026-07-19 07:48 PHASE4-DIARY-CORE
+
+Task
+Phase 4 Diary 共用 Entry Domain 與 Backend Core 骨架
+
+執行者
+Codex
+
+### 完成內容
+
+- 擴充共用 `Entry`，新增 Diary factory 與 update domain operation，固定 `entryType = DIARY`、`annoyanceTypeId = null`、`isSolved = false`，並阻擋 Annoyance／Diary 交叉更新。
+- 新增 Diary response DTO、record method、media response 與 Mapper；由文字或 active primary media 推導記錄方式，download URL 指向 Backend，Response 不包含 private R2 object key，Phase 4 `reward` 固定為 null。
+- 新增 Diary Service Core，提供 owner-scoped Entry lookup、Mood lookup、active media response 組裝，以及 TEXT／IMAGE／AUDIO／VIDEO 主要內容組合驗證。
+- 新增 `/api/diaries` Controller 骨架；本 Task 尚未開放任何 endpoint，新增日記 API 由下一個 Task 實作。
+- 沿用共用 `EntryRepository`、`EntryMediaRepository` 與 `MoodRepository`，不建立獨立 Diary Entity、table 或 Repository。
+- 完整測試初次發現既有 Mood migration assertion 仍比對未含 timestamp 的舊 seed tuple；僅同步測試 assertion 至目前 migration，未修改 SQL 行為。
+
+### 修改／新增／刪除檔案
+
+- 修改 `backend/src/main/java/com/monsters/entity/entry/Entry.java`。
+- 新增 `backend/src/main/java/com/monsters/dto/diary/DiaryMediaResponse.java`。
+- 新增 `backend/src/main/java/com/monsters/dto/diary/DiaryRecordMethod.java`。
+- 新增 `backend/src/main/java/com/monsters/dto/diary/DiaryResponse.java`。
+- 新增 `backend/src/main/java/com/monsters/mapper/diary/DiaryMapper.java`。
+- 新增 `backend/src/main/java/com/monsters/service/diary/DiaryService.java`。
+- 新增 `backend/src/main/java/com/monsters/controller/diary/DiaryController.java`。
+- 修改 `backend/src/test/java/com/monsters/entity/entry/EntryTest.java`。
+- 修改 `backend/src/test/java/com/monsters/entity/entry/MoodSchemaTest.java`。
+- 新增 Diary Controller／Mapper／Service 單元測試。
+- 修改 `docs/DATABASE_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv`。
+- 無刪除檔案；未納入使用者的 `frontend/lib/pages/home_page.dart` 工作樹異動。
+
+### system_data 參考結果
+
+- 重讀系統手冊 Diary 資料表與新增日記頁面，確認舊流程包含文字／相機／影音／錄音、optional 心情圖、1 至 5 分與分享設定。
+- 參考舊 `DiaryController`、`DiaryServiceImpl`、`DiaryDAOImpl`、`Diary` 與 `DiaryBean` 的欄位意圖。
+- 未沿用 account 外鍵、獨立 diary table、Controller 發獎、硬編碼 Windows 路徑、舊 Hibernate DAO、錯誤 null 判斷、自由文字 yes／no 或 monster 發放邏輯。
+- 未修改 `system_data/`。
+
+### API 異動
+
+- API contract 無異動；新增 `/api/diaries` Controller 骨架但尚無可呼叫 endpoint。
+- 建立 Diary response mapping 基礎，媒體 URL、owner 隔離與 `reward = null` 符合既有 API 規格。
+
+### Database 異動
+
+- 無 schema、SQL 或 Migration 異動。
+- 沿用 `entries`、`entry_media` 與 `moods`；DATABASE_SPEC 補充 DIARY 一種主要內容與 optional drawing 規則。
+
+### 文件更新
+
+- DATABASE_SPEC 補充 Diary Entry／Media 與 Mood lookup 規則。
+- TASKS 記錄 Diary Core TODO → IN PROGRESS → REVIEW → DONE 狀態。
+- CHANGE_LOG 與 CHANGE_HISTORY 記錄本次實作、測試與保存期限檢查。
+
+### 測試方式與結果
+
+- Diary／Entry targeted Gradle tests：通過。
+- Backend `./gradlew test`：BUILD SUCCESSFUL，216 tests passed。
+- Spring context、Annoyance、Auth、User 與 Entry regression tests 全部通過。
+- `git diff --check`：通過；新增 Diary production code 無 TODO、FIXME、`System.out` 或 object key 輸出。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；保存期限截止日為 2026-06-19。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- 無；下一個 Task 為 `POST /api/diaries` 新增日記 API，會在新的 task branch 實作 request DTO、private media upload 與 transaction cleanup。
+
+---
+
 ## 2026-07-18 22:21 PHASE4-DIARY-CONTRACT
 
 Task
@@ -6930,3 +7684,191 @@ Codex
 ### 待確認事項
 
 - 無。
+
+---
+
+## 2026-07-19 08:31 PHASE4-DIARY-QUERY
+
+Task
+Phase 4 查詢日記 API
+
+執行者
+Codex
+
+### 完成內容
+
+- 實作 `GET /api/diaries` owner-scoped 列表查詢，支援 `page`、`size`、`sort` 與 optional `isShared` 篩選。
+- 實作 `GET /api/diaries/{id}` 單筆查詢，只允許目前 JWT 使用者讀取自己的未刪除 DIARY entry。
+- 列表限定 `occurredAt`、`createdAt`、`score` 排序與 `asc`／`desc` 方向，空白 sort 使用 `occurredAt,desc`；相同排序值維持 entry id descending。
+- 將共用 Entry Repository 的 `findAnnoyancePage` 更名為 `findEntryPage`，Diary 與 Annoyance 共用同一個 owner、entry type、soft-delete、分享與分數排序 JPQL。
+- 列表批次載入 Mood 與 active EntryMedia，避免逐筆 lookup；空列表不執行額外 mood／media 查詢。
+- 無效分頁或排序回傳 400；不存在、已刪除、類型錯誤或 owner 不符回傳 404；response 保持 `reward = null` 且不輸出 private R2 object key。
+
+### 修改／新增／刪除檔案
+
+- 修改 `backend/src/main/java/com/monsters/controller/diary/DiaryController.java`。
+- 修改 `backend/src/main/java/com/monsters/service/diary/DiaryService.java`。
+- 修改 `backend/src/main/java/com/monsters/repository/entry/EntryRepository.java`。
+- 修改 `backend/src/main/java/com/monsters/service/annoyance/AnnoyanceService.java` 以沿用更名後的共用 Repository 方法，行為不變。
+- 修改 Diary Controller／Service、Entry Repository 與 Annoyance Service 測試。
+- 修改 `docs/DATABASE_SPEC.md`、`docs/TASKS.md`、`log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv`。
+- 無新增或刪除檔案。
+
+### system_data 參考結果
+
+- 參考系統手冊歷史記錄列表、日記篩選與詳細內容流程，以及舊 `HistoryController`、Diary Service／DAO、Flutter History Repository 與日記詳細頁。
+- 保留「從歷史列表查看日記詳細內容」的業務意圖；未沿用 account path parameter、記憶體排序、空列表視為失敗、查詢回傳 HTTP 201、Base64 媒體、全域登入資料或 UI 直接呼叫 API。
+- 未修改 `system_data/`。
+
+### API 異動
+
+- 實作既有 contract 的 `GET /api/diaries` 與 `GET /api/diaries/{id}`；成功回傳 HTTP 200 與 `ApiResponse<T>`。
+- `docs/API_SPEC.md` 既有 contract 已涵蓋本次實作，無新增或修改。
+
+### Database 異動
+
+- 無 schema、SQL 或 Migration 異動。
+- `docs/DATABASE_SPEC.md` 補充 Annoyance／Diary 共用 Entry offset pagination 與穩定次排序規則。
+
+### 文件更新
+
+- `docs/DATABASE_SPEC.md` 同步共用列表查詢規則。
+- `docs/TASKS.md` 記錄 TODO → IN PROGRESS → REVIEW → DONE 與完成範圍。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次實作與驗證。
+
+### 測試方式與結果
+
+- Diary Query／Entry Repository／Annoyance regression targeted Gradle tests：BUILD SUCCESSFUL。
+- `./gradlew test`：BUILD SUCCESSFUL，232 tests、0 failures、0 errors、0 skipped。
+- `git diff --check`：通過。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；2026-07-19 的保存期限截止日為 2026-06-19。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- Task PR 合併至 `feature/phase4` 後，下一個 Task 為修改日記 API。
+
+---
+
+## 2026-07-22 09:05 PHASE4-DIARY-UPDATE
+
+Task
+Phase 4 修改日記 API（REVIEW）
+
+執行者
+Codex
+
+### 完成內容
+
+- 實作 `PUT /api/diaries/{id}` multipart 完整修改流程，僅允許目前 JWT 使用者修改自己的未刪除 DIARY entry。
+- 主要記錄方式必須是 TEXT、IMAGE、AUDIO、VIDEO 其中一種；文字日記不得附主要媒體，媒體日記必須在新檔與同類型既有媒體 ID 中擇一。
+- 可保留既有主要媒體或心情圖；傳入新檔時會取代對應媒體；未傳新心情圖與既有心情圖 ID 時移除心情圖。
+- 僅接受屬於該日記且類型正確的既有媒體 ID；資料不存在、已刪除、類型不符或 owner 不符時維持既有的 404／400 行為。
+- 新媒體在資料庫交易失敗時會清理；被取代的 private R2 舊物件僅在交易成功後 best-effort 清理，清理失敗不回滾成功的資料庫交易。
+
+### 修改／新增／刪除檔案
+
+- 修改 `backend/src/main/java/com/monsters/controller/diary/DiaryController.java`。
+- 新增 `backend/src/main/java/com/monsters/dto/diary/UpdateDiaryRequest.java`。
+- 修改 `backend/src/main/java/com/monsters/service/diary/DiaryService.java`、`DiaryPersistenceService.java`，並新增 `UpdatedDiary.java`。
+- 新增或修改 Diary DTO、Controller、Service、Persistence 單元測試。
+- 修改 `docs/TASKS.md`、`log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv`。
+- 未刪除檔案，亦未修改 `system_data/`。
+
+### system_data/ 參考結果
+
+- 參考系統手冊與舊 Diary 流程的文字、圖片、錄音、影片、optional 心情圖、1 至 5 分與分享業務意圖。
+- 更新行為沿用新版 Annoyance 的 owner 驗證、媒體替換、資料庫交易與 private R2 補償模式；未沿用舊系統的 account path parameter、公開檔案路徑或舊分層程式。
+
+### API 異動
+
+- 實作既有 contract 的 `PUT /api/diaries/{id}`，成功回傳 HTTP 200 與 `ApiResponse<DiaryResponse>`。
+- `docs/API_SPEC.md` 已完整定義 request parts、既有媒體 ID 與替換規則，本次未變更 contract。
+
+### Database 異動
+
+- 無 schema、SQL 或 Migration 異動；沿用共用 `entries` 與 `entry_media` 的 soft-delete 欄位。
+
+### 文件更新
+
+- `docs/TASKS.md` 記錄 TODO → IN PROGRESS → REVIEW。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次實作與驗證。
+
+### 測試方式與結果
+
+- Diary DTO／Controller／Service／Persistence targeted Gradle tests：BUILD SUCCESSFUL。
+- `./gradlew test`：BUILD SUCCESSFUL。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；保存期限截止日為 2026-06-22。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- 等待 Task PR 建立與 review；核准並合併至 `feature/phase4` 後，才能將本 Task 標記 DONE 並開始分享／取消分享日記 API。
+
+---
+
+## 2026-07-22 09:29 PHASE4-DIARY-SHARING
+
+Task
+Phase 4 分享／取消分享日記 API（REVIEW）
+
+執行者
+Codex
+
+### 完成內容
+
+- 實作 `PATCH /api/diaries/{id}/share`，以 request body 的 `isShared` 明確設定分享目標狀態，不使用 toggle。
+- 僅允許目前 JWT 使用者更新自己的未刪除 DIARY entry；資料不存在、已刪除或 owner 不符時維持 404。
+- 同狀態請求採冪等成功，只有分享狀態實際改變時才寫入資料庫。
+- `isShared` 缺漏時以 Bean Validation 拒絕，Service 亦保留 null 防禦驗證。
+
+### 修改／新增／刪除檔案
+
+- 修改 `backend/src/main/java/com/monsters/controller/diary/DiaryController.java`。
+- 新增 `backend/src/main/java/com/monsters/dto/diary/ShareDiaryRequest.java`。
+- 修改 `backend/src/main/java/com/monsters/service/diary/DiaryService.java`。
+- 新增或修改 Diary 分享 DTO、Controller、Service 單元測試。
+- 修改 `docs/TASKS.md`、`log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv`。
+- 未刪除檔案，亦未修改 `system_data/`。
+
+### system_data/ 參考結果
+
+- 參考舊 Diary controller、service 與 DAO 的分享欄位及公開日記查詢業務意圖。
+- 正式 API contract 優先；未沿用舊系統的 account path parameter、廣泛修改 endpoint 或舊分層程式。
+- 實作沿用新版 Annoyance 的 owner 驗證、明確 boolean 目標狀態與冪等更新模式。
+
+### API 異動
+
+- 實作既有 contract 的 `PATCH /api/diaries/{id}/share`，成功回傳 HTTP 200 與更新後的 `ApiResponse<DiaryResponse>`。
+- Request body 為 `{ "isShared": true | false }`；缺漏欄位為 400，找不到 owner-scoped 日記為 404。
+- `docs/API_SPEC.md` 已完整定義本次 contract，未修改規格。
+
+### Database 異動
+
+- 無 schema、SQL 或 Migration 異動；沿用 `entries.is_shared` 欄位。
+
+### 文件更新
+
+- `docs/TASKS.md` 將修改日記 API 標記 DONE，並記錄分享／取消分享日記 API 的 TODO → IN PROGRESS → REVIEW。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次實作與驗證。
+
+### 測試方式與結果
+
+- Diary 分享 DTO／Controller／Service targeted Gradle tests：BUILD SUCCESSFUL。
+- `./gradlew test`：BUILD SUCCESSFUL。
+- `git diff --check`：通過。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；保存期限截止日為 2026-06-22。
+- 最早正式紀錄為 2026-06-29，未發現超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 未作為本次紀錄來源且未修改。
+
+### 待確認事項
+
+- 等待 Task PR 建立與 review；核准並合併至 `feature/phase4` 後，才能將本 Task 標記 DONE 並開始下載日記媒體 API。

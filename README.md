@@ -407,8 +407,8 @@ docker compose down
 | `BACKEND_PORT` | 對外 Backend port | `8080` |
 | `CORS_ALLOWED_ORIGIN_PATTERNS` | 後端允許的前端來源 pattern | `http://localhost:*,http://127.0.0.1:*` |
 | `CORS_ALLOWED_METHODS` | 後端允許的 HTTP method | `GET,POST,PUT,PATCH,DELETE,OPTIONS` |
-| `CORS_ALLOWED_HEADERS` | 後端允許的 request header | `Authorization,Content-Type` |
-| `CORS_EXPOSED_HEADERS` | 後端回傳可被前端讀取的 header | `Authorization` |
+| `CORS_ALLOWED_HEADERS` | 後端允許的 request header | `Authorization,Content-Type,Range` |
+| `CORS_EXPOSED_HEADERS` | 後端回傳可被前端讀取的 header | `Authorization,Accept-Ranges,Content-Length,Content-Range` |
 | `CORS_ALLOW_CREDENTIALS` | 是否允許 credentials | `true` |
 | `CORS_MAX_AGE` | preflight cache 秒數 | `3600` |
 | `JWT_ISSUER` | JWT issuer | `monsters` |
