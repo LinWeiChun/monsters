@@ -6,6 +6,7 @@ import 'package:monsters/config/app_config.dart';
 import 'package:monsters/core/network/api_client.dart';
 import 'package:monsters/models/diary_draft.dart';
 import 'package:monsters/models/diary_response.dart';
+import 'package:monsters/models/entry_draft_snapshot.dart';
 import 'package:monsters/pages/diary_chat_page.dart';
 import 'package:monsters/providers/diary_chat_provider.dart';
 import 'package:monsters/repositories/diary_repository.dart';
@@ -20,7 +21,12 @@ void main() {
     testWidgets('diary Mobile follows the 390 canvas at $size', (tester) async {
       await _setSurface(tester, size);
       await tester.pumpWidget(
-        const ProviderScope(child: MaterialApp(home: DiaryChatPage())),
+        ProviderScope(
+          overrides: [
+            diaryRepositoryProvider.overrideWithValue(_FakeDiaryRepository()),
+          ],
+          child: const MaterialApp(home: DiaryChatPage()),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -50,7 +56,12 @@ void main() {
     ) async {
       await _setSurface(tester, size);
       await tester.pumpWidget(
-        const ProviderScope(child: MaterialApp(home: DiaryChatPage())),
+        ProviderScope(
+          overrides: [
+            diaryRepositoryProvider.overrideWithValue(_FakeDiaryRepository()),
+          ],
+          child: const MaterialApp(home: DiaryChatPage()),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -72,7 +83,12 @@ void main() {
   ) async {
     await _setSurface(tester, const Size(1440, 900));
     await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: DiaryChatPage())),
+      ProviderScope(
+        overrides: [
+          diaryRepositoryProvider.overrideWithValue(_FakeDiaryRepository()),
+        ],
+        child: const MaterialApp(home: DiaryChatPage()),
+      ),
     );
 
     expect(find.byKey(const Key('diaryChatGreeting')), findsOneWidget);
@@ -95,7 +111,12 @@ void main() {
   ) async {
     await _setSurface(tester, const Size(390, 844));
     await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: DiaryChatPage())),
+      ProviderScope(
+        overrides: [
+          diaryRepositoryProvider.overrideWithValue(_FakeDiaryRepository()),
+        ],
+        child: const MaterialApp(home: DiaryChatPage()),
+      ),
     );
 
     await _tapVisible(tester, find.byKey(const Key('diaryChatStartButton')));
@@ -146,7 +167,12 @@ void main() {
   testWidgets('shows the Penpot Mobile drawing canvas state', (tester) async {
     await _setSurface(tester, const Size(390, 844));
     await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: DiaryChatPage())),
+      ProviderScope(
+        overrides: [
+          diaryRepositoryProvider.overrideWithValue(_FakeDiaryRepository()),
+        ],
+        child: const MaterialApp(home: DiaryChatPage()),
+      ),
     );
 
     await _tapVisible(tester, find.byKey(const Key('diaryChatStartButton')));
@@ -282,6 +308,74 @@ Future<void> _setSurface(WidgetTester tester, Size size) async {
 class _FakeDiaryRepository extends DiaryRepository {
   _FakeDiaryRepository() : super(_dummyClient());
 
+  DiaryRecordMethod? _recordMethod;
+  String _content = '';
+  int? _score;
+  bool? _isShared;
+
+  @override
+  Future<EntryDraftSnapshot?> getDraft() async => null;
+
+  @override
+  Future<EntryDraftSnapshot> saveDraft({
+    required String step,
+    required DiaryRecordMethod? recordMethod,
+    required String content,
+    required DiaryMediaFile? contentMedia,
+    required bool? wantsDrawing,
+    required DiaryDrawingFile? drawing,
+    required int? score,
+    required bool? isShared,
+  }) async {
+    _recordMethod = recordMethod;
+    _content = content;
+    _score = score;
+    _isShared = isShared;
+    return EntryDraftSnapshot(
+      id: 1,
+      entryType: 'DIARY',
+      step: step,
+      category: null,
+      recordMethod: recordMethod?.apiValue,
+      content: recordMethod == DiaryRecordMethod.text ? content : null,
+      wantsDrawing: wantsDrawing,
+      score: score,
+      isShared: isShared,
+      expiresAt: DateTime.parse('2026-08-27T10:00:00+08:00'),
+      contentMedia: _mediaSnapshot(contentMedia, 'CONTENT', 11),
+      drawingMedia:
+          drawing == null
+              ? null
+              : EntryDraftMediaSnapshot(
+                id: 12,
+                role: 'DRAWING',
+                type: 'drawing',
+                fileName: drawing.name,
+                contentType: drawing.mimeType,
+                sizeBytes: drawing.sizeBytes,
+                durationSeconds: null,
+                downloadUrl: '/api/diaries/draft/media/12',
+              ),
+    );
+  }
+
+  @override
+  Future<void> discardDraft() async {}
+
+  @override
+  Future<DiaryResponse> submitDraft() async {
+    await Future<void>.delayed(const Duration(milliseconds: 1));
+    return DiaryResponse(
+      id: 301,
+      recordMethod: (_recordMethod ?? DiaryRecordMethod.text).apiValue,
+      content: _content,
+      score: _score ?? 3,
+      isShared: _isShared ?? false,
+      occurredAt: '2026-07-22T10:00:00+08:00',
+      media: const [],
+    );
+  }
+
   @override
   Future<DiaryResponse> create({
     required DiaryRecordMethod recordMethod,
@@ -300,6 +394,27 @@ class _FakeDiaryRepository extends DiaryRepository {
       isShared: isShared,
       occurredAt: '2026-07-22T10:00:00+08:00',
       media: const [],
+    );
+  }
+
+  EntryDraftMediaSnapshot? _mediaSnapshot(
+    DiaryMediaFile? media,
+    String role,
+    int id,
+  ) {
+    if (media == null) {
+      return null;
+    }
+    return EntryDraftMediaSnapshot(
+      id: id,
+      role: role,
+      type: media.method.apiValue.toLowerCase(),
+      fileName: media.name,
+      contentType: media.mimeType,
+      sizeBytes: media.sizeBytes,
+      durationSeconds:
+          media.duration == null ? null : media.duration!.inMilliseconds / 1000,
+      downloadUrl: '/api/diaries/draft/media/$id',
     );
   }
 }

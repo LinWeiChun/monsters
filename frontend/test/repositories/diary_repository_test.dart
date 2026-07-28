@@ -62,6 +62,42 @@ void main() {
       expect(adapter.rawRequestBody, contains('"score":$score'));
     }
   });
+
+  test(
+    'uses durable diary draft endpoints for restore, save, submit, and discard',
+    () async {
+      final adapter = _DiaryDraftAdapter();
+      final dio = Dio()..httpClientAdapter = adapter;
+      final repository = DiaryRepository(
+        ApiClient(config: _config(), dio: dio),
+      );
+
+      final restored = await repository.getDraft();
+      final saved = await repository.saveDraft(
+        step: 'REVIEW',
+        recordMethod: DiaryRecordMethod.text,
+        content: '可繼續的日記',
+        contentMedia: null,
+        wantsDrawing: false,
+        drawing: null,
+        score: 4,
+        isShared: false,
+      );
+      final submitted = await repository.submitDraft();
+      await repository.discardDraft();
+
+      expect(restored?.content, '可繼續的日記');
+      expect(saved.step, 'REVIEW');
+      expect(submitted.id, 301);
+      expect(adapter.requests, [
+        'GET /diaries/draft',
+        'PUT /diaries/draft',
+        'POST /diaries/draft/submit',
+        'DELETE /diaries/draft',
+      ]);
+      expect(adapter.savedFormData?.files.map((part) => part.key), ['request']);
+    },
+  );
 }
 
 AppConfig _config() {
@@ -135,6 +171,63 @@ class _DiaryCreateAdapter implements HttpClientAdapter {
         },
       }),
       201,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+class _DiaryDraftAdapter implements HttpClientAdapter {
+  final List<String> requests = [];
+  FormData? savedFormData;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    requests.add('${options.method} ${options.path}');
+    if (options.method == 'PUT') {
+      savedFormData = options.data as FormData;
+    }
+    final data =
+        options.path == '/diaries/draft/submit'
+            ? {
+              'id': 301,
+              'recordMethod': 'TEXT',
+              'content': '可繼續的日記',
+              'score': 4,
+              'isShared': false,
+              'occurredAt': '2026-07-28T10:00:00+08:00',
+              'media': <Object>[],
+              'reward': null,
+            }
+            : options.method == 'DELETE'
+            ? null
+            : {
+              'draft': {
+                'id': 501,
+                'entryType': 'DIARY',
+                'step': 'REVIEW',
+                'category': null,
+                'recordMethod': 'TEXT',
+                'content': '可繼續的日記',
+                'wantsDrawing': false,
+                'score': 4,
+                'isShared': false,
+                'expiresAt': '2026-08-27T10:00:00+08:00',
+                'contentMedia': null,
+                'drawingMedia': null,
+              },
+            };
+    return ResponseBody.fromString(
+      jsonEncode({'success': true, 'message': 'success', 'data': data}),
+      options.path == '/diaries/draft/submit' ? 201 : 200,
       headers: {
         Headers.contentTypeHeader: [Headers.jsonContentType],
       },

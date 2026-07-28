@@ -1,6 +1,7 @@
 package com.monsters.controller.diary;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.monsters.dto.common.ApiResponse;
@@ -10,8 +11,13 @@ import com.monsters.dto.diary.DiaryRecordMethod;
 import com.monsters.dto.diary.DiaryResponse;
 import com.monsters.dto.diary.ShareDiaryRequest;
 import com.monsters.dto.diary.UpdateDiaryRequest;
+import com.monsters.dto.entry.EntryDraftEnvelope;
+import com.monsters.dto.entry.SaveEntryDraftRequest;
+import com.monsters.entity.entry.EntryDraftStep;
+import com.monsters.entity.entry.EntryType;
 import com.monsters.security.common.AuthenticatedUser;
 import com.monsters.service.diary.DiaryService;
+import com.monsters.service.entry.EntryDraftService;
 import java.time.OffsetDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -31,7 +37,10 @@ class DiaryControllerTest {
                 .containsExactly("/api/diaries");
 
         DiaryService service = org.mockito.Mockito.mock(DiaryService.class);
-        DiaryController controller = new DiaryController(service);
+        DiaryController controller = new DiaryController(
+                service,
+                org.mockito.Mockito.mock(EntryDraftService.class)
+        );
 
         assertThat(ReflectionTestUtils.getField(controller, "diaryService")).isSameAs(service);
     }
@@ -39,7 +48,10 @@ class DiaryControllerTest {
     @Test
     void createShouldReturnCreatedResponseForCurrentUser() {
         DiaryService service = org.mockito.Mockito.mock(DiaryService.class);
-        DiaryController controller = new DiaryController(service);
+        DiaryController controller = new DiaryController(
+                service,
+                org.mockito.Mockito.mock(EntryDraftService.class)
+        );
         CreateDiaryRequest request = new CreateDiaryRequest(
                 DiaryRecordMethod.IMAGE,
                 null,
@@ -80,9 +92,63 @@ class DiaryControllerTest {
     }
 
     @Test
+    void draftEndpointsShouldRestoreSaveDiscardAndSubmitForCurrentUser() {
+        DiaryService diaryService = org.mockito.Mockito.mock(DiaryService.class);
+        EntryDraftService draftService = org.mockito.Mockito.mock(EntryDraftService.class);
+        DiaryController controller = new DiaryController(diaryService, draftService);
+        AuthenticatedUser user = new AuthenticatedUser(1L, "user@example.com");
+        EntryDraftEnvelope draft = new EntryDraftEnvelope(null);
+        SaveEntryDraftRequest request = new SaveEntryDraftRequest(
+                EntryDraftStep.INTRO,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        DiaryResponse diary = new DiaryResponse(
+                10L,
+                DiaryRecordMethod.TEXT,
+                "content",
+                4,
+                false,
+                OffsetDateTime.parse("2026-07-28T12:00:00+08:00"),
+                List.of(),
+                null
+        );
+        when(draftService.find(1L, EntryType.DIARY)).thenReturn(draft);
+        when(draftService.save(1L, EntryType.DIARY, request, null, null))
+                .thenReturn(draft);
+        when(draftService.submitDiary(1L)).thenReturn(diary);
+
+        ResponseEntity<ApiResponse<EntryDraftEnvelope>> found =
+                controller.findDraft(user);
+        ResponseEntity<ApiResponse<EntryDraftEnvelope>> saved =
+                controller.saveDraft(user, request, null, null);
+        ResponseEntity<ApiResponse<Void>> discarded = controller.discardDraft(user);
+        ResponseEntity<ApiResponse<DiaryResponse>> submitted =
+                controller.submitDraft(user);
+
+        assertThat(found.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(found.getBody().data()).isSameAs(draft);
+        assertThat(saved.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(saved.getBody().data()).isSameAs(draft);
+        assertThat(discarded.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(submitted.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(submitted.getBody().data()).isSameAs(diary);
+        verify(draftService).discard(1L, EntryType.DIARY);
+    }
+
+    @Test
     void findAllShouldReturnPageForCurrentUser() {
         DiaryService service = org.mockito.Mockito.mock(DiaryService.class);
-        DiaryController controller = new DiaryController(service);
+        DiaryController controller = new DiaryController(
+                service,
+                org.mockito.Mockito.mock(EntryDraftService.class)
+        );
         PageResponse<DiaryResponse> page = new PageResponse<>(
                 List.of(),
                 0,
@@ -111,7 +177,10 @@ class DiaryControllerTest {
     @Test
     void findOneShouldReturnOwnerDiary() {
         DiaryService service = org.mockito.Mockito.mock(DiaryService.class);
-        DiaryController controller = new DiaryController(service);
+        DiaryController controller = new DiaryController(
+                service,
+                org.mockito.Mockito.mock(EntryDraftService.class)
+        );
         DiaryResponse diary = new DiaryResponse(
                 10L,
                 DiaryRecordMethod.TEXT,
@@ -138,7 +207,10 @@ class DiaryControllerTest {
     @Test
     void updateShouldReturnUpdatedDiaryForCurrentUser() {
         DiaryService service = org.mockito.Mockito.mock(DiaryService.class);
-        DiaryController controller = new DiaryController(service);
+        DiaryController controller = new DiaryController(
+                service,
+                org.mockito.Mockito.mock(EntryDraftService.class)
+        );
         UpdateDiaryRequest request = new UpdateDiaryRequest(
                 DiaryRecordMethod.TEXT,
                 "updated content",
@@ -178,7 +250,10 @@ class DiaryControllerTest {
     @Test
     void updateSharingShouldReturnUpdatedDiaryForCurrentUser() {
         DiaryService service = org.mockito.Mockito.mock(DiaryService.class);
-        DiaryController controller = new DiaryController(service);
+        DiaryController controller = new DiaryController(
+                service,
+                org.mockito.Mockito.mock(EntryDraftService.class)
+        );
         ShareDiaryRequest request = new ShareDiaryRequest(true);
         DiaryResponse diary = new DiaryResponse(
                 10L,

@@ -54,6 +54,7 @@
 | Phase 4 日記繪圖 | 採方案 A：心情圖為 optional；使用者可選擇繪圖或略過，每筆最多一張心情圖 |
 | Phase 4 起 UI 設計流程 | 採 Penpot design-first；所有後續含 UI 的 Phase 先完成或更新 Web／Mobile 畫板及狀態，再同步 UI 規格與 Flutter 實作 |
 | Phase 4 起 UI 驗收順序 | 採 Web-first：Penpot Web 畫板為第一實作與驗收來源，Mobile 畫板保留並於 Web 驗收後適配；新畫面需對齊已完成頁面的導覽、版型與視覺 token |
+| 日記／煩惱持久草稿 | 採獨立 `entry_drafts`／`entry_draft_media`，每位使用者每種類型最多一份草稿；草稿與 private R2 媒體保留 30 天，完成送出時在同一 Database transaction 轉為正式 Entry，放棄或逾期時清理媒體 |
 
 ## 二、已核准套件與工具
 

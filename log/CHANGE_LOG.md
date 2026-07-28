@@ -8,6 +8,84 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-28 15:01 PHASE4-ENTRY-DURABLE-DRAFTS
+
+Task
+Phase 4 日記／煩惱持久草稿與媒體暫存機制（REVIEW）
+
+執行者
+Codex
+
+### 完成內容
+
+- 確認首頁日記入口 PR #78 已合併至 `feature/phase4`，將前一個 Task 轉為 DONE。
+- 依使用者選定方案一，將日記與煩惱的本機記憶體草稿改為 owner-scoped 伺服器持久草稿；每位使用者每種類型只保留一份，儲存後續期 30 天。
+- 新增 restore、save、discard、submit 與草稿媒體下載 API；媒體沿用 private R2 驗證與 object key，送出時在同一 Database transaction 轉為正式 Entry，不重複上傳。
+- Flutter 進入頁面時自動還原步驟、文字、選項與暫存媒體；狀態變更自動暫存、文字採 debounce，送出前等待最後一次同步。
+- 「重新開始」改為先確認再刪除伺服器草稿；一般返回、重新整理或重新登入不刪除草稿。
+- 定期清理採每批 100 筆的 keyset 批次與 30 天期限；單次排程會持續處理後續批次，失敗項目留待下次排程，不會阻塞較新的到期草稿。
+- 儲存、送出、捨棄與清理共用 row lock，清理取得鎖後再次確認到期時間，避免刪除剛被續存的草稿。
+- 明確捨棄或到期清理若刪除 R2 object 失敗，保留 Database metadata 供下次重試。
+- Penpot Diary／Annoyance Web／Mobile 已同步「暫存並繼續」及 30 天跨裝置草稿文案。
+
+### 修改／新增／刪除檔案
+
+- 新增 Backend Entry Draft Entity、DTO、Repository、Persistence／Deletion／Cleanup／Domain Service 與對應單元測試。
+- 修改 Diary、Annoyance 與 Entry Media Controller，新增日記／煩惱草稿與 owner-only 草稿媒體 endpoint。
+- 新增 `frontend/lib/models/entry_draft_snapshot.dart` 與 generated JSON parser；修改 Diary／Annoyance Repository、Provider、頁面及 Entry 共用媒體預覽。
+- 修改 Diary／Annoyance page、provider、repository 測試，涵蓋草稿還原、媒體 metadata 與 durable endpoint。
+- 新增 `database/migrations/20260724_01_add_entry_drafts.sql`，並同步 `database/init/01_schema.sql`。
+- 修改 `docs/PROJECT_SPEC.md`、`docs/API_SPEC.md`、`docs/DATABASE_SPEC.md`、`docs/UI_SPEC.md`、`docs/DECISIONS.md`、`docs/TASKS.md`。
+- 未修改 `system_data/` 或 `log/CHANGE_HISTORY.xlsx`。
+- 既有未提交的 `frontend/pubspec.lock`、`frontend/tool/run_web_local.ps1` 與本 Task 無關的 `.agents/`、`skills-lock.json` 均保留且不納入 Commit。
+- 本機 `frontend/tool/verify.ps1` 繼續由 `.git/info/exclude` 忽略，不納入 Git。
+
+### system_data/ 參考結果
+
+- 參考舊日記／煩惱聊天室的步驟、內容、心情圖、分數與分享流程，確認返回新增頁時應回到原紀錄的業務意圖。
+- 舊系統只有正式新增流程，沒有持久草稿 API、草稿資料表或 private R2 暫存媒體機制。
+- 未沿用舊系統的畫面記憶體狀態、直接 HTTP、account-based owner、Base64／public media 或硬編碼設定。
+
+### API 異動
+
+- 新增 `/api/diaries/draft` 與 `/api/annoyances/draft` 的 GET、multipart PUT、DELETE，以及 `/draft/submit` POST。
+- 新增 `/api/diaries/draft/media/{mediaId}` 與 `/api/annoyances/draft/media/{mediaId}`，只允許目前 owner 以 JWT 下載。
+- 草稿 PUT 接受部分完成狀態及既有暫存媒體 ID；完整記錄組合只在 submit 驗證。
+- 無草稿時 GET 仍回傳 200 與 `{ "draft": null }`；submit 成功沿用既有 Diary／Annoyance 201 response。
+
+### Database 異動
+
+- 新增 `entry_drafts`，以 `(user_id, entry_type)` unique 限制每位使用者每種類型一份草稿，保存步驟、部分欄位與 `expires_at`。
+- 新增 `entry_draft_media`，每個草稿的 CONTENT／DRAWING 各最多一筆，保存 private R2 object metadata。
+- Migration 使用 `CREATE TABLE IF NOT EXISTS`，可重複執行；送出時沿用 object key 建立正式 `entry_media`。
+
+### 文件更新
+
+- Project、API、Database、UI、Decision 已同步 30 天期限、owner-only、跨裝置恢復、submit transaction、R2 清理重試與並行鎖定規則。
+- `docs/TASKS.md` 將 PR #78 首頁 Task 轉為 DONE，並將持久草稿 Task 推進至 REVIEW。
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 記錄本次實作與驗證。
+
+### 測試方式與結果
+
+- Backend `gradlew test`：275 tests，0 failures，4 skipped，BUILD SUCCESSFUL。
+- Flutter Analyze：PASS，31.3 秒。
+- Flutter完整測試：166 tests passed，50.1 秒。
+- Flutter Web Build：PASS，132.7 秒；既有 CupertinoIcons 字型提示與 Wasm 建議未造成失敗。
+- 草稿 Provider／Repository 定向測試：24 tests passed；Backend 草稿 Service、Deletion 與 Controller 定向測試通過。
+- Docker Desktop 未執行，因此未執行真實 MySQL／R2 端到端；Schema、Migration、transaction、storage cleanup 與 API 行為由靜態檢查及隔離測試涵蓋。
+
+### Log 保存期限檢查結果
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；2026-07-28 的保存期限截止日為 2026-06-28。
+- 三者最早正式紀錄皆為 2026-06-29，無超過一個月的紀錄，本次未刪除 Log；`CHANGE_HISTORY.xlsx` 維持只讀且未修改。
+
+### 待確認事項
+
+- 本 Task 維持 REVIEW；完成 Commit、Push 與 Task PR 後，仍需待 PR 合併至 `feature/phase4` 才能標記 DONE。
+- 部署前需在實際 MySQL 先套用 `database/migrations/20260724_01_add_entry_drafts.sql`，並確認 Backend 的 private R2 設定可用。
+
+---
+
 ## 2026-07-24 10:48 PHASE4-HOME-DIARY-ENTRY
 
 Task

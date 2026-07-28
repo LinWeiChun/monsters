@@ -15,15 +15,60 @@ class EntryMediaFile {
     required this.mimeType,
     required this.sizeBytes,
     required this.duration,
+    this.draftMediaId,
+    this.downloadUrl,
   });
 
+  factory EntryMediaFile.fromDraft({
+    required EntryRecordMethod method,
+    required int draftMediaId,
+    required String downloadUrl,
+    required String name,
+    required String mimeType,
+    required int sizeBytes,
+    required Duration? duration,
+  }) {
+    return EntryMediaFile(
+      method: method,
+      file: null,
+      bytes: Uint8List(0),
+      name: name,
+      mimeType: mimeType,
+      sizeBytes: sizeBytes,
+      duration: duration,
+      draftMediaId: draftMediaId,
+      downloadUrl: downloadUrl,
+    );
+  }
+
   final EntryRecordMethod method;
-  final XFile file;
+  final XFile? file;
   final Uint8List bytes;
   final String name;
   final String mimeType;
   final int sizeBytes;
   final Duration? duration;
+  final int? draftMediaId;
+  final String? downloadUrl;
+
+  bool get isPersistedDraft => draftMediaId != null;
+
+  EntryMediaFile withDraftReference({
+    required int draftMediaId,
+    required String downloadUrl,
+  }) {
+    return EntryMediaFile(
+      method: method,
+      file: file,
+      bytes: bytes,
+      name: name,
+      mimeType: mimeType,
+      sizeBytes: sizeBytes,
+      duration: duration,
+      draftMediaId: draftMediaId,
+      downloadUrl: downloadUrl,
+    );
+  }
 }
 
 class EntryMediaLimits {

@@ -9,6 +9,7 @@ import 'package:monsters/core/network/api_error_type.dart';
 import 'package:monsters/core/network/api_exception.dart';
 import 'package:monsters/models/diary_draft.dart';
 import 'package:monsters/models/diary_response.dart';
+import 'package:monsters/models/entry_draft_snapshot.dart';
 import 'package:monsters/providers/diary_chat_provider.dart';
 import 'package:monsters/repositories/diary_repository.dart';
 
@@ -155,6 +156,44 @@ void main() {
       expect(controller.state.submitError, 'Network failed.');
     },
   );
+
+  test('restores a server draft with private staged media', () async {
+    final repository = _FakeDiaryRepository(
+      draft: EntryDraftSnapshot(
+        id: 501,
+        entryType: 'DIARY',
+        step: 'DRAWING_DECISION',
+        category: null,
+        recordMethod: 'IMAGE',
+        content: null,
+        wantsDrawing: null,
+        score: null,
+        isShared: null,
+        expiresAt: DateTime.parse('2026-08-27T10:00:00+08:00'),
+        contentMedia: const EntryDraftMediaSnapshot(
+          id: 601,
+          role: 'CONTENT',
+          type: 'image',
+          fileName: 'memory.png',
+          contentType: 'image/png',
+          sizeBytes: 1024,
+          durationSeconds: null,
+          downloadUrl: '/api/diaries/draft/media/601',
+        ),
+        drawingMedia: null,
+      ),
+    );
+    final controller = DiaryChatController(repository);
+    addTearDown(controller.dispose);
+
+    await controller.restoreDraft();
+
+    expect(controller.state.step, DiaryChatStep.drawingDecision);
+    expect(controller.state.recordMethod, DiaryRecordMethod.image);
+    expect(controller.state.contentMedia?.draftMediaId, 601);
+    expect(controller.state.contentMedia?.file, isNull);
+    expect(controller.state.draftStatusMessage, contains('30 天'));
+  });
 }
 
 void _reachScoreStep(DiaryChatController controller) {
@@ -179,10 +218,66 @@ DiaryMediaFile _media(DiaryRecordMethod method) {
 }
 
 class _FakeDiaryRepository extends DiaryRepository {
-  _FakeDiaryRepository({this.exception}) : super(_dummyClient());
+  _FakeDiaryRepository({this.exception, this.draft}) : super(_dummyClient());
 
   final ApiException? exception;
+  final EntryDraftSnapshot? draft;
   int createCount = 0;
+  int? _score;
+  bool? _isShared;
+
+  @override
+  Future<EntryDraftSnapshot?> getDraft() async => draft;
+
+  @override
+  Future<EntryDraftSnapshot> saveDraft({
+    required String step,
+    required DiaryRecordMethod? recordMethod,
+    required String content,
+    required DiaryMediaFile? contentMedia,
+    required bool? wantsDrawing,
+    required DiaryDrawingFile? drawing,
+    required int? score,
+    required bool? isShared,
+  }) async {
+    _score = score;
+    _isShared = isShared;
+    return EntryDraftSnapshot(
+      id: 1,
+      entryType: 'DIARY',
+      step: step,
+      category: null,
+      recordMethod: recordMethod?.apiValue,
+      content: recordMethod == DiaryRecordMethod.text ? content : null,
+      wantsDrawing: wantsDrawing,
+      score: score,
+      isShared: isShared,
+      expiresAt: DateTime.parse('2026-08-27T10:00:00+08:00'),
+      contentMedia: null,
+      drawingMedia: null,
+    );
+  }
+
+  @override
+  Future<void> discardDraft() async {}
+
+  @override
+  Future<DiaryResponse> submitDraft() async {
+    createCount += 1;
+    final error = exception;
+    if (error != null) {
+      throw error;
+    }
+    return DiaryResponse(
+      id: 301,
+      recordMethod: 'TEXT',
+      content: '今天值得記下來',
+      score: _score ?? 3,
+      isShared: _isShared ?? false,
+      occurredAt: '2026-07-22T10:00:00+08:00',
+      media: const [],
+    );
+  }
 
   @override
   Future<DiaryResponse> create({
@@ -193,11 +288,6 @@ class _FakeDiaryRepository extends DiaryRepository {
     required int score,
     required bool isShared,
   }) async {
-    createCount += 1;
-    final error = exception;
-    if (error != null) {
-      throw error;
-    }
     return DiaryResponse(
       id: 301,
       recordMethod: recordMethod.apiValue,

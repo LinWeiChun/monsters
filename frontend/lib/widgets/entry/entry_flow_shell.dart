@@ -348,10 +348,24 @@ class _MobileMessagePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _MessageList(
-      keyPrefix: data.keyPrefix,
-      messages: data.messages,
-      height: 96,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _MessageList(
+          keyPrefix: data.keyPrefix,
+          messages: data.messages,
+          height: 96,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          data.privacyMessage,
+          style: const TextStyle(
+            color: AppColors.entrySuccess,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -1,6 +1,7 @@
 package com.monsters.controller.annoyance;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.monsters.dto.annoyance.AnnoyanceRecordMethod;
@@ -11,8 +12,13 @@ import com.monsters.dto.annoyance.SolveAnnoyanceRequest;
 import com.monsters.dto.annoyance.UpdateAnnoyanceRequest;
 import com.monsters.dto.common.ApiResponse;
 import com.monsters.dto.common.PageResponse;
+import com.monsters.dto.entry.EntryDraftEnvelope;
+import com.monsters.dto.entry.SaveEntryDraftRequest;
+import com.monsters.entity.entry.EntryDraftStep;
+import com.monsters.entity.entry.EntryType;
 import com.monsters.security.common.AuthenticatedUser;
 import com.monsters.service.annoyance.AnnoyanceService;
+import com.monsters.service.entry.EntryDraftService;
 import java.time.OffsetDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -32,7 +38,10 @@ class AnnoyanceControllerTest {
                 .containsExactly("/api/annoyances");
 
         AnnoyanceService service = org.mockito.Mockito.mock(AnnoyanceService.class);
-        AnnoyanceController controller = new AnnoyanceController(service);
+        AnnoyanceController controller = new AnnoyanceController(
+                service,
+                org.mockito.Mockito.mock(EntryDraftService.class)
+        );
 
         assertThat(ReflectionTestUtils.getField(controller, "annoyanceService")).isSameAs(service);
     }
@@ -40,7 +49,10 @@ class AnnoyanceControllerTest {
     @Test
     void createShouldReturnCreatedResponseForCurrentUser() {
         AnnoyanceService service = org.mockito.Mockito.mock(AnnoyanceService.class);
-        AnnoyanceController controller = new AnnoyanceController(service);
+        AnnoyanceController controller = new AnnoyanceController(
+                service,
+                org.mockito.Mockito.mock(EntryDraftService.class)
+        );
         CreateAnnoyanceRequest request = new CreateAnnoyanceRequest(
                 "ACADEMIC",
                 AnnoyanceRecordMethod.IMAGE,
@@ -84,9 +96,69 @@ class AnnoyanceControllerTest {
     }
 
     @Test
+    void draftEndpointsShouldRestoreSaveDiscardAndSubmitForCurrentUser() {
+        AnnoyanceService annoyanceService =
+                org.mockito.Mockito.mock(AnnoyanceService.class);
+        EntryDraftService draftService = org.mockito.Mockito.mock(EntryDraftService.class);
+        AnnoyanceController controller = new AnnoyanceController(
+                annoyanceService,
+                draftService
+        );
+        AuthenticatedUser user = new AuthenticatedUser(1L, "user@example.com");
+        EntryDraftEnvelope draft = new EntryDraftEnvelope(null);
+        SaveEntryDraftRequest request = new SaveEntryDraftRequest(
+                EntryDraftStep.INTRO,
+                "ACADEMIC",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        AnnoyanceResponse annoyance = new AnnoyanceResponse(
+                10L,
+                null,
+                AnnoyanceRecordMethod.TEXT,
+                "content",
+                4,
+                false,
+                false,
+                OffsetDateTime.parse("2026-07-28T12:00:00+08:00"),
+                List.of(),
+                null
+        );
+        when(draftService.find(1L, EntryType.ANNOYANCE)).thenReturn(draft);
+        when(draftService.save(1L, EntryType.ANNOYANCE, request, null, null))
+                .thenReturn(draft);
+        when(draftService.submitAnnoyance(1L)).thenReturn(annoyance);
+
+        ResponseEntity<ApiResponse<EntryDraftEnvelope>> found =
+                controller.findDraft(user);
+        ResponseEntity<ApiResponse<EntryDraftEnvelope>> saved =
+                controller.saveDraft(user, request, null, null);
+        ResponseEntity<ApiResponse<Void>> discarded = controller.discardDraft(user);
+        ResponseEntity<ApiResponse<AnnoyanceResponse>> submitted =
+                controller.submitDraft(user);
+
+        assertThat(found.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(found.getBody().data()).isSameAs(draft);
+        assertThat(saved.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(saved.getBody().data()).isSameAs(draft);
+        assertThat(discarded.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(submitted.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(submitted.getBody().data()).isSameAs(annoyance);
+        verify(draftService).discard(1L, EntryType.ANNOYANCE);
+    }
+
+    @Test
     void findAllShouldReturnPageForCurrentUser() {
         AnnoyanceService service = org.mockito.Mockito.mock(AnnoyanceService.class);
-        AnnoyanceController controller = new AnnoyanceController(service);
+        AnnoyanceController controller = new AnnoyanceController(
+                service,
+                org.mockito.Mockito.mock(EntryDraftService.class)
+        );
         PageResponse<AnnoyanceResponse> page = new PageResponse<>(
                 List.of(),
                 0,
@@ -116,7 +188,10 @@ class AnnoyanceControllerTest {
     @Test
     void findOneShouldReturnOwnerAnnoyance() {
         AnnoyanceService service = org.mockito.Mockito.mock(AnnoyanceService.class);
-        AnnoyanceController controller = new AnnoyanceController(service);
+        AnnoyanceController controller = new AnnoyanceController(
+                service,
+                org.mockito.Mockito.mock(EntryDraftService.class)
+        );
         AnnoyanceResponse annoyance = new AnnoyanceResponse(
                 10L,
                 null,
@@ -145,7 +220,10 @@ class AnnoyanceControllerTest {
     @Test
     void updateShouldReturnUpdatedAnnoyanceForCurrentUser() {
         AnnoyanceService service = org.mockito.Mockito.mock(AnnoyanceService.class);
-        AnnoyanceController controller = new AnnoyanceController(service);
+        AnnoyanceController controller = new AnnoyanceController(
+                service,
+                org.mockito.Mockito.mock(EntryDraftService.class)
+        );
         UpdateAnnoyanceRequest request = new UpdateAnnoyanceRequest(
                 "ACADEMIC",
                 AnnoyanceRecordMethod.TEXT,
@@ -187,7 +265,10 @@ class AnnoyanceControllerTest {
     @Test
     void solveShouldReturnSolvedAnnoyanceForCurrentUser() {
         AnnoyanceService service = org.mockito.Mockito.mock(AnnoyanceService.class);
-        AnnoyanceController controller = new AnnoyanceController(service);
+        AnnoyanceController controller = new AnnoyanceController(
+                service,
+                org.mockito.Mockito.mock(EntryDraftService.class)
+        );
         SolveAnnoyanceRequest request = new SolveAnnoyanceRequest(true);
         AnnoyanceResponse annoyance = new AnnoyanceResponse(
                 10L,
@@ -218,7 +299,10 @@ class AnnoyanceControllerTest {
     @Test
     void updateSharingShouldReturnUpdatedAnnoyanceForCurrentUser() {
         AnnoyanceService service = org.mockito.Mockito.mock(AnnoyanceService.class);
-        AnnoyanceController controller = new AnnoyanceController(service);
+        AnnoyanceController controller = new AnnoyanceController(
+                service,
+                org.mockito.Mockito.mock(EntryDraftService.class)
+        );
         ShareAnnoyanceRequest request = new ShareAnnoyanceRequest(true);
         AnnoyanceResponse annoyance = new AnnoyanceResponse(
                 10L,

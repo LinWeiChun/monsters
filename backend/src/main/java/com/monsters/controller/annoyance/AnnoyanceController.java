@@ -7,13 +7,18 @@ import com.monsters.dto.annoyance.SolveAnnoyanceRequest;
 import com.monsters.dto.annoyance.UpdateAnnoyanceRequest;
 import com.monsters.dto.common.ApiResponse;
 import com.monsters.dto.common.PageResponse;
+import com.monsters.dto.entry.EntryDraftEnvelope;
+import com.monsters.dto.entry.SaveEntryDraftRequest;
+import com.monsters.entity.entry.EntryType;
 import com.monsters.security.common.AuthenticatedUser;
 import com.monsters.service.annoyance.AnnoyanceService;
+import com.monsters.service.entry.EntryDraftService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,9 +36,14 @@ import org.springframework.web.multipart.MultipartFile;
 public class AnnoyanceController {
 
     private final AnnoyanceService annoyanceService;
+    private final EntryDraftService entryDraftService;
 
-    public AnnoyanceController(AnnoyanceService annoyanceService) {
+    public AnnoyanceController(
+            AnnoyanceService annoyanceService,
+            EntryDraftService entryDraftService
+    ) {
         this.annoyanceService = annoyanceService;
+        this.entryDraftService = entryDraftService;
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -48,6 +58,63 @@ public class AnnoyanceController {
                 request,
                 contentFile,
                 drawingFile
+        );
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Annoyance creation success", response));
+    }
+
+    @GetMapping("/draft")
+    public ResponseEntity<ApiResponse<EntryDraftEnvelope>> findDraft(
+            @AuthenticationPrincipal AuthenticatedUser currentUser
+    ) {
+        EntryDraftEnvelope response = entryDraftService.find(
+                currentUser.userId(),
+                EntryType.ANNOYANCE
+        );
+        return ResponseEntity.ok(ApiResponse.success(
+                "Annoyance draft query success",
+                response
+        ));
+    }
+
+    @PutMapping(value = "/draft", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<EntryDraftEnvelope>> saveDraft(
+            @AuthenticationPrincipal AuthenticatedUser currentUser,
+            @Valid @RequestPart("request") SaveEntryDraftRequest request,
+            @RequestPart(value = "contentFile", required = false) MultipartFile contentFile,
+            @RequestPart(value = "drawingFile", required = false) MultipartFile drawingFile
+    ) {
+        EntryDraftEnvelope response = entryDraftService.save(
+                currentUser.userId(),
+                EntryType.ANNOYANCE,
+                request,
+                contentFile,
+                drawingFile
+        );
+        return ResponseEntity.ok(ApiResponse.success(
+                "Annoyance draft save success",
+                response
+        ));
+    }
+
+    @DeleteMapping("/draft")
+    public ResponseEntity<ApiResponse<Void>> discardDraft(
+            @AuthenticationPrincipal AuthenticatedUser currentUser
+    ) {
+        entryDraftService.discard(currentUser.userId(), EntryType.ANNOYANCE);
+        return ResponseEntity.ok(ApiResponse.success(
+                "Annoyance draft discard success",
+                null
+        ));
+    }
+
+    @PostMapping("/draft/submit")
+    public ResponseEntity<ApiResponse<AnnoyanceResponse>> submitDraft(
+            @AuthenticationPrincipal AuthenticatedUser currentUser
+    ) {
+        AnnoyanceResponse response = entryDraftService.submitAnnoyance(
+                currentUser.userId()
         );
         return ResponseEntity
                 .status(HttpStatus.CREATED)

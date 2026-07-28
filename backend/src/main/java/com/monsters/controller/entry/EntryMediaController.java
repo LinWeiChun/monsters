@@ -2,6 +2,7 @@ package com.monsters.controller.entry;
 
 import com.monsters.entity.entry.EntryType;
 import com.monsters.security.common.AuthenticatedUser;
+import com.monsters.service.entry.EntryDraftService;
 import com.monsters.service.entry.EntryMediaDownloadResult;
 import com.monsters.service.entry.EntryMediaDownloadService;
 import org.springframework.core.io.InputStreamResource;
@@ -22,9 +23,14 @@ public class EntryMediaController {
     private static final String ACCEPT_RANGES_VALUE = "bytes";
 
     private final EntryMediaDownloadService entryMediaDownloadService;
+    private final EntryDraftService entryDraftService;
 
-    public EntryMediaController(EntryMediaDownloadService entryMediaDownloadService) {
+    public EntryMediaController(
+            EntryMediaDownloadService entryMediaDownloadService,
+            EntryDraftService entryDraftService
+    ) {
         this.entryMediaDownloadService = entryMediaDownloadService;
+        this.entryDraftService = entryDraftService;
     }
 
     @GetMapping("/annoyances/{id}/media/{mediaId}")
@@ -55,6 +61,36 @@ public class EntryMediaController {
                 currentUser.userId(),
                 EntryType.DIARY,
                 id,
+                mediaId,
+                rangeHeader
+        );
+        return toResponse(download);
+    }
+
+    @GetMapping("/annoyances/draft/media/{mediaId}")
+    public ResponseEntity<InputStreamResource> downloadAnnoyanceDraftMedia(
+            @AuthenticationPrincipal AuthenticatedUser currentUser,
+            @PathVariable Long mediaId,
+            @RequestHeader(value = HttpHeaders.RANGE, required = false) String rangeHeader
+    ) {
+        EntryMediaDownloadResult download = entryDraftService.download(
+                currentUser.userId(),
+                EntryType.ANNOYANCE,
+                mediaId,
+                rangeHeader
+        );
+        return toResponse(download);
+    }
+
+    @GetMapping("/diaries/draft/media/{mediaId}")
+    public ResponseEntity<InputStreamResource> downloadDiaryDraftMedia(
+            @AuthenticationPrincipal AuthenticatedUser currentUser,
+            @PathVariable Long mediaId,
+            @RequestHeader(value = HttpHeaders.RANGE, required = false) String rangeHeader
+    ) {
+        EntryMediaDownloadResult download = entryDraftService.download(
+                currentUser.userId(),
+                EntryType.DIARY,
                 mediaId,
                 rangeHeader
         );

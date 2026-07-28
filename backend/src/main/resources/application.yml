@@ -17,6 +17,9 @@ server:
   port: 8080
 
 app:
+  entry-draft:
+    retention-days: ${ENTRY_DRAFT_RETENTION_DAYS:30}
+    cleanup-cron: "${ENTRY_DRAFT_CLEANUP_CRON:0 30 3 * * *}"
   cors:
     allowed-origin-patterns: ${CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*,http://127.0.0.1:*}
     allowed-methods: ${CORS_ALLOWED_METHODS:GET,POST,PUT,PATCH,DELETE,OPTIONS}

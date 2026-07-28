@@ -70,6 +70,7 @@ class DiaryMobileFlow extends StatelessWidget {
                   progress: progress,
                   title: title,
                   subtitle: subtitle,
+                  status: state.draftStatusMessage,
                 ),
                 if (state.step != DiaryChatStep.intro && !completed)
                   Positioned(
@@ -138,7 +139,7 @@ class DiaryMobileFlow extends StatelessWidget {
         textLabel: '日記內容',
         textHint: '今天早上走到公司時，突然發現風很舒服……',
         maxTextLength: 2000,
-        continueLabel: '儲存並繼續',
+        continueLabel: '暫存並繼續',
         showTitle: false,
       ),
       DiaryChatStep.drawingDecision => _MobileDrawingDecision(
@@ -181,12 +182,14 @@ class _MobileHeader extends StatelessWidget {
     required this.progress,
     required this.title,
     required this.subtitle,
+    required this.status,
   });
 
   final String stepLabel;
   final double progress;
   final String title;
   final String subtitle;
+  final String status;
 
   @override
   Widget build(BuildContext context) {
@@ -215,6 +218,20 @@ class _MobileHeader extends StatelessWidget {
             style: const TextStyle(
               color: AppColors.entryMuted,
               fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        Positioned(
+          left: 24,
+          top: 145,
+          width: 342,
+          child: Text(
+            status,
+            key: const Key('diaryMobileDraftStatus'),
+            style: const TextStyle(
+              color: AppColors.entrySuccess,
+              fontSize: 10,
               fontWeight: FontWeight.w700,
             ),
           ),

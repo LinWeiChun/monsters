@@ -47,6 +47,39 @@ void main() {
       startsWith(Headers.jsonContentType),
     );
   });
+
+  test('uses durable annoyance draft endpoints with category state', () async {
+    final adapter = _AnnoyanceDraftAdapter();
+    final dio = Dio()..httpClientAdapter = adapter;
+    final repository = AnnoyanceRepository(
+      ApiClient(config: _config(), dio: dio),
+    );
+
+    final restored = await repository.getDraft();
+    final saved = await repository.saveDraft(
+      step: 'REVIEW',
+      category: annoyanceCategories.first,
+      recordMethod: AnnoyanceRecordMethod.text,
+      content: '可繼續的煩惱',
+      contentMedia: null,
+      wantsDrawing: false,
+      drawing: null,
+      score: 3,
+      isShared: false,
+    );
+    final submitted = await repository.submitDraft();
+    await repository.discardDraft();
+
+    expect(restored?.category?.code, 'ACADEMIC');
+    expect(saved.content, '可繼續的煩惱');
+    expect(submitted.id, 101);
+    expect(adapter.requests, [
+      'GET /annoyances/draft',
+      'PUT /annoyances/draft',
+      'POST /annoyances/draft/submit',
+      'DELETE /annoyances/draft',
+    ]);
+  });
 }
 
 AppConfig _config() {
@@ -113,6 +146,61 @@ class _AnnoyanceCreateAdapter implements HttpClientAdapter {
         },
       }),
       201,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+class _AnnoyanceDraftAdapter implements HttpClientAdapter {
+  final List<String> requests = [];
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    requests.add('${options.method} ${options.path}');
+    final data =
+        options.path == '/annoyances/draft/submit'
+            ? {
+              'id': 101,
+              'category': {'code': 'ACADEMIC', 'name': '學業'},
+              'recordMethod': 'TEXT',
+              'content': '可繼續的煩惱',
+              'score': 3,
+              'isShared': false,
+              'isSolved': false,
+              'occurredAt': '2026-07-28T10:00:00+08:00',
+              'media': <Object>[],
+              'reward': null,
+            }
+            : options.method == 'DELETE'
+            ? null
+            : {
+              'draft': {
+                'id': 501,
+                'entryType': 'ANNOYANCE',
+                'step': 'REVIEW',
+                'category': {'code': 'ACADEMIC', 'name': '學業'},
+                'recordMethod': 'TEXT',
+                'content': '可繼續的煩惱',
+                'wantsDrawing': false,
+                'score': 3,
+                'isShared': false,
+                'expiresAt': '2026-08-27T10:00:00+08:00',
+                'contentMedia': null,
+                'drawingMedia': null,
+              },
+            };
+    return ResponseBody.fromString(
+      jsonEncode({'success': true, 'message': 'success', 'data': data}),
+      options.path == '/annoyances/draft/submit' ? 201 : 200,
       headers: {
         Headers.contentTypeHeader: [Headers.jsonContentType],
       },
