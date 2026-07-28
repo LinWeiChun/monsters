@@ -2,12 +2,90 @@
 
 # 貘nsters REST API 規格
 
+> 狀態說明：本文件以「零、已核准 v1 目標契約」為正式目標。第二章以後仍包含 `develop` 目前無版本 API 的實作細節，供 Phase 4 整合與相容 Migration 使用；凡涉及 `/api`、`account`、公開頭貼上傳、JWT Refresh Token、伺服器密碼鎖、`isShared`、分數／分類必填、隨機怪獸或深度心理測驗者，均屬待淘汰基線，不得新增依賴。
+
+## 零、已核准 v1 目標契約
+
+### 0.1 API 邊界
+
+- 正式 Base URL 固定為 `/api/v1`。
+- Client 可引用的 Entry、媒體、Community Post、留言、案件與工作使用 UUID `publicId`，不得回傳內部自增 ID。
+- 會員 owner 一律由 Access Token 的工作階段取得，Client 不得傳入 `userId`、`account` 或 owner。
+- 不存在、已刪除、無權查看或不屬於父資源時，以一致 404 避免洩漏。
+- 建立、分享、刪除申請、匯出等可重試操作接受 `Idempotency-Key`。
+- 更新 Aggregate 必須帶版本或 `If-Match`；版本衝突回傳 409，不得最後寫入者無聲覆蓋。
+- OpenAPI 為可執行契約，CI 必須驗證實作與規格未漂移。
+
+### 0.2 身分與工作階段
+
+| 能力 | v1 契約 |
+|---|---|
+| Email 註冊 | 不接受 `account`；建立 `PENDING_EMAIL_VERIFICATION` 會員並寄送一次性驗證連結 |
+| Email 驗證 | Token 短效、單次使用、Backend 只保存 hash |
+| Google 登入 | 只接受已驗證 Email；同 Email 不自動合併，回傳需連結狀態 |
+| 年齡資格 | Email 驗證後提交生日、服務地區與條款版本；13–17 歲進入監護人同意流程 |
+| Guardian Consent | 一次性 Email 連結；核准／撤回特定條款版本，不授予內容存取 |
+| Access Token | 10 分鐘短效 JWT，只含最少聲明與工作階段 ID |
+| Refresh Token | 高強度不透明值，每次換發 rotation；Backend 只保存 hash 與 Token family |
+| Web Session | Refresh Token 使用 `__Host-` HttpOnly、Secure、SameSite Cookie；Access Token 只放記憶體 |
+| App Session | Refresh Token 存 Keychain／Keystore；Access Token 只放記憶體 |
+| Session Expiry | 一般會員閒置 30 天、絕對 90 天；特權後台閒置 30 分鐘、絕對 8 小時 |
+| Reauthentication | 敏感操作需五分鐘內取得、用途受限且不可延長的 reauth credential |
+| Password Reset | 對外統一回應，Email reset link 15 分鐘單次使用；成功後撤銷所有工作階段 |
+| Privileged MFA | Moderator、Admin、Content Reviewer 必須完成 TOTP 與備援碼才能使用後台 |
+
+Web 使用 Cookie 的 Auth endpoint 必須驗證可信任 Origin／CSRF 防護；SameSite 不能作為唯一防護。任何 Token、Cookie、Authorization Header 或驗證連結不得寫入 Log。
+
+### 0.3 核心資源契約
+
+| 資源 | v1 行為 |
+|---|---|
+| Entry | Diary／Annoyance 共用核心，建立／修改命令分離；私人分類與 1–5 情緒負荷皆選填 |
+| Emotional Trace | 最近 30 個本地日曆日，同日多筆取平均、缺值留白，可依 Entry type 篩選 |
+| Entry Search | 本人主動關鍵字與 metadata 篩選；不保存查詢、不做向量或 AI 搜尋 |
+| Media | 先建立隔離工作，完成真實格式、重新處理、中繼資料移除與掃描後才可下載 |
+| Community Post | 由 Entry 建立獨立公開快照；更新產生版本，私人原文修改不得自動同步 |
+| Unshare | 立即隱藏 Post、留言與支持，七天內清除；重新分享產生新 Post |
+| Monster | 查詢圖鑑、已取得項目、固定里程碑進度與選定頭貼；不提供 random API |
+| Self Exploration | 結果完全私人、版本化、可逐筆刪除，不提供分享 |
+| Educational Quiz | 有答案、說明、來源與適用年齡；不排名、不因答錯扣獎勵進度 |
+| Data Export | 重新驗證後建立背景工作，回傳狀態與短效下載連結 |
+| Account Deletion | 重新驗證後立即停用與取消分享，七天內可取消，之後永久清除 |
+
+### 0.4 社群與後台契約
+
+- Community API 只接受具 Community Eligibility 的成年會員。
+- 社群提供時間／公開主題查詢、單層留言、單一支持、檢舉、封鎖、取消分享及申訴。
+- 不提供公開支持數、排行榜、私訊、追蹤、標記、使用者搜尋、社群全文搜尋或永久媒體 URL。
+- Report 建立後只對檢舉者隱藏內容，不因檢舉數自動下架；自傷／傷人疑慮進入人工優先佇列。
+- Moderator 只處理已檢舉公開內容；Admin 管理角色、設定與正式停權；Content Reviewer 只審閱版本化內容。
+- 所有特權操作須 MFA、最小權限與不可修改稽核；任何角色都不得查詢私人 Entry 或模擬會員登入。
+
+### 0.5 錯誤與工作狀態
+
+v1 錯誤 Response 必須包含：
+
+```json
+{
+  "success": false,
+  "code": "ENTRY_VERSION_CONFLICT",
+  "message": "資料已在其他裝置更新",
+  "requestId": "opaque-request-id",
+  "data": null
+}
+```
+
+- `code` 為穩定機器代碼；Client 不得解析自由文字決定流程。
+- `requestId` 不可包含 user、Email、Token 或資源內部 ID。
+- 背景工作回傳明確 `pending`、`processing`、`completed`、`failed`、`expired` 等狀態。
+- 媒體、Email、匯出、刪除、通知與獎勵透過 Transactional Outbox 與 idempotent Worker 執行；一次性 best-effort 不符合契約。
+
 ## 一、共通規範
 
 Base URL：
 
 ```text
-/api
+/api/v1
 ```
 
 Flutter API Client：
@@ -19,7 +97,7 @@ frontend/lib/core/network/ApiClient
 前端 API Base URL 預設值：
 
 ```text
-http://localhost:8080/api
+http://localhost:8080/api/v1
 ```
 
 前端可透過 dart-define 覆寫：
@@ -69,7 +147,9 @@ frontend/lib/core/network/ApiErrorType
 ```json
 {
   "success": false,
+  "code": "VALIDATION_ERROR",
   "message": "錯誤訊息",
+  "requestId": "opaque-request-id",
   "data": null
 }
 ```
@@ -80,12 +160,14 @@ frontend/lib/core/network/ApiErrorType
 com.monsters.dto.common.ApiResponse<T>
 ```
 
-Controller 回傳資料時必須使用 `ApiResponse<T>` 包裝，欄位固定為：
+Controller 回傳資料時必須使用 `ApiResponse<T>` 包裝；v1 欄位為：
 
 | 欄位 | 型別 | 說明 |
 |---|---|---|
 | success | boolean | 是否成功 |
+| code | string / null | 失敗時的穩定錯誤代碼；成功可為 null |
 | message | string | 成功或錯誤訊息 |
+| requestId | string / null | 失敗追蹤用 opaque ID；不得含個資或內部資源 ID |
 | data | object / array / null | 回傳資料，失敗時為 null |
 
 成功預設訊息：
@@ -105,7 +187,9 @@ Exception 回傳格式固定使用 `ApiResponse<Void>`：
 ```json
 {
   "success": false,
+  "code": "UNEXPECTED_ERROR",
   "message": "錯誤訊息",
+  "requestId": "opaque-request-id",
   "data": null
 }
 ```
@@ -137,7 +221,7 @@ com.monsters.config.common.CorsConfig
 CORS 僅套用於：
 
 ```text
-/api/**
+/api/v1/**
 ```
 
 允許來源不得使用 `*`，需透過環境變數或設定檔指定可信任來源。
@@ -161,13 +245,13 @@ com.monsters.security.common.SecurityConfig
 
 | Path | Method | 規則 |
 |---|---|---|
-| /api/auth/register | POST | 允許匿名 |
-| /api/auth/login | POST | 允許匿名 |
-| /api/auth/google-login | POST | 允許匿名 |
-| /api/auth/forgot-password | POST | 允許匿名 |
-| /api/auth/reset-password | POST | 允許匿名 |
-| /api/auth/logout | POST | 需驗證 |
-| /api/** | ALL | 需驗證 |
+| /api/v1/auth/register | POST | 允許匿名 |
+| /api/v1/auth/login | POST | 允許匿名 |
+| /api/v1/auth/google-login | POST | 允許匿名 |
+| /api/v1/auth/forgot-password | POST | 允許匿名 |
+| /api/v1/auth/reset-password | POST | 允許匿名 |
+| /api/v1/auth/logout | POST | 需驗證 |
+| /api/v1/** | ALL | 需驗證 |
 | 其他路徑 | ALL | 拒絕 |
 
 Security 錯誤回應固定使用 `ApiResponse<Void>`：
@@ -182,9 +266,10 @@ JWT 基礎設定：
 | 設定 | 環境變數 | 預設值 |
 |---|---|---|
 | app.security.jwt.issuer | JWT_ISSUER | monsters |
-| app.security.jwt.secret | JWT_SECRET | 空字串，正式環境必須提供 |
-| app.security.jwt.access-token-expiration-seconds | JWT_ACCESS_TOKEN_EXPIRATION_SECONDS | 3600 |
-| app.security.jwt.refresh-token-expiration-seconds | JWT_REFRESH_TOKEN_EXPIRATION_SECONDS | 2592000 |
+| app.security.jwt.signing-key | JWT_SIGNING_KEY | 空字串，正式環境必須由 Secret Manager／KMS 提供並支援 `kid` 輪替 |
+| app.security.jwt.access-token-expiration-seconds | JWT_ACCESS_TOKEN_EXPIRATION_SECONDS | 600 |
+| app.security.session.idle-expiration-seconds | SESSION_IDLE_EXPIRATION_SECONDS | 2592000 |
+| app.security.session.absolute-expiration-seconds | SESSION_ABSOLUTE_EXPIRATION_SECONDS | 7776000 |
 
 Google 登入設定：
 
@@ -212,13 +297,13 @@ Cloudflare R2 檔案上傳設定：
 
 | 設定 | 環境變數 | 預設值 |
 |---|---|---|
-| app.storage.r2.account-id | R2_ACCOUNT_ID | 空字串，啟用頭貼上傳前必須提供 |
-| app.storage.r2.access-key-id | R2_ACCESS_KEY_ID | 空字串，啟用頭貼上傳前必須提供 |
-| app.storage.r2.secret-access-key | R2_SECRET_ACCESS_KEY | 空字串，啟用頭貼上傳前必須提供 |
-| app.storage.r2.bucket | R2_BUCKET | 空字串，啟用頭貼上傳前必須提供 |
-| app.storage.r2.public-base-url | R2_PUBLIC_BASE_URL | 空字串，啟用頭貼上傳前必須提供 |
-| app.storage.r2.avatar-key-prefix | R2_AVATAR_KEY_PREFIX | users/avatars |
-| app.storage.r2.max-avatar-size-bytes | R2_MAX_AVATAR_SIZE_BYTES | 5242880 |
+| app.storage.r2.account-id | R2_ACCOUNT_ID | 空字串，啟用私人媒體前必須提供 |
+| app.storage.r2.access-key-id | R2_ACCESS_KEY_ID | 空字串，啟用私人媒體前必須提供 |
+| app.storage.r2.secret-access-key | R2_SECRET_ACCESS_KEY | 空字串，啟用私人媒體前必須提供 |
+| app.storage.r2.entry-media-bucket | R2_ENTRY_MEDIA_BUCKET | 空字串，必須為 private bucket |
+| app.storage.r2.quarantine-bucket | R2_QUARANTINE_BUCKET | 空字串，必須與正式媒體隔離 |
+
+使用者頭貼不接受上傳；既有 public avatar bucket、`R2_PUBLIC_BASE_URL`、avatar prefix 與 avatar upload endpoint 均列入移除清單。
 
 ---
 
@@ -260,7 +345,9 @@ Cloudflare R2 檔案上傳設定：
 
 ---
 
-## 二、Auth API
+## 二、目前無版本 Auth API（待遷移）
+
+本章以下 Request／Response 用於描述 `develop` 現況，不是新功能契約。目標 Auth API 依 0.2 實作；不得再新增 `account`、JWT Refresh Token 明文 Response、開發 reset Token Response 或 Google 同 Email 自動連結。
 
 ### 2.1 註冊
 
@@ -551,7 +638,9 @@ Response：
 
 ---
 
-## 三、User API
+## 三、目前無版本 User API（待遷移）
+
+`PUT /api/users/me/avatar`、伺服器密碼鎖 endpoint 與公開 `avatarUrl` 為待移除基線。目標 User API 改為選擇已取得貘怪頭貼、裝置本機隱私鎖、Email 變更、工作階段管理、匯出與刪除流程。
 
 ### 3.1 查詢個人資料
 
@@ -635,7 +724,9 @@ Response：
 - 查無使用者時回傳 404。
 - 更新成功後回傳最新個人資料，欄位格式與查詢個人資料 API 相同。
 
-### 3.3 更改頭貼
+### 3.3 更改頭貼（Deprecated）
+
+本 endpoint 只描述 `develop` 現有實作，Phase 4.5 必須移除。v1 頭貼只能選擇已取得的貘怪素材，不接受任何使用者檔案。
 
 `PUT /api/users/me/avatar`
 
@@ -674,7 +765,7 @@ Response：
 - 需登入。
 - 後端必須從 JWT 驗證後的 `userId` 更新目前使用者，不得由前端傳入 user id 或 account。
 - 只更新未刪除使用者。
-- 圖片必須上傳到 Cloudflare R2，資料庫只保存公開可讀的 `avatarUrl`。
+- 歷史實作將圖片上傳至 Cloudflare R2 並保存公開 `avatarUrl`；此行為已禁止新增使用，待 Migration 移除。
 - 檔案欄位名稱固定為 `file`。
 - 僅接受 `image/jpeg`、`image/png`、`image/webp`。
 - 預設檔案大小上限為 5 MB，可透過 `R2_MAX_AVATAR_SIZE_BYTES` 調整。
@@ -683,7 +774,9 @@ Response：
 - R2 設定缺漏或上傳失敗時回傳 500。
 - 更新成功後回傳最新個人資料，欄位格式與查詢個人資料 API 相同。
 
-### 3.4 設定密碼鎖
+### 3.4 設定密碼鎖（Deprecated）
+
+本 endpoint 只描述 `develop` 現有實作，Phase 4.5 必須移除。v1 PIN 只存在 Android／iOS 本機安全儲存區。
 
 `PUT /api/users/me/password-lock`
 
@@ -718,12 +811,12 @@ Response：
 - 需登入。
 - 後端必須從 JWT 驗證後的 `userId` 設定目前使用者的密碼鎖，不得由前端傳入 user id 或 account。
 - `lockPassword` 必填，格式固定為 4 位數字。
-- 密碼鎖需使用 BCrypt hash 保存至 `user_password_locks.lock_password_hash`，不得保存明文。
+- 歷史實作使用 BCrypt hash 保存至 `user_password_locks.lock_password_hash`；v1 Backend 不得接收、保存或驗證本機 PIN。
 - 同一使用者重複設定時更新既有密碼鎖 hash，並保持 `enabled = true`。
 - 查無使用者時回傳 404。
 - 不得將密碼鎖明文或 hash 寫入 log。
 
-### 3.5 驗證密碼鎖
+### 3.5 驗證密碼鎖（Deprecated）
 
 `POST /api/users/me/password-lock/verify`
 
@@ -766,7 +859,9 @@ Response：
 
 ---
 
-## 四、Annoyance API
+## 四、目前無版本 Annoyance API（待遷移）
+
+本章 `isShared` 與 score／category 必填規則由 0.3 取代；Community Post 建立／更新／取消分享不得繼續修改 Entry 分享 boolean。
 
 共同規則：
 
@@ -819,7 +914,7 @@ Parts：
 
 - `categoryCode` 必須為已啟用的 annoyance type code。
 - `recordMethod = TEXT` 時 `content` 必填且不得傳 `contentFile`；其餘方式 `content` 必須為 null，並需傳入相符 MIME type 的 `contentFile`。
-- `score` 必須為 1 至 5；`isShared` 未傳時為 false；`occurredAt` 未傳時由後端設定。
+- 歷史 Phase 3 contract 要求 `score` 為 1 至 5、`isShared` 未傳時為 false，且 `occurredAt` 未傳時由後端設定；v1 目標改為 nullable Emotional Load 與獨立 Community Post。
 - Phase 3 建立成功不發放怪獸；`reward` 固定回傳 null，Phase 6 再串接真實獎勵。Response JSON 必須保留 `"reward": null`，不得因值為 null 而省略欄位。
 
 Response data：
@@ -1017,7 +1112,9 @@ GET／PUT response data：
 
 ---
 
-## 五、Diary API
+## 五、目前無版本 Diary API（Phase 4 候選契約）
+
+本章尚未整合至 `develop`。本次文件更新不執行 Phase 4 整合；整合後仍須依 0.3 遷移至選填情緒負荷、選填分類與獨立 Community Post。
 
 共同規則：
 
@@ -1205,7 +1302,7 @@ GET／PUT response data 使用 `{ "draft": ... }` envelope，`entryType = DIARY`
 
 ---
 
-## 六、History API
+## 六、History API（目標改為 30 日 Emotional Trace）
 
 ### 6.1 查詢歷史記錄
 
@@ -1217,7 +1314,7 @@ GET／PUT response data 使用 `{ "draft": ... }` envelope，`entryType = DIARY`
 
 規則：
 
-- 回傳最近七次煩惱或日記的心情分數。
+- 回傳最近 30 個本地日曆日的 Diary／Annoyance 情緒負荷；同日多筆取平均，缺值留白，並可查詢當日原始分數。
 - 依建立時間排序。
 
 ---
@@ -1232,9 +1329,9 @@ GET／PUT response data 使用 `{ "draft": ... }` envelope，`entryType = DIARY`
 
 `GET /api/users/me/monsters`
 
-### 7.3 隨機取得怪獸
+### 7.3 固定解鎖進度
 
-`POST /api/users/me/monsters/random`
+隨機取得怪獸 endpoint 已廢止。v1 提供里程碑進度、已達成獎勵與防重領取契約，不接受任意 `monsterId` 或 random request。
 
 ### 7.4 更換怪獸造型
 
@@ -1244,7 +1341,7 @@ GET／PUT response data 使用 `{ "draft": ... }` envelope，`entryType = DIARY`
 
 ## 八、Community API
 
-社群文章為煩惱與日記分享內容的聚合顯示。
+社群文章為獨立 Community Post 快照，不直接聚合或公開私人 Entry。
 
 `postId` 格式：
 
@@ -1295,7 +1392,7 @@ diary:1
 
 `POST /api/interactive/daily-test/answer`
 
-### 9.4 深度心理測驗
+### 9.4 自我探索
 
 `GET /api/interactive/psychological-tests`
 

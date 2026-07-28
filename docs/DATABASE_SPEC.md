@@ -2,6 +2,8 @@
 
 # 貘nsters Database Spec
 
+> 狀態說明：本文件同時記錄 `develop` 目前 Schema 與 2026-07-26 已核准的目標 Schema。第二章的目標模型具有規格優先權；第三章既有表格是 Migration 輸入，不代表仍可新增依賴。所有目標變更必須於基礎安全階段透過 Flyway 實作，不得直接覆蓋正式資料庫。
+
 ## 一、資料庫基礎規範
 
 本專案使用 MySQL 8.4，資料庫名稱為 `monsters`。
@@ -35,7 +37,8 @@ Spring Boot 只能透過 JPA / Repository 存取資料庫；Flutter 不得直接
 - Primary Key：`id`
 - Foreign Key：`<table_singular>_id`
 - Boolean：`is_` 前綴
-- 時間欄位：使用 `DATETIME`
+- 系統事件時間：使用 UTC `DATETIME`
+- 具有使用者日期語意的 Entry：另保存建立當下的本地日期、IANA timezone 與 UTC offset
 
 所有主要資料表必須包含：
 
@@ -56,18 +59,68 @@ Spring Boot 只能透過 JPA / Repository 存取資料庫；Flutter 不得直接
 
 本次依照 `system_data` 舊程式與現有 API 文件進行資料庫正規化，採以下原則：
 
-1. 不再以 `account` 作為跨表關聯鍵，統一改用 `users.id`。
+1. 移除使用者可見 `account`；內部關聯統一使用 `users.id`，Client 使用不可推測 `public_id`。
 2. 使用者認證資料與使用者個人資料拆分。
 3. Diary 與 Annoyance 共用 `entries` 主表，使用 `entry_type` 區分。
 4. 圖片、音訊、手繪圖等媒體從 Diary / Annoyance 主表拆至 `entry_media`。
-5. 社群按讚與留言改為共用 `entry_likes`、`entry_comments`。
+5. 私人 `entries` 不直接承載社群互動；分享建立 `community_posts` 公開快照，支持與留言依附 Community Post。
 6. 怪物基本資料與圖片 / GIF / 配件等資產拆分。
 7. 每日測驗選項從固定欄位拆成 `daily_test_options`。
 8. 查詢型資料使用 lookup table，例如 `annoyance_types`、`moods`、`monster_groups`。
 9. 使用 unique constraint 避免重複資料，例如 Email、OAuth 帳號、使用者怪物、按讚。
 10. 需要列表查詢的時間欄位、外鍵欄位必須建立 index。
+11. 正式 Schema 變更使用 Flyway；已在共用環境執行的 Migration 不得改寫。
+12. 刪除、匯出、工作階段、監護人同意、內容審閱與背景工作必須有可查核的狀態，不以 boolean 或一次性 best-effort 取代生命週期。
 
-## 三、資料表設計
+### 2.1 已核准目標模型
+
+下列模型須於 Phase 4 整合後的「基礎安全與領域模型」階段，以 expand／migrate／contract 方式導入：
+
+| 領域 | 目標資料結構與不可變規則 |
+|---|---|
+| 使用者 | `users` 新增 UUID `public_id`、服務地區、生日、資格狀態與選定貘怪頭貼關聯；移除 `account`、`avatar_url` 與使用者頭貼上傳依賴 |
+| Email 驗證 | 一次性驗證 Token 只保存 hash、到期時間與使用時間；七天未驗證且無內容的空帳號可清除 |
+| 憑證 | `user_credentials` 保存 Argon2id 參數版本；舊 BCrypt 只供登入時漸進遷移 |
+| OAuth | `user_oauth_accounts` 以 provider＋`sub` 唯一；同 Email 不得自動連結，連結／解除需重新驗證 |
+| 工作階段 | `user_sessions` 表示裝置、建立／最後活動／閒置／絕對到期與撤銷狀態；Refresh Token 另表只保存 hash、family、rotation 與 reuse 狀態 |
+| 年齡與同意 | 監護人同意、條款同意、成人重新同意都保存文件版本、時間、狀態與撤回時間；監護人 Email 不授予內容存取權 |
+| 角色 | `MEMBER`、`MODERATOR`、`ADMIN`、`CONTENT_REVIEWER` 分離；Community Eligibility 另存，不是角色 |
+| Entry | Diary／Annoyance 共用核心；`public_id`、`version`、UTC 時間、本地日期、timezone、offset、選填情緒負荷、選填私人分類與刪除狀態 |
+| Entry Media | 保存私人 object key、真實格式、處理狀態、掃描狀態、大小、時長與清除狀態；未通過隔離處理不得成為可用媒體 |
+| Community Post | 保存 Entry owner、獨立快照、公開主題、版本、發布／取消分享／審核狀態；不保存私人分數、私人分類或原始日期 |
+| 社群治理 | 留言、支持、檢舉、封鎖、處置、申訴與敏感警示皆依附 Community Post；留言為單層，支持只有一種且不建立公開排行 |
+| 內容系統 | 自我探索、教育小測驗、外部資源與固定貘怪回應使用版本化內容、適用年齡、來源、Reviewer 與發布狀態 |
+| 圖鑑 | `user_monsters` 維持唯一擁有關聯，另保存固定 Unlock Milestone 與防重達成事件；不建立隨機抽取或代幣 |
+| 資料權利 | 匯出工作、刪除申請、刪除 marker、法律保全、通知與清理工作具有可重試狀態及期限 |
+| 非同步工作 | Transactional Outbox 與 Worker job 保存最小識別、防重鍵、嘗試次數、下次重試與最終失敗狀態，不保存私人內容 |
+| 稽核 | 保存特權操作、角色變更、安全與刪除事件；不得保存私人原文、Token、Email、監護人資料或已刪除會員的可逆識別 |
+
+### 2.2 核心資料限制
+
+- Entry 情緒負荷為 nullable `TINYINT`，有值時只能為 1 至 5；1 代表較輕，5 代表較重。
+- Entry 私人分類為 nullable；Diary 與 Annoyance 都可略過。
+- Entry 文字最多 20,000 個 Unicode 字元，Community Post 最多 10,000 字，留言最多 1,000 字。
+- 每位會員正式媒體配額第一版為 1 GB；超過配額只拒絕新增媒體。
+- 所有 Client 可引用資源都有唯一 UUID `public_id`；內部 `BIGINT id` 不得回傳一般 Client。
+- 所有可修改 Aggregate 使用 `version` 作 optimistic concurrency control；刪除優先於舊版本更新。
+- Community Post 取消分享或刪除後，其版本、留言與支持立即不可見並於七天內清除。
+- 個別內容於七天內清除、備份與 R2 舊版本最長 30 天輪替；災難還原後必須重播刪除與撤銷 marker。
+
+### 2.3 資料保存期限
+
+| 資料 | 保存期限 |
+|---|---|
+| 一般應用與錯誤 Log | 30 天 |
+| 登入、Token、密碼與帳號安全事件 | 180 天 |
+| 檢舉、下架、停權、申訴與角色變更稽核 | 1 年 |
+| 回饋案件文字 | 關閉後 90 天 |
+| 內容／帳號刪除工作資料 | 正式資料七天內清除；不含內容的事件依稽核期限 |
+| 加密備份與 R2 舊版本 | 最長 30 天 |
+| 法律保全 | 僅依正式要求的最小範圍與明確期限，定期複核 |
+
+## 三、目前 `develop` 資料表設計（待 Flyway Migration）
+
+本章描述現有基線，供 Migration 與相容測試使用。凡與第二章衝突者，以第二章為目標規格；不得再新增對 `account`、公開 `avatar_url`、JWT Refresh Token、伺服器 PIN、`entries.is_shared`、`entry_likes` 或 `entry_comments` 的新依賴。
 
 ### 3.1 users
 
@@ -76,11 +129,11 @@ Spring Boot 只能透過 JPA / Repository 存取資料庫；Flutter 不得直接
 | 欄位 | 型別 | 約束 | 說明 |
 |---|---|---|---|
 | id | BIGINT | PK | 使用者 ID |
-| account | VARCHAR(50) | UNIQUE NOT NULL | 使用者帳號，英文開頭，可包含英文、數字、底線，長度 4 到 50 |
+| account | VARCHAR(50) | UNIQUE NOT NULL | 舊基線帳號欄位；目標 Schema 移除 |
 | email | VARCHAR(255) | UNIQUE NOT NULL | Email |
 | user_name | VARCHAR(80) | NOT NULL | 顯示名稱 |
 | birthday | DATE | NULL | 生日 |
-| avatar_url | VARCHAR(500) | NULL | 頭像 URL |
+| avatar_url | VARCHAR(500) | NULL | 舊基線公開頭像 URL；目標 Schema 改為已取得貘怪素材關聯 |
 | created_at | DATETIME | NOT NULL | 建立時間 |
 | updated_at | DATETIME | NOT NULL | 更新時間 |
 | is_deleted | BOOLEAN | NOT NULL | 是否刪除 |
@@ -94,7 +147,7 @@ Email / Password 登入憑證。
 |---|---|---|---|
 | id | BIGINT | PK | ID |
 | user_id | BIGINT | FK UNIQUE NOT NULL | 使用者 ID |
-| password_hash | VARCHAR(255) | NOT NULL | BCrypt 密碼雜湊 |
+| password_hash | VARCHAR(255) | NOT NULL | 舊資料可能為 BCrypt；新密碼使用可辨識參數版本的 Argon2id 雜湊 |
 | password_updated_at | DATETIME | NULL | 密碼更新時間 |
 | created_at | DATETIME | NOT NULL | 建立時間 |
 | updated_at | DATETIME | NOT NULL | 更新時間 |
@@ -125,9 +178,9 @@ Index：
 - token 使用後必須寫入 `used_at`。
 - 過期、已使用或對應已刪除使用者的 token 不得重設密碼。
 
-### 3.2.2 revoked_tokens
+### 3.2.2 revoked_tokens（舊基線）
 
-登出或 refresh rotation 後撤銷的 JWT。
+登出或 refresh rotation 後撤銷的 JWT。目標模型改由 `user_sessions` 與不透明 Refresh Token family 管理；本表只作 Migration 輸入。
 
 | 欄位 | 型別 | 約束 | 說明 |
 |---|---|---|---|
@@ -164,18 +217,18 @@ Index：
 
 Unique：`provider, provider_user_id`
 
-Google 登入規則：
+Google 登入目標規則：
 
 - Google provider 固定使用 `google`。
 - `provider_user_id` 必須保存 Google ID Token 的 `sub`，不得保存 ID Token 本體。
-- 首次 Google 登入時，若 email 尚未存在於未刪除的 `users`，需由 email 前綴產生唯一 `account`，並建立 `users` 與 `user_oauth_accounts`。
-- 首次 Google 登入時，若 email 已存在於未刪除的 `users`，需建立 `user_oauth_accounts` 並連結既有使用者。
+- 首次 Google 登入時，若 email 尚未存在於未刪除的 `users`，建立待完成服務地區與年齡資格流程的會員，不產生 `account`。
+- Google email 與既有會員相同時不得自動連結；需先重新驗證既有登入方式並明確建立 OAuth 關聯。
 - 已連結的 Google 帳號登入時，需透過 `provider + provider_user_id` 查詢使用者。
 - 已刪除使用者不得透過既有 OAuth 帳號登入。
 
-### 3.4 user_password_locks
+### 3.4 user_password_locks（目標移除）
 
-使用者隱私鎖設定。
+舊基線的伺服器隱私鎖設定。目標模型由 Android／iOS 每台裝置安全儲存本機 PIN，Backend 不保存、不驗證也不回傳 PIN。
 
 | 欄位 | 型別 | 約束 | 說明 |
 |---|---|---|---|
@@ -320,11 +373,11 @@ Unique：`user_id, monster_group_id`
 | entry_type | VARCHAR(20) | NOT NULL | DIARY 或 ANNOYANCE |
 | monster_id | BIGINT | FK NULL | 當下使用怪物 |
 | annoyance_type_id | BIGINT | FK NULL | 煩惱分類，僅 ANNOYANCE 使用 |
-| mood_id | BIGINT | FK NOT NULL | 情緒 ID |
+| mood_id | BIGINT | FK NULL | 選填情緒負荷 lookup |
 | content | TEXT | NULL | 文字內容 |
-| is_shared | BOOLEAN | NOT NULL | 是否分享至社群 |
+| is_shared | BOOLEAN | NOT NULL | 舊基線分享旗標；目標模型改為獨立 `community_posts` |
 | is_solved | BOOLEAN | NOT NULL | 是否已解決，僅 ANNOYANCE 使用 |
-| occurred_at | DATETIME | NOT NULL | 使用者紀錄時間 |
+| occurred_at | DATETIME | NOT NULL | UTC 紀錄時間；目標模型另保存當時本地日期、timezone 與 offset |
 | created_at | DATETIME | NOT NULL | 建立時間 |
 | updated_at | DATETIME | NOT NULL | 更新時間 |
 | is_deleted | BOOLEAN | NOT NULL | 是否刪除 |
@@ -333,8 +386,8 @@ Unique：`user_id, monster_group_id`
 規則：
 
 - `entry_type = 'DIARY'` 時，`annoyance_type_id` 必須為 NULL，`is_solved` 固定為 false。
-- `entry_type = 'ANNOYANCE'` 時，`annoyance_type_id` 必須有值。
-- Annoyance Service 依 `annoyance_types.code` 與 `moods.score` 解析 FK；Client 不得傳 lookup ID。
+- `entry_type = 'ANNOYANCE'` 時，`annoyance_type_id` 可略過；有值時必須為有效 lookup。
+- Service 依分類 code 與情緒負荷 score 解析 FK；兩者皆可略過，Client 不得傳 lookup ID。
 - 每筆 ANNOYANCE 使用一種主要記錄方式：文字存於 `entries.content`，或一筆 image／audio／video 媒體；另可有一筆 drawing。此組合由 Service 驗證。
 - 每筆 DIARY 同樣只使用一種主要記錄方式：文字存於 `entries.content`，或一筆 image／audio／video 媒體；另可有一筆 optional drawing。Diary Service 依 `moods.score` 解析 FK，Client 不得傳 lookup ID。
 
@@ -359,12 +412,12 @@ Unique：`user_id, monster_group_id`
 
 規則：
 
-- Entry media 使用與 public avatar 分離的 private R2 bucket；Database 不保存 public URL。
+- Entry media 使用 private R2 bucket；Database 不保存 public URL。使用者頭貼不接受上傳。
 - `object_key` 由 Backend 產生且必須唯一，Client 不得提供或取得此值。
 - `media_type` 僅允許 `image`、`audio`、`video`、`drawing`。
 - `file_size_bytes` 必須大於 0。
 - `audio` 與 `video` 必須保存經 `ffprobe` 驗證的正數 `duration_seconds`；其他類型必須為 NULL。
-- 媒體下載由 Backend 先驗證 entry owner 或分享狀態，再以 object key 向 R2 取回並串流。
+- 媒體先完成隔離、真實格式解析、重新處理、中繼資料移除與惡意檔案掃描；下載由 Backend 驗證 Entry owner，公開快照則依 Community Post 資格另行授權。
 
 ### 3.14 entry_drafts
 
@@ -422,7 +475,7 @@ Unique：`user_id, monster_group_id`
 - 草稿送出時沿用同一 object key 建立正式 `entry_media`，避免重複上傳大型媒體。
 - 本表為短生命週期暫存資料，不採 soft delete；刪除由 owner 操作、送出 transaction 或到期清理負責。
 
-### 3.16 entry_likes
+### 3.16 entry_likes（舊基線；目標由 Community Post 支持取代）
 
 社群貼文按讚。
 
@@ -436,7 +489,7 @@ Unique：`user_id, monster_group_id`
 
 Unique：`entry_id, user_id`
 
-### 3.17 entry_comments
+### 3.17 entry_comments（舊基線；目標由 Community Post 留言取代）
 
 社群貼文留言。
 
@@ -507,9 +560,9 @@ Unique：`entry_id, user_id`
 
 Unique：`user_id, answered_date`
 
-### 3.22 psychological_tests
+### 3.22 psychological_tests（舊基線；目標重新命名為 Self Exploration）
 
-心理測驗資源。
+舊基線心理測驗資源。目標模型不得使用診斷式名稱，並拆為版本化 Self Exploration、Educational Quiz 與 External Resource。
 
 | 欄位 | 型別 | 約束 | 說明 |
 |---|---|---|---|
@@ -580,7 +633,7 @@ Unique：`user_id, answered_date`
 
 - `users` 1 對 1 `user_credentials`
 - `users` 1 對多 `user_oauth_accounts`
-- `users` 1 對 1 `user_password_locks`
+- `users` 1 對 1 `user_password_locks`（舊基線；目標移除）
 - `monster_groups` 1 對多 `monsters`
 - `monsters` 1 對多 `monster_assets`
 - `users` 多對多 `monsters`，透過 `user_monsters`
@@ -590,8 +643,8 @@ Unique：`user_id, answered_date`
 - `users` 1 對多 `entry_drafts`
 - `entry_drafts` 1 對多 `entry_draft_media`
 - `annoyance_types` 1 對多 `entry_drafts`
-- `entries` 1 對多 `entry_likes`
-- `entries` 1 對多 `entry_comments`
+- `entries` 1 對多 `entry_likes`（舊基線；目標改由 Community Post 承載）
+- `entries` 1 對多 `entry_comments`（舊基線；目標改由 Community Post 承載）
 - `annoyance_types` 1 對多 `entries`
 - `moods` 1 對多 `entries`
 - `daily_tests` 1 對多 `daily_test_options`
@@ -731,6 +784,20 @@ Migration 應包含：
 
 ---
 
+## 目前 Auth／User API Database Mapping（Historical）
+
+本章以下 mapping 描述 `develop` 現況，只供 Flyway Migration 與回歸測試。v1 不使用 `account`、public avatar、JWT Refresh Token、server password lock 或新 BCrypt hash。
+
+### v1 目標 Mapping
+
+| Use Case | 主要資料 |
+|---|---|
+| Register | `users.email`、Email verification status、Argon2id `user_credentials`；不建立 `account` |
+| Login | `users.email`＋credential hash 或 OAuth provider＋`sub`；建立 `user_sessions` 與 opaque Refresh Token hash |
+| Profile | UUID public user identity、private user name、locked birthday、region、eligibility 與 selected owned monster asset |
+| Email Change | reauth evidence、pending verified email、old／new notification events 與 session revocation |
+| Local Privacy Lock | Database 無 PIN table、hash 或 verify endpoint；只存在 App secure storage |
+
 ## Register API Database Mapping
 
 `POST /api/auth/register` writes data to the normalized auth tables:
@@ -739,7 +806,7 @@ Migration 應包含：
 |---|---|---|---|
 | email | users | email | Lowercase normalized before duplicate check |
 | userName | users | user_name | Trimmed before persistence |
-| password | user_credentials | password_hash | Stored as BCrypt hash only |
+| password | user_credentials | password_hash | Historical BCrypt baseline；v1 new hash uses Argon2id |
 
 Register API must not store raw passwords, JWT values, or secrets in logs.
 
@@ -752,7 +819,7 @@ Register API must not store raw passwords, JWT values, or secrets in logs.
 | email | users | email | Lowercase normalized before lookup; deleted users are rejected |
 | password | user_credentials | password_hash | Compared with BCrypt `PasswordEncoder.matches` |
 
-Login API returns JWT access and refresh tokens, but tokens must not be persisted or written to logs.
+Historical Login API returns JWT access and refresh tokens；v1 改為短效 JWT Access 與 opaque Refresh session，任何 Token 都不得寫入 Log。
 
 ## User API Database Mapping
 
@@ -761,11 +828,11 @@ Login API returns JWT access and refresh tokens, but tokens must not be persiste
 | API Field | Table | Column | Note |
 |---|---|---|---|
 | userId | users | id | Read from authenticated JWT principal, not from client input |
-| account | users | account | Kept for old-system compatibility and import only |
+| account | users | account | Deprecated；v1 移除 |
 | email | users | email | Read-only in this API |
 | userName | users | user_name | Display name |
 | birthday | users | birthday | Nullable profile field |
-| avatarUrl | users | avatar_url | Nullable public avatar URL |
+| avatarUrl | users | avatar_url | Deprecated；v1 改為 owned monster asset 關聯 |
 
 `PUT /api/users/me` updates only editable profile columns:
 
@@ -774,15 +841,15 @@ Login API returns JWT access and refresh tokens, but tokens must not be persiste
 | userName | users | user_name | Required, max length 80, trimmed before persistence |
 | birthday | users | birthday | Nullable `DATE` value |
 
-`PUT /api/users/me/avatar` uploads the avatar file to Cloudflare R2 and updates only the public URL:
+`PUT /api/users/me/avatar` 是待移除的 historical endpoint：
 
 | API Field | Table | Column | Note |
 |---|---|---|---|
-| file | users | avatar_url | File binary is not stored in MySQL; only the public R2 URL is persisted |
+| file | users | avatar_url | Deprecated；v1 禁止使用者頭貼上傳 |
 
 User APIs must query or update only non-deleted users and must not accept `userId` or `account` from client input for the current-user profile flow.
 
-## Password Lock API Database Mapping
+## Password Lock API Database Mapping（Deprecated）
 
 `PUT /api/users/me/password-lock` creates or updates the authenticated user's password lock:
 
@@ -797,4 +864,4 @@ User APIs must query or update only non-deleted users and must not accept `userI
 |---|---|---|---|
 | lockPassword | user_password_locks | lock_password_hash | Compared with BCrypt `PasswordEncoder.matches` |
 
-Password Lock API must not store or log raw lock passwords. The client must not submit `userId` or `account`; the backend uses the authenticated JWT principal.
+本章只描述 historical server PIN。Phase 4.5 移除此 API 與 table；v1 Backend 不得接收、保存或驗證本機 PIN。

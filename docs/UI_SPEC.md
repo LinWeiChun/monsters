@@ -2,6 +2,20 @@
 
 # 貘nsters Flutter UI 規格
 
+> 狀態說明：2026-07-26 grilling 決策為目標 UI 契約。Phase 2／3 與 `feature/phase4` 的既有畫面敘述仍保留作 Migration 參考；凡涉及 Account 登入、上傳個人頭貼、伺服器密碼鎖、分數／分類必填、boolean 分享、最近七筆、隨機怪獸、公開人氣或深度心理測驗者，必須在基礎安全階段改為本文件的新規則。
+
+## 零、跨功能 UI 邊界
+
+- 第一版正式語言為台灣繁體中文；所有文案、日期、數字與錯誤訊息必須可國際化。
+- 核心流程依 WCAG 2.2 AA 實作，支援鍵盤、明確焦點、螢幕閱讀器、系統大字與減少動態效果。
+- 不得只以顏色、圖片或怪獸表情表達情緒負荷、錯誤、成功或選取狀態。
+- 私人內容不得顯示於 App switcher、鎖定畫面通知、URL、瀏覽器標題、分享預覽、Crash screenshot 或一般系統日誌。
+- App 進背景立即顯示隱私遮罩；預設離開一分鐘後需本機 PIN，可選立即、1、5、15 分鐘。
+- Web 不顯示本機 PIN，頁籤失焦先遮蔽，閒置 15 分鐘後要求帳號重新驗證。
+- 第一版不持久化離線私人資料；尚未同步的本機草稿只在目前 App 執行期間保留，已同步的 owner-scoped 伺服器草稿依 30 天規則保存，送出失敗時可於原畫面重試。
+- 通知預設只顯示「貘nsters 有一則新通知」，不得顯示日記、貼文、留言、媒體或情緒負荷。
+- 高風險功能由 Backend 功能開關強制；Client 設定無法取得時採關閉狀態，但仍保留資料查看、匯出與刪除入口。
+
 ## 一、平台
 
 本專案 UI 使用 Flutter 實作，需支援：
@@ -48,15 +62,20 @@
 - 輸入 Email
 - 輸入密碼
 - 確認密碼
-- 輸入暱稱
-- 完成註冊
+- 不顯示或要求 `account`
+- 完成註冊後顯示 Email 驗證狀態與重新寄送入口
+- Email 驗證後依序確認台灣服務地區、生日、條款版本與年齡資格
+- 13 至 17 歲顯示監護人 Email 同意流程；等待同意期間不得進入完整 App
+- 未滿 13 歲或非服務地區顯示無法註冊與資料清除說明
 
 ### 2.4 首次 Google 登入設定個人資料
 
 功能：
 
-- 設定暱稱
-- 設定基本個人資料
+- 確認 Google Email 已驗證
+- Google Email 與既有會員相同時，引導先登入既有方式並明確連結，不自動合併
+- 設定私人暱稱、服務地區、生日與必要同意
+- 依年齡進入成人或監護人同意流程
 
 ### 2.5 主頁面
 
@@ -85,25 +104,29 @@
 功能：
 
 - 個人資料
-- 更改頭貼
+- 從已取得的貘怪圖鑑選擇頭貼
 - 編輯個人資料
-- 設定 / 更改密碼鎖
+- Android／iOS 設定或更改本機隱私鎖
+- 登入裝置管理
+- 資料匯出
+- 刪除帳號
 - 使用說明
 - 使用回饋
-- 分享 App
 - 登出
 
 ### 2.7 新增煩惱聊天室
 
+下列聊天式結構與媒體能力可沿用 Phase 3，但分類與情緒負荷必須增加「略過」，分享必須改為建立獨立 Community Post 的明確預覽；既有 `isShared` boolean 只作 Migration 參考。
+
 流程：
 
 1. 怪獸引導對話
-2. 以結構化選擇元件選擇煩惱類別
+2. 以結構化選擇元件選擇煩惱類別或略過
 3. 選擇文字、錄音、照片或影片其中一種主要記錄方式
 4. 輸入文字或選取一個主要媒體，顯示預覽、移除與重選操作
 5. 選擇是否畫心情；選擇繪圖時最多附加一張心情圖
-6. 以結構化元件選擇 1 至 5 分
-7. 選擇是否分享，預設私人
+6. 以結構化元件選擇 1 至 5 情緒負荷或「這次不評分」
+7. 選擇保持私人，或進入公開快照逐項預覽；不得預先勾選分享
 8. 檢視摘要並送出；送出中禁止重複操作，失敗時保留伺服器草稿
 9. 顯示建立完成頁面，可前往歷史記錄
 
@@ -123,9 +146,9 @@ Phase 3 完成頁不顯示假怪獸獎勵，不得沿用舊系統「恭喜你獲
 
 畫心情 Task 在主要內容確認後顯示「想畫／先不用」結構化選項；選擇略過時直接進入分數步驟，選擇繪圖時顯示單一正方形畫布。`MoodDrawingCanvas` 使用正規化座標保存筆畫，提供六色畫筆、2 至 16 的線寬、橡皮擦、復原、清除、取消與完成操作；完成時以白色背景輸出固定 1024×1024 PNG，限制 5 MB，並在聊天紀錄顯示一張心情圖預覽後進入分數步驟。取消繪圖須返回是否繪圖選項，返回上一步或重新選擇主要內容時須清除未提交的繪圖草稿；心情圖不另存至相簿，後續由既有新增煩惱 multipart API 的 `drawingFile` 上傳。
 
-煩惱分數 Task 使用 `MoodScoreSelector` 顯示 `moodPoint_1.png`～`moodPoint_5.png` 與 `1分`～`5分` 結構化圖片卡片，圖片依綠色笑臉至紅色難過表情對應分數 1 至 5；選取卡片需以品牌色邊框、底色與陰影標示，窄螢幕可自動換行。使用者點選後，草稿保存整數 `score` 並進入 `sharing` 步驟；僅接受 1 至 5，與既有 API `score` contract 及 Database `SCORE_1`～`SCORE_5` lookup 一致。從分享步驟返回時保留原分數並標示選取狀態以便修改；返回繪圖選擇或重新開始時清除分數。
+情緒負荷 Task 使用 `MoodScoreSelector` 同時顯示數字與「較輕」至「較重」的非診斷式文字，1 代表較輕、5 代表較重，另提供「這次不評分」。圖片只能作輔助，不得把分數稱為快樂、心理健康或疾病嚴重度；略過時保存 null，情緒足跡不得補零。
 
-煩惱分享 Task 使用 `ShareChoiceCard` 顯示「保持私人」與「分享到社群」兩個結構化選項，預設語意為私人，不使用無參數 toggle。使用者選擇後，草稿保存 boolean `isShared`，並進入 `review` 步驟；選擇「保持私人」對應既有 API `isShared = false`，選擇「分享到社群」對應 `isShared = true`。從摘要步驟返回分享步驟時保留原選擇並標示選取狀態；返回分數步驟、上游內容步驟或重新開始時清除分享選擇。
+分享 Task 使用 `ShareChoiceCard` 顯示「保持私人」與「建立匿名公開快照」。選擇分享後必須逐項預覽實際公開文字、媒體與公開主題；情緒負荷、私人分類、原始日期與版本歷史預設不公開。每次分享都需主動確認，不能只改 boolean 或沿用上次選擇。
 
 煩惱摘要送出 Task 使用 `AnnoyanceReviewCard` 顯示類別、記錄方式、主要內容、心情圖、分數與分享狀態。送出前完成最後一次草稿同步，再由 `AnnoyanceRepository` 呼叫 `POST /api/annoyances/draft/submit`；送出中進入 `submitting` 狀態並禁止上一步與重複送出。成功後保存 `AnnoyanceResponse` 並顯示 `AnnoyanceCompletedCard`，Phase 3 僅呈現建立成功與分享狀態，不顯示假怪獸獎勵；失敗時返回 `review`、保留伺服器草稿並顯示 API 錯誤訊息。
 
@@ -178,7 +201,7 @@ Desktop 以共用 Navbar 與 1200px 內容區呈現雙欄流程；Tablet `600px 
 
 - 顯示煩惱與日記列表
 - 查看詳細內容
-- 修改分享狀態
+- 建立、更新或取消獨立公開快照
 - 將煩惱設為已解決
 - 顯示煩惱解決動畫
 - 前往心的軌跡圖表
@@ -187,18 +210,23 @@ Desktop 以共用 Navbar 與 1200px 內容區呈現雙欄流程；Tablet `600px 
 
 功能：
 
-- 顯示最近七次心情分數
-- 折線圖呈現情緒變化
+- 顯示最近 30 個本地日曆日的情緒負荷
+- 同日多筆以平均呈現，缺值留白；點擊日期可查看當日原始分數
+- 可合併顯示或依 Diary／Annoyance 篩選
+- 不顯示診斷、風險警示、自動解讀或情緒好壞判斷
 
 ### 2.11 社群頁面
 
 功能：
 
-- 查看已分享的煩惱與日記
-- 按愛心
-- 取消愛心
-- 查看留言
-- 新增留言
+- 僅成年且具社群資格的已登入會員可進入；未成年人與未登入者不得預覽內容
+- 依時間與公開主題瀏覽 Community Post，不提供全文搜尋或熱門排行
+- 送出或取消單一「支持」，其他讀者不看到公開總數
+- 查看與新增單層留言，不提供私訊、追蹤、標記或巢狀回覆
+- 檢舉、封鎖、取消分享與申訴入口
+- 封鎖後立即隱藏被封鎖會員的貼文與留言，但不得顯示其帳號、固定匿名 ID 或跨貼文 Profile
+- 敏感媒體預設遮蔽，音訊不自動播放；顯示「檢舉不是緊急求助管道」
+- 作者取消分享後整個討論立即不可用；重新分享不恢復舊留言
 
 ### 2.12 圖鑑頁面
 
@@ -208,16 +236,18 @@ Desktop 以共用 Navbar 與 1200px 內容區呈現雙欄流程；Tablet `600px 
 - 區分已取得與未取得
 - 查看怪獸詳細資料
 - 更改怪獸造型
+- 查看透明的固定解鎖里程碑與進度
+- 從已取得貘怪中選擇私人個人頭貼
+- 不顯示抽取、稀有度競爭、代幣、排行榜或連續登入
 
 ### 2.13 互動區頁面
 
 入口：
 
-- 解答之書
-- 每日測驗
-- 深度心理測驗
-- 心理小遊戲
-- 紓壓方法
+- 自我探索
+- 教育小測驗
+- 外部資源
+- 解答之書或小遊戲只有在完成內容分類與審閱後才顯示
 
 ### 2.14 解答之書頁面
 
@@ -231,26 +261,28 @@ Desktop 以共用 Navbar 與 1200px 內容區呈現雙欄流程；Tablet `600px 
 
 功能：
 
-- 顯示每日題目
+- 顯示教育題目、來源與適用年齡
 - 選擇答案
 - 顯示回答正確 / 錯誤頁面
-- 正確時累積獎勵進度
-- 累積七次可獲得怪獸造型
+- 完成符合條件的教育互動可累積固定里程碑，不因答錯扣除
+- 累積次數不要求連續日期，不建立能力排名
 
-### 2.16 深度心理測驗頁面
-
-功能：
-
-- 內嵌 Youtube 影片或測驗內容
-- 送出答案
-- 顯示分析結果與建議
-
-### 2.17 心理小遊戲頁面
+### 2.16 自我探索頁面
 
 功能：
 
-- 顯示外部趣味測驗清單
-- 點擊後開啟外部網站
+- 顯示題目版本、適用年齡與非醫療說明
+- 作答沒有正確／錯誤
+- 顯示描述性回饋與固定「不是醫療診斷」聲明
+- 結果完全私人，可逐筆刪除，不提供社群分享、結果圖片或人格徽章
+
+### 2.17 外部資源頁面
+
+功能：
+
+- 顯示經允許清單與內容審閱的網站／影片
+- 點擊前顯示離站與第三方資料處理提示
+- 由使用者主動在外部瀏覽器開啟，不在背景或內嵌頁面自動載入追蹤資源
 
 ### 2.18 紓壓方法頁面
 
@@ -366,10 +398,10 @@ AI 或開發者參考 `system_data/` 舊 UI 時，應檢查以下項目：
 
 - `frontend/lib/pages/login_page.dart`
 
-登入頁支援：
+登入頁目標支援：
 
-- Account 或 Email / 密碼輸入與前端必填驗證
-- 呼叫 `POST /api/auth/login`
+- verified Email / 密碼輸入與前端必填驗證
+- 呼叫 `POST /api/v1/auth/login`
 - Loading 狀態
 - API 錯誤訊息呈現
 - 登入成功後導向 `home` route
@@ -412,21 +444,21 @@ REST API
 
 規則：
 
-- 登入識別欄位顯示「帳號或 Email」；前端沿用 `email` request key，後端接受已註冊的 Account 或 Email，並在查詢前去除前後空白及轉為小寫。
+- 登入識別欄位顯示「Email」；不得再接受或顯示 `account`。
 - 登入頁不得直接呼叫 Dio。
 - 登入頁不得直接保存 JWT、Refresh Token 或密碼至 SharedPreferences；登入狀態保存必須集中由 `AuthRepository` 與 `AuthSessionStore` 管理。
-- 登入成功後，`AuthSessionStore` 保存 `LoginResult` 與最後開啟時間，讓 Web、Android、iOS 在未登出且 30 天內再次開啟時自動恢復登入。
+- `AuthSessionStore` 必須改為平台 `SessionCredentialStore`：Web Refresh Cookie 由 Backend 管理，App Refresh Token 進 Keychain／Keystore；Access Token 只放記憶體，不得序列化完整 `LoginResult`。
 - App 啟動時由 `SplashPage` 透過 `AuthController.restoreSession()` 判斷登入狀態；若本地 session 有效，必須先以 refresh token 換發新 Token、覆蓋舊 session，再套用新 access token 並導向 `home` route。
 - 受保護 API 回傳 401 時，並行 request 必須共用單一 refresh request；換發成功後每個原 request 最多重試一次，refresh request 本身不得遞迴重試。
-- 若 refresh token 無效／過期／已 rotation、最後開啟時間超過 30 天、session 格式無效或使用者登出，必須清除本地登入狀態並導向登入頁；暫時性網路錯誤只顯示連線錯誤並保留 session。
+- 若 refresh token 無效／過期／已 rotation／reuse、session 到達 idle／absolute expiry 或使用者登出，必須清除 Credential Store 並導向登入頁；暫時性網路錯誤只顯示連線錯誤，不得誤撤銷 server session。
 - 登出需呼叫 `AuthController.logout()`，由 Repository 呼叫登出 API、清除 `ApiClient` Authorization header 與本地 session。
-- 密碼不得保存至 SharedPreferences。`AuthUser` 與 `LoginResult` 必須使用 `json_serializable` 產生 JSON mapping。
+- 密碼、Token、完整 Login Result 與私人會員資料不得保存至 SharedPreferences。
 - Google 登入不得假造 Google ID Token、不得沿用舊系統空密碼登入流程、不得在前端自行驗證後傳入 Google 使用者資料。
 - Google 登入成功後需呼叫 `POST /api/auth/google-login`，由後端驗證 Google ID Token 並回傳本系統 `LoginResult`。
 - Web 版需使用 Google Identity Services 官方按鈕；Android / iOS 可使用共用 Flutter 按鈕觸發 Google SDK。
 - Web 版 Google SDK 初始化只傳 `GOOGLE_CLIENT_ID`，不得傳 `serverClientId`，避免官方按鈕停留在 `Getting ready` 狀態。
 - Web 本機測試需使用固定 origin `http://localhost:5050`，並透過 `frontend/tool/run_web_local.sh` 或 Windows `frontend/tool/run_web_local.ps1` 啟動，避免每次重啟隨機 port 造成 Google OAuth origin mismatch。
-- Google 登入成功後必須沿用 `AuthSessionStore` 保存 30 天登入狀態；登出時需同時清除本地 session 並嘗試執行 Google SDK sign-out。
+- Google 登入成功後使用相同 server session 與 `SessionCredentialStore`；同 Email 既有會員必須先明確連結，登出時撤銷 server session、清除本機 Credential 並嘗試執行 Google SDK sign-out。
 
 ## Flutter Register Page 實作規範
 
@@ -437,13 +469,12 @@ REST API
 註冊頁支援：
 
 - Email 輸入與格式驗證
-- 帳號輸入與格式驗證
 - 暱稱輸入與長度驗證
-- 密碼輸入、確認密碼與一致性驗證
-- 呼叫 `POST /api/auth/register`
+- 15 至 128 Unicode 密碼輸入、確認與弱密碼錯誤提示
+- 呼叫 `POST /api/v1/auth/register`
 - Loading 狀態
 - API 錯誤訊息呈現
-- 註冊成功後導向 `login` route
+- 註冊成功後進入 Email 驗證等待頁
 - 前往登入頁
 
 註冊頁 Penpot 對齊規格：
@@ -452,7 +483,7 @@ REST API
 - Web 版使用左側品牌區與右側表單區；品牌區使用 `title.png` 與 `icon.png`，表單最大寬度 500px。
 - App / Mobile 版以 390px 寬畫面為基準，左右 36px 邊距，logo 150px，欄位與主要按鈕高 54px。
 - 註冊頁色票集中於 `frontend/lib/theme/app_colors.dart`，頁面不得直接宣告 `Color(0x...)` 作為設計色票。
-- 註冊成功不自動登入；成功後仍依規格導向登入頁。
+- 註冊成功不進入完整 App；完成 Email 驗證、服務地區、生日與必要同意後才可進入私人核心。
 註冊頁資料流程：
 
 ```text
@@ -480,8 +511,9 @@ REST API
 
 - 註冊頁不得直接呼叫 Dio。
 - 註冊頁不得保存密碼或 token 至 SharedPreferences。
-- 註冊成功不自動登入；使用者需回登入頁登入取得 token。
-- 帳號為必填，需英文開頭，只能包含英文、數字、底線，長度 4 到 50；送出前需轉為小寫。
+- 註冊頁不得顯示或傳送 `account`。
+- 註冊後顯示重新寄送驗證信、修正 Email 與刪除未完成帳號入口。
+- 13 至 17 歲使用者完成 Email 驗證後進入監護人同意等待頁；未滿 13 歲或非台灣服務地區不得進入 App。
 ## Flutter Profile Page 實作規範
 
 個人資料頁位置：
@@ -491,8 +523,10 @@ REST API
 個人資料頁支援：
 
 - 呼叫 `GET /api/users/me` 查詢目前登入使用者個人資料
-- 顯示頭貼、暱稱、Email、舊帳號與生日
-- 修改暱稱與生日
+- 顯示已取得貘怪頭貼、私人暱稱、Email、服務地區、生日與資格狀態，不顯示 `account`
+- 修改私人暱稱；Email 使用獨立 reauth＋驗證流程
+- 從已取得圖鑑選擇頭貼，不提供圖片上傳
+- 生日完成資格確認後鎖定；更正需走 reauth 與人工申請
 - 生日欄位為唯讀文字輸入外觀，點擊後開啟 Flutter 內建日曆；不得要求使用者手動輸入日期格式
 - 呼叫 `PUT /api/users/me` 儲存個人資料
 - 顯示可見的登出按鈕；點擊後先顯示確認對話框，再由 `AuthController.logout()` 完成登出並導向登入頁
@@ -527,11 +561,13 @@ REST API
 規則：
 
 - 個人資料頁不得直接呼叫 Dio。
-- 個人資料頁不得由前端傳入 user id 或 account 進行查詢或修改。
+- 個人資料頁不得由前端傳入 user id、account 或 owner 進行查詢或修改。
 - `userName` 必填，最大長度 80。
-- `birthday` 可為空；若填寫，格式需為 `yyyy-MM-dd`。
-- 頭貼上傳涉及三平台檔案選取流程，需於後續更改頭貼 UI Task 定案檔案選取方案後實作。
+- 完成年齡資格後 `birthday` 不可為空，API 格式為 `yyyy-MM-dd`。
+- 頭貼只能傳已取得的 monster public ID；不得啟動相機、相簿或上傳流程。
 ## Flutter Password Lock Page 實作規範
+
+本節現有 server PIN 實作為待移除基線。目標頁面只管理 Android／iOS 本機 Privacy Lock；Web route 應改為閒置重新驗證設定。
 
 密碼鎖頁位置：
 
@@ -540,9 +576,8 @@ REST API
 密碼鎖頁支援：
 
 - 設定或更改四位數密碼鎖
-- 呼叫 `PUT /api/users/me/password-lock`
-- 驗證四位數密碼鎖
-- 呼叫 `POST /api/users/me/password-lock/verify`
+- 透過平台 Local Privacy Lock Adapter 將 PIN 保存於 Keychain／Keystore
+- 冷啟動與離開超過設定時間時離線驗證四位數 PIN
 - 前端 4 位數字格式驗證
 - 設定時需再次輸入確認
 - Loading 狀態
@@ -555,13 +590,9 @@ REST API
 ```text
 PasswordLockPage
 ↓
-PasswordLockController
+LocalPrivacyLockController
 ↓
-UserRepository
-↓
-ApiClient
-↓
-REST API
+Platform Secure Storage Adapter
 ```
 
 實作檔案：
@@ -569,17 +600,17 @@ REST API
 | 類型 | 檔案 |
 |---|---|
 | Page | `frontend/lib/pages/password_lock_page.dart` |
-| Provider | `frontend/lib/providers/password_lock_provider.dart` |
-| Repository | `frontend/lib/repositories/user_repository.dart` |
-| Model | `frontend/lib/models/password_lock_status.dart`、`frontend/lib/models/password_lock_verification.dart` |
+| Provider | `frontend/lib/providers/password_lock_provider.dart`（待改為 Local Controller） |
+| Adapter | 平台 Keychain／Keystore Local Privacy Lock Adapter |
+| Reauth | 忘記 PIN 時呼叫用途受限的 Account Reauthentication API |
 
 規則：
 
 - 密碼鎖頁不得直接呼叫 Dio。
-- 密碼鎖頁不得由前端傳入 user id 或 account。
+- 密碼鎖頁不得傳送 PIN、user id 或 account 至 Backend。
 - 密碼鎖固定為 4 位數字。
-- 密碼鎖不得保存於 SharedPreferences 或其他前端本地儲存。
-- 忘記密碼鎖流程尚未有正式 API，需於後續 API 定案後實作。
+- PIN 只能保存於平台安全儲存區，不得保存於 SharedPreferences、一般 Database、一般檔案或 Backend。
+- 忘記 PIN 必須先完成帳號 reauth，再清除並重設該裝置 PIN；Backend 永遠不回傳或替換原 PIN。
 ## Flutter Router 基礎規範
 
 前端路由統一使用 go_router，入口必須使用 `MaterialApp.router`。

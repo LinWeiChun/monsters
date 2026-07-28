@@ -1,4 +1,43 @@
 
+# 貘nsters AI 開發任務清單
+
+AI 必須依照本清單順序開發。每完成一項任務，需確認可編譯、可執行、可測試。
+
+2026-07-26 核准的後續實際執行順序為：
+
+```text
+Phase 4 整合
+→ Phase 4.5 基礎安全與領域模型
+→ Phase 5 歷史與情緒足跡
+→ Phase 6 圖鑑與固定解鎖
+→ Phase 8 經審閱互動內容
+→ Phase 9 使用說明與回饋
+→ Phase 10 私人核心封閉測試
+→ Phase 7 匿名社群治理與功能
+→ Phase 10 正式發布驗證
+```
+
+Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封閉測試執行。
+
+每個任務完成時，AI 需回報：
+
+- 是否參考 `system_data/`
+- 參考了哪些功能、流程或檔案
+- 哪些舊寫法未沿用
+- 是否有發現需要更新的正式文件
+
+## DOC-013：Grilling 決策與領域模型文件化（2026-07-26）
+
+- [x] TODO：唯讀檢查 AGENTS、README、system_data、正式文件、Git 狀態／diff／log、目錄、TODO／FIXME、測試與 Phase 完成狀態。
+- [x] IN PROGRESS：逐項確認產品、年齡、隱私、身分、資料生命週期、社群治理、內容、獎勵、平台與發布決策。
+- [x] REVIEW：建立 `CONTEXT.md`、ADR，並同步 AGENTS、README、Project、Database、API、UI、Coding Standard、Decisions、Tasks 與 Log。
+- [x] DONE：文件交叉一致性檢查完成，PR #79 與 Phase 4 contract PR #82 已合併至 `develop`。
+
+限制：
+
+- 本文件 Task 不整合或修改 `feature/phase4` 程式碼。
+- `feature/phase4` 整合完成後，必須先完成 Phase 4.5；Phase 5 以後功能在此前維持 blocked。
+
 ---
 
 ## 插隊任務：Penpot MCP Web 註冊頁精準修正
@@ -8,18 +47,7 @@
 - [x] 顏色維持集中於 `frontend/lib/theme/app_colors.dart`。
 - [x] 更新註冊頁 widget test，補上 Web 註冊頁文字驗證。
 - [x] 執行 `flutter analyze --no-pub` 與 `flutter test --no-pub test/register_page_test.dart`。
-- [x] 更新 UI_SPEC、CHANGE_LOG、CHANGE_HISTORY。# TASKS.md
-
-# 貘nsters AI 開發任務清單
-
-AI 必須依照本清單順序開發。每完成一項任務，需確認可編譯、可執行、可測試。
-
-每個任務完成時，AI 需回報：
-
-- 是否參考 `system_data/`
-- 參考了哪些功能、流程或檔案
-- 哪些舊寫法未沿用
-- 是否有發現需要更新的正式文件
+- [x] 更新 UI_SPEC、CHANGE_LOG、CHANGE_HISTORY。
 
 ## 插隊任務：Profile 操作列底色同步（2026-07-18）
 
@@ -204,9 +232,11 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ## Phase 4：日記功能
 
+狀態：REVIEW。Phase 4 Task PR #66～#78、#81 均已合併至 `feature/phase4`，同步 `develop` 後的 Backend、Flutter 與 Web build 整合驗證均通過；仍須透過 Phase PR 合併至 `develop`。
+
 - [x] 檢查 `system_data/` 中舊日記、聊天室、心情分數與分享流程
 - [x] 整理可參考的欄位與 UI 流程
-- [ ] 依新版 Entry 架構與 API 規格重新實作
+- [ ] 依已核准 v1 Entry 架構與 API 規格重新實作（TODO：排入 Phase 4.5；目前 Phase 4 程式為 Migration baseline）
 
 - [x] TODO：盤點 Phase 4 DoR、舊系統參考、既有 Entry／R2 架構、Diary API 與 Penpot 畫板缺口
 - [x] IN PROGRESS：依使用者全選方案 A、Penpot design-first、Web-first 與既有頁面樣式完成 Diary contract
@@ -277,22 +307,82 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] TODO：確認日記／煩惱現有 Provider 僅保存記憶體狀態、舊系統無草稿 API，並完成兩方案評估
 - [x] IN PROGRESS：依使用者選定方案建立持久草稿 API、資料表、private R2 暫存媒體、30 天清理與 Flutter 自動恢復
 - [x] REVIEW：完成恢復、續存、送出、放棄、逾期重試與續存競爭保護測試；Backend 275 項、Flutter 166 項、Analyze 與 Web build 通過
-- [ ] DONE：同步 Penpot、正式規格、Migration、Log，完成 Commit、Push 與 Task PR（Draft PR #81 已建立，待轉 Ready 與合併）
-- [ ] 日記／煩惱持久草稿與媒體暫存機制（REVIEW：實作與完整驗證已完成；Draft PR #81 待 review 與合併）
-- [ ] 測試
+- [x] DONE：同步 Penpot、正式規格、Migration、Log，完成 Commit、Push 與 Task PR（PR #81 已合併至 `feature/phase4`）
+- [x] 日記／煩惱持久草稿與媒體暫存機制（DONE：PR #81 已合併至 `feature/phase4`）
+- [x] 測試（DONE：同步 `develop` 後 Backend 275 項、Flutter Analyze、166 項完整測試與 Web build 通過）
+
+---
+
+## Phase 4.5：基礎安全與領域模型
+
+前置條件：Phase 4 候選成果完成 Review、整合測試並正式合併至 `develop`。本 Phase 完成前不得開始 Phase 5 以後 Feature。
+
+### 文件與契約
+
+- [ ] 依 `CONTEXT.md` 與 ADR 將目標規格拆為可交付 Task
+- [ ] 移除文件中的 `account`、公開頭貼上傳、server PIN、JWT Refresh、`isShared`、隨機怪獸與深度心理測驗舊契約
+- [ ] 建立 `/api/v1` OpenAPI 契約、穩定 error code、requestId、UUID public ID、version 與 idempotency 規則
+
+### Database 與共用基礎
+
+- [ ] 導入 Flyway 並建立 `develop` 現況 Baseline
+- [ ] 建立空資料庫與上一版本升級測試
+- [ ] 使用 expand／migrate／contract 加入 UUID public ID、optimistic version、UTC／本地日期／timezone／offset
+- [ ] 建立 Transactional Outbox、Worker job、retry、dead-letter／failed queue 與 alert 狀態
+- [ ] 建立 deletion／unshare／revocation marker，確保 restore 不復活已刪除資料
+
+### Auth、年齡與權限
+
+- [ ] 移除 `account` 註冊／登入依賴，完成 Email verification 狀態流程
+- [ ] 建立服務地區、生日鎖定、13–17 Guardian Consent 與成年重新同意
+- [ ] 修正 Google 同 Email 自動連結，加入明確 reauth linking
+- [ ] 將 Access Token 改為 10 分鐘 JWT，Refresh Token 改為 opaque family rotation
+- [ ] 建立 Web Cookie／CSRF 與 App Keychain／Keystore `SessionCredentialStore`
+- [ ] 移除 SharedPreferences 中 Token 與完整 Login Result
+- [ ] 建立 device session list、單一／全部撤銷、reuse detection 與敏感操作 reauth
+- [ ] 正式 Email forgot password、Email change、rate limit 與 session revocation
+- [ ] 導入 Argon2id、弱密碼 blocklist 與 BCrypt 漸進 rehash
+- [ ] 建立 MEMBER／MODERATOR／ADMIN／CONTENT_REVIEWER 與獨立 Community Eligibility
+- [ ] 建立 privileged TOTP MFA、backup codes 與受控初始 Admin provisioning
+- [ ] 移除 Backend `user_password_locks` API；建立 App 本機 PIN、背景遮罩與 Web idle reauth
+- [ ] 移除使用者頭貼上傳；改為選擇已取得貘怪素材
+
+### Entry、Media 與資料權利
+
+- [ ] 收斂 Entry 共用核心與 Diary／Annoyance 分離 Command
+- [ ] 將 Emotional Load 與 Private Category 改為 optional
+- [ ] 建立 Community Post 獨立快照與既有 `isShared` Migration
+- [ ] 建立媒體 quarantine、真實格式解析、重新處理、metadata removal、malware scan 與 1 GB quota
+- [ ] 建立個別內容刪除、七天清理、30 天 backup expiry 與 failure alert
+- [ ] 建立 reauth Data Export、短效 ZIP download 與到期清理
+- [ ] 建立 Account Deletion 七天取消期、三年 inactive lifecycle 與窄化 Legal Hold
+- [ ] 實作一般 30 天、安全 180 天、管理／審核一年 Log／Audit retention
+
+### Platform、CI 與營運
+
+- [ ] 隔離 Development／Staging／Production DB、R2、OAuth、Email、keys 與 domains
+- [ ] 建立 field allowlist observability，禁止 body、內容、Email、Token、media path 與 screenshot
+- [ ] 建立 edge＋Backend rate limit，不使用 persistent device fingerprint
+- [ ] 建立 server-side emergency feature flags 與雙人核准高風險變更
+- [ ] 建立加密 backup、15 分鐘 RPO、24 小時 RTO 與 quarterly restore drill
+- [ ] 建立 Backend／Flutter／Web／Android／iOS／Flyway／OpenAPI／security／E2E CI gate
+- [ ] 完成 token key leak、cross-account access 與 emergency flag incident drill
 
 ---
 
 ## Phase 5：歷史記錄與心的軌跡
 
 - [ ] 先確認／更新 Penpot History & Heart Web／Mobile 畫板，Web-first 完成實作與驗收
+狀態：BLOCKED，等待 Phase 4.5 完成。
+
 - [ ] 檢查 `system_data/` 中舊歷史記錄、心情分數與圖表呈現邏輯
 - [ ] 整理可參考的查詢條件與圖表資料格式
 - [ ] 依新版 API 與 UI 狀態處理重新實作
 
 - [ ] 歷史記錄 API
 - [ ] 心的軌跡 API
-- [ ] 最近七次情緒分數查詢
+- [ ] 最近 30 個本地日曆日 Emotional Load 查詢：同日平均、缺值留白、原始分數 drill-down、Entry type filter
+- [ ] 本人主動 keyword／metadata search；不保存搜尋詞、不做 AI／semantic search
 - [ ] Flutter 歷史記錄頁
 - [ ] Flutter 心的軌跡圖表
 - [ ] 測試
@@ -302,6 +392,8 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 ## Phase 6：怪獸圖鑑
 
 - [ ] 先確認／更新 Penpot Monster Collection Web／Mobile 畫板，Web-first 完成實作與驗收
+狀態：BLOCKED，等待 Phase 4.5 完成。
+
 - [ ] 檢查 `system_data/` 中舊怪獸、怪獸群組、素材與換裝邏輯
 - [ ] 整理可參考的資料欄位與素材路徑
 - [ ] 依新版 Monster schema、API 與資產規格重新實作
@@ -310,9 +402,12 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [ ] personal_monster Entity / DTO / Repository / Service / Controller
 - [ ] 查詢全部怪獸 API
 - [ ] 查詢我的怪獸 API
-- [ ] 隨機取得怪獸 API
-- [ ] 串接新增煩惱後的隨機怪獸獎勵與完成頁流程
+- [ ] 起始貘怪自選 API
+- [ ] 固定 Unlock Milestone、進度查詢與 idempotent reward event
+- [ ] 串接 Diary／Annoyance 成功事件，不依內容、分數或分類發獎
+- [ ] 移除 random endpoint、重複補償、連續登入與虛擬貨幣概念
 - [ ] 更改怪獸造型 API
+- [ ] 從已取得圖鑑選擇私人個人頭貼 API
 - [ ] Flutter 圖鑑頁
 - [ ] Flutter 怪獸詳細頁
 - [ ] 測試
@@ -321,43 +416,50 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 
 ## Phase 7：社群功能
 
-- [ ] 先確認／更新 Penpot Community Web／Mobile 畫板，Web-first 完成實作與驗收
+狀態：BLOCKED。私人核心封閉測試穩定，且下列治理、安全與特權 MFA 全部完成前，Backend feature flag 必須保持關閉。
+
 - [ ] 檢查 `system_data/` 中舊社群、按愛心與留言流程
 - [ ] 整理可參考的資料關聯與互動狀態
-- [ ] 依新版共用 Entry 社群模型重新實作
+- [ ] 依新版 Community Post 公開快照模型重新實作
 
-- [ ] 社群文章查詢 API
-- [ ] 煩惱社群按愛心 API
-- [ ] 煩惱社群留言 API
-- [ ] 日記社群按愛心 API
-- [ ] 日記社群留言 API
+- [ ] 建立／更新／取消 Community Post 公開快照與版本
+- [ ] 僅成人 Community Eligibility 的時間／Public Topic 查詢
+- [ ] 單一 Support Reaction API，不公開總數、不建排行榜
+- [ ] 單層留言查詢／新增／刪除 API
+- [ ] Report、Block、Reporter Hide 與 Author Unshare／Delete
+- [ ] Moderator review、Takedown、Community Restriction 與 immutable Audit
+- [ ] 14 天 Appeal 與不同 Moderator 複核
+- [ ] Sensitive Content Warning 與媒體預設遮蔽
+- [ ] 自傷／傷人疑慮優先人工佇列與「非緊急求助」UI
+- [ ] Unshare／Delete 後 Post、Comment、Support 七天內 cascade purge
 - [ ] Flutter 社群頁
 - [ ] Flutter 留言功能
-- [ ] Flutter 愛心功能
+- [ ] Flutter 非競爭式支持功能
+- [ ] 驗證無私訊、追蹤、標記、跨貼文身分、全文搜尋、公開索引或永久媒體 URL
 - [ ] 測試
 
 ---
 
 ## Phase 8：互動區
 
-- [ ] 先確認／更新 Penpot Interaction Web／Mobile 畫板，Web-first 完成實作與驗收
+狀態：BLOCKED，等待 Phase 4.5 完成與 Content Reviewer 工作流可用。
+
 - [ ] 檢查 `system_data/` 中舊解答之書、每日測驗、心理測驗、心理遊戲與紓壓方法
-- [ ] 整理可參考的題目、選項、獎勵與外部連結邏輯
+- [ ] 將舊內容分類為 Self Exploration、Educational Quiz、External Resource 或淘汰
 - [ ] 依新版 Interactive API 與 UI 規格重新實作
 
 - [ ] 解答之書 API
-- [ ] 每日測驗 API
-- [ ] 每日測驗答題 API
-- [ ] 每日測驗七次獎勵邏輯
-- [ ] 深度心理測驗 API
-- [ ] 心理小遊戲 API
-- [ ] 紓壓方法 API
+- [ ] Educational Quiz API、作答與來源／年齡版本
+- [ ] 累積完成教育互動里程碑，不要求連續日期、不因答錯扣除
+- [ ] Self Exploration 版本化內容、私人結果、逐筆刪除與匯出
+- [ ] External Resource allowlist、離站提示與 age applicability
+- [ ] Content Reviewer 草稿／退回／核准／發布工作流
+- [ ] 經審閱 Monster Response 內容庫
 - [ ] Flutter 互動區首頁
 - [ ] Flutter 解答之書頁
-- [ ] Flutter 每日測驗頁
-- [ ] Flutter 深度心理測驗頁
-- [ ] Flutter 心理小遊戲頁
-- [ ] Flutter 紓壓方法頁
+- [ ] Flutter Educational Quiz 頁
+- [ ] Flutter Self Exploration 頁
+- [ ] Flutter External Resource 頁
 - [ ] 測試
 
 ---
@@ -370,9 +472,9 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [ ] 依新版 UI 與 API 規格重新實作
 
 - [ ] 使用說明頁
-- [ ] 使用回饋 API
+- [ ] 使用回饋 API：文字＋opaque requestId、無附件、關閉 90 天清除
 - [ ] 使用回饋頁
-- [ ] 分享 App 功能
+- [ ] 安全與危機協助固定入口
 - [ ] 測試
 
 ---
@@ -393,6 +495,10 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [ ] MySQL 正式環境設定
 - [ ] 環境變數整理
 - [ ] 最終整合測試
+- [ ] 台灣限定、Production 等級私人核心封閉測試
+- [ ] Web／Android／iOS 各平台完整 E2E 與真實裝置驗證
+- [ ] 至少穩定四週且無未解決 High／Critical privacy、authorization、deletion、token 或 data-loss defect
+- [ ] 私人核心達標後才排程 Phase 7 Community release gate
 
 ---
 

@@ -8,6 +8,74 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-28 15:58 PHASE4-DEVELOP-SYNC
+
+Task
+
+Phase 4 同步 `develop` 與任務狀態稽核（REVIEW）
+
+執行者
+
+Codex
+
+### 完成內容
+
+- 確認 `origin/develop` 比 `origin/feature/phase4` 多 4 個文件契約 Commit，將 PR #79／#82 的 grilling 決策、Phase 4 contract、`CONTEXT.md` 與 8 份 ADR 合併至 `feature/phase4`。
+- 解決 `API_SPEC`、`DATABASE_SPEC`、`PROJECT_SPEC`、`UI_SPEC` 與 `CHANGE_LOG` 衝突；以 `/api/v1`、UUID、optional Emotional Load、獨立 Community Post 等新契約為正式目標，保留 Phase 4 既有程式與持久草稿為 Migration baseline。
+- 明確區分未同步本機草稿與 owner-scoped 伺服器草稿：前者不持久化，後者依已核准方案保留 30 天。
+- 即時查核 GitHub：Phase 4 Task PR #66～#78、#81 全部已合併至 `feature/phase4`；DOC-013 的 PR #79 與 Phase 4 contract PR #82 已合併至 `develop`。
+- 將 DOC-013、PR #81 持久草稿 Task 與 Phase 4 整合測試轉為 DONE；Phase 4 整體保留 REVIEW，等待 Phase PR 合併至 `develop`。
+- 保留「依已核准 v1 Entry 架構與 API 規格重新實作」為 Phase 4.5 TODO，未將現有 `/api`、`isShared` 與必填分數實作誤標為完成。
+
+### 修改檔案
+
+- `AGENTS.md`、`CONTEXT.md`、`README.md`
+- `docs/API_SPEC.md`、`docs/DATABASE_SPEC.md`、`docs/PROJECT_SPEC.md`、`docs/UI_SPEC.md`
+- `docs/CODING_STANDARD.md`、`docs/DECISIONS.md`、`docs/TASKS.md`
+- `docs/PHASE2_TEST_REPORT.md`、`docs/PHASE3_ANNOYANCE_DESIGN_PROPOSAL.md`、`docs/SYSTEM_DATA_REFERENCE.md`
+- `docs/adr/0001`～`0008`
+- `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`
+
+### system_data 參考結果
+
+- 本次為分支同步與狀態稽核，未修改、搬移、刪除或格式化 `system_data/`。
+- 沿用 Phase 4 各 Task 已完成的舊系統流程與素材查核結果；新契約明確標示舊 Account、server PIN、boolean 分享與隨機獎勵僅為歷史基線。
+
+### API 異動
+
+- 合併文件中的 `/api/v1`、UUID public ID、OpenAPI、穩定 error code、optimistic version 與 idempotency 目標契約。
+- 保留 Phase 4 既有 `/api` endpoint 與持久草稿 API 為 Migration baseline；本次未修改 Backend endpoint。
+
+### Database 異動
+
+- 合併 Flyway、Community Post、Session、資料生命週期與 Transactional Outbox 目標模型。
+- 保留 `entry_drafts`／`entry_draft_media` 現況與 30 天保存規則；本次未修改 Schema、Migration 或資料。
+
+### UI 異動
+
+- 合併 optional Emotional Load、獨立公開快照、隱私遮罩與本機鎖目標規格。
+- 保留 owner-scoped 伺服器草稿的恢復與失敗重試流程；本次未修改 Flutter UI。
+
+### 測試方式與結果
+
+- Backend `gradlew test`：BUILD SUCCESSFUL，275 tests、0 failures、0 errors、4 skipped，76.7 秒。
+- Flutter Analyze：PASS，無問題，16.1 秒。
+- Flutter完整測試：PASS，166 tests，67.9 秒。
+- Flutter Web build：PASS，114.6 秒。
+- `git diff --cached --check` 與衝突標記檢查：通過。
+
+### Log 保存期限檢查結果
+
+- 以 2026-07-28 為基準檢查 `CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv`；最早紀錄均為 2026-06-29，未早於 2026-06-28。
+- 未發現超過一個月的 Log，未刪除紀錄；`CHANGE_HISTORY.xlsx` 本次未作為紀錄來源且未修改。
+
+### 待確認事項
+
+- `feature/phase4` 推送後仍須建立 Phase PR 合併至 `develop`；合併完成前 Phase 4 維持 REVIEW。
+- Phase 4.5 必須先完成 v1 契約 Migration，Phase 5 以後功能維持 BLOCKED。
+
+---
+
 ## 2026-07-28 15:01 PHASE4-ENTRY-DURABLE-DRAFTS
 
 Task
@@ -545,6 +613,87 @@ Codex
 ### 待確認事項
 
 - 等待 Task PR 建立與 review；核准並合併至 `feature/phase4` 後，才能將兩支媒體下載 API 與本 Task 標記 DONE。
+---
+
+## 2026-07-26 10:57
+
+Task
+DOC-013 Grilling 決策與領域模型文件化（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 依序檢查 AGENTS、system_data、正式規格、Git status／diff／log、主要模組、TODO／FIXME、測試與功能完成狀態。
+- 以 grilling 與 domain-modeling 逐項確認產品、年齡、隱私、身分、資料生命週期、匿名社群、內容、怪獸、平台、營運與發布決策。
+- 建立 `CONTEXT.md`，統一 Member、Entry、Emotional Load、Community Post、Self Exploration、Community Eligibility 等領域詞彙。
+- 建立 8 份 ADR，記錄非醫療私人核心、年齡資格、工作階段、本機隱私鎖、Entry／Community Post、資料生命週期、社群治理、內容審閱、固定獎勵與版本化平台基礎。
+- 將核准結果同步至 AGENTS、README、Project、Database、API、UI、Coding Standard、Decisions 與 Tasks。
+- 新增 Phase 4.5 基礎安全與領域模型工作清單，並明確阻擋 Phase 5 以後功能。
+- 保留 `feature/phase4` 30 個候選 Commit 的現況，不執行 merge、rebase、cherry-pick 或程式修改。
+- 檢查 Log 保存期限；最早紀錄為 2026-06-29，未早於 2026-06-26，因此未刪除 Log。
+
+### Added
+
+- `CONTEXT.md`
+- `docs/adr/0001-non-medical-private-core.md`
+- `docs/adr/0002-age-and-community-eligibility.md`
+- `docs/adr/0003-session-and-local-privacy-lock.md`
+- `docs/adr/0004-entry-and-community-post-boundary.md`
+- `docs/adr/0005-data-lifecycle-and-recovery.md`
+- `docs/adr/0006-governed-closed-community.md`
+- `docs/adr/0007-reviewed-content-and-deterministic-rewards.md`
+- `docs/adr/0008-versioned-platform-foundation.md`
+
+### Modified
+
+- `AGENTS.md`
+- `README.md`
+- `docs/PROJECT_SPEC.md`
+- `docs/DATABASE_SPEC.md`
+- `docs/API_SPEC.md`
+- `docs/UI_SPEC.md`
+- `docs/CODING_STANDARD.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- `docs/SYSTEM_DATA_REFERENCE.md`
+- `docs/PHASE2_TEST_REPORT.md`
+- `docs/PHASE3_ANNOYANCE_DESIGN_PROPOSAL.md`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- 文件工作，未執行程式 Compile／Test。
+- 執行 Markdown／Git whitespace、內部連結、目標規格關鍵字與文件交叉一致性檢查。
+- 本次新增的 14 筆 `DOC-013` CSV 紀錄皆符合 13 欄現行格式；既有 41 筆 9 欄歷史紀錄與修改前相同，本次未擴大範圍改寫。
+
+### system_data Reference
+
+- 參考系統手冊、系統簡介、舊會員、煩惱、日記、怪獸、社群與互動流程。
+- 未沿用舊 Account、空密碼 OAuth、SharedPreferences Token、公開頭貼、server PIN、Base64 媒體、隨機怪獸與未治理社群。
+- 未修改、搬移、刪除或格式化 `system_data/`。
+
+### API
+
+- 文件目標改為 `/api/v1`、UUID public ID、OpenAPI、stable error code、optimistic version、idempotency、短效 JWT Access＋opaque Refresh Session。
+- 本次未修改 Backend endpoint。
+
+### Database
+
+- 文件核准 Flyway、target schema、Community Post、Session、Guardian Consent、Outbox、Deletion／Export／Audit 等 Migration 方向。
+- 本次未修改 Schema 或執行 Migration。
+
+### UI
+
+- 文件核准 Email-only login、年齡／Guardian Consent、本機 Privacy Lock、optional Emotional Load、30 日 Emotional Trace、Monster Avatar、封閉成人社群與無障礙邊界。
+- 本次未修改 Flutter 程式或 Penpot。
+
+### Pending
+
+- DOC-013 文件 Review 與 PR。
+- 後續另行 Review／整合 `feature/phase4`；本 Task 明確不執行 Phase 4 整合。
 
 ---
 

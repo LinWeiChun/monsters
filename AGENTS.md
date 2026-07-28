@@ -2,7 +2,7 @@
 
 # 貘nsters AI 開發規範
 
-> Version：v3.3  
+> Version：v3.4
 > 本文件為貘nsters Repository 的最高層級 AI 開發規範，適用於 Codex、Cursor Agent、GitHub Copilot Agent、Claude Code、Gemini CLI 等所有 AI Coding Agent。
 
 ---
@@ -20,18 +20,20 @@
 AI 開始任何任務前，必須依序閱讀：
 
 1. `AGENTS.md`
-2. `system_data/系統手冊`
-3. `system_data/系統簡介`
-4. `system_data/參考程式` 或 `system_data/` 內既有程式
-5. `docs/GIT_RULE.md`
-6. `docs/PROJECT_SPEC.md`
-7. `docs/DATABASE_SPEC.md`
-8. `docs/API_SPEC.md`
-9. `docs/UI_SPEC.md`
-10. `docs/CODING_STANDARD.md`
-11. `docs/DECISIONS.md`
-12. `docs/TASKS.md`
-13. 使用者最新明確指示
+2. `CONTEXT.md`
+3. `system_data/系統手冊`
+4. `system_data/系統簡介`
+5. `system_data/參考程式` 或 `system_data/` 內既有程式
+6. `docs/GIT_RULE.md`
+7. `docs/PROJECT_SPEC.md`
+8. `docs/DATABASE_SPEC.md`
+9. `docs/API_SPEC.md`
+10. `docs/UI_SPEC.md`
+11. `docs/CODING_STANDARD.md`
+12. `docs/DECISIONS.md`
+13. `docs/adr/` 中與任務相關的 ADR
+14. `docs/TASKS.md`
+15. 使用者最新明確指示
 
 若內容互相衝突，AI 必須停止實作，說明衝突、提出方案，並等待使用者確認；不得自行推測。
 
@@ -46,6 +48,23 @@ Flutter → REST API → Spring Boot → MySQL
 ```
 
 Flutter 不得直接存取 Database；所有資料必須透過 REST API。詳細規格依 `docs/PROJECT_SPEC.md`。
+
+### 3.1 已核准產品與資料邊界
+
+下列原則為 2026-07-26 grilling 後確認的不可自行弱化基線：
+
+- 產品定位為非醫療情緒記錄與自我照顧工具，不提供診斷、治療或臨床風險判讀。
+- 私人日記、煩惱、媒體、情緒負荷與自我探索結果不得被 AI、關鍵字或人工後台自動分析。
+- 第一版服務地區為台灣，最低年齡為 13 歲；13 至 17 歲需監護人同意且不得使用社群。
+- 匿名社群只對符合資格的成年會員開放；檢舉、封鎖、人工審核、申訴、稽核與特權帳號 MFA 完成前不得啟用。
+- 管理員、審核員、內容審閱者與客服不得查看私人內容、模擬會員登入或取得會員 Token。
+- 使用者內容不得用於生成式 AI 訓練、廣告、跨站追蹤、敏感分群或未另行同意的研究。
+- 取消分享、刪除、匯出、帳號停用與法律保全必須依正式資料生命週期處理，不得以備份、Log、搜尋索引或客服系統形成永久副本。
+- 第一版不採端對端加密；文件與 UI 必須如實說明，不得暗示平台無法解密資料。
+- 第一版不接受使用者上傳個人頭貼；頭貼只能從已取得的貘怪圖鑑素材選擇。
+- 第一版先完成私人核心封閉測試，社群於治理與安全門檻完成後另行開放。
+
+完整領域語言以 `CONTEXT.md` 為準，具架構取捨的決策以 `docs/adr/` 與 `docs/DECISIONS.md` 為準。
 
 ---
 
@@ -90,16 +109,17 @@ AI 使用參考程式時必須遵守：
 每次收到任務，AI 必須：
 
 1. 閱讀必要文件與最新任務
-2. 確認 `docs/TASKS.md` 狀態與前置條件
-3. 檢查 `system_data/` 是否有可參考的既有寫法、流程、素材或資料結構
-4. 比對舊系統與正式文件是否衝突
-5. 檢查 DoR
-6. 分析需求並提出必要問題
-7. 依既有架構、正式文件與 `docs/CODING_STANDARD.md` 實作
-8. 執行 Compile / Test / 必要檢查
-9. 更新相關文件與 Log
-10. 依 `docs/GIT_RULE.md` 執行 Git / PR 流程
-11. 回報成果
+2. 依 `CONTEXT.md` 確認領域詞彙，並閱讀相關 ADR
+3. 確認 `docs/TASKS.md` 狀態與前置條件
+4. 檢查 `system_data/` 是否有可參考的既有寫法、流程、素材或資料結構
+5. 比對舊系統、現有程式與正式文件是否衝突
+6. 檢查 DoR
+7. 分析需求並提出必要問題
+8. 依既有架構、正式文件與 `docs/CODING_STANDARD.md` 實作
+9. 執行 Compile / Test / 必要檢查
+10. 更新相關文件、ADR 與 Log
+11. 依 `docs/GIT_RULE.md` 執行 Git / PR 流程
+12. 回報成果
 
 AI 必須優先重用既有程式與架構，保持 Coding Style 一致，不得只改程式而不更新文件。
 
@@ -118,6 +138,8 @@ TODO → IN PROGRESS → REVIEW → DONE
 ### Definition of Ready（DoR）
 
 開始實作前，必須確認：Task、需求、API、Database、UI 與前置 Task 皆已明確。
+
+涉及會員、Entry、媒體、社群、內容管理或營運功能時，還必須確認年齡資格、owner、角色、刪除／匯出、稽核、重試、失敗狀態及隱私邊界。
 
 未符合 DoR 時，不得開始實作。
 
@@ -141,6 +163,8 @@ TODO → IN PROGRESS → REVIEW → DONE
 | UI | `docs/UI_SPEC.md` |
 | Coding Style | `docs/CODING_STANDARD.md` |
 | Task / Log | `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY` |
+| 領域詞彙 | `CONTEXT.md` |
+| 難以逆轉的架構決策 | `docs/adr/`、`docs/DECISIONS.md` |
 
 新增 Log 前，AI 必須檢查 `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv`、`log/CHANGE_HISTORY.xlsx`（若本次使用）。
 
@@ -161,6 +185,10 @@ AI 不得：
 - 自行推測未明確需求
 - 跳過文件同步或測試
 - 違反 `docs/GIT_RULE.md` 或 `docs/CODING_STANDARD.md`
+- 將私人內容、Token、Email、生日、監護人資料或媒體寫入 Log、分析事件、客服工單或第三方監控
+- 以情緒分數、文字內容或未經同意的推測影響獎勵、排序、通知、資格或處分
+- 只在前端隱藏功能而未由 Backend 強制權限與功能開關
+- 在 `feature/phase4` 尚未正式整合且基礎安全階段未完成前開始 Phase 5 以後功能
 
 ---
 
@@ -205,11 +233,11 @@ AI 必須自動閱讀文件、確認 Task、實作、更新文件、執行 Git �
 | 項目 | 內容 |
 |---|---|
 | 文件 | `AGENTS.md` |
-| 版本 | v3.3 |
+| 版本 | v3.4 |
 | 專案 | 貘nsters |
 | 維護者 | WeiChun Lin |
 | 適用 | 所有 AI Coding Agent |
-| 主要引用 | `docs/GIT_RULE.md`、`docs/CODING_STANDARD.md`、`system_data/` |
+| 主要引用 | `CONTEXT.md`、`docs/GIT_RULE.md`、`docs/CODING_STANDARD.md`、`docs/adr/`、`system_data/` |
 | Log 保存政策 | 新增 Log 前需檢查並刪除超過一個月的紀錄 |
 
 ---

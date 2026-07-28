@@ -1,4 +1,22 @@
 日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
+2026-07-28,15:58,PHASE4-DEVELOP-SYNC,Integration,feature/phase4,合併,同步 develop 四個文件契約 Commit 並解決五個文件衝突,Codex,是,是,是,是,本次只合併文件且不修改程式或 Schema
+2026-07-28,15:58,PHASE4-DEVELOP-SYNC,Documentation,docs/TASKS.md,修改,依 GitHub PR 與完整測試證據更新 Phase 4 任務狀態,Codex,否,否,否,否,PR 66 至 78 與 81 已合併且 Phase 4 維持 REVIEW
+2026-07-28,15:58,PHASE4-DEVELOP-SYNC,Documentation,log/CHANGE_LOG.md,修改,記錄 develop 同步衝突處理整合測試與待辦,Codex,否,否,否,否,Log 保存期限檢查通過
+2026-07-28,15:58,PHASE4-DEVELOP-SYNC,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Phase 4 develop 同步歷程,Codex,否,否,否,否,Backend 275 Flutter 166 Analyze 與 Web build 通過
+2026-07-26,10:57,DOC-013,Documentation,CONTEXT.md,新增,建立 grilling 核准領域共同語言,Codex,否,否,否,否,Member Entry Emotional Load Community Post 等 canonical terms
+2026-07-26,10:57,DOC-013,Documentation,docs/adr/*.md,新增,建立八份難以逆轉的架構決策紀錄,Codex,是,是,是,是,不執行程式或 Phase 4 整合
+2026-07-26,10:57,DOC-013,Documentation,AGENTS.md,修改,升級 v3.4 並加入產品資料邊界與文件閱讀規則,Codex,是,是,是,是,最高層級規範同步
+2026-07-26,10:57,DOC-013,Documentation,README.md,修改,更新產品定位專案狀態與文件閱讀順序,Codex,否,否,否,否,Phase 4 candidate 未整合
+2026-07-26,10:57,DOC-013,Documentation,docs/PROJECT_SPEC.md,修改,同步非醫療年齡隱私社群內容資料權利與發布規格,Codex,是,是,是,是,Phase 4.5 前不得開始 Phase 5
+2026-07-26,10:57,DOC-013,Documentation,docs/DATABASE_SPEC.md,修改,新增 Flyway target schema 資料生命週期與 historical baseline 標示,Codex,否,是,否,是,本次未執行 Migration
+2026-07-26,10:57,DOC-013,Documentation,docs/API_SPEC.md,修改,新增 api v1 auth session entry community export delete target contract,Codex,是,是,是,是,本次未修改 Backend endpoint
+2026-07-26,10:57,DOC-013,Documentation,docs/UI_SPEC.md,修改,同步 Email login guardian local lock optional score trace community accessibility,Codex,是,否,是,是,本次未修改 Flutter
+2026-07-26,10:57,DOC-013,Documentation,docs/CODING_STANDARD.md,修改,加入 credential media migration logging outbox 與 privacy coding rules,Codex,是,是,是,是,版本更新 v3.2
+2026-07-26,10:57,DOC-013,Documentation,docs/DECISIONS.md,修改,記錄 2026-07-26 grilling 全部核准基線,Codex,是,是,是,是,舊衝突決策保留為 historical
+2026-07-26,10:57,DOC-013,Documentation,docs/TASKS.md,修改,新增 DOC-013 與 Phase 4.5 及重排後續執行順序,Codex,是,是,是,是,不整合 feature phase4
+2026-07-26,10:57,DOC-013,Documentation,docs historical references,修改,標示 Phase2 Phase3 與 system_data 為 historical reference,Codex,否,否,否,否,避免舊規格反向覆蓋
+2026-07-26,10:57,DOC-013,Documentation,log/CHANGE_LOG.md,修改,新增 grilling 文件化工作紀錄,Codex,是,是,是,是,已檢查一個月保存期限無過期 log
+2026-07-26,10:57,DOC-013,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-013 文件異動歷程,Codex,是,是,是,是,文件 only 無 code test
 2026-07-13,09:32,TASK-059,Documentation,docs/TASKS.md,修改,將 Flutter 煩惱分數選擇與 Phase 3 測試標記 DONE,Codex,否,否,否,否,review 驗證通過
 2026-07-13,09:32,TASK-059,Documentation,log/CHANGE_LOG.md,修改,新增 Phase 3 分數選擇 review 與測試收尾紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-13,09:32,TASK-059,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-059 history 紀錄,Codex,否,否,否,否,Flutter 66 tests 與 Backend Gradle test 通過
