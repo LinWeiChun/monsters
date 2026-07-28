@@ -4,6 +4,8 @@
 
 本文件記錄已定案與待確認的跨文件決策。
 
+Phase 4.5 已核准決策的可交付規格與測試接縫整理於 [`PHASE4_5_FOUNDATION_SPEC.md`](PHASE4_5_FOUNDATION_SPEC.md)；該文件不得反向弱化本文件、`CONTEXT.md` 或 ADR。
+
 ## 零、2026-07-26 Grilling 核准基線
 
 本章決策已由使用者逐項確認。若與後續既有決策、舊系統或目前程式衝突，以本章、`CONTEXT.md` 與 `docs/adr/` 為目標規格；衝突程式須列入 Phase 4 後的基礎安全階段，不得把舊實作反向視為新規格。

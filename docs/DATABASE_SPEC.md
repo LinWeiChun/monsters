@@ -2,6 +2,8 @@
 
 # 貘nsters Database Spec
 
+> Phase 4.5 的 Database Migration 與資料生命週期驗收範圍以 [`PHASE4_5_FOUNDATION_SPEC.md`](PHASE4_5_FOUNDATION_SPEC.md) 為準；本文件保存正式 Schema 契約。
+
 > 狀態說明：本文件同時記錄 `develop` 目前 Schema 與 2026-07-26 已核准的目標 Schema。第二章的目標模型具有規格優先權；第三章既有表格是 Migration 輸入，不代表仍可新增依賴。所有目標變更必須於基礎安全階段透過 Flyway 實作，不得直接覆蓋正式資料庫。
 
 ## 一、資料庫基礎規範

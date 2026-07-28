@@ -2,6 +2,8 @@
 
 # 貘nsters 程式設計規範（Coding Standard）
 
+> Phase 4.5 實作必須同時符合 [`PHASE4_5_FOUNDATION_SPEC.md`](PHASE4_5_FOUNDATION_SPEC.md) 的驗收接縫；測試以外部可觀察行為為主，不得以內部實作斷言代替契約驗證。
+
 > Version：v3.2
 >
 > 本文件規範 **貘nsters** 專案所有程式碼撰寫標準。

@@ -1,4 +1,9 @@
 日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
+2026-07-28,15:32,DOC-014,Documentation,docs/PHASE4_5_FOUNDATION_SPEC.md,新增,建立 Phase 4.5 to-spec 完整規格與跨平台 E2E 驗收接縫,Codex,是,是,是,是,文件 only 不執行實作或 Issue 發布
+2026-07-28,15:32,DOC-014,Documentation,docs formal specs,修改,同步 Project Database API UI Coding Standard Decisions 規格索引,Codex,是,是,是,是,正式契約仍以各 Spec 與 ADR 為準
+2026-07-28,15:32,DOC-014,Documentation,docs/TASKS.md,修改,新增 DOC-014 REVIEW 狀態與工作限制,Codex,否,否,否,否,待文件 Review 與 Git PR
+2026-07-28,15:32,DOC-014,Documentation,log/CHANGE_LOG.md,修改,新增 to-spec 文件化工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限無過期 Log
+2026-07-28,15:32,DOC-014,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-014 文件異動歷程,Codex,否,否,否,否,共五筆現行 13 欄紀錄
 2026-07-28,16:09,PHASE4-PR,Git,GitHub PR #83,新增,建立 feature phase4 至 develop 正式整合 PR,Codex,否,否,否,否,OPEN 非 Draft 且 merge state CLEAN
 2026-07-28,15:58,PHASE4-DEVELOP-SYNC,Integration,feature/phase4,合併,同步 develop 四個文件契約 Commit 並解決五個文件衝突,Codex,是,是,是,是,本次只合併文件且不修改程式或 Schema
 2026-07-28,15:58,PHASE4-DEVELOP-SYNC,Documentation,docs/TASKS.md,修改,依 GitHub PR 與完整測試證據更新 Phase 4 任務狀態,Codex,否,否,否,否,PR 66 至 78 與 81 已合併且 Phase 4 維持 REVIEW
