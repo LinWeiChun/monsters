@@ -272,8 +272,13 @@ AI 必須依照本清單順序開發。每完成一項任務，需確認可編�
 - [x] TODO：確認 PR #77 已合併，重讀首頁日記入口正式規格、既有 `/diaries/new` 路由與舊系統首頁導向
 - [x] IN PROGRESS：將 Desktop／Tablet／Mobile 首頁日記入口統一導向 `AppRoute.diaryChat`，補齊路由回歸測試
 - [x] REVIEW：首頁三種 window class 日記導向與 17 項首頁測試、Flutter Analyze、162 項完整測試及 Web build 通過
-- [ ] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（Draft PR #78 已建立，待轉 Ready 與合併）
-- [ ] Flutter 首頁導入紀錄日記（REVIEW：Desktop／Tablet／Mobile 實作與驗證完成；Draft PR #78 已建立，待轉 Ready 與合併）
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（PR #78 已合併至 `feature/phase4`）
+- [x] Flutter 首頁導入紀錄日記（DONE：Desktop／Tablet／Mobile 均已導向 `/diaries/new`；PR #78 已合併至 `feature/phase4`）
+- [x] TODO：確認日記／煩惱現有 Provider 僅保存記憶體狀態、舊系統無草稿 API，並完成兩方案評估
+- [x] IN PROGRESS：依使用者選定方案建立持久草稿 API、資料表、private R2 暫存媒體、30 天清理與 Flutter 自動恢復
+- [x] REVIEW：完成恢復、續存、送出、放棄、逾期重試與續存競爭保護測試；Backend 275 項、Flutter 166 項、Analyze 與 Web build 通過
+- [ ] DONE：同步 Penpot、正式規格、Migration、Log，完成 Commit、Push 與 Task PR（Draft PR #81 已建立，待轉 Ready 與合併）
+- [ ] 日記／煩惱持久草稿與媒體暫存機制（REVIEW：實作與完整驗證已完成；Draft PR #81 待 review 與合併）
 - [ ] 測試
 
 ---

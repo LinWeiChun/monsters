@@ -9,14 +9,54 @@ class EntryDrawingFile {
     required this.bytes,
     required this.name,
     this.mimeType = 'image/png',
-  });
+    this.draftMediaId,
+    this.downloadUrl,
+    int? sizeBytes,
+  }) : _sizeBytes = sizeBytes;
 
-  final XFile file;
+  factory EntryDrawingFile.fromDraft({
+    required int draftMediaId,
+    required String downloadUrl,
+    required String name,
+    required String mimeType,
+    required int sizeBytes,
+  }) {
+    return EntryDrawingFile(
+      file: null,
+      bytes: Uint8List(0),
+      name: name,
+      mimeType: mimeType,
+      draftMediaId: draftMediaId,
+      downloadUrl: downloadUrl,
+      sizeBytes: sizeBytes,
+    );
+  }
+
+  final XFile? file;
   final Uint8List bytes;
   final String name;
   final String mimeType;
+  final int? draftMediaId;
+  final String? downloadUrl;
+  final int? _sizeBytes;
 
-  int get sizeBytes => bytes.length;
+  int get sizeBytes => _sizeBytes ?? bytes.length;
+  bool get isPersistedDraft => draftMediaId != null;
+
+  EntryDrawingFile withDraftReference({
+    required int draftMediaId,
+    required String downloadUrl,
+  }) {
+    return EntryDrawingFile(
+      file: file,
+      bytes: bytes,
+      name: name,
+      mimeType: mimeType,
+      draftMediaId: draftMediaId,
+      downloadUrl: downloadUrl,
+      sizeBytes: sizeBytes,
+    );
+  }
 }
 
 class EntryDrawingLimits {

@@ -946,7 +946,67 @@ Request：
 - Backend 驗證權限後從 private R2 串流，不以 redirect 洩漏 R2 URL 或 object key。
 - 支援單一 HTTP `Range` request 以供錄音／影片 seek；完整回應為 200，range 回應為 206，並回傳正確 `Content-Type`、`Content-Length`、`Accept-Ranges` 與 `Content-Range`。
 
-### 4.8 Annoyance 錯誤處理
+### 4.8 煩惱草稿
+
+| Method | Path | 說明 |
+|---|---|---|
+| GET | `/api/annoyances/draft` | 取得目前使用者尚未到期的煩惱草稿 |
+| PUT | `/api/annoyances/draft` | 建立或覆寫煩惱草稿 |
+| DELETE | `/api/annoyances/draft` | 明確捨棄草稿與暫存媒體；不存在時仍回傳成功 |
+| POST | `/api/annoyances/draft/submit` | 驗證完整草稿並轉為正式煩惱 |
+| GET | `/api/annoyances/draft/media/{mediaId}` | 下載目前使用者的草稿媒體 |
+
+`PUT` 使用 `multipart/form-data`，parts 與正式建立 API 相同；`request` 改使用可部分完成的草稿欄位：
+
+```json
+{
+  "step": "CONTENT",
+  "categoryCode": "ACADEMIC",
+  "recordMethod": "TEXT",
+  "content": "最近考試讓我很焦慮",
+  "wantsDrawing": null,
+  "score": null,
+  "isShared": null,
+  "existingContentMediaId": null,
+  "existingDrawingMediaId": null
+}
+```
+
+- `step` 僅允許 `INTRO`、`CATEGORY`、`RECORD_METHOD`、`CONTENT`、`DRAWING_DECISION`、`DRAWING`、`SCORE`、`SHARING`、`REVIEW`；不得保存 `SUBMITTING` 或 `COMPLETED`。
+- 儲存草稿採部分驗證；`POST /draft/submit` 才執行與正式建立 API 相同的完整組合驗證。
+- submit 時 `wantsDrawing` 必須已選擇；true 時需有 drawing 暫存媒體，false 時不得保留 drawing 暫存媒體。
+- 每位使用者只保留一筆煩惱草稿；每次有效儲存將到期時間延長 30 天。
+- 新 `contentFile`／`drawingFile` 與同用途 `existing...MediaId` 不得同時傳入；existing id 必須屬於目前草稿且用途相符。兩者皆未傳代表移除該用途媒體。
+- 草稿與媒體只允許 owner 存取，即使 `isShared = true` 仍不得供其他使用者讀取。
+- 媒體使用既有 private R2 驗證與大小／長度限制；取代、捨棄或到期時清理 object。
+- 儲存、送出、捨棄與到期清理會鎖定同一使用者／類型的草稿；到期清理取得鎖後須再次確認 `expiresAt`，不得刪除等待期間已被續存的草稿。
+- 明確捨棄或到期清理若無法刪除 R2 object，不得先刪除草稿 metadata；排程保留該筆資料供下次重試。
+- 送出在同一 Database transaction 建立 `entries`／`entry_media` 並刪除草稿 metadata；沿用既有 object key，不重新上傳檔案。
+
+GET／PUT response data：
+
+```json
+{
+  "draft": {
+    "id": 501,
+    "entryType": "ANNOYANCE",
+    "step": "CONTENT",
+    "category": { "code": "ACADEMIC", "name": "學業" },
+    "recordMethod": "TEXT",
+    "content": "最近考試讓我很焦慮",
+    "wantsDrawing": null,
+    "score": null,
+    "isShared": null,
+    "expiresAt": "2026-08-23T12:00:00+08:00",
+    "contentMedia": null,
+    "drawingMedia": null
+  }
+}
+```
+
+無草稿時仍回傳 200，`data = { "draft": null }`。草稿媒體 response 另包含 `id`、`role`、`type`、`fileName`、`contentType`、`sizeBytes`、`durationSeconds` 與需帶 JWT 的 Backend `downloadUrl`，不得包含 object key。送出成功回傳 201 與既有 Annoyance response data。
+
+### 4.9 Annoyance 錯誤處理
 
 - 400：欄位、主要記錄方式組合、分頁、MIME type、大小或長度驗證失敗。
 - 401：未登入或 token 無效。
@@ -1105,7 +1165,36 @@ Request：
 - Backend 驗證權限後從 private R2 串流，不以 redirect 洩漏 R2 URL 或 object key。
 - 支援單一 HTTP `Range` request 以供錄音／影片 seek；完整回應為 200，range 回應為 206，並回傳正確 `Content-Type`、`Content-Length`、`Accept-Ranges` 與 `Content-Range`。
 
-### 5.7 Diary 錯誤處理
+### 5.7 日記草稿
+
+| Method | Path | 說明 |
+|---|---|---|
+| GET | `/api/diaries/draft` | 取得目前使用者尚未到期的日記草稿 |
+| PUT | `/api/diaries/draft` | 建立或覆寫日記草稿 |
+| DELETE | `/api/diaries/draft` | 明確捨棄草稿與暫存媒體；不存在時仍回傳成功 |
+| POST | `/api/diaries/draft/submit` | 驗證完整草稿並轉為正式日記 |
+| GET | `/api/diaries/draft/media/{mediaId}` | 下載目前使用者的草稿媒體 |
+
+日記草稿 contract、30 天期限、owner-only 權限、private R2、媒體取代／移除、到期清理與 transaction 送出規則全部沿用 4.8；`categoryCode` 固定不得傳入，`step` 不接受 Annoyance 專用的 `CATEGORY`。
+
+日記草稿 `PUT` request 範例：
+
+```json
+{
+  "step": "CONTENT",
+  "recordMethod": "TEXT",
+  "content": "今天完成了一件重要的事",
+  "wantsDrawing": null,
+  "score": null,
+  "isShared": null,
+  "existingContentMediaId": null,
+  "existingDrawingMediaId": null
+}
+```
+
+GET／PUT response data 使用 `{ "draft": ... }` envelope，`entryType = DIARY`、`category = null`；無草稿時 `draft = null`。送出成功回傳 201 與既有 Diary response data。
+
+### 5.8 Diary 錯誤處理
 
 - 400：欄位、主要記錄方式組合、分頁、MIME type、大小或長度驗證失敗。
 - 401：未登入或 token 無效。

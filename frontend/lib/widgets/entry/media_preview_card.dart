@@ -66,6 +66,9 @@ class MediaPreviewCard extends StatelessWidget {
   }
 
   Widget _buildPreview() {
+    if (media.file == null && media.bytes.isEmpty) {
+      return _PersistedDraftPreview(method: media.method, keyPrefix: keyPrefix);
+    }
     return switch (media.method) {
       EntryRecordMethod.image => ClipRRect(
         borderRadius: BorderRadius.circular(AppRadius.md),
@@ -80,11 +83,11 @@ class MediaPreviewCard extends StatelessWidget {
         ),
       ),
       EntryRecordMethod.audio => _AudioPreview(
-        path: media.file.path,
+        path: media.file!.path,
         keyPrefix: keyPrefix,
       ),
       EntryRecordMethod.video => _VideoPreview(
-        path: media.file.path,
+        path: media.file!.path,
         keyPrefix: keyPrefix,
       ),
       EntryRecordMethod.text => const SizedBox.shrink(),
@@ -105,6 +108,41 @@ class MediaPreviewCard extends StatelessWidget {
     final minutes = duration.inMinutes;
     final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
     return '$minutes:$seconds';
+  }
+}
+
+class _PersistedDraftPreview extends StatelessWidget {
+  const _PersistedDraftPreview({required this.method, required this.keyPrefix});
+
+  final EntryRecordMethod method;
+  final String keyPrefix;
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = switch (method) {
+      EntryRecordMethod.image => Icons.image_outlined,
+      EntryRecordMethod.audio => Icons.graphic_eq,
+      EntryRecordMethod.video => Icons.videocam_outlined,
+      EntryRecordMethod.text => Icons.description_outlined,
+    };
+    return Container(
+      key: Key('${keyPrefix}PersistedMediaPreview'),
+      height: 140,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 42),
+          const SizedBox(height: AppSpacing.sm),
+          const Text('媒體已安全暫存'),
+          const SizedBox(height: AppSpacing.xs),
+          Text('重新選擇即可更換檔案', style: Theme.of(context).textTheme.bodySmall),
+        ],
+      ),
+    );
   }
 }
 

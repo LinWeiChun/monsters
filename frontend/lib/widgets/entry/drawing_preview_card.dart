@@ -25,22 +25,37 @@ class DrawingPreviewCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(AppRadius.md),
-                child: Image.memory(
-                  drawing.bytes,
-                  key: Key('${keyPrefix}DrawingPreview'),
+              if (drawing.bytes.isEmpty)
+                SizedBox(
+                  key: Key('${keyPrefix}PersistedDrawingPreview'),
                   width: 220,
-                  height: 220,
-                  fit: BoxFit.contain,
-                  errorBuilder:
-                      (context, error, stackTrace) => const SizedBox(
-                        width: 220,
-                        height: 120,
-                        child: Center(child: Text('心情圖預覽無法顯示')),
-                      ),
+                  height: 120,
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.brush_outlined, size: 36),
+                      SizedBox(height: AppSpacing.sm),
+                      Text('心情圖已安全暫存'),
+                    ],
+                  ),
+                )
+              else
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  child: Image.memory(
+                    drawing.bytes,
+                    key: Key('${keyPrefix}DrawingPreview'),
+                    width: 220,
+                    height: 220,
+                    fit: BoxFit.contain,
+                    errorBuilder:
+                        (context, error, stackTrace) => const SizedBox(
+                          width: 220,
+                          height: 120,
+                          child: Center(child: Text('心情圖預覽無法顯示')),
+                        ),
+                  ),
                 ),
-              ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 '${(drawing.sizeBytes / 1024).toStringAsFixed(1)} KB',

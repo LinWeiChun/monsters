@@ -8,11 +8,106 @@ import '../core/network/api_error_type.dart';
 import '../core/network/api_exception.dart';
 import '../models/diary_draft.dart';
 import '../models/diary_response.dart';
+import '../models/entry_draft_snapshot.dart';
 
 class DiaryRepository {
   const DiaryRepository(this._apiClient);
 
   final ApiClient _apiClient;
+
+  Future<EntryDraftSnapshot?> getDraft() async {
+    final response = await _apiClient.get<EntryDraftEnvelopeModel>(
+      '/diaries/draft',
+      fromJsonT:
+          (json) =>
+              EntryDraftEnvelopeModel.fromJson(json! as Map<String, dynamic>),
+    );
+    _requireSuccess(response.success, response.message);
+    return response.data.draft;
+  }
+
+  Future<EntryDraftSnapshot> saveDraft({
+    required String step,
+    required DiaryRecordMethod? recordMethod,
+    required String content,
+    required DiaryMediaFile? contentMedia,
+    required bool? wantsDrawing,
+    required DiaryDrawingFile? drawing,
+    required int? score,
+    required bool? isShared,
+  }) async {
+    final contentBytes =
+        contentMedia == null || contentMedia.isPersistedDraft
+            ? null
+            : await _readMediaBytes(contentMedia);
+    final drawingBytes =
+        drawing == null || drawing.isPersistedDraft
+            ? null
+            : await _readDrawingBytes(drawing);
+    final formData = FormData.fromMap({
+      'request': MultipartFile.fromString(
+        jsonEncode({
+          'step': step,
+          'recordMethod': recordMethod?.apiValue,
+          'content': recordMethod == DiaryRecordMethod.text ? content : null,
+          'wantsDrawing': wantsDrawing,
+          'score': score,
+          'isShared': isShared,
+          'existingContentMediaId': contentMedia?.draftMediaId,
+          'existingDrawingMediaId': drawing?.draftMediaId,
+        }),
+        filename: 'request.json',
+        contentType: DioMediaType.parse(Headers.jsonContentType),
+      ),
+      if (contentMedia != null && contentBytes != null)
+        'contentFile': MultipartFile.fromBytes(
+          contentBytes,
+          filename: contentMedia.name,
+          contentType: DioMediaType.parse(contentMedia.mimeType),
+        ),
+      if (drawing != null && drawingBytes != null)
+        'drawingFile': MultipartFile.fromBytes(
+          drawingBytes,
+          filename: drawing.name,
+          contentType: DioMediaType.parse(drawing.mimeType),
+        ),
+    });
+    final response = await _apiClient.put<EntryDraftEnvelopeModel>(
+      '/diaries/draft',
+      data: formData,
+      options: Options(contentType: Headers.multipartFormDataContentType),
+      fromJsonT:
+          (json) =>
+              EntryDraftEnvelopeModel.fromJson(json! as Map<String, dynamic>),
+    );
+    _requireSuccess(response.success, response.message);
+    final draft = response.data.draft;
+    if (draft == null) {
+      throw const ApiException(
+        type: ApiErrorType.unknown,
+        message: '草稿回應格式錯誤。',
+      );
+    }
+    return draft;
+  }
+
+  Future<void> discardDraft() async {
+    final response = await _apiClient.delete<Object?>(
+      '/diaries/draft',
+      fromJsonT: (json) => json,
+    );
+    _requireSuccess(response.success, response.message);
+  }
+
+  Future<DiaryResponse> submitDraft() async {
+    final response = await _apiClient.post<DiaryResponse>(
+      '/diaries/draft/submit',
+      fromJsonT:
+          (json) => DiaryResponse.fromJson(json! as Map<String, dynamic>),
+    );
+    _requireSuccess(response.success, response.message);
+    return response.data;
+  }
 
   Future<DiaryResponse> create({
     required DiaryRecordMethod recordMethod,
@@ -70,7 +165,34 @@ class DiaryRepository {
     if (media.bytes.isNotEmpty) {
       return media.bytes;
     }
-    return media.file.readAsBytes();
+    final file = media.file;
+    if (file == null) {
+      throw const ApiException(
+        type: ApiErrorType.unknown,
+        message: '找不到待上傳的媒體檔案。',
+      );
+    }
+    return file.readAsBytes();
+  }
+
+  Future<Uint8List> _readDrawingBytes(DiaryDrawingFile drawing) async {
+    if (drawing.bytes.isNotEmpty) {
+      return drawing.bytes;
+    }
+    final file = drawing.file;
+    if (file == null) {
+      throw const ApiException(
+        type: ApiErrorType.unknown,
+        message: '找不到待上傳的心情圖。',
+      );
+    }
+    return file.readAsBytes();
+  }
+
+  void _requireSuccess(bool success, String message) {
+    if (!success) {
+      throw ApiException(type: ApiErrorType.unknown, message: message);
+    }
   }
 
   Map<String, dynamic> _requestJson({

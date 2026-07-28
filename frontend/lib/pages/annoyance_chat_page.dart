@@ -68,13 +68,14 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
                   mediaService,
                 ),
                 onHome: () => context.goNamed(AppRoute.home),
-                onPrimaryAction: controller.restart,
+                onPrimaryAction: () => _confirmRestart(context, controller),
                 onBack: () => _returnToHome(context),
                 onProfile: () => context.pushNamed(AppRoute.profile),
                 onNotification: () => _showUnavailable(context, '通知'),
                 onUnavailable: (feature) => _showUnavailable(context, feature),
-                onRestart: controller.restart,
+                onRestart: () => _confirmRestart(context, controller),
                 canRestart: state.step != AnnoyanceChatStep.intro,
+                privacyMessage: state.draftStatusMessage,
               ),
     );
   }
@@ -91,6 +92,34 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text('$feature即將開放')));
+  }
+
+  Future<void> _confirmRestart(
+    BuildContext context,
+    AnnoyanceChatController controller,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (dialogContext) => AlertDialog(
+            title: const Text('捨棄目前草稿？'),
+            content: const Text('重新開始會刪除文字與已暫存的媒體，且無法復原。'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: const Text('繼續編輯'),
+              ),
+              FilledButton(
+                key: const Key('annoyanceConfirmRestartButton'),
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: const Text('捨棄並重新開始'),
+              ),
+            ],
+          ),
+    );
+    if (confirmed == true) {
+      await controller.restart();
+    }
   }
 
   List<Widget> _buildMessages(AnnoyanceChatState state) {
@@ -195,6 +224,7 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
         onContinue: controller.confirmContent,
         keyPrefix: 'annoyance',
         textLabel: '煩惱內容',
+        continueLabel: '暫存並繼續',
       ),
       AnnoyanceChatStep.drawingDecision => DrawingChoiceCard(
         onSelected: controller.selectDrawingChoice,

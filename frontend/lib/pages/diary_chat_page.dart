@@ -72,9 +72,9 @@ class _DiaryChatPageState extends ConsumerState<DiaryChatPage> {
               onProfile: () => context.pushNamed(AppRoute.profile),
               onNotification: () => _showUnavailable(context, '通知'),
               onUnavailable: (feature) => _showUnavailable(context, feature),
-              onRestart: controller.restart,
+              onRestart: () => _confirmRestart(context, controller),
               canRestart: state.step != DiaryChatStep.intro,
-              privacyMessage: '●  可隨時儲存，預設只有自己看得見',
+              privacyMessage: state.draftStatusMessage,
             );
 
     return Scaffold(
@@ -113,6 +113,34 @@ class _DiaryChatPageState extends ConsumerState<DiaryChatPage> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text('$feature即將開放')));
+  }
+
+  Future<void> _confirmRestart(
+    BuildContext context,
+    DiaryChatController controller,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (dialogContext) => AlertDialog(
+            title: const Text('捨棄目前草稿？'),
+            content: const Text('重新開始會刪除文字與已暫存的媒體，且無法復原。'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: const Text('繼續編輯'),
+              ),
+              FilledButton(
+                key: const Key('diaryConfirmRestartButton'),
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: const Text('捨棄並重新開始'),
+              ),
+            ],
+          ),
+    );
+    if (confirmed == true) {
+      await controller.restart();
+    }
   }
 
   List<Widget> _buildMessages(DiaryChatState state) {

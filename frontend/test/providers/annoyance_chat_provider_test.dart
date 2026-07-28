@@ -11,6 +11,7 @@ import 'package:monsters/models/annoyance_drawing.dart';
 import 'package:monsters/models/annoyance_draft.dart';
 import 'package:monsters/models/annoyance_media.dart';
 import 'package:monsters/models/annoyance_response.dart';
+import 'package:monsters/models/entry_draft_snapshot.dart';
 import 'package:monsters/providers/annoyance_chat_provider.dart';
 import 'package:monsters/repositories/annoyance_repository.dart';
 
@@ -228,6 +229,41 @@ void main() {
     expect(controller.state.submitError, 'Network failed.');
     expect(controller.state.createdAnnoyance, isNull);
   });
+
+  test(
+    'restores category, text, score, and sharing from server draft',
+    () async {
+      final repository = _FakeAnnoyanceRepository(
+        draft: EntryDraftSnapshot(
+          id: 501,
+          entryType: 'ANNOYANCE',
+          step: 'REVIEW',
+          category: const EntryDraftCategorySnapshot(
+            code: 'CAREER',
+            name: '職涯',
+          ),
+          recordMethod: 'TEXT',
+          content: '工作上的煩惱',
+          wantsDrawing: false,
+          score: 4,
+          isShared: false,
+          expiresAt: DateTime.parse('2026-08-27T10:00:00+08:00'),
+          contentMedia: null,
+          drawingMedia: null,
+        ),
+      );
+      final controller = AnnoyanceChatController(repository);
+      addTearDown(controller.dispose);
+
+      await controller.restoreDraft();
+
+      expect(controller.state.step, AnnoyanceChatStep.review);
+      expect(controller.state.category?.code, 'CAREER');
+      expect(controller.state.contentText, '工作上的煩惱');
+      expect(controller.state.score, 4);
+      expect(controller.state.isShared, isFalse);
+    },
+  );
 }
 
 void _reachScoreStep(AnnoyanceChatController controller) {
@@ -264,12 +300,76 @@ AnnoyanceDrawingFile _drawing({required Uint8List bytes}) {
 }
 
 class _FakeAnnoyanceRepository extends AnnoyanceRepository {
-  _FakeAnnoyanceRepository({this.exception}) : super(_dummyClient());
+  _FakeAnnoyanceRepository({this.exception, this.draft})
+    : super(_dummyClient());
 
   final ApiException? exception;
+  final EntryDraftSnapshot? draft;
   int createCount = 0;
   int? lastScore;
   bool? lastIsShared;
+
+  @override
+  Future<EntryDraftSnapshot?> getDraft() async => draft;
+
+  @override
+  Future<EntryDraftSnapshot> saveDraft({
+    required String step,
+    required AnnoyanceCategory? category,
+    required AnnoyanceRecordMethod? recordMethod,
+    required String content,
+    required AnnoyanceMediaFile? contentMedia,
+    required bool? wantsDrawing,
+    required AnnoyanceDrawingFile? drawing,
+    required int? score,
+    required bool? isShared,
+  }) async {
+    lastScore = score;
+    lastIsShared = isShared;
+    return EntryDraftSnapshot(
+      id: 1,
+      entryType: 'ANNOYANCE',
+      step: step,
+      category:
+          category == null
+              ? null
+              : EntryDraftCategorySnapshot(
+                code: category.code,
+                name: category.name,
+              ),
+      recordMethod: recordMethod?.apiValue,
+      content: recordMethod == AnnoyanceRecordMethod.text ? content : null,
+      wantsDrawing: wantsDrawing,
+      score: score,
+      isShared: isShared,
+      expiresAt: DateTime.parse('2026-08-27T10:00:00+08:00'),
+      contentMedia: null,
+      drawingMedia: null,
+    );
+  }
+
+  @override
+  Future<void> discardDraft() async {}
+
+  @override
+  Future<AnnoyanceResponse> submitDraft() async {
+    createCount += 1;
+    final error = exception;
+    if (error != null) {
+      throw error;
+    }
+    return AnnoyanceResponse(
+      id: 101,
+      category: const AnnoyanceCategoryResponse(code: 'ACADEMIC', name: '學業'),
+      recordMethod: 'TEXT',
+      content: '最近壓力有點大',
+      score: lastScore ?? 3,
+      isShared: lastIsShared ?? false,
+      isSolved: false,
+      occurredAt: '2026-07-13T10:00:00+08:00',
+      media: const [],
+    );
+  }
 
   @override
   Future<AnnoyanceResponse> create({
@@ -281,13 +381,6 @@ class _FakeAnnoyanceRepository extends AnnoyanceRepository {
     required int score,
     required bool isShared,
   }) async {
-    createCount += 1;
-    lastScore = score;
-    lastIsShared = isShared;
-    final error = exception;
-    if (error != null) {
-      throw error;
-    }
     return AnnoyanceResponse(
       id: 101,
       category: AnnoyanceCategoryResponse(

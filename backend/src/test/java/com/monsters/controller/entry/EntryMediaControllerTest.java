@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.monsters.entity.entry.EntryType;
 import com.monsters.security.common.AuthenticatedUser;
+import com.monsters.service.entry.EntryDraftService;
 import com.monsters.service.entry.EntryMediaDownloadResult;
 import com.monsters.service.entry.EntryMediaDownloadService;
 import java.io.ByteArrayInputStream;
@@ -39,11 +40,27 @@ class EntryMediaControllerTest {
                 Long.class,
                 String.class
         );
+        Method annoyanceDraftMethod = EntryMediaController.class.getMethod(
+                "downloadAnnoyanceDraftMedia",
+                AuthenticatedUser.class,
+                Long.class,
+                String.class
+        );
+        Method diaryDraftMethod = EntryMediaController.class.getMethod(
+                "downloadDiaryDraftMedia",
+                AuthenticatedUser.class,
+                Long.class,
+                String.class
+        );
 
         assertThat(annoyanceMethod.getAnnotation(GetMapping.class).value())
                 .containsExactly("/annoyances/{id}/media/{mediaId}");
         assertThat(diaryMethod.getAnnotation(GetMapping.class).value())
                 .containsExactly("/diaries/{id}/media/{mediaId}");
+        assertThat(annoyanceDraftMethod.getAnnotation(GetMapping.class).value())
+                .containsExactly("/annoyances/draft/media/{mediaId}");
+        assertThat(diaryDraftMethod.getAnnotation(GetMapping.class).value())
+                .containsExactly("/diaries/draft/media/{mediaId}");
     }
 
     @Test
@@ -51,7 +68,10 @@ class EntryMediaControllerTest {
         EntryMediaDownloadService service = org.mockito.Mockito.mock(
                 EntryMediaDownloadService.class
         );
-        EntryMediaController controller = new EntryMediaController(service);
+        EntryMediaController controller = new EntryMediaController(
+                service,
+                org.mockito.Mockito.mock(EntryDraftService.class)
+        );
         EntryMediaDownloadResult download = download(3, null);
         when(service.download(1L, EntryType.ANNOYANCE, 10L, 20L, null))
                 .thenReturn(download);
@@ -79,7 +99,10 @@ class EntryMediaControllerTest {
         EntryMediaDownloadService service = org.mockito.Mockito.mock(
                 EntryMediaDownloadService.class
         );
-        EntryMediaController controller = new EntryMediaController(service);
+        EntryMediaController controller = new EntryMediaController(
+                service,
+                org.mockito.Mockito.mock(EntryDraftService.class)
+        );
         EntryMediaDownloadResult download = download(2, "bytes 0-1/3");
         when(service.download(1L, EntryType.DIARY, 10L, 20L, "bytes=0-1"))
                 .thenReturn(download);
@@ -97,6 +120,31 @@ class EntryMediaControllerTest {
         assertThat(response.getHeaders().getFirst(HttpHeaders.CONTENT_RANGE))
                 .isEqualTo("bytes 0-1/3");
         verify(service).download(1L, EntryType.DIARY, 10L, 20L, "bytes=0-1");
+    }
+
+    @Test
+    void diaryDraftDownloadShouldUseOwnerScopedDraftService() {
+        EntryDraftService draftService = org.mockito.Mockito.mock(
+                EntryDraftService.class
+        );
+        EntryMediaController controller = new EntryMediaController(
+                org.mockito.Mockito.mock(EntryMediaDownloadService.class),
+                draftService
+        );
+        EntryMediaDownloadResult download = download(3, null);
+        when(draftService.download(1L, EntryType.DIARY, 20L, null))
+                .thenReturn(download);
+
+        ResponseEntity<InputStreamResource> response =
+                controller.downloadDiaryDraftMedia(
+                        new AuthenticatedUser(1L, "user@example.com"),
+                        20L,
+                        null
+                );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getHeaders().getContentLength()).isEqualTo(3);
+        verify(draftService).download(1L, EntryType.DIARY, 20L, null);
     }
 
     private EntryMediaDownloadResult download(long contentLength, String contentRange) {

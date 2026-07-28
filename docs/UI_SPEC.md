@@ -104,7 +104,7 @@
 5. 選擇是否畫心情；選擇繪圖時最多附加一張心情圖
 6. 以結構化元件選擇 1 至 5 分
 7. 選擇是否分享，預設私人
-8. 檢視摘要並送出；送出中禁止重複操作，失敗時保留草稿
+8. 檢視摘要並送出；送出中禁止重複操作，失敗時保留伺服器草稿
 9. 顯示建立完成頁面，可前往歷史記錄
 
 互動採聊天外觀搭配 `AnnoyanceCategorySelector`、`RecordMethodSelector`、`MediaPreviewCard`、`MoodDrawingCanvas`、`MoodScoreSelector`、`ShareChoiceCard` 與 `AnnoyanceReviewCard`，不得以自由文字比對選項。狀態依 `intro → category → recordMethod → content → drawingDecision → drawing（optional）→ score → sharing → review → submitting → completed` 推進。
@@ -112,6 +112,8 @@
 前後端媒體限制一致：圖片 jpeg/png/webp，最多 5 MB；錄音 mp4/aac/mpeg/wav，最多 10 MB 或 5 分鐘；影片 mp4/quicktime/webm，最多 50 MB 或 60 秒；心情圖 png/webp，最多 5 MB。Web、Android、iOS 的平台差異集中於媒體 Service／Adapter。
 
 煩惱媒體存放於獨立的 private R2 bucket。Flutter 只能使用 API 回傳的 Backend download URL 並附帶 JWT 讀取，不得組合 R2 bucket URL 或保存 object key；錄音與影片播放器需支援 Backend 的 HTTP Range response。
+
+進入 `/annoyances/new` 時先讀取 owner 的伺服器草稿；存在時還原步驟、文字、選項與暫存媒體，讓重新整理、離開後返回、重新登入或跨裝置繼續。狀態變更後自動暫存，文字輸入使用 debounce；畫面顯示「暫存中」、「草稿已暫存」或可重試錯誤。草稿保存 30 天，媒體仍保持私人；「重新開始」必須先確認，確認後呼叫 DELETE Draft API，不得只清除本機 Provider。
 
 Phase 3 完成頁不顯示假怪獸獎勵，不得沿用舊系統「恭喜你獲得一隻怪獸」或「查看圖鑑」操作；真實獎勵與圖鑑導向於 Phase 6 串接。
 
@@ -125,7 +127,7 @@ Phase 3 完成頁不顯示假怪獸獎勵，不得沿用舊系統「恭喜你獲
 
 煩惱分享 Task 使用 `ShareChoiceCard` 顯示「保持私人」與「分享到社群」兩個結構化選項，預設語意為私人，不使用無參數 toggle。使用者選擇後，草稿保存 boolean `isShared`，並進入 `review` 步驟；選擇「保持私人」對應既有 API `isShared = false`，選擇「分享到社群」對應 `isShared = true`。從摘要步驟返回分享步驟時保留原選擇並標示選取狀態；返回分數步驟、上游內容步驟或重新開始時清除分享選擇。
 
-煩惱摘要送出 Task 使用 `AnnoyanceReviewCard` 顯示類別、記錄方式、主要內容、心情圖、分數與分享狀態。送出時由 `AnnoyanceRepository` 呼叫既有 `POST /api/annoyances` multipart contract，`request` 為 JSON part，依草稿內容附加 optional `contentFile` 與 `drawingFile`；送出中進入 `submitting` 狀態並禁止上一步與重複送出。成功後保存 `AnnoyanceResponse` 並顯示 `AnnoyanceCompletedCard`，Phase 3 僅呈現建立成功與分享狀態，不顯示假怪獸獎勵；失敗時返回 `review`、保留草稿並顯示 API 錯誤訊息。
+煩惱摘要送出 Task 使用 `AnnoyanceReviewCard` 顯示類別、記錄方式、主要內容、心情圖、分數與分享狀態。送出前完成最後一次草稿同步，再由 `AnnoyanceRepository` 呼叫 `POST /api/annoyances/draft/submit`；送出中進入 `submitting` 狀態並禁止上一步與重複送出。成功後保存 `AnnoyanceResponse` 並顯示 `AnnoyanceCompletedCard`，Phase 3 僅呈現建立成功與分享狀態，不顯示假怪獸獎勵；失敗時返回 `review`、保留伺服器草稿並顯示 API 錯誤訊息。
 
 ### 2.8 新增日記聊天室
 
@@ -145,7 +147,7 @@ Phase 3 完成頁不顯示假怪獸獎勵，不得沿用舊系統「恭喜你獲
 5. 選擇繪圖時顯示心情畫布；略過時直接進入分數
 6. 使用 `moodPoint_1.png`～`moodPoint_5.png` 選擇 1 至 5 分
 7. 選擇保持私人或分享到社群，預設私人
-8. 檢視摘要並送出；送出中禁止重複操作，失敗時保留草稿
+8. 檢視摘要並送出；送出中禁止重複操作，失敗時保留伺服器草稿
 9. 顯示安全保存完成結果，可返回首頁或再寫一篇日記
 
 狀態依 `intro → recordMethod → content → drawingDecision → drawing（optional）→ score → sharing → review → submitting → completed` 推進。聊天室入口使用 `/diaries/new`，Phase 4 完成後首頁「寫一篇日記」需由開發中狀態改為可操作。
@@ -155,6 +157,8 @@ Diary 前端需抽出並重用 Phase 3 Entry 共用元件與平台 Adapter，包
 Entry 共用前端基礎位於 `frontend/lib/models/entry_*.dart`、`frontend/lib/services/entry_media_*.dart` 與 `frontend/lib/widgets/entry/`。共用 Widget 以 `keyPrefix`、標題與語意文案區分 Annoyance／Diary，媒體 Service 以 `recordingFilePrefix` 區分錄音暫存檔；Annoyance 已改為直接使用這些共用元件並保留原測試 key。Diary 後續只能依賴 Entry 共用層，不得匯入 `widgets/annoyance/` 或 Annoyance 媒體型別。
 
 Flutter Web 實作位於 `frontend/lib/pages/diary_chat_page.dart`，並以 `diary_draft.dart`、`diary_chat_provider.dart`、`diary_repository.dart`、`diary_response.dart` 與 `widgets/diary/` 維持 Diary 專屬狀態、API 與確認／完成畫面。`/diaries/new` 已可直接進入；首頁 Desktop／Tablet／Mobile 的 `homeDiaryChatButton` 統一以 `context.pushNamed(AppRoute.diaryChat)` 導向日記聊天室，不再顯示「即將開放」。Web 已驗收 1200、1440、1920px，不得以固定 1440px canvas 取代 Responsive flow。
+
+進入 `/diaries/new` 時先讀取 owner 的伺服器草稿；還原與自動暫存行為沿用煩惱流程。內容按鈕文字使用「暫存並繼續」，並顯示草稿保存 30 天、可跨裝置繼續的狀態。離開頁面不得刪除草稿；明確重新開始才顯示確認並呼叫 DELETE Draft API。送出前完成最後一次同步，改呼叫 `POST /api/diaries/draft/submit`，成功後由後端刪除草稿。
 
 Flutter Mobile 以 `frontend/lib/widgets/diary/diary_mobile_flow.dart` 實作 Penpot 390×844 單欄畫布，並透過 `ResponsiveFixedCanvas` 在 320px 至 599px 等比例填滿 viewport 寬度；縮放後高度超過 viewport 時允許垂直捲動，不得在 391px 至 599px 保留靠左的固定 390px 留白。Mobile 依 `01` 至 `08` 與 `09 Completed / Phase 4` 呈現品牌、步驟、進度、標題、說明、主要操作及完成頁底部導覽。記錄方式、分數與分享選擇在 Mobile 先保存選項，再由明確的下一步按鈕確認；Web／Tablet 保留既有快速選擇行為，三種 window class 仍共用同一份 `DiaryChatState`、Controller、Repository 與 API contract。
 

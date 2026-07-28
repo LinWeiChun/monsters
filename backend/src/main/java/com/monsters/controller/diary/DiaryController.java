@@ -6,13 +6,18 @@ import com.monsters.dto.diary.CreateDiaryRequest;
 import com.monsters.dto.diary.DiaryResponse;
 import com.monsters.dto.diary.ShareDiaryRequest;
 import com.monsters.dto.diary.UpdateDiaryRequest;
+import com.monsters.dto.entry.EntryDraftEnvelope;
+import com.monsters.dto.entry.SaveEntryDraftRequest;
+import com.monsters.entity.entry.EntryType;
 import com.monsters.security.common.AuthenticatedUser;
 import com.monsters.service.diary.DiaryService;
+import com.monsters.service.entry.EntryDraftService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -30,9 +35,14 @@ import org.springframework.web.multipart.MultipartFile;
 public class DiaryController {
 
     private final DiaryService diaryService;
+    private final EntryDraftService entryDraftService;
 
-    public DiaryController(DiaryService diaryService) {
+    public DiaryController(
+            DiaryService diaryService,
+            EntryDraftService entryDraftService
+    ) {
         this.diaryService = diaryService;
+        this.entryDraftService = entryDraftService;
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -48,6 +58,52 @@ public class DiaryController {
                 contentFile,
                 drawingFile
         );
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Diary creation success", response));
+    }
+
+    @GetMapping("/draft")
+    public ResponseEntity<ApiResponse<EntryDraftEnvelope>> findDraft(
+            @AuthenticationPrincipal AuthenticatedUser currentUser
+    ) {
+        EntryDraftEnvelope response = entryDraftService.find(
+                currentUser.userId(),
+                EntryType.DIARY
+        );
+        return ResponseEntity.ok(ApiResponse.success("Diary draft query success", response));
+    }
+
+    @PutMapping(value = "/draft", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<EntryDraftEnvelope>> saveDraft(
+            @AuthenticationPrincipal AuthenticatedUser currentUser,
+            @Valid @RequestPart("request") SaveEntryDraftRequest request,
+            @RequestPart(value = "contentFile", required = false) MultipartFile contentFile,
+            @RequestPart(value = "drawingFile", required = false) MultipartFile drawingFile
+    ) {
+        EntryDraftEnvelope response = entryDraftService.save(
+                currentUser.userId(),
+                EntryType.DIARY,
+                request,
+                contentFile,
+                drawingFile
+        );
+        return ResponseEntity.ok(ApiResponse.success("Diary draft save success", response));
+    }
+
+    @DeleteMapping("/draft")
+    public ResponseEntity<ApiResponse<Void>> discardDraft(
+            @AuthenticationPrincipal AuthenticatedUser currentUser
+    ) {
+        entryDraftService.discard(currentUser.userId(), EntryType.DIARY);
+        return ResponseEntity.ok(ApiResponse.success("Diary draft discard success", null));
+    }
+
+    @PostMapping("/draft/submit")
+    public ResponseEntity<ApiResponse<DiaryResponse>> submitDraft(
+            @AuthenticationPrincipal AuthenticatedUser currentUser
+    ) {
+        DiaryResponse response = entryDraftService.submitDiary(currentUser.userId());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Diary creation success", response));

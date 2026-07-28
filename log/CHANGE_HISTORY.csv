@@ -1140,3 +1140,11 @@
 2026-07-24,10:48,PHASE4-HOME-DIARY-ENTRY,Test,frontend/test/home_page_test.dart,修改,驗證 390px 900px 1440px 首頁日記入口與既有首頁回歸,Codex,否,否,否,否,17 項定向與 162 項完整測試通過 Analyze 及 Web build 成功
 2026-07-24,10:48,PHASE4-HOME-DIARY-ENTRY,Documentation,docs/UI_SPEC.md docs/TASKS.md,修改,同步首頁日記 named route contract 並將 PR 77 Reward Task 轉為 DONE,Codex,否,否,是,否,本 Task 維持 REVIEW 待 task PR 合併
 2026-07-24,10:48,PHASE4-HOME-DIARY-ENTRY,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增首頁日記入口工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log；Draft PR #78 已建立且 Task 維持 REVIEW
+2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Backend,backend/src/main/java/com/monsters/service/entry 與 dto/entity/repository,新增,建立日記煩惱持久草稿服務 row lock 送出與逾期清理,Codex,是,是,否,是,30 天 owner-only 草稿與 R2 刪除失敗重試
+2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Backend,backend/src/main/java/com/monsters/controller,修改,新增 Diary Annoyance draft CRUD submit 與 owner-only 媒體下載 endpoint,Codex,是,否,否,否,無草稿 GET 回傳 draft null
+2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Database,database/init/01_schema.sql 與 database/migrations/20260724_01_add_entry_drafts.sql,新增與修改,建立 entry_drafts 與 entry_draft_media schema,Codex,否,是,否,是,每位使用者每種類型一份草稿
+2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Frontend,frontend/lib/providers 與 repositories,修改,串接自動暫存還原捨棄送出與序列化 queue,Codex,是,否,是,否,文字 debounce 且送出前 flush
+2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Frontend,frontend/lib/models pages widgets,新增與修改,還原 private 暫存媒體並更新暫存狀態與重新開始確認,Codex,否,否,是,否,離開頁面不刪除草稿
+2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Test,backend/src/test 與 frontend/test,新增與修改,驗證恢復續存 endpoint owner 清理競爭送出與既有回歸,Codex,是,是,是,否,Backend 275 tests 與 Flutter 166 tests 通過
+2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Documentation,docs/PROJECT_SPEC.md docs/API_SPEC.md docs/DATABASE_SPEC.md docs/UI_SPEC.md docs/DECISIONS.md docs/TASKS.md,修改,同步持久草稿 API Database UI Decision 與 Task 狀態,Codex,是,是,是,是,PR 78 首頁 Task 已轉 DONE
+2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增持久草稿工作報告與保存期限檢查,Codex,否,否,否,否,三種 Log 最早 2026-06-29 無過期紀錄；Draft PR #81 已建立
