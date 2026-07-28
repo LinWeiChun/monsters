@@ -232,7 +232,7 @@ Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封�
 
 ## Phase 4：日記功能
 
-狀態：REVIEW。Phase 4 Task PR #66～#78、#81 均已合併至 `feature/phase4`，同步 `develop` 後的 Backend、Flutter 與 Web build 整合驗證均通過；仍須透過 Phase PR 合併至 `develop`。
+狀態：REVIEW。Phase 4 Task PR #66～#78、#81 均已合併至 `feature/phase4`，同步 `develop` 後的 Backend、Flutter 與 Web build 整合驗證均通過；Phase PR #83 已建立，等待 Review 並合併至 `develop`。
 
 - [x] 檢查 `system_data/` 中舊日記、聊天室、心情分數與分享流程
 - [x] 整理可參考的欄位與 UI 流程

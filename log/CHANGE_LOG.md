@@ -26,6 +26,7 @@ Codex
 - 即時查核 GitHub：Phase 4 Task PR #66～#78、#81 全部已合併至 `feature/phase4`；DOC-013 的 PR #79 與 Phase 4 contract PR #82 已合併至 `develop`。
 - 將 DOC-013、PR #81 持久草稿 Task 與 Phase 4 整合測試轉為 DONE；Phase 4 整體保留 REVIEW，等待 Phase PR 合併至 `develop`。
 - 保留「依已核准 v1 Entry 架構與 API 規格重新實作」為 Phase 4.5 TODO，未將現有 `/api`、`isShared` 與必填分數實作誤標為完成。
+- 建立正式 Phase PR #83（`feature/phase4 → develop`）；PR 為 OPEN、非 Draft，GitHub merge state 為 CLEAN。
 
 ### 修改檔案
 
@@ -71,7 +72,7 @@ Codex
 
 ### 待確認事項
 
-- `feature/phase4` 推送後仍須建立 Phase PR 合併至 `develop`；合併完成前 Phase 4 維持 REVIEW。
+- Phase PR #83 已建立，等待 Review 與合併至 `develop`；合併完成前 Phase 4 維持 REVIEW。
 - Phase 4.5 必須先完成 v1 契約 Migration，Phase 5 以後功能維持 BLOCKED。
 
 ---
