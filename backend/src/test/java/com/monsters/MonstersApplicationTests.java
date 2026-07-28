@@ -3,6 +3,8 @@ package com.monsters;
 import com.monsters.repository.annoyance.AnnoyanceTypeRepository;
 import com.monsters.repository.entry.EntryMediaRepository;
 import com.monsters.repository.entry.EntryRepository;
+import com.monsters.repository.entry.EntryDraftMediaRepository;
+import com.monsters.repository.entry.EntryDraftRepository;
 import com.monsters.repository.entry.MoodRepository;
 import com.monsters.repository.user.PasswordResetTokenRepository;
 import com.monsters.repository.user.RevokedTokenRepository;
@@ -44,6 +46,12 @@ class MonstersApplicationTests {
 
     @MockBean
     private EntryMediaRepository entryMediaRepository;
+
+    @MockBean
+    private EntryDraftRepository entryDraftRepository;
+
+    @MockBean
+    private EntryDraftMediaRepository entryDraftMediaRepository;
 
     @MockBean
     private MoodRepository moodRepository;

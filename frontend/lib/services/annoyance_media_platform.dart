@@ -1,10 +1,5 @@
-import 'package:just_audio/just_audio.dart';
-import 'package:video_player/video_player.dart';
+import 'entry_media_platform.dart';
 
-abstract class AnnoyanceMediaPlatform {
-  String createRecordingPath();
+export 'entry_media_platform.dart';
 
-  Future<Duration?> loadAudio(AudioPlayer player, String path);
-
-  VideoPlayerController createVideoController(String path);
-}
+typedef AnnoyanceMediaPlatform = EntryMediaPlatform;

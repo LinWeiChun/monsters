@@ -6,21 +6,22 @@ import '../models/annoyance_draft.dart';
 import '../providers/annoyance_chat_provider.dart';
 import '../providers/annoyance_media_provider.dart';
 import '../routes/app_routes.dart';
-import '../services/annoyance_media_service.dart';
+import '../services/entry_media_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/annoyance/annoyance_category_selector.dart';
 import '../widgets/annoyance/annoyance_chat_bubble.dart';
 import '../widgets/annoyance/annoyance_completed_card.dart';
-import '../widgets/annoyance/annoyance_content_input.dart';
-import '../widgets/annoyance/annoyance_penpot_shell.dart';
 import '../widgets/annoyance/annoyance_review_card.dart';
-import '../widgets/annoyance/drawing_choice_card.dart';
-import '../widgets/annoyance/drawing_preview_card.dart';
-import '../widgets/annoyance/mood_drawing_canvas.dart';
-import '../widgets/annoyance/mood_score_selector.dart';
-import '../widgets/annoyance/record_method_selector.dart';
-import '../widgets/annoyance/share_choice_card.dart';
+import '../widgets/entry/drawing_choice_card.dart';
+import '../widgets/entry/drawing_preview_card.dart';
+import '../widgets/entry/entry_content_input.dart';
+import '../widgets/entry/entry_flow_shell.dart';
+import '../widgets/entry/mood_drawing_canvas.dart';
+import '../widgets/entry/mood_score_selector.dart';
+import '../widgets/entry/record_method_selector.dart';
+import '../widgets/entry/share_choice_card.dart';
+import '../widgets/navigation/app_navigation.dart';
 
 class AnnoyanceChatPage extends ConsumerStatefulWidget {
   const AnnoyanceChatPage({this.drawingExporter, super.key});
@@ -50,7 +51,10 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
                   exportPng: widget.drawingExporter,
                 ),
               )
-              : AnnoyancePenpotShell(
+              : EntryFlowShell(
+                keyPrefix: 'annoyance',
+                compactTitle: '新增煩惱',
+                activeDestination: AppNavigationDestination.annoyance,
                 stepLabel: presentation.stepLabel,
                 progress: presentation.progress,
                 flowTitle: presentation.flowTitle,
@@ -64,12 +68,14 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
                   mediaService,
                 ),
                 onHome: () => context.goNamed(AppRoute.home),
+                onPrimaryAction: () => _confirmRestart(context, controller),
                 onBack: () => _returnToHome(context),
                 onProfile: () => context.pushNamed(AppRoute.profile),
                 onNotification: () => _showUnavailable(context, '通知'),
                 onUnavailable: (feature) => _showUnavailable(context, feature),
-                onRestart: controller.restart,
+                onRestart: () => _confirmRestart(context, controller),
                 canRestart: state.step != AnnoyanceChatStep.intro,
+                privacyMessage: state.draftStatusMessage,
               ),
     );
   }
@@ -86,6 +92,34 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text('$feature即將開放')));
+  }
+
+  Future<void> _confirmRestart(
+    BuildContext context,
+    AnnoyanceChatController controller,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (dialogContext) => AlertDialog(
+            title: const Text('捨棄目前草稿？'),
+            content: const Text('重新開始會刪除文字與已暫存的媒體，且無法復原。'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: const Text('繼續編輯'),
+              ),
+              FilledButton(
+                key: const Key('annoyanceConfirmRestartButton'),
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: const Text('捨棄並重新開始'),
+              ),
+            ],
+          ),
+    );
+    if (confirmed == true) {
+      await controller.restart();
+    }
   }
 
   List<Widget> _buildMessages(AnnoyanceChatState state) {
@@ -120,7 +154,7 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
       if (state.wantsDrawing case final wantsDrawing?)
         AnnoyanceChatBubble(message: wantsDrawing ? '想畫' : '先不用', isUser: true),
       if (state.drawing case final drawing?)
-        DrawingPreviewCard(drawing: drawing),
+        DrawingPreviewCard(drawing: drawing, keyPrefix: 'annoyance'),
       if (state.step.index >= AnnoyanceChatStep.score.index)
         const AnnoyanceChatBubble(
           key: Key('annoyanceScorePrompt'),
@@ -161,7 +195,7 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
   Widget _buildInteractionPanel(
     AnnoyanceChatState state,
     AnnoyanceChatController controller,
-    AnnoyanceMediaService mediaService,
+    EntryMediaService mediaService,
   ) {
     final selector = switch (state.step) {
       AnnoyanceChatStep.intro => FilledButton.icon(
@@ -175,8 +209,9 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
       ),
       AnnoyanceChatStep.recordMethod => RecordMethodSelector(
         onSelected: controller.selectRecordMethod,
+        keyPrefix: 'annoyance',
       ),
-      AnnoyanceChatStep.content => AnnoyanceContentInput(
+      AnnoyanceChatStep.content => EntryContentInput(
         key: ValueKey(state.recordMethod),
         method: state.recordMethod!,
         textContent: state.contentText,
@@ -187,17 +222,26 @@ class _AnnoyanceChatPageState extends ConsumerState<AnnoyanceChatPage> {
         onClear: controller.clearContent,
         canContinue: state.isContentReady,
         onContinue: controller.confirmContent,
+        keyPrefix: 'annoyance',
+        textLabel: '煩惱內容',
+        continueLabel: '暫存並繼續',
       ),
       AnnoyanceChatStep.drawingDecision => DrawingChoiceCard(
         onSelected: controller.selectDrawingChoice,
+        keyPrefix: 'annoyance',
       ),
       AnnoyanceChatStep.score => MoodScoreSelector(
         selectedScore: state.score,
         onSelected: controller.selectScore,
+        keyPrefix: 'annoyance',
+        title: '選擇現在的煩惱分數',
+        semanticLabel: '煩惱分數，1 到 5 分',
       ),
       AnnoyanceChatStep.sharing => ShareChoiceCard(
         selectedValue: state.isShared,
         onSelected: controller.selectSharing,
+        keyPrefix: 'annoyance',
+        title: '是否分享這筆煩惱？',
       ),
       AnnoyanceChatStep.review => AnnoyanceReviewCard(
         state: state,

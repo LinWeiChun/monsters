@@ -128,7 +128,7 @@ public class AnnoyanceService {
         requireUser(userId);
         validatePage(page, size);
         AnnoyanceSort annoyanceSort = parseSort(sort);
-        Page<Entry> entries = entryRepository.findAnnoyancePage(
+        Page<Entry> entries = entryRepository.findEntryPage(
                 userId,
                 EntryType.ANNOYANCE,
                 solved,

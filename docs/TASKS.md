@@ -31,7 +31,7 @@ Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封�
 - [x] TODO：唯讀檢查 AGENTS、README、system_data、正式文件、Git 狀態／diff／log、目錄、TODO／FIXME、測試與 Phase 完成狀態。
 - [x] IN PROGRESS：逐項確認產品、年齡、隱私、身分、資料生命週期、社群治理、內容、獎勵、平台與發布決策。
 - [x] REVIEW：建立 `CONTEXT.md`、ADR，並同步 AGENTS、README、Project、Database、API、UI、Coding Standard、Decisions、Tasks 與 Log。
-- [ ] DONE：文件交叉一致性檢查完成並依 Git 規範送出 PR。
+- [x] DONE：文件交叉一致性檢查完成，PR #79 與 Phase 4 contract PR #82 已合併至 `develop`。
 
 限制：
 
@@ -127,7 +127,7 @@ Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封�
 ## 插隊任務：登入帳號或 Email 驗證修正
 
 - [x] 比對 `bec7bcf` 與 `0b3d265` 的登入欄位及後端查詢行為（DONE）
-- [x] 修正 LoginRequest 將 Account 誤判為非法 Email 的驗證限制（REVIEW：保留 `email` request key，相容既有前端）
+- [x] 修正 LoginRequest 將 Account 誤判為非法 Email 的驗證限制（DONE：PR #52 已合併；保留 `email` request key，相容既有前端）
 - [x] 補齊 Account / Email 登入測試（DONE：登入相關後端測試與後端完整測試通過）
 - [x] 同步 API、UI 規格與 Log（DONE）
 
@@ -147,7 +147,7 @@ Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封�
 
 - [x] 檢查 Penpot MCP 指定 Account & Access 畫面狀態（DONE：目前 selection 為空，註冊頁以已取得的 Account & Access 視覺系統與登入頁規格延伸）
 - [x] 比對 Flutter 現有註冊頁與 Account & Access 排版差異（DONE：已確認舊版置中表單、舊 logo 路徑與未使用 Penpot 版型）
-- [x] 依 Account & Access 視覺系統調整註冊頁排版（REVIEW：本次僅註冊頁）
+- [x] 依 Account & Access 視覺系統調整註冊頁排版（DONE：PR #51、#53 已合併；本次僅註冊頁）
 - [x] 執行 Flutter Analyze 與 Register Page Test（DONE：`flutter analyze --no-pub`、`flutter test --no-pub test/register_page_test.dart` 通過）
 - [x] 同步 UI 規格與 Log（DONE）
 
@@ -232,6 +232,7 @@ Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封�
 - [x] 修改煩惱 API（DONE：PR #33 已合併至 `feature/phase3`）
 - [x] 解決煩惱 API（DONE：PR #34 已合併至 `feature/phase3`）
 - [x] 分享 / 取消分享煩惱 API（DONE：PR #34 已合併至 `feature/phase3`）
+- [x] 下載煩惱媒體 API（DONE：PR #72 已合併至 `feature/phase4`；與 Diary 共用 private R2 串流、owner／分享授權及單一 Range）
 - [x] Flutter 新增煩惱聊天室（DONE：PR #35 已合併至 `feature/phase3`）
 - [x] Flutter 文字 / 圖片 / 錄音 / 影片選取與預覽（DONE：PR #36 已合併至 `feature/phase3`）
 - [x] Flutter 畫心情功能（DONE：PR #37 已合併至 `feature/phase3`）
@@ -245,20 +246,84 @@ Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封�
 
 ## Phase 4：日記功能
 
-狀態：`feature/phase4` 目前比 `develop` 多 30 個 Commit，包含日記候選成果；尚未正式整合。本次 DOC-013 不執行 Phase 4 merge，也不把候選成果標記為 `develop` 已完成。
+狀態：REVIEW。Phase 4 Task PR #66～#78、#81 均已合併至 `feature/phase4`，同步 `develop` 後的 Backend、Flutter 與 Web build 整合驗證均通過；Phase PR #83 已建立，等待 Review 並合併至 `develop`。
 
-- [ ] 檢查 `system_data/` 中舊日記、聊天室、心情分數與分享流程
-- [ ] 整理可參考的欄位與 UI 流程
-- [ ] 依新版 Entry 架構與 API 規格重新實作
+- [x] 檢查 `system_data/` 中舊日記、聊天室、心情分數與分享流程
+- [x] 整理可參考的欄位與 UI 流程
+- [ ] 依已核准 v1 Entry 架構與 API 規格重新實作（TODO：排入 Phase 4.5；目前 Phase 4 程式為 Migration baseline）
 
-- [ ] 建立 diary Entity / DTO / Repository / Service / Controller
-- [ ] 新增日記 API
-- [ ] 查詢日記 API
-- [ ] 修改日記 API
-- [ ] 分享 / 取消分享日記 API
-- [ ] Flutter 新增日記聊天室
-- [ ] Flutter 日記分數選擇
-- [ ] 測試
+- [x] TODO：盤點 Phase 4 DoR、舊系統參考、既有 Entry／R2 架構、Diary API 與 Penpot 畫板缺口
+- [x] IN PROGRESS：依使用者全選方案 A、Penpot design-first、Web-first 與既有頁面樣式完成 Diary contract
+- [x] REVIEW：檢查 Project／API／UI／Decision／Task／Log 與 Penpot 畫板一致性
+- [x] DONE：完成 contract-first 文件、Penpot Web／Mobile 狀態修正、驗證與 Git 流程
+
+- [x] TODO：確認 PR #66 已合併、重讀 Diary 正式規格與舊系統參考、盤點 Annoyance Core 可重用架構
+- [x] IN PROGRESS：擴充共用 Entry Diary domain，建立 Diary response DTO、Mapper、Service 驗證與 Controller 骨架
+- [x] REVIEW：執行 Diary Core 單元測試、Backend 完整測試與架構檢查
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR
+
+- [x] 擴充共用 Entry diary factory／update，建立 Diary DTO / Mapper / Repository / Service / Controller（DONE：沿用共用 EntryRepository，不新增獨立 Diary Entity／Repository）
+- [x] TODO：確認 PR #67 已合併、重讀 Diary create contract、舊系統流程與共用 Entry／R2 實作
+- [x] IN PROGRESS：實作 `POST /api/diaries` multipart 建立流程、owner 驗證、private R2 媒體與交易保存
+- [x] REVIEW：執行建立日記單元測試、Backend 完整測試與契約檢查
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR
+- [x] 新增日記 API（DONE：`POST /api/diaries` multipart、private R2 媒體與交易補償流程）
+- [x] TODO：確認 PR #68 已合併、重讀 Diary query contract、舊歷史記錄流程與共用 Entry 分頁查詢
+- [x] IN PROGRESS：實作 `GET /api/diaries` 列表與 `GET /api/diaries/{id}` owner-scoped 查詢
+- [x] REVIEW：執行 Repository／Service／Controller 查詢測試、Backend 完整測試與契約檢查
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR
+- [x] 查詢日記 API（DONE：owner-scoped 列表／單筆、分頁、分享篩選、穩定排序與批次 media mapping）
+- [x] TODO：確認 PR #69 已合併、重讀 Diary update contract、既有 Annoyance 更新流程與 private R2 清理規則
+- [x] IN PROGRESS：實作 `PUT /api/diaries/{id}` multipart 完整修改、既有媒體保留／替換與 transaction 補償流程
+- [x] REVIEW：執行 Diary DTO／Controller／Service／Persistence 測試與 Backend 完整測試，確認 owner-scoped、媒體組合與清理行為
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR
+- [x] 修改日記 API（DONE：owner-scoped multipart 完整修改、既有媒體保留／替換與 private R2 清理）
+- [x] TODO：確認 PR #70 已合併，重讀 Diary sharing contract 與既有 Annoyance 冪等分享流程
+- [x] IN PROGRESS：實作 `PATCH /api/diaries/{id}/share` 明確目標狀態更新與 owner-scoped 驗證
+- [x] REVIEW：執行 Diary 分享 DTO／Controller／Service 定向測試與 Backend 完整測試
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（PR #71 已合併至 `feature/phase4`）
+- [x] 分享 / 取消分享日記 API（DONE：PR #71 已合併至 `feature/phase4`）
+- [x] TODO：確認 PR #71 已合併，重讀 Annoyance／Diary 媒體下載 contract、舊系統媒體流程與既有 private R2 Range 實作
+- [x] IN PROGRESS：實作共用 Entry 媒體授權與串流，提供 Annoyance／Diary 下載 endpoint，補齊 Range CORS headers
+- [x] REVIEW：執行授權、200／206、404／416／500、CORS、R2 與 Backend 完整測試
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（PR #72 已合併至 `feature/phase4`）
+- [x] 下載日記媒體 API（DONE：PR #72 已合併至 `feature/phase4`；共用 private R2 串流、owner／分享授權及單一 Range）
+- [x] TODO：確認 PR #72 已合併，重讀 Diary UI contract、舊系統流程與 Annoyance 可重用前端架構
+- [x] IN PROGRESS：抽出 Entry 共用前端元件、Responsive flow shell 與媒體 Adapter，並維持 Annoyance 行為相容
+- [x] REVIEW：Entry 共用元件與媒體 Adapter 定向回歸 35 項、Flutter Analyze、136 項完整測試與 Web build 通過
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（PR #73 已合併至 `feature/phase4`）
+- [x] 抽出 Entry 共用前端元件、Responsive flow shell 與媒體 Adapter（DONE：PR #73 已合併至 `feature/phase4`）
+- [x] TODO：確認 PR #73 已合併，重讀 Diary UI／API contract、舊系統流程與 Penpot `Diary Flow / Web`
+- [x] IN PROGRESS：建立 Diary 獨立 draft／Provider／Repository／DTO，串接 Entry 共用元件與 `/diaries/new` Web 流程
+- [x] REVIEW：Penpot Web 文案、1200／1440／1920px RWD、multipart 建立流程、Flutter Analyze、148 項完整測試與 Web build 通過
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（PR #74 已合併至 `feature/phase4`）
+- [x] 依 Penpot `Diary Flow / Web` 實作 Flutter Web 日記聊天室並先完成 RWD 驗收（DONE：PR #74 已合併至 `feature/phase4`）
+- [x] TODO：確認 PR #74 已合併，重讀 Diary Mobile 正式規格、舊系統流程與 Penpot `Diary Flow / Mobile`
+- [x] IN PROGRESS：校正 Penpot 單一主要記錄方式文案，建立 390×844 Mobile 畫布並沿用既有 Diary 狀態與 API
+- [x] REVIEW：驗證 320／390／500／599px、逐步確認、心情畫布、Phase 4 完成頁、Flutter Analyze、156 項完整測試與 Web build
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（PR #75 已合併至 `feature/phase4`）
+- [x] 依 Penpot `Diary Flow / Mobile` 適配 Flutter Mobile 日記聊天室（DONE：PR #75 已合併至 `feature/phase4`）
+- [x] TODO：確認 PR #75 已合併，重讀 Diary 分數正式規格、舊系統 1-based 對應與 Penpot Mobile 分數畫板
+- [x] IN PROGRESS：稽核共用 `MoodScoreSelector`、Diary Web／Mobile 狀態與 multipart `score` contract
+- [x] REVIEW：驗證 1／5 邊界、0／6 拒絕、五個圖片選項、語意標籤、multipart 實際分數、Flutter Analyze、159 項完整測試與 Web build
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（PR #76 已合併至 `feature/phase4`）
+- [x] Flutter 日記分數選擇（DONE：PR #76 已合併至 `feature/phase4`）
+- [x] TODO：確認 PR #76 已合併，重讀 Annoyance／Diary Reward 正式規格及舊系統立即抽怪獸流程
+- [x] IN PROGRESS：修正 Annoyance／Diary Response JSON 明確保留 `reward: null`，拒絕 Phase 6 前的非 null Reward，補強 Flutter 完成頁防回歸
+- [x] REVIEW：Backend Reward contract 3 項與 262 項完整測試、Flutter Reward 定向 44 項、Analyze、159 項完整測試及 Web build 通過
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（PR #77 已合併至 `feature/phase4`）
+- [x] Phase 4 完成頁保持 `reward = null`，Phase 6 再串接真實獎勵（DONE：含 Phase 3 煩惱 Reward；PR #77 已合併至 `feature/phase4`）
+- [x] TODO：確認 PR #77 已合併，重讀首頁日記入口正式規格、既有 `/diaries/new` 路由與舊系統首頁導向
+- [x] IN PROGRESS：將 Desktop／Tablet／Mobile 首頁日記入口統一導向 `AppRoute.diaryChat`，補齊路由回歸測試
+- [x] REVIEW：首頁三種 window class 日記導向與 17 項首頁測試、Flutter Analyze、162 項完整測試及 Web build 通過
+- [x] DONE：同步文件與 Log，完成 Git commit、push 與 task PR（PR #78 已合併至 `feature/phase4`）
+- [x] Flutter 首頁導入紀錄日記（DONE：Desktop／Tablet／Mobile 均已導向 `/diaries/new`；PR #78 已合併至 `feature/phase4`）
+- [x] TODO：確認日記／煩惱現有 Provider 僅保存記憶體狀態、舊系統無草稿 API，並完成兩方案評估
+- [x] IN PROGRESS：依使用者選定方案建立持久草稿 API、資料表、private R2 暫存媒體、30 天清理與 Flutter 自動恢復
+- [x] REVIEW：完成恢復、續存、送出、放棄、逾期重試與續存競爭保護測試；Backend 275 項、Flutter 166 項、Analyze 與 Web build 通過
+- [x] DONE：同步 Penpot、正式規格、Migration、Log，完成 Commit、Push 與 Task PR（PR #81 已合併至 `feature/phase4`）
+- [x] 日記／煩惱持久草稿與媒體暫存機制（DONE：PR #81 已合併至 `feature/phase4`）
+- [x] 測試（DONE：同步 `develop` 後 Backend 275 項、Flutter Analyze、166 項完整測試與 Web build 通過）
 
 ---
 
@@ -321,6 +386,7 @@ Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封�
 
 ## Phase 5：歷史記錄與心的軌跡
 
+- [ ] 先確認／更新 Penpot History & Heart Web／Mobile 畫板，Web-first 完成實作與驗收
 狀態：BLOCKED，等待 Phase 4.5 完成。
 
 - [ ] 檢查 `system_data/` 中舊歷史記錄、心情分數與圖表呈現邏輯
@@ -339,6 +405,7 @@ Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封�
 
 ## Phase 6：怪獸圖鑑
 
+- [ ] 先確認／更新 Penpot Monster Collection Web／Mobile 畫板，Web-first 完成實作與驗收
 狀態：BLOCKED，等待 Phase 4.5 完成。
 
 - [ ] 檢查 `system_data/` 中舊怪獸、怪獸群組、素材與換裝邏輯
@@ -413,6 +480,7 @@ Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封�
 
 ## Phase 9：使用說明、回饋與分享
 
+- [ ] 先確認／更新 Penpot Help & Feedback Web／Mobile 畫板，Web-first 完成實作與驗收
 - [ ] 檢查 `system_data/` 中舊使用說明、回饋與分享流程
 - [ ] 整理可參考的文案、入口與資料欄位
 - [ ] 依新版 UI 與 API 規格重新實作
@@ -427,11 +495,12 @@ Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封�
 
 ## Phase 10：跨平台與部署
 
+- [ ] 最終 UI 或 RWD 調整先同步 Penpot Web／Mobile 畫板，再進行跨平台驗收
 - [ ] 檢查 `system_data/` 中舊環境設定、平台差異與部署相關參考
 - [ ] 排除舊系統金鑰、憑證、jar、metadata 與 build artifact
 - [ ] 依新版環境變數、部署與 Git 規範重新整理
 
-- [ ] App icon / Logo 三平台替換（REVIEW：本地產圖、登入 / 註冊 / 啟動畫面 logo 套用與文件同步完成；待測試與 GitHub push）
+- [x] App icon / Logo 三平台替換（DONE：相關提交已合併並存在於 `develop`／目前分支，三平台建置與測試紀錄已通過）
 - [ ] Android 測試
 - [ ] iOS 測試
 - [ ] Web 測試

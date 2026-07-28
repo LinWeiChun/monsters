@@ -232,8 +232,8 @@ CORS 僅套用於：
 |---|---|---|
 | app.cors.allowed-origin-patterns | CORS_ALLOWED_ORIGIN_PATTERNS | http://localhost:*,http://127.0.0.1:* |
 | app.cors.allowed-methods | CORS_ALLOWED_METHODS | GET,POST,PUT,PATCH,DELETE,OPTIONS |
-| app.cors.allowed-headers | CORS_ALLOWED_HEADERS | Authorization,Content-Type |
-| app.cors.exposed-headers | CORS_EXPOSED_HEADERS | Authorization |
+| app.cors.allowed-headers | CORS_ALLOWED_HEADERS | Authorization,Content-Type,Range |
+| app.cors.exposed-headers | CORS_EXPOSED_HEADERS | Authorization,Accept-Ranges,Content-Length,Content-Range |
 | app.cors.allow-credentials | CORS_ALLOW_CREDENTIALS | true |
 | app.cors.max-age | CORS_MAX_AGE | 3600 |
 
@@ -916,8 +916,8 @@ Parts：
 
 - `categoryCode` 必須為已啟用的 annoyance type code。
 - `recordMethod = TEXT` 時 `content` 必填且不得傳 `contentFile`；其餘方式 `content` 必須為 null，並需傳入相符 MIME type 的 `contentFile`。
-- 歷史 Phase 3 contract 要求 `score` 為 1 至 5 並使用 `isShared`；v1 目標改為 nullable Emotional Load 與獨立 Community Post。
-- Phase 3 建立成功不發放怪獸；`reward` 固定回傳 null，Phase 6 再串接真實獎勵。
+- 歷史 Phase 3 contract 要求 `score` 為 1 至 5、`isShared` 未傳時為 false，且 `occurredAt` 未傳時由後端設定；v1 目標改為 nullable Emotional Load 與獨立 Community Post。
+- Phase 3 建立成功不發放怪獸；`reward` 固定回傳 null，Phase 6 再串接真實獎勵。Response JSON 必須保留 `"reward": null`，不得因值為 null 而省略欄位。
 
 Response data：
 
@@ -1043,7 +1043,67 @@ Request：
 - Backend 驗證權限後從 private R2 串流，不以 redirect 洩漏 R2 URL 或 object key。
 - 支援單一 HTTP `Range` request 以供錄音／影片 seek；完整回應為 200，range 回應為 206，並回傳正確 `Content-Type`、`Content-Length`、`Accept-Ranges` 與 `Content-Range`。
 
-### 4.8 Annoyance 錯誤處理
+### 4.8 煩惱草稿
+
+| Method | Path | 說明 |
+|---|---|---|
+| GET | `/api/annoyances/draft` | 取得目前使用者尚未到期的煩惱草稿 |
+| PUT | `/api/annoyances/draft` | 建立或覆寫煩惱草稿 |
+| DELETE | `/api/annoyances/draft` | 明確捨棄草稿與暫存媒體；不存在時仍回傳成功 |
+| POST | `/api/annoyances/draft/submit` | 驗證完整草稿並轉為正式煩惱 |
+| GET | `/api/annoyances/draft/media/{mediaId}` | 下載目前使用者的草稿媒體 |
+
+`PUT` 使用 `multipart/form-data`，parts 與正式建立 API 相同；`request` 改使用可部分完成的草稿欄位：
+
+```json
+{
+  "step": "CONTENT",
+  "categoryCode": "ACADEMIC",
+  "recordMethod": "TEXT",
+  "content": "最近考試讓我很焦慮",
+  "wantsDrawing": null,
+  "score": null,
+  "isShared": null,
+  "existingContentMediaId": null,
+  "existingDrawingMediaId": null
+}
+```
+
+- `step` 僅允許 `INTRO`、`CATEGORY`、`RECORD_METHOD`、`CONTENT`、`DRAWING_DECISION`、`DRAWING`、`SCORE`、`SHARING`、`REVIEW`；不得保存 `SUBMITTING` 或 `COMPLETED`。
+- 儲存草稿採部分驗證；`POST /draft/submit` 才執行與正式建立 API 相同的完整組合驗證。
+- submit 時 `wantsDrawing` 必須已選擇；true 時需有 drawing 暫存媒體，false 時不得保留 drawing 暫存媒體。
+- 每位使用者只保留一筆煩惱草稿；每次有效儲存將到期時間延長 30 天。
+- 新 `contentFile`／`drawingFile` 與同用途 `existing...MediaId` 不得同時傳入；existing id 必須屬於目前草稿且用途相符。兩者皆未傳代表移除該用途媒體。
+- 草稿與媒體只允許 owner 存取，即使 `isShared = true` 仍不得供其他使用者讀取。
+- 媒體使用既有 private R2 驗證與大小／長度限制；取代、捨棄或到期時清理 object。
+- 儲存、送出、捨棄與到期清理會鎖定同一使用者／類型的草稿；到期清理取得鎖後須再次確認 `expiresAt`，不得刪除等待期間已被續存的草稿。
+- 明確捨棄或到期清理若無法刪除 R2 object，不得先刪除草稿 metadata；排程保留該筆資料供下次重試。
+- 送出在同一 Database transaction 建立 `entries`／`entry_media` 並刪除草稿 metadata；沿用既有 object key，不重新上傳檔案。
+
+GET／PUT response data：
+
+```json
+{
+  "draft": {
+    "id": 501,
+    "entryType": "ANNOYANCE",
+    "step": "CONTENT",
+    "category": { "code": "ACADEMIC", "name": "學業" },
+    "recordMethod": "TEXT",
+    "content": "最近考試讓我很焦慮",
+    "wantsDrawing": null,
+    "score": null,
+    "isShared": null,
+    "expiresAt": "2026-08-23T12:00:00+08:00",
+    "contentMedia": null,
+    "drawingMedia": null
+  }
+}
+```
+
+無草稿時仍回傳 200，`data = { "draft": null }`。草稿媒體 response 另包含 `id`、`role`、`type`、`fileName`、`contentType`、`sizeBytes`、`durationSeconds` 與需帶 JWT 的 Backend `downloadUrl`，不得包含 object key。送出成功回傳 201 與既有 Annoyance response data。
+
+### 4.9 Annoyance 錯誤處理
 
 - 400：欄位、主要記錄方式組合、分頁、MIME type、大小或長度驗證失敗。
 - 401：未登入或 token 無效。
@@ -1058,25 +1118,189 @@ Request：
 
 本章尚未整合至 `develop`。本次文件更新不執行 Phase 4 整合；整合後仍須依 0.3 遷移至選填情緒負荷、選填分類與獨立 Community Post。
 
+共同規則：
+
+- 全部 endpoint 均需登入；`userId` 只取自 JWT principal，Client 不得傳入 owner、account 或 user id。
+- Diary 使用共用 `entries`／`entry_media` 模型，`entryType = DIARY`、`annoyanceTypeId = null`、`isSolved = false`；Phase 4 的 `monsterId` 與 `reward` 為 null。
+- 一筆日記只能選擇 TEXT、IMAGE、AUDIO、VIDEO 其中一種主要記錄方式，另可選擇一張 drawing；drawing 不是必填。
+- 預設 `isShared = false`；`occurredAt` 未傳時由後端使用目前時間。
+- 媒體數量、MIME type、副檔名、大小、影音長度、`ffprobe` 驗證、private R2 與 transaction cleanup 規則全部沿用 Annoyance API。
+- 不存在、已刪除或不屬於目前使用者的資料一律回傳 404，避免洩漏 owner 資訊；媒體下載 endpoint 另允許目前為分享狀態的 entry。
+- Response 不得包含 bucket、object key、R2 credential 或暫存檔路徑；媒體只回傳需帶 JWT 的 Backend download URL。
+
 ### 5.1 新增日記
 
 `POST /api/diaries`
+
+Content-Type：`multipart/form-data`
+
+Parts：
+
+| Part | 型別 | 必填 | 說明 |
+|---|---|---|---|
+| `request` | `application/json` | 是 | 建立資料 |
+| `contentFile` | binary | 條件必填 | IMAGE／AUDIO／VIDEO 時必填；TEXT 時不得傳 |
+| `drawingFile` | binary | 否 | 可選心情圖 |
+
+`request`：
+
+```json
+{
+  "recordMethod": "TEXT",
+  "content": "今天完成了一件很有成就感的事",
+  "score": 2,
+  "isShared": false,
+  "occurredAt": "2026-07-18T20:00:00+08:00"
+}
+```
+
+規則：
+
+- `recordMethod = TEXT` 時 `content` 必填且不得傳 `contentFile`；其餘方式 `content` 必須為 null，並需傳入相符 MIME type 的 `contentFile`。
+- `score` 必須為 1 至 5；`isShared` 未傳時為 false；`occurredAt` 未傳時由後端設定。
+- 建立成功回傳 201。Phase 4 不發放怪獸或其他獎勵，`reward` 固定回傳 null；Phase 6 再串接真實獎勵。Response JSON 必須保留 `"reward": null`，不得因值為 null 而省略欄位。
+
+Response data：
+
+```json
+{
+  "id": 301,
+  "recordMethod": "TEXT",
+  "content": "今天完成了一件很有成就感的事",
+  "score": 2,
+  "isShared": false,
+  "occurredAt": "2026-07-18T20:00:00+08:00",
+  "media": [
+    {
+      "id": 401,
+      "type": "drawing",
+      "contentType": "image/png",
+      "sizeBytes": 20480,
+      "durationSeconds": null,
+      "downloadUrl": "/api/diaries/301/media/401"
+    }
+  ],
+  "reward": null
+}
+```
 
 ### 5.2 查詢日記列表
 
 `GET /api/diaries`
 
+Query：
+
+| 參數 | 必填 | 預設 | 規則 |
+|---|---|---|---|
+| `page` | 否 | 0 | 從 0 開始 |
+| `size` | 否 | 20 | 1 至 100 |
+| `sort` | 否 | `occurredAt,desc` | 可排序欄位：`occurredAt`、`createdAt`、`score`；方向為 `asc` 或 `desc` |
+| `isShared` | 否 | 全部 | boolean filter |
+
+後端以 `LIMIT`／`OFFSET` 與排序查詢，只查詢目前登入使用者未刪除的 DIARY entry；相同排序值以 entry id 由大至小作為穩定次排序。無效的 page、size、sort 或 boolean query parameter 回傳 400。
+
+Response data：
+
+```json
+{
+  "content": [],
+  "page": 0,
+  "size": 20,
+  "totalElements": 0,
+  "totalPages": 0,
+  "first": true,
+  "last": true
+}
+```
+
 ### 5.3 查詢單筆日記
 
 `GET /api/diaries/{id}`
+
+回傳與新增成功相同的 Diary data；`reward` 在 Phase 4 為 null。
 
 ### 5.4 修改日記
 
 `PUT /api/diaries/{id}`
 
+Content-Type、parts 與驗證規則同新增 API。`request` 需傳完整可編輯資料，並可加上：
+
+```json
+{
+  "recordMethod": "IMAGE",
+  "content": null,
+  "score": 3,
+  "isShared": false,
+  "occurredAt": "2026-07-18T21:00:00+08:00",
+  "existingContentMediaId": 401,
+  "existingDrawingMediaId": 402
+}
+```
+
+- 保留既有主要媒體或心情圖時傳入對應 media id；id 必須屬於該 entry 且 media type 相符。
+- 傳入新檔案時不得同時傳同用途的 existing media id；新檔案成功後取代舊檔案。
+- 未傳新檔案與 `existingDrawingMediaId` 代表移除心情圖。
+- `entryType`、`isSolved`、`monsterId` 與 `reward` 不屬於此 API 的可編輯欄位。
+- 修改成功回傳 200 與更新後 Diary data；R2 舊 object 僅在 transaction 成功後 best-effort 清理，清理失敗不得回滾已成功的 Database transaction。
+
 ### 5.5 分享或取消分享日記
 
 `PATCH /api/diaries/{id}/share`
+
+Request：
+
+```json
+{ "isShared": true }
+```
+
+使用明確 boolean 目標狀態，不提供無參數 toggle；重複傳相同狀態應維持 idempotent success。分享與取消分享成功皆回傳 200 與更新後 Diary data；不存在、已刪除或不屬於目前使用者的 entry 回傳 404。
+
+### 5.6 下載日記媒體
+
+`GET /api/diaries/{id}/media/{mediaId}`
+
+- 需登入；entry owner 可讀取，非 owner 僅能在 entry 目前為分享狀態時讀取，否則回傳 404。
+- `mediaId` 必須屬於 path 中的 entry 且未刪除。
+- Backend 驗證權限後從 private R2 串流，不以 redirect 洩漏 R2 URL 或 object key。
+- 支援單一 HTTP `Range` request 以供錄音／影片 seek；完整回應為 200，range 回應為 206，並回傳正確 `Content-Type`、`Content-Length`、`Accept-Ranges` 與 `Content-Range`。
+
+### 5.7 日記草稿
+
+| Method | Path | 說明 |
+|---|---|---|
+| GET | `/api/diaries/draft` | 取得目前使用者尚未到期的日記草稿 |
+| PUT | `/api/diaries/draft` | 建立或覆寫日記草稿 |
+| DELETE | `/api/diaries/draft` | 明確捨棄草稿與暫存媒體；不存在時仍回傳成功 |
+| POST | `/api/diaries/draft/submit` | 驗證完整草稿並轉為正式日記 |
+| GET | `/api/diaries/draft/media/{mediaId}` | 下載目前使用者的草稿媒體 |
+
+日記草稿 contract、30 天期限、owner-only 權限、private R2、媒體取代／移除、到期清理與 transaction 送出規則全部沿用 4.8；`categoryCode` 固定不得傳入，`step` 不接受 Annoyance 專用的 `CATEGORY`。
+
+日記草稿 `PUT` request 範例：
+
+```json
+{
+  "step": "CONTENT",
+  "recordMethod": "TEXT",
+  "content": "今天完成了一件重要的事",
+  "wantsDrawing": null,
+  "score": null,
+  "isShared": null,
+  "existingContentMediaId": null,
+  "existingDrawingMediaId": null
+}
+```
+
+GET／PUT response data 使用 `{ "draft": ... }` envelope，`entryType = DIARY`、`category = null`；無草稿時 `draft = null`。送出成功回傳 201 與既有 Diary response data。
+
+### 5.8 Diary 錯誤處理
+
+- 400：欄位、主要記錄方式組合、分頁、MIME type、大小或長度驗證失敗。
+- 401：未登入或 token 無效。
+- 404：entry 或 media 不存在，或目前使用者無權存取。
+- 413：上傳檔案超過限制。
+- 416：媒體 `Range` 超出 object 範圍。
+- 500：R2、`ffprobe` 或資料儲存失敗；不得回傳 bucket credential、內部 object key、暫存檔路徑或 stack trace。
 
 ---
 

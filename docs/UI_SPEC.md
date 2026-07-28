@@ -14,7 +14,7 @@
 - 私人內容不得顯示於 App switcher、鎖定畫面通知、URL、瀏覽器標題、分享預覽、Crash screenshot 或一般系統日誌。
 - App 進背景立即顯示隱私遮罩；預設離開一分鐘後需本機 PIN，可選立即、1、5、15 分鐘。
 - Web 不顯示本機 PIN，頁籤失焦先遮蔽，閒置 15 分鐘後要求帳號重新驗證。
-- 第一版不持久化離線私人資料；草稿只在目前 App 執行期間保留，送出失敗時可於原畫面重試。
+- 第一版不持久化離線私人資料；尚未同步的本機草稿只在目前 App 執行期間保留，已同步的 owner-scoped 伺服器草稿依 30 天規則保存，送出失敗時可於原畫面重試。
 - 通知預設只顯示「貘nsters 有一則新通知」，不得顯示日記、貼文、留言、媒體或情緒負荷。
 - 高風險功能由 Backend 功能開關強制；Client 設定無法取得時採關閉狀態，但仍保留資料查看、匯出與刪除入口。
 
@@ -29,6 +29,13 @@
 目前開發與驗收以 Web-first 為主，Web 版需以 Responsive Layout 呈現；Mobile Penpot 畫面與 Android／iOS 相容性仍須保留。
 
 前端功能 Task 預設需以 Flutter 共用程式實作，並確認 Web、Android、iOS 三平台皆可使用。若功能涉及平台差異，例如檔案選取、通知、相機、外部連結或權限，必須在同一 Task 內補齊三平台處理或明確記錄平台限制與替代方案。
+
+### 1.1 Penpot design-first 與 Web-first 驗收
+
+- 自 Phase 4 起，所有包含 UI 的 Phase 必須先在 Penpot 完成或更新 Web／Mobile 畫板與必要狀態，才能進入 Flutter UI 實作。
+- Web 畫板是第一實作與驗收來源；先完成 Desktop 與 Responsive Web Design，再沿用同一份 Flutter 業務、狀態與資料層適配 Mobile 畫板。
+- Penpot 畫板必須參考已完成頁面的共用視覺語言，包括 Navbar／底部導覽、內容最大寬度、網格、字級、間距、色彩、圓角、陰影、卡片及按鈕層級，不得為單一 Phase 建立不相容的平行樣式。
+- 流程、狀態或 UI 決策異動時，先更新 Penpot，再同步本文件與程式；交付前需匯出或實際檢視畫板，確認無溢位、遮擋及錯誤文案。
 
 ## 二、主要頁面
 
@@ -122,7 +129,7 @@
 5. 選擇是否畫心情；選擇繪圖時最多附加一張心情圖
 6. 以結構化元件選擇 1 至 5 情緒負荷或「這次不評分」
 7. 選擇保持私人，或進入公開快照逐項預覽；不得預先勾選分享
-8. 檢視摘要並送出；送出中禁止重複操作，失敗時保留草稿
+8. 檢視摘要並送出；送出中禁止重複操作，失敗時保留伺服器草稿
 9. 顯示建立完成頁面，可前往歷史記錄
 
 互動採聊天外觀搭配 `AnnoyanceCategorySelector`、`RecordMethodSelector`、`MediaPreviewCard`、`MoodDrawingCanvas`、`MoodScoreSelector`、`ShareChoiceCard` 與 `AnnoyanceReviewCard`，不得以自由文字比對選項。狀態依 `intro → category → recordMethod → content → drawingDecision → drawing（optional）→ score → sharing → review → submitting → completed` 推進。
@@ -131,7 +138,9 @@
 
 煩惱媒體存放於獨立的 private R2 bucket。Flutter 只能使用 API 回傳的 Backend download URL 並附帶 JWT 讀取，不得組合 R2 bucket URL 或保存 object key；錄音與影片播放器需支援 Backend 的 HTTP Range response。
 
-Phase 3 完成頁不顯示假怪獸獎勵；真實獎勵與圖鑑導向於 Phase 6 串接。
+進入 `/annoyances/new` 時先讀取 owner 的伺服器草稿；存在時還原步驟、文字、選項與暫存媒體，讓重新整理、離開後返回、重新登入或跨裝置繼續。狀態變更後自動暫存，文字輸入使用 debounce；畫面顯示「暫存中」、「草稿已暫存」或可重試錯誤。草稿保存 30 天，媒體仍保持私人；「重新開始」必須先確認，確認後呼叫 DELETE Draft API，不得只清除本機 Provider。
+
+Phase 3 完成頁不顯示假怪獸獎勵，不得沿用舊系統「恭喜你獲得一隻怪獸」或「查看圖鑑」操作；真實獎勵與圖鑑導向於 Phase 6 串接。
 
 聊天室入口使用 `/annoyances/new`，由首頁「新增煩惱」進入。聊天室基礎 Task 建立聊天泡泡、不可變草稿狀態、上一步／重新開始操作，以及 `intro → category → recordMethod → content` 的結構化推進；content 之後的媒體選取、繪圖、分數、分享、摘要與送出依後續 Phase 3 Task 接續同一狀態機，不得另建平行流程。
 
@@ -143,19 +152,50 @@ Phase 3 完成頁不顯示假怪獸獎勵；真實獎勵與圖鑑導向於 Phase
 
 分享 Task 使用 `ShareChoiceCard` 顯示「保持私人」與「建立匿名公開快照」。選擇分享後必須逐項預覽實際公開文字、媒體與公開主題；情緒負荷、私人分類、原始日期與版本歷史預設不公開。每次分享都需主動確認，不能只改 boolean 或沿用上次選擇。
 
-煩惱摘要送出 Task 使用 `AnnoyanceReviewCard` 顯示類別、記錄方式、主要內容、心情圖、分數與分享狀態。送出時由 `AnnoyanceRepository` 呼叫既有 `POST /api/annoyances` multipart contract，`request` 為 JSON part，依草稿內容附加 optional `contentFile` 與 `drawingFile`；送出中進入 `submitting` 狀態並禁止上一步與重複送出。成功後保存 `AnnoyanceResponse` 並顯示 `AnnoyanceCompletedCard`，Phase 3 僅呈現建立成功與分享狀態，不顯示假怪獸獎勵；失敗時返回 `review`、保留草稿並顯示 API 錯誤訊息。
+煩惱摘要送出 Task 使用 `AnnoyanceReviewCard` 顯示類別、記錄方式、主要內容、心情圖、分數與分享狀態。送出前完成最後一次草稿同步，再由 `AnnoyanceRepository` 呼叫 `POST /api/annoyances/draft/submit`；送出中進入 `submitting` 狀態並禁止上一步與重複送出。成功後保存 `AnnoyanceResponse` 並顯示 `AnnoyanceCompletedCard`，Phase 3 僅呈現建立成功與分享狀態，不顯示假怪獸獎勵；失敗時返回 `review`、保留伺服器草稿並顯示 API 錯誤訊息。
 
 ### 2.8 新增日記聊天室
 
-流程：
+設計與驗收來源：
 
-1. 怪獸引導對話
-2. 選擇記錄方式
-3. 輸入內容
-4. 選擇是否畫心情
-5. 記錄情緒負荷或略過
-6. 保持私人，或逐項確認建立匿名公開快照
-7. 顯示建立結果與已達成的固定解鎖里程碑，不顯示隨機抽取
+- 第一實作與驗收：Penpot `WEB / Diary Flow / Web`，各狀態採 1440×900 Desktop 畫板，Responsive Web 驗收範圍為 1200px 至 1920px。
+- 後續 Mobile 適配：Penpot `APP / Diary Flow / Mobile`，基準畫板為 390×844；Mobile 不先於 Web 實作。
+- Phase 4 使用 `01` 至 `08` 與 `09 Completed / Phase 4` 畫板；`Future Reward / Phase 6` 僅保留為未來設計，不得在 Phase 4 程式顯示。
+- 視覺樣式需對齊已完成的 Penpot `Web / Companion Home` 與 `Annoyance Flow / Web`：共用 Navbar、1200px 內容區、桌面雙欄、暖色卡片、字級階層、間距、圓角、陰影與主要／次要按鈕。
+
+流程與狀態機：
+
+1. 怪獸引導與開始記錄
+2. 選擇文字、錄音、照片或影片其中一種主要記錄方式
+3. 輸入文字或選取一個主要媒體，並提供預覽、移除與重選
+4. 以結構化選項選擇畫心情或先略過
+5. 選擇繪圖時顯示心情畫布；略過時直接進入分數
+6. 使用 `moodPoint_1.png`～`moodPoint_5.png` 選擇 1 至 5 分
+7. 選擇保持私人或分享到社群，預設私人
+8. 檢視摘要並送出；送出中禁止重複操作，失敗時保留伺服器草稿
+9. 顯示安全保存完成結果，可返回首頁或再寫一篇日記
+
+狀態依 `intro → recordMethod → content → drawingDecision → drawing（optional）→ score → sharing → review → submitting → completed` 推進。聊天室入口使用 `/diaries/new`，Phase 4 完成後首頁「寫一篇日記」需由開發中狀態改為可操作。
+
+Diary 前端需抽出並重用 Phase 3 Entry 共用元件與平台 Adapter，包括記錄方式、媒體預覽、心情畫布、分數、分享選擇及 Responsive flow shell；Diary 仍維持獨立的 draft state、Provider、Repository、DTO、review 與完成元件，不得直接耦合 Annoyance 專屬類別或 API。
+
+Entry 共用前端基礎位於 `frontend/lib/models/entry_*.dart`、`frontend/lib/services/entry_media_*.dart` 與 `frontend/lib/widgets/entry/`。共用 Widget 以 `keyPrefix`、標題與語意文案區分 Annoyance／Diary，媒體 Service 以 `recordingFilePrefix` 區分錄音暫存檔；Annoyance 已改為直接使用這些共用元件並保留原測試 key。Diary 後續只能依賴 Entry 共用層，不得匯入 `widgets/annoyance/` 或 Annoyance 媒體型別。
+
+Flutter Web 實作位於 `frontend/lib/pages/diary_chat_page.dart`，並以 `diary_draft.dart`、`diary_chat_provider.dart`、`diary_repository.dart`、`diary_response.dart` 與 `widgets/diary/` 維持 Diary 專屬狀態、API 與確認／完成畫面。`/diaries/new` 已可直接進入；首頁 Desktop／Tablet／Mobile 的 `homeDiaryChatButton` 統一以 `context.pushNamed(AppRoute.diaryChat)` 導向日記聊天室，不再顯示「即將開放」。Web 已驗收 1200、1440、1920px，不得以固定 1440px canvas 取代 Responsive flow。
+
+進入 `/diaries/new` 時先讀取 owner 的伺服器草稿；還原與自動暫存行為沿用煩惱流程。內容按鈕文字使用「暫存並繼續」，並顯示草稿保存 30 天、可跨裝置繼續的狀態。離開頁面不得刪除草稿；明確重新開始才顯示確認並呼叫 DELETE Draft API。送出前完成最後一次同步，改呼叫 `POST /api/diaries/draft/submit`，成功後由後端刪除草稿。
+
+Flutter Mobile 以 `frontend/lib/widgets/diary/diary_mobile_flow.dart` 實作 Penpot 390×844 單欄畫布，並透過 `ResponsiveFixedCanvas` 在 320px 至 599px 等比例填滿 viewport 寬度；縮放後高度超過 viewport 時允許垂直捲動，不得在 391px 至 599px 保留靠左的固定 390px 留白。Mobile 依 `01` 至 `08` 與 `09 Completed / Phase 4` 呈現品牌、步驟、進度、標題、說明、主要操作及完成頁底部導覽。記錄方式、分數與分享選擇在 Mobile 先保存選項，再由明確的下一步按鈕確認；Web／Tablet 保留既有快速選擇行為，三種 window class 仍共用同一份 `DiaryChatState`、Controller、Repository 與 API contract。
+
+Penpot `Diary / Mobile / 02 記錄方式` 的說明已由「可混合使用」校正為「目前先選擇一種主要記錄方式，之後仍可編輯」，與 Project、Database 及 API 規格一致。Mobile 每篇日記仍只允許文字、圖片、錄音或影片其中一種主要記錄方式，並可另外附加一張 optional 心情圖。
+
+媒體 MIME type、大小、長度、private R2、JWT download URL 與 HTTP Range 規則全部沿用新增煩惱規格；每筆日記限一個主要媒體與一張 optional 心情圖。Web 不支援的來源需提供可理解的替代選取方式，不得阻斷文字日記或檔案上傳。
+
+日記分數固定使用 `moodPoint_1.png`～`moodPoint_5.png` 呈現 1 至 5 分，圖片只作輔助，無障礙名稱使用中性分數。Web／Tablet 選擇後直接前進，Mobile 先保留選項再按鈕確認；三種 window class 共用同一個 1-based 整數狀態。Flutter 送出的 multipart `request` 必須直接帶入 1 至 5，不得轉為 0-based index 或傳送 mood lookup ID；0 與 6 等範圍外值不得改變選擇。
+
+Phase 4 完成頁只顯示日記已安全保存、分數與分享狀態；API `reward` 為 `null`，不得顯示舊系統「恭喜你獲得一隻怪獸」、「查看圖鑑」、連續天數禮物或尚未完成的歷史頁導向。日記獎勵於 Phase 6 串接。
+
+Desktop 以共用 Navbar 與 1200px 內容區呈現雙欄流程；Tablet `600px - 1199px` 使用 compact flow；Mobile `< 600px` 依 Mobile Penpot 改為單欄。三種 window class 必須共用同一狀態機與資料層。
 
 ### 2.9 歷史記錄頁面
 
@@ -806,8 +846,9 @@ Logo 規範：
 - `HomePage` Web 版改為 `LayoutBuilder + Column / Row / Expanded / ConstrainedBox` 的相對 layout；Mobile 版仍保留 390 x 844 Penpot canvas。
 - Home 色彩集中於 `frontend/lib/theme/app_colors.dart` 的 `home*` token，page 不直接宣告色碼。
 - 主要行動 `homeAnnoyanceChatButton` 使用 `context.pushNamed(AppRoute.annoyanceChat)`，讓明確返回按鈕保留上一頁。
+- 日記行動 `homeDiaryChatButton` 在 Desktop／Tablet／Mobile 使用 `context.pushNamed(AppRoute.diaryChat)`，導向 `/diaries/new` 並保留首頁於返回堆疊。
 - Mobile 右上角通知按鈕不再重複提供個人資料入口；底部 `mobileNavProfile` 導向 `profile`。
-- 尚未開放的 diary / history / collection / community / interaction 入口顯示具名的「即將開放」訊息。
+- 尚未開放的 history / collection / community / interaction 入口顯示具名的「即將開放」訊息。
 - `homeAnimatedMonster`、`homeAnimatedMonsterIdle`、`homeAnimatedMonsterReacting` 測試 key 保留，降低既有測試與互動行為破壞。
 ---
 

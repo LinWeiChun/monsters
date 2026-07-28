@@ -12,6 +12,7 @@ import 'package:monsters/models/annoyance_drawing.dart';
 import 'package:monsters/models/annoyance_draft.dart';
 import 'package:monsters/models/annoyance_media.dart';
 import 'package:monsters/models/annoyance_response.dart';
+import 'package:monsters/models/entry_draft_snapshot.dart';
 import 'package:monsters/pages/annoyance_chat_page.dart';
 import 'package:monsters/providers/annoyance_chat_provider.dart';
 import 'package:monsters/providers/annoyance_media_provider.dart';
@@ -33,7 +34,14 @@ void main() {
     ) async {
       await _setSurface(tester, size);
       await tester.pumpWidget(
-        const ProviderScope(child: MaterialApp(home: AnnoyanceChatPage())),
+        ProviderScope(
+          overrides: [
+            annoyanceRepositoryProvider.overrideWithValue(
+              _FakeAnnoyanceRepository(),
+            ),
+          ],
+          child: const MaterialApp(home: AnnoyanceChatPage()),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -57,8 +65,13 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(
+      ProviderScope(
+        overrides: [
+          annoyanceRepositoryProvider.overrideWithValue(
+            _FakeAnnoyanceRepository(),
+          ),
+        ],
+        child: const MaterialApp(
           home: AnnoyanceChatPage(drawingExporter: _exportTestDrawing),
         ),
       ),
@@ -104,8 +117,13 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(
+      ProviderScope(
+        overrides: [
+          annoyanceRepositoryProvider.overrideWithValue(
+            _FakeAnnoyanceRepository(),
+          ),
+        ],
+        child: const MaterialApp(
           home: AnnoyanceChatPage(drawingExporter: _exportTestDrawing),
         ),
       ),
@@ -125,6 +143,9 @@ void main() {
 
     await tester.tap(find.byKey(const Key('annoyanceChatRestartButton')));
     await tester.pumpAndSettle();
+    expect(find.text('捨棄目前草稿？'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('annoyanceConfirmRestartButton')));
+    await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('annoyanceChatStartButton')), findsOneWidget);
     expect(find.text('職涯'), findsNothing);
@@ -135,6 +156,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          annoyanceRepositoryProvider.overrideWithValue(
+            _FakeAnnoyanceRepository(),
+          ),
           annoyanceMediaServiceProvider.overrideWithValue(mediaService),
         ],
         child: const MaterialApp(home: AnnoyanceChatPage()),
@@ -175,6 +199,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          annoyanceRepositoryProvider.overrideWithValue(
+            _FakeAnnoyanceRepository(),
+          ),
           annoyanceMediaServiceProvider.overrideWithValue(mediaService),
         ],
         child: const MaterialApp(home: AnnoyanceChatPage()),
@@ -287,6 +314,9 @@ void main() {
 
     expect(find.byKey(const Key('annoyanceCompletedCard')), findsOneWidget);
     expect(find.textContaining('101'), findsOneWidget);
+    expect(find.textContaining('獎勵'), findsNothing);
+    expect(find.textContaining('恭喜你獲得'), findsNothing);
+    expect(find.text('查看圖鑑'), findsNothing);
     expect(find.byKey(const Key('annoyanceChatBackButton')), findsNothing);
   });
 }
@@ -370,6 +400,89 @@ class _FakeMediaService implements AnnoyanceMediaService {
 class _FakeAnnoyanceRepository extends AnnoyanceRepository {
   _FakeAnnoyanceRepository() : super(_dummyClient());
 
+  AnnoyanceCategory? _category;
+  AnnoyanceRecordMethod? _recordMethod;
+  String _content = '';
+  int? _score;
+  bool? _isShared;
+
+  @override
+  Future<EntryDraftSnapshot?> getDraft() async => null;
+
+  @override
+  Future<EntryDraftSnapshot> saveDraft({
+    required String step,
+    required AnnoyanceCategory? category,
+    required AnnoyanceRecordMethod? recordMethod,
+    required String content,
+    required AnnoyanceMediaFile? contentMedia,
+    required bool? wantsDrawing,
+    required AnnoyanceDrawingFile? drawing,
+    required int? score,
+    required bool? isShared,
+  }) async {
+    _category = category;
+    _recordMethod = recordMethod;
+    _content = content;
+    _score = score;
+    _isShared = isShared;
+    return EntryDraftSnapshot(
+      id: 1,
+      entryType: 'ANNOYANCE',
+      step: step,
+      category:
+          category == null
+              ? null
+              : EntryDraftCategorySnapshot(
+                code: category.code,
+                name: category.name,
+              ),
+      recordMethod: recordMethod?.apiValue,
+      content: recordMethod == AnnoyanceRecordMethod.text ? content : null,
+      wantsDrawing: wantsDrawing,
+      score: score,
+      isShared: isShared,
+      expiresAt: DateTime.parse('2026-08-27T10:00:00+08:00'),
+      contentMedia: _mediaSnapshot(contentMedia, 'CONTENT', 11),
+      drawingMedia:
+          drawing == null
+              ? null
+              : EntryDraftMediaSnapshot(
+                id: 12,
+                role: 'DRAWING',
+                type: 'drawing',
+                fileName: drawing.name,
+                contentType: drawing.mimeType,
+                sizeBytes: drawing.sizeBytes,
+                durationSeconds: null,
+                downloadUrl: '/api/annoyances/draft/media/12',
+              ),
+    );
+  }
+
+  @override
+  Future<void> discardDraft() async {}
+
+  @override
+  Future<AnnoyanceResponse> submitDraft() async {
+    await Future<void>.delayed(const Duration(milliseconds: 1));
+    final category = _category ?? annoyanceCategories.first;
+    return AnnoyanceResponse(
+      id: 101,
+      category: AnnoyanceCategoryResponse(
+        code: category.code,
+        name: category.name,
+      ),
+      recordMethod: (_recordMethod ?? AnnoyanceRecordMethod.text).apiValue,
+      content: _content,
+      score: _score ?? 3,
+      isShared: _isShared ?? false,
+      isSolved: false,
+      occurredAt: '2026-07-13T10:00:00+08:00',
+      media: const [],
+    );
+  }
+
   @override
   Future<AnnoyanceResponse> create({
     required AnnoyanceCategory category,
@@ -394,6 +507,27 @@ class _FakeAnnoyanceRepository extends AnnoyanceRepository {
       isSolved: false,
       occurredAt: '2026-07-13T10:00:00+08:00',
       media: const [],
+    );
+  }
+
+  EntryDraftMediaSnapshot? _mediaSnapshot(
+    AnnoyanceMediaFile? media,
+    String role,
+    int id,
+  ) {
+    if (media == null) {
+      return null;
+    }
+    return EntryDraftMediaSnapshot(
+      id: id,
+      role: role,
+      type: media.method.apiValue.toLowerCase(),
+      fileName: media.name,
+      contentType: media.mimeType,
+      sizeBytes: media.sizeBytes,
+      durationSeconds:
+          media.duration == null ? null : media.duration!.inMilliseconds / 1000,
+      downloadUrl: '/api/annoyances/draft/media/$id',
     );
   }
 }

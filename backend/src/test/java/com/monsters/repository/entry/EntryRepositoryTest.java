@@ -15,6 +15,19 @@ import org.springframework.data.jpa.repository.Query;
 class EntryRepositoryTest {
 
     @Test
+    void shouldExposeTypeScopedSoftDeleteLookupForMediaAuthorization()
+            throws NoSuchMethodException {
+        Method method = EntryRepository.class.getMethod(
+                "findByIdAndEntryTypeAndDeletedFalse",
+                Long.class,
+                EntryType.class
+        );
+
+        assertThat(method.getReturnType()).isEqualTo(Optional.class);
+        assertThat(method.getGenericReturnType().getTypeName()).contains(Entry.class.getName());
+    }
+
+    @Test
     void shouldExposeOwnerScopedSoftDeleteLookup() throws NoSuchMethodException {
         assertThat(JpaRepository.class).isAssignableFrom(EntryRepository.class);
 
@@ -30,9 +43,9 @@ class EntryRepositoryTest {
     }
 
     @Test
-    void shouldExposeOwnerScopedFilteredAnnoyancePageQuery() throws NoSuchMethodException {
+    void shouldExposeOwnerScopedFilteredEntryPageQuery() throws NoSuchMethodException {
         Method method = EntryRepository.class.getMethod(
-                "findAnnoyancePage",
+                "findEntryPage",
                 Long.class,
                 EntryType.class,
                 Boolean.class,
