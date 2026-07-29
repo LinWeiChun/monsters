@@ -7,6 +7,8 @@ plugins {
 group = 'com.monsters'
 version = '0.0.1-SNAPSHOT'
 
+ext['testcontainers.version'] = '1.21.4'
+
 java {
     sourceCompatibility = JavaVersion.VERSION_18
     targetCompatibility = JavaVersion.VERSION_18
@@ -15,6 +17,17 @@ java {
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
+    }
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+sourceSets {
+    integrationTest {
+        java.srcDir file('src/integrationTest/java')
+        resources.srcDir file('src/integrationTest/resources')
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
     }
 }
 
@@ -28,9 +41,25 @@ dependencies {
     runtimeOnly 'com.mysql:mysql-connector-j'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    integrationTestImplementation platform('org.testcontainers:testcontainers-bom:1.21.4')
+    integrationTestImplementation 'org.testcontainers:junit-jupiter'
+    integrationTestImplementation 'org.testcontainers:mysql'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+tasks.register('integrationTest', Test) {
+    description = 'Runs HTTP integration tests against MySQL 8.4 with the real security filter chain.'
+    group = 'verification'
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    shouldRunAfter tasks.named('test')
+    useJUnitPlatform()
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('integrationTest')
 }

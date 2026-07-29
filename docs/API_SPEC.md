@@ -152,8 +152,11 @@ frontend/lib/core/network/ApiErrorType
   "success": false,
   "code": "VALIDATION_ERROR",
   "message": "錯誤訊息",
-  "requestId": "opaque-request-id",
-  "data": null
+  "data": null,
+  "fieldErrors": {
+    "email": "Email 格式錯誤"
+  },
+  "requestId": "opaque-request-id"
 }
 ```
 
@@ -168,10 +171,11 @@ Controller 回傳資料時必須使用 `ApiResponse<T>` 包裝；v1 欄位為：
 | 欄位 | 型別 | 說明 |
 |---|---|---|
 | success | boolean | 是否成功 |
-| code | string / null | 失敗時的穩定錯誤代碼；成功可為 null |
+| code | string | 穩定機器代碼；成功預設為 `SUCCESS` |
 | message | string | 成功或錯誤訊息 |
-| requestId | string / null | 失敗追蹤用 opaque ID；不得含個資或內部資源 ID |
 | data | object / array / null | 回傳資料，失敗時為 null |
+| fieldErrors | object | 欄位驗證錯誤；沒有錯誤時為空 object，不得包含被拒絕的原始值 |
+| requestId | string | 每次回應的 opaque ID；不得含個資或內部資源 ID |
 
 成功預設訊息：
 
@@ -192,8 +196,9 @@ Exception 回傳格式固定使用 `ApiResponse<Void>`：
   "success": false,
   "code": "UNEXPECTED_ERROR",
   "message": "錯誤訊息",
-  "requestId": "opaque-request-id",
-  "data": null
+  "data": null,
+  "fieldErrors": {},
+  "requestId": "opaque-request-id"
 }
 ```
 
@@ -257,12 +262,12 @@ com.monsters.security.common.SecurityConfig
 | /api/v1/** | ALL | 需驗證 |
 | 其他路徑 | ALL | 拒絕 |
 
-Security 錯誤回應固定使用 `ApiResponse<Void>`：
+Security 錯誤回應固定使用 `ApiResponse<Void>`，並包含穩定 `code`、空 `fieldErrors` 與 opaque `requestId`：
 
-| 狀態 | message |
-|---:|---|
-| 401 | 尚未登入或 Token 無效 |
-| 403 | 權限不足 |
+| 狀態 | code | message |
+|---:|---|---|
+| 401 | `AUTHENTICATION_REQUIRED` | 尚未登入或 Token 無效 |
+| 403 | `PERMISSION_DENIED` | 權限不足 |
 
 JWT 基礎設定：
 

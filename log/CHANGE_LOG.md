@@ -8,6 +8,86 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-29 10:10
+
+Task
+Registration Login 01 Auth／Member 真實驗收骨架（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 建立獨立 `integrationTest` 測試層，以 Testcontainers 1.21.4 啟動 MySQL 8.4，不使用 H2 作主要驗收。
+- 建立 Auth／Member 真實 HTTP 整合測試，啟用正式 Security Filter，驗證未授權 Member 請求、Auth 資料庫查詢及 Google 登入接縫。
+- 將應用程式時間改由 `Clock` Bean 注入；建立正式 Email Delivery／Async Job port，整合測試提供固定時間及 Email、Google、非同步工作的替代 Bean。
+- 擴充共用 API envelope，加入穩定 `code`、安全 `fieldErrors` 與 UUID 格式 opaque `requestId`。
+- 預期錯誤 Log 不再輸出 Exception 內容或被拒絕的欄位值，只記錄狀態、類型或欄位名稱。
+- 建立 Backend unit、Backend MySQL integration、Flutter 與 OpenAPI contract 四層 CI。
+- Task 01 依 `TODO → IN PROGRESS → REVIEW` 更新，未修改 `docs/TASKS.md`。
+
+### Added
+
+- `.github/workflows/registration-login-ci.yml`
+- `backend/src/integrationTest/java/com/monsters/auth/AuthMemberHttpIntegrationTest.java`
+- `backend/src/integrationTest/java/com/monsters/support/AuthMemberControlledDependencies.java`
+- `backend/src/main/java/com/monsters/config/common/TimeConfig.java`
+- `backend/src/main/java/com/monsters/job/AsyncJob.java`
+- `backend/src/main/java/com/monsters/job/AsyncJobDispatcher.java`
+- `backend/src/main/java/com/monsters/notification/email/EmailDeliveryPort.java`
+- `backend/src/main/java/com/monsters/notification/email/EmailDeliveryRequest.java`
+- `backend/src/test/java/com/monsters/contract/RegistrationLoginOpenApiContractTest.java`
+- `docs/openapi/registration-login.yaml`
+
+### Modified
+
+- `backend/build.gradle`
+- `backend/src/main/java/com/monsters/dto/common/ApiResponse.java`
+- `backend/src/main/java/com/monsters/exception/common/GlobalExceptionHandler.java`
+- `backend/src/main/java/com/monsters/security/common/SecurityExceptionHandler.java`
+- `backend/src/main/java/com/monsters/service/auth/AuthService.java`
+- `backend/src/test/java/com/monsters/dto/common/ApiResponseTest.java`
+- `docs/API_SPEC.md`
+- `docs/REGISTRATION_LOGIN_TASKS.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- Backend `test`：通過。
+- Backend `compileIntegrationTestJava`：通過。
+- Backend `integrationTest`：以 Docker Desktop 29.6.2 與 MySQL 8.4 通過。
+- Flutter `test --no-pub`：166 項通過。
+- OpenAPI YAML parse、envelope schema contract 與 Git whitespace 檢查：通過。
+
+### system_data Reference
+
+- 參考舊系統註冊、登入、Google、忘記密碼與會員資料流程，只作 Migration baseline。
+- 未沿用舊 `account` 主鍵、空密碼 Google 登入、server PIN、舊暱稱／頭貼契約或敏感設定。
+- 未修改 `system_data/`。
+
+### API
+
+- 共用 `ApiResponse<T>` 新增 `code`、`fieldErrors` 與 `requestId`。
+- Security 401 使用 `AUTHENTICATION_REQUIRED`，403 使用 `PERMISSION_DENIED`。
+- 既有 Endpoint path 與 Request DTO 未修改。
+
+### Database
+
+- 正式 Schema 與 Migration 無異動。
+- 整合測試由 Hibernate 在一次性 MySQL 8.4 container 建立並清除測試 Schema。
+
+### Log Retention
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與既有 `CHANGE_HISTORY.xlsx`。
+- 保存期限截止日為 2026-06-29，未發現早於截止日的紀錄，本次未刪除 Log。
+
+### Pending
+
+- Email／Async port 本 Task 只建立可替換邊界；正式 Outbox、Worker、重試與供應商 Adapter 由後續對應 Task 實作。
+- 等待 Task PR review 與合併至 `feature/phase4.5`；合併前不標記 DONE。
+
+---
+
 ## 2026-07-29 09:26
 
 Task

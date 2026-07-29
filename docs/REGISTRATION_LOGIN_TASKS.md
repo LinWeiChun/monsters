@@ -50,14 +50,14 @@
 
 **Blocked by:** None — can start immediately.
 
-**Status:** ready-for-agent
+**Status:** REVIEW
 
-- [ ] 測試環境使用與正式環境相同 major version 的 MySQL，不以 H2 作主要驗收。
-- [ ] Auth與Member HTTP整合測試啟用真實Security Filter。
-- [ ] 測試可控制時間、Email寄送、Google身分驗證及非同步工作。
-- [ ] 共用API envelope可驗證穩定`code`、安全`fieldErrors`與opaque `requestId`。
-- [ ] 測試資料使用synthetic data，不記錄密碼、Token、完整Email、生日或Guardian資料。
-- [ ] Backend測試、Flutter既有測試及OpenAPI檢查可在CI中分層執行。
+- [x] 測試環境使用與正式環境相同 major version 的 MySQL，不以 H2 作主要驗收。
+- [x] Auth與Member HTTP整合測試啟用真實Security Filter。
+- [x] 測試可控制時間、Email寄送、Google身分驗證及非同步工作。
+- [x] 共用API envelope可驗證穩定`code`、安全`fieldErrors`與opaque `requestId`。
+- [x] 測試資料使用synthetic data，不記錄密碼、Token、完整Email、生日或Guardian資料。
+- [x] Backend測試、Flutter既有測試及OpenAPI檢查可在CI中分層執行。
 
 ---
 

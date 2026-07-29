@@ -31,7 +31,7 @@ public class SecurityExceptionHandler implements AuthenticationEntryPoint, Acces
             HttpServletResponse response,
             AuthenticationException authException
     ) throws IOException {
-        writeErrorResponse(response, HttpStatus.UNAUTHORIZED, UNAUTHORIZED_MESSAGE);
+        writeErrorResponse(response, HttpStatus.UNAUTHORIZED, "AUTHENTICATION_REQUIRED", UNAUTHORIZED_MESSAGE);
     }
 
     @Override
@@ -40,17 +40,18 @@ public class SecurityExceptionHandler implements AuthenticationEntryPoint, Acces
             HttpServletResponse response,
             AccessDeniedException accessDeniedException
     ) throws IOException {
-        writeErrorResponse(response, HttpStatus.FORBIDDEN, FORBIDDEN_MESSAGE);
+        writeErrorResponse(response, HttpStatus.FORBIDDEN, "PERMISSION_DENIED", FORBIDDEN_MESSAGE);
     }
 
     private void writeErrorResponse(
             HttpServletResponse response,
             HttpStatus status,
+            String code,
             String message
     ) throws IOException {
         response.setStatus(status.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
-        objectMapper.writeValue(response.getWriter(), ApiResponse.failure(message));
+        objectMapper.writeValue(response.getWriter(), ApiResponse.failure(code, message));
     }
 }

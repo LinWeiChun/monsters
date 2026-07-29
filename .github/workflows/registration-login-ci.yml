@@ -1,0 +1,73 @@
+name: Registration and login checks
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "docs/openapi/**"
+      - "docs/API_SPEC.md"
+      - "docs/REGISTRATION_LOGIN_TASKS.md"
+      - ".github/workflows/registration-login-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend-unit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "18"
+          cache: gradle
+      - run: ./gradlew test
+
+  backend-auth-member-integration:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "18"
+          cache: gradle
+      - run: ./gradlew integrationTest
+
+  flutter:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.29.2"
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter test
+
+  openapi-contract:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "18"
+          cache: gradle
+      - run: ./gradlew test --tests com.monsters.contract.RegistrationLoginOpenApiContractTest
