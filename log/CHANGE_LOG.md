@@ -8,6 +8,61 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-29 09:26
+
+Task
+DOC-016 Registration Login Task 拆解（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 依使用者指定的 `to-tickets` 流程，將註冊、登入與會員管理規格拆為 18 張 tracer-bullet Task。
+- 每張 Task 都包含使用者可驗證的完整交付行為、明確阻擋關係、`ready-for-agent` 狀態及驗收條件。
+- 依使用者要求，先完成會員本人註冊、登入、Session、資料匯出與刪除，再於最後階段處理特權角色、Admin管理與Legal Hold。
+- 建立獨立Task文件，未修改或加入既有`docs/TASKS.md`。
+- 檢查Log保存期限；最早紀錄為2026-06-29，未超過一個月，因此未刪除Log。
+
+### Added
+
+- `docs/REGISTRATION_LOGIN_TASKS.md`
+
+### Modified
+
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- 文件工作，不執行程式Compile／Test。
+- 驗證18張Task編號連續，且每張都有`Blocked by`、`Status`與Acceptance Criteria。
+- 驗證依賴圖無循環、frontier只有Task 01、Markdown code fence與Git whitespace正常。
+- 驗證`docs/TASKS.md`沒有異動。
+
+### system_data Reference
+
+- 本次沿用已核准規格中的現況差距，不另外修改或複製`system_data/`內容。
+- 舊`account`、JWT Refresh、SharedPreferences Credential、server PIN與public avatar只作Migration Task輸入。
+
+### API
+
+- Task描述未來Auth、Member、Admin及Data Rights API交付與驗收，未修改任何Endpoint。
+
+### Database
+
+- Task描述未來MySQL、Flyway、Session、State、Export與Deletion Migration，未修改Schema。
+
+### UI
+
+- Task描述未來Flutter Web／Android／iOS流程與測試，未修改Flutter或Penpot。
+
+### Pending
+
+- DOC-016文件Review與Git／PR流程。
+- 目前可立即開始的frontier只有Task 01。
+
+---
+
 ## 2026-07-28 17:36
 
 Task

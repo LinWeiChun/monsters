@@ -1,4 +1,7 @@
 日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
+2026-07-29,09:26,DOC-016,Documentation,docs/REGISTRATION_LOGIN_TASKS.md,新增,將registration_login規格拆為18張垂直Task與依賴圖,Codex,是,是,是,是,管理者相關Task安排於最後階段
+2026-07-29,09:26,DOC-016,Documentation,log/CHANGE_LOG.md,修改,新增DOC-016工作紀錄與驗證結果,Codex,否,否,否,否,docs TASKS.md未修改
+2026-07-29,09:26,DOC-016,Documentation,log/CHANGE_HISTORY.csv,修改,新增DOC-016文件異動歷程,Codex,否,否,否,否,已檢查一個月保存期限無過期Log
 2026-07-28,17:36,DOC-015,Documentation,docs/REGISTRATION_LOGIN_MEMBER_MANAGEMENT_SPEC.md,新增,建立註冊登入會員管理完整需求驗收測試差距與實作順序,Codex,是,是,是,是,文件 only 不執行程式或 Migration
 2026-07-28,17:36,DOC-015,Documentation,CONTEXT.md and docs/adr,修改,公開暱稱社群取代跨貼文匿名身分並新增 ADR-0009,Codex,是,是,是,是,仍維持封閉成人資格與治理 Gate
 2026-07-28,17:36,DOC-015,Documentation,AGENTS.md README.md and formal specs,修改,同步公開暱稱註冊登入會員管理與資料權利契約,Codex,是,是,是,是,AGENTS version v3.5
