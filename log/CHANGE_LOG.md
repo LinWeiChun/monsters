@@ -79,7 +79,7 @@ Codex
 
 ### Pending
 
-- Task 03 維持 REVIEW，待本地提交後由使用者決定是否推送並建立 PR，再由 GitHub CI 與 PR review 驗證。
+- Task 03 維持 REVIEW；本地提交已完成，待使用者決定是否推送並建立 PR，再由 GitHub CI 與 PR review 驗證。
 - 未取得各環境 Flutter Web 公開 URL 與 SMTP provider 設定，因此寄信 Worker 預設維持停用；不影響程式碼與契約驗收。
 
 ---
