@@ -3,6 +3,7 @@ package com.monsters.exception.common;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.monsters.dto.common.ApiResponse;
+import com.monsters.exception.member.MemberStateConflictException;
 import jakarta.validation.ConstraintViolationException;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,16 @@ class GlobalExceptionHandlerTest {
                 handler.handleBusinessException(new ConflictException("Resource conflict"));
 
         assertErrorResponse(response, HttpStatus.CONFLICT, "Resource conflict");
+    }
+
+    @Test
+    void memberStateConflictShouldReturnItsPublicErrorCode() {
+        ResponseEntity<ApiResponse<Void>> response =
+                handler.handleBusinessException(new MemberStateConflictException("State conflict"));
+
+        assertErrorResponse(response, HttpStatus.CONFLICT, "State conflict");
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().code()).isEqualTo("MEMBER_STATE_CONFLICT");
     }
 
     @Test

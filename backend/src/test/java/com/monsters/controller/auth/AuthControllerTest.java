@@ -93,7 +93,7 @@ class AuthControllerTest {
     @Test
     void loginShouldReturnOkResponse() throws Exception {
         when(authService.login(any(LoginRequest.class)))
-                .thenReturn(new LoginResponse(
+                .thenReturn(LoginResponse.authenticated(
                         "access-token",
                         "refresh-token",
                         "Bearer",
@@ -123,7 +123,7 @@ class AuthControllerTest {
     @Test
     void loginShouldAcceptAccountIdentifier() throws Exception {
         when(authService.login(any(LoginRequest.class)))
-                .thenReturn(new LoginResponse(
+                .thenReturn(LoginResponse.authenticated(
                         "access-token",
                         "refresh-token",
                         "Bearer",
@@ -157,7 +157,7 @@ class AuthControllerTest {
     @Test
     void googleLoginShouldReturnOkResponse() throws Exception {
         when(authService.googleLogin(any(GoogleLoginRequest.class)))
-                .thenReturn(new LoginResponse(
+                .thenReturn(LoginResponse.authenticated(
                         "access-token",
                         "refresh-token",
                         "Bearer",
@@ -192,7 +192,7 @@ class AuthControllerTest {
     @Test
     void refreshShouldRotateTokenAndReturnOkResponse() throws Exception {
         when(authService.refresh(any(RefreshTokenRequest.class)))
-                .thenReturn(new LoginResponse(
+                .thenReturn(LoginResponse.authenticated(
                         "new-access-token",
                         "new-refresh-token",
                         "Bearer",

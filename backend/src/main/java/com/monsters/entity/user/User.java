@@ -3,13 +3,20 @@ package com.monsters.entity.user;
 import com.monsters.entity.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
 public class User extends BaseEntity {
+
+    @Column(name = "public_id", nullable = false, length = 36, unique = true, updatable = false)
+    private String publicId;
 
     @Column(name = "account", length = 50, unique = true)
     private String account;
@@ -32,14 +39,24 @@ public class User extends BaseEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "member_state", nullable = false, length = 40)
+    private MemberState memberState;
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private long version;
+
     protected User() {
     }
 
     public User(String account, String email, String userName) {
+        this.publicId = UUID.randomUUID().toString();
         this.account = account;
         this.email = email;
         this.userName = userName;
         this.deleted = false;
+        this.memberState = MemberState.ACTIVE;
     }
 
     public void updateProfile(String userName, LocalDate birthday) {
@@ -51,8 +68,19 @@ public class User extends BaseEntity {
         this.avatarUrl = avatarUrl;
     }
 
+    public void completeEligibility() {
+        if (memberState != MemberState.PENDING_ELIGIBILITY) {
+            throw new IllegalStateException("Member is not pending eligibility");
+        }
+        memberState = MemberState.ACTIVE;
+    }
+
     public String getAccount() {
         return account;
+    }
+
+    public String getPublicId() {
+        return publicId;
     }
 
     public String getEmail() {
@@ -77,5 +105,13 @@ public class User extends BaseEntity {
 
     public LocalDateTime getDeletedAt() {
         return deletedAt;
+    }
+
+    public MemberState getMemberState() {
+        return memberState;
+    }
+
+    public long getVersion() {
+        return version;
     }
 }

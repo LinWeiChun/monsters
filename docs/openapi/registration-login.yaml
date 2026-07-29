@@ -2,7 +2,38 @@ openapi: 3.1.0
 info:
   title: Monsters Registration and Login Contract
   version: 0.1.0
-paths: {}
+paths:
+  /api/auth/login:
+    post:
+      summary: Authenticate a member or continue an incomplete member flow
+      operationId: loginMember
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Authenticated session or purpose-limited continuation
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/AuthenticatedLoginEnvelope"
+                  - $ref: "#/components/schemas/ContinuationLoginEnvelope"
+        "400":
+          description: Request validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
 components:
   schemas:
     ApiEnvelope:
@@ -28,3 +59,85 @@ components:
         requestId:
           type: string
           format: uuid
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          description: Current migration endpoint accepts Email or legacy account.
+        password:
+          type: string
+          format: password
+          writeOnly: true
+    AuthenticatedLoginData:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+        - tokenType
+        - expiresIn
+        - user
+      properties:
+        accessToken:
+          type: string
+          readOnly: true
+        refreshToken:
+          type: string
+          readOnly: true
+        tokenType:
+          type: string
+          const: Bearer
+        expiresIn:
+          type: integer
+          format: int64
+          minimum: 1
+        user:
+          type: object
+          additionalProperties: true
+    ContinuationNextAction:
+      type: string
+      enum:
+        - VERIFY_EMAIL
+        - COMPLETE_ELIGIBILITY
+        - REACTIVATE_ACCOUNT
+        - REVIEW_SUSPENSION
+        - REVIEW_DELETION
+    ContinuationLoginData:
+      type: object
+      additionalProperties: false
+      required:
+        - nextAction
+        - continuationCredential
+        - expiresIn
+      properties:
+        nextAction:
+          $ref: "#/components/schemas/ContinuationNextAction"
+        continuationCredential:
+          type: string
+          readOnly: true
+          description: Ten-minute opaque purpose-limited credential returned once.
+        expiresIn:
+          type: integer
+          format: int64
+          const: 600
+    AuthenticatedLoginEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            code:
+              const: AUTHENTICATED
+            data:
+              $ref: "#/components/schemas/AuthenticatedLoginData"
+    ContinuationLoginEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            code:
+              const: AUTH_CONTINUATION_REQUIRED
+            data:
+              $ref: "#/components/schemas/ContinuationLoginData"

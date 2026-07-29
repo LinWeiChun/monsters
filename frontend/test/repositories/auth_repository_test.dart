@@ -114,6 +114,52 @@ void main() {
     );
     expect(authStates, isEmpty);
   });
+
+  test(
+    'continuation response does not create an authenticated session',
+    () async {
+      const continuationCredential = 'synthetic-continuation-credential';
+      const store = AuthSessionStore();
+      final dio = Dio();
+      dio.httpClientAdapter = _CallbackAdapter(
+        (_) => _jsonResponse({
+          'success': true,
+          'code': 'AUTH_CONTINUATION_REQUIRED',
+          'message': 'Additional step required',
+          'data': {
+            'nextAction': 'COMPLETE_ELIGIBILITY',
+            'continuationCredential': continuationCredential,
+            'expiresIn': 600,
+          },
+        }),
+      );
+      final client = ApiClient(config: _config, dio: dio);
+      final authStates = <bool>[];
+      final repository = AuthRepository(
+        client,
+        sessionStore: store,
+        onAuthenticationChanged: authStates.add,
+      );
+
+      final result = await repository.login(
+        email: 'pending.member@example.test',
+        password: 'synthetic-password',
+      );
+
+      expect(result.requiresContinuation, isTrue);
+      expect(result.nextAction, 'COMPLETE_ELIGIBILITY');
+      expect(client.dio.options.headers.containsKey('Authorization'), isFalse);
+      expect(await store.restoreValidSession(), isNull);
+      final preferences = await SharedPreferences.getInstance();
+      for (final key in preferences.getKeys()) {
+        expect(
+          preferences.get(key).toString(),
+          isNot(contains(continuationCredential)),
+        );
+      }
+      expect(authStates, [false]);
+    },
+  );
 }
 
 const _config = AppConfig(

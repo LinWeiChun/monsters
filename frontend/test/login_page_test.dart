@@ -89,6 +89,30 @@ void main() {
     expect(find.text('首頁'), findsWidgets);
   });
 
+  testWidgets(
+    'continuation login stays on login page and shows the required next step',
+    (tester) async {
+      await _setMobileSurface(tester);
+      final repository = _FakeAuthRepository(
+        loginResult: _continuationLoginResult,
+      );
+      await tester.pumpWidget(_loginApp(repository));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const Key('loginEmailField')),
+        'pending.member@example.test',
+      );
+      await tester.enterText(find.byKey(const Key('loginPasswordField')), 'p');
+      await tester.tap(find.byKey(const Key('loginSubmitButton')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
+      expect(find.text('首頁'), findsNothing);
+      expect(find.text('請完成會員資格資料後再繼續'), findsOneWidget);
+    },
+  );
+
   testWidgets('submits Google ID token and navigates to home on success', (
     tester,
   ) async {
@@ -289,11 +313,13 @@ class _FakeAuthRepository extends AuthRepository {
     this.exception,
     this.googleException,
     this.restoredSession,
+    this.loginResult = _loginResult,
   }) : super(_dummyClient());
 
   final ApiException? exception;
   final ApiException? googleException;
   final LoginResult? restoredSession;
+  final LoginResult loginResult;
   String? email;
   String? password;
   String? googleIdToken;
@@ -310,7 +336,7 @@ class _FakeAuthRepository extends AuthRepository {
     if (exception != null) {
       throw exception;
     }
-    return _loginResult;
+    return loginResult;
   }
 
   @override
@@ -320,7 +346,7 @@ class _FakeAuthRepository extends AuthRepository {
     if (exception != null) {
       throw exception;
     }
-    return _loginResult;
+    return loginResult;
   }
 
   @override
@@ -380,6 +406,12 @@ const _loginResult = LoginResult(
     userName: 'Wei',
     avatarUrl: null,
   ),
+);
+
+const _continuationLoginResult = LoginResult(
+  expiresIn: 600,
+  nextAction: 'COMPLETE_ELIGIBILITY',
+  continuationCredential: 'synthetic-continuation-credential',
 );
 
 const _testConfig = AppConfig(

@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
                 exception.getStatus().value(), exception.getClass().getSimpleName());
         return buildErrorResponse(
                 exception.getStatus(),
-                errorCode(exception.getStatus()),
+                exception.getCode() == null ? errorCode(exception.getStatus()) : exception.getCode(),
                 exception.getMessage(),
                 Map.of()
         );

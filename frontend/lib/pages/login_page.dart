@@ -45,7 +45,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     ref.listen(authControllerProvider, (previous, next) {
       final previousResult = previous?.loginResult;
       final nextResult = next.loginResult;
-      if (nextResult != null && previousResult != nextResult) {
+      if (nextResult?.isAuthenticated == true && previousResult != nextResult) {
         context.goNamed(AppRoute.home);
       }
     });
@@ -373,6 +373,14 @@ class _LoginForm extends StatelessWidget {
               authState.errorMessage!,
               key: const Key('loginErrorMessage'),
               style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ],
+          if (authState.continuationMessage != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              authState.continuationMessage!,
+              key: const Key('loginContinuationMessage'),
+              style: TextStyle(color: Theme.of(context).colorScheme.primary),
             ),
           ],
           SizedBox(height: isMobile ? AppSpacing.md : AppSpacing.lg),

@@ -15,7 +15,7 @@ public class Mood extends BaseEntity {
     @Column(name = "label", nullable = false, length = 80)
     private String label;
 
-    @Column(name = "score", nullable = false, unique = true)
+    @Column(name = "score", nullable = false, unique = true, columnDefinition = "TINYINT")
     private int score;
 
     @Column(name = "image_url", length = 500)

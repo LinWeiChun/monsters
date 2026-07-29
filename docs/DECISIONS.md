@@ -34,6 +34,10 @@ Phase 4.5 已核准決策的可交付規格與測試接縫整理於 [`PHASE4_5_F
 |---|---|
 | `account` | 移除使用者可見 account；Email／密碼以 verified Email 登入 |
 | Email 驗證 | 驗證前不得建立私人內容；七天未驗證空帳號清除 |
+| Member State | 七態狀態機：Email 待驗證、資格待完成、啟用、本人停用、管理停權、刪除等待、已刪除；Community Eligibility／Restriction 分離 |
+| State Priority | `DELETED > DELETION_PENDING > ADMIN_SUSPENDED > USER_DEACTIVATED > pending > ACTIVE`；`DELETED` terminal，恢復使用專用 Command |
+| State Command | 不提供泛用 `targetState` API；Email 驗證、資格、停用、停權與刪除由分離 Command 經內部狀態機處理 |
+| Continuation Credential | 32-byte 隨機不透明值、10 分鐘、只回傳一次、Server 只存 SHA-256 hash；狀態或 version 改變即撤銷，不能存取一般 API |
 | Google Linking | 相同 Email 不自動合併；需先驗證既有登入方式並明確連結 |
 | 忘記密碼 | 正式 Email reset link，15 分鐘單次 hash Token、統一對外回應、成功後撤銷全部工作階段 |
 | Email 變更 | reauth、新 Email 驗證、新舊 Email 通知、撤銷其他工作階段 |
