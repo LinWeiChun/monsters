@@ -16,11 +16,52 @@ spring:
     multipart:
       max-file-size: ${MULTIPART_MAX_FILE_SIZE:50MB}
       max-request-size: ${MULTIPART_MAX_REQUEST_SIZE:60MB}
+  mail:
+    host: ${SMTP_HOST:}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SMTP_AUTH:true}
+          starttls:
+            enable: ${SMTP_STARTTLS_ENABLED:true}
 
 server:
   port: 8080
+  forward-headers-strategy: framework
 
 app:
+  registration:
+    documents:
+      terms:
+        version: ${REGISTRATION_TERMS_VERSION:}
+        url: ${REGISTRATION_TERMS_URL:}
+      privacy:
+        version: ${REGISTRATION_PRIVACY_VERSION:}
+        url: ${REGISTRATION_PRIVACY_URL:}
+    email-verification:
+      public-url: ${EMAIL_VERIFICATION_PUBLIC_URL:}
+      token-ttl-hours: ${EMAIL_VERIFICATION_TOKEN_TTL_HOURS:24}
+      max-delivery-attempts: ${EMAIL_VERIFICATION_MAX_DELIVERY_ATTEMPTS:5}
+      worker-enabled: ${EMAIL_VERIFICATION_WORKER_ENABLED:false}
+      worker-delay-ms: ${EMAIL_VERIFICATION_WORKER_DELAY_MS:5000}
+      unverified-retention-days: ${UNVERIFIED_MEMBER_RETENTION_DAYS:7}
+      cleanup-batch-size: ${UNVERIFIED_MEMBER_CLEANUP_BATCH_SIZE:100}
+      cleanup-enabled: ${UNVERIFIED_MEMBER_CLEANUP_ENABLED:false}
+      cleanup-cron: "${UNVERIFIED_MEMBER_CLEANUP_CRON:0 45 3 * * *}"
+    rate-limit:
+      hash-key: ${REGISTRATION_RATE_LIMIT_HASH_KEY:}
+      email-cooldown-seconds: ${REGISTRATION_EMAIL_COOLDOWN_SECONDS:60}
+      email-max-attempts: ${REGISTRATION_EMAIL_MAX_ATTEMPTS:5}
+      ip-max-attempts: ${REGISTRATION_IP_MAX_ATTEMPTS:20}
+      window-minutes: ${REGISTRATION_RATE_LIMIT_WINDOW_MINUTES:15}
+    email:
+      smtp:
+        enabled: ${REGISTRATION_SMTP_ENABLED:false}
+        from: ${REGISTRATION_SMTP_FROM:}
+        subject: ${REGISTRATION_SMTP_SUBJECT:Verify your Monsters email}
   entry-draft:
     retention-days: ${ENTRY_DRAFT_RETENTION_DAYS:30}
     cleanup-cron: "${ENTRY_DRAFT_CLEANUP_CRON:0 30 3 * * *}"

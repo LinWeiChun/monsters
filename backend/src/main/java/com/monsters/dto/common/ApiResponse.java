@@ -43,6 +43,22 @@ public record ApiResponse<T>(
         return new ApiResponse<>(false, code, message, null, Map.copyOf(fieldErrors), newRequestId());
     }
 
+    public static <T> ApiResponse<T> failure(
+            String code,
+            String message,
+            Map<String, String> fieldErrors,
+            T data
+    ) {
+        return new ApiResponse<>(
+                false,
+                code,
+                message,
+                data,
+                Map.copyOf(fieldErrors),
+                newRequestId()
+        );
+    }
+
     private static String newRequestId() {
         return UUID.randomUUID().toString();
     }

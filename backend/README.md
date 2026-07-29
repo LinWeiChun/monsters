@@ -74,6 +74,10 @@ Docker Compose 會使用 `mysql` 作為 MySQL service hostname。
 - `POST /api/auth/refresh`
 - `POST /api/auth/forgot-password`
 - `POST /api/auth/reset-password`
+- `GET /api/v1/auth/registration-policy`
+- `POST /api/v1/auth/register`
+- `POST /api/v1/auth/email-verification-requests`
+- `POST /api/v1/auth/email-verifications`
 
 上述 API 允許匿名，其餘 `/api/**` 需驗證。
 
@@ -95,6 +99,28 @@ Google 登入環境變數：
 | `GOOGLE_CLIENT_IDS` | 空字串，啟用 Google 登入前必須提供 |
 
 `GOOGLE_CLIENT_IDS` 可用逗號設定多組 Web / Android / iOS Client ID。後端會以此檢查 Google ID Token 的 `aud`。
+
+## Registration / Email 驗證設定
+
+Task 03 不提供程式內正式預設值；Railway `develop` 與 `main` service 必須分別設定：
+
+| 環境變數 | 說明 |
+|---|---|
+| `REGISTRATION_TERMS_VERSION` | 目前服務條款版本 |
+| `REGISTRATION_TERMS_URL` | 目前服務條款 HTTPS URL |
+| `REGISTRATION_PRIVACY_VERSION` | 目前隱私權政策版本 |
+| `REGISTRATION_PRIVACY_URL` | 目前隱私權政策 HTTPS URL |
+| `REGISTRATION_RATE_LIMIT_HASH_KEY` | Email／IP 限流 HMAC secret |
+| `EMAIL_VERIFICATION_PUBLIC_URL` | 對應環境 Flutter Web `/verify-email` 完整 HTTPS URL |
+| `SMTP_HOST`、`SMTP_PORT` | SMTP 連線主機與 port |
+| `SMTP_USERNAME`、`SMTP_PASSWORD` | SMTP secret |
+| `SMTP_AUTH`、`SMTP_STARTTLS_ENABLED` | SMTP 驗證與 STARTTLS 開關 |
+| `REGISTRATION_SMTP_FROM` | 已驗證寄件者 |
+| `REGISTRATION_SMTP_ENABLED` | 完成上述設定後才設為 `true` |
+| `EMAIL_VERIFICATION_WORKER_ENABLED` | SMTP 可用後設為 `true` |
+| `UNVERIFIED_MEMBER_CLEANUP_ENABLED` | 確認 V3 migration 後設為 `true` |
+
+SMTP 寄送最多重試五次；七日空會員清理預設每日 03:45 執行。正式環境不得把 Email、IP、密碼或 Token 寫入設定、Log 或 Outbox payload。
 
 ## 專案規範
 

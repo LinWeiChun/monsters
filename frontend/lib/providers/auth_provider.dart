@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/network/api_exception.dart';
 import '../models/login_result.dart';
-import '../models/register_result.dart';
+import '../models/registration_policy.dart';
 import '../repositories/auth_repository.dart';
 import '../services/google_sign_in_service.dart';
 import 'api_client_provider.dart';
@@ -42,13 +42,19 @@ class AuthState {
     this.isLoading = false,
     this.errorMessage,
     this.loginResult,
-    this.registerResult,
+    this.registrationPolicy,
+    this.registrationAccepted = false,
+    this.verificationResult,
+    this.retryAfter,
   });
 
   final bool isLoading;
   final String? errorMessage;
   final LoginResult? loginResult;
-  final RegisterResult? registerResult;
+  final RegistrationPolicy? registrationPolicy;
+  final bool registrationAccepted;
+  final LoginResult? verificationResult;
+  final int? retryAfter;
 
   String? get continuationMessage {
     if (loginResult?.requiresContinuation != true) {
@@ -70,14 +76,20 @@ class AuthState {
     String? errorMessage,
     bool clearErrorMessage = false,
     LoginResult? loginResult,
-    RegisterResult? registerResult,
+    RegistrationPolicy? registrationPolicy,
+    bool? registrationAccepted,
+    LoginResult? verificationResult,
+    int? retryAfter,
   }) {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
       errorMessage:
           clearErrorMessage ? null : errorMessage ?? this.errorMessage,
       loginResult: loginResult ?? this.loginResult,
-      registerResult: registerResult ?? this.registerResult,
+      registrationPolicy: registrationPolicy ?? this.registrationPolicy,
+      registrationAccepted: registrationAccepted ?? this.registrationAccepted,
+      verificationResult: verificationResult ?? this.verificationResult,
+      retryAfter: retryAfter ?? this.retryAfter,
     );
   }
 }
@@ -182,30 +194,95 @@ class AuthController extends StateNotifier<AuthState> {
     }
   }
 
+  Future<bool> loadRegistrationPolicy() async {
+    state = state.copyWith(isLoading: true, clearErrorMessage: true);
+    try {
+      final policy = await _authRepository.registrationPolicy();
+      state = AuthState(registrationPolicy: policy);
+      return true;
+    } on ApiException catch (error) {
+      state = AuthState(errorMessage: _registrationMessage(error));
+      return false;
+    } on Object {
+      state = const AuthState(errorMessage: '目前無法載入註冊條款，請稍後再試');
+      return false;
+    }
+  }
+
   Future<bool> register({
-    required String account,
     required String email,
     required String password,
-    required String userName,
+    required String acceptedTermsVersion,
+    required String acceptedPrivacyVersion,
   }) async {
     state = state.copyWith(isLoading: true, clearErrorMessage: true);
 
     try {
-      final result = await _authRepository.register(
-        account: account.trim().toLowerCase(),
+      await _authRepository.register(
         email: email.trim(),
         password: password,
-        userName: userName.trim(),
+        acceptedTermsVersion: acceptedTermsVersion,
+        acceptedPrivacyVersion: acceptedPrivacyVersion,
       );
-      state = AuthState(registerResult: result);
+      state = AuthState(
+        registrationPolicy: state.registrationPolicy,
+        registrationAccepted: true,
+      );
       return true;
     } on ApiException catch (error) {
-      state = AuthState(errorMessage: error.message);
+      state = AuthState(
+        registrationPolicy: state.registrationPolicy,
+        errorMessage: _registrationMessage(error),
+      );
       return false;
     } on Object {
       state = const AuthState(errorMessage: '系統忙碌，請稍後再試');
       return false;
     }
+  }
+
+  Future<bool> requestVerificationEmail({required String email}) async {
+    state = state.copyWith(isLoading: true, clearErrorMessage: true);
+    try {
+      await _authRepository.requestVerificationEmail(email: email.trim());
+      state = const AuthState();
+      return true;
+    } on ApiException catch (error) {
+      state = AuthState(
+        errorMessage: _registrationMessage(error),
+        retryAfter: error.retryAfter,
+      );
+      return false;
+    } on Object {
+      state = const AuthState(errorMessage: '目前無法重寄驗證信，請稍後再試');
+      return false;
+    }
+  }
+
+  Future<bool> verifyEmail({required String token}) async {
+    state = state.copyWith(isLoading: true, clearErrorMessage: true);
+    try {
+      final result = await _authRepository.verifyEmail(token: token);
+      state = AuthState(verificationResult: result);
+      return true;
+    } on ApiException catch (error) {
+      state = AuthState(errorMessage: _registrationMessage(error));
+      return false;
+    } on Object {
+      state = const AuthState(errorMessage: '目前無法驗證 Email，請稍後再試');
+      return false;
+    }
+  }
+
+  String _registrationMessage(ApiException error) {
+    return switch (error.code) {
+      'REGISTRATION_POLICY_OUTDATED' => '條款內容已更新，請重新確認後再送出',
+      'EMAIL_VERIFICATION_TOKEN_EXPIRED' => '驗證連結已過期，請重新開始驗證流程',
+      'EMAIL_VERIFICATION_TOKEN_INVALID' => '驗證連結無效或已使用',
+      'RATE_LIMITED' => '請稍候 ${error.retryAfter ?? 60} 秒後再試',
+      'SERVICE_TEMPORARILY_UNAVAILABLE' => '註冊服務暫時無法使用，請稍後再試',
+      _ => error.message,
+    };
   }
 
   Future<void> logout() async {

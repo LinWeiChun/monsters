@@ -52,7 +52,7 @@ void main() {
     await tester.tap(registerLink);
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('registerAccountField')), findsOneWidget);
+    expect(find.byKey(const Key('registerAccountField')), findsNothing);
     expect(find.byKey(const Key('registerEmailField')), findsOneWidget);
   });
 }

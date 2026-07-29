@@ -160,6 +160,95 @@ void main() {
       expect(authStates, [false]);
     },
   );
+
+  test(
+    'registration lifecycle uses only the v1 email verification contract',
+    () async {
+      final requests = <RequestOptions>[];
+      final dio = Dio();
+      dio.httpClientAdapter = _CallbackAdapter((options) {
+        requests.add(options);
+      return switch ((options.method, options.uri.path)) {
+          ('GET', '/api/v1/auth/registration-policy') => _jsonResponse({
+            'success': true,
+            'code': 'REGISTRATION_POLICY_AVAILABLE',
+            'message': 'Registration policy available',
+            'data': {
+              'termsVersion': 'terms-v1',
+              'termsUrl': 'https://example.test/terms',
+              'privacyVersion': 'privacy-v1',
+              'privacyUrl': 'https://example.test/privacy',
+            },
+          }),
+          ('POST', '/api/v1/auth/register') => _jsonResponse({
+            'success': true,
+            'code': 'REGISTRATION_ACCEPTED',
+            'message': 'Registration request accepted',
+            'data': null,
+          }, statusCode: 202),
+          ('POST', '/api/v1/auth/email-verification-requests') =>
+            _jsonResponse({
+              'success': true,
+              'code': 'EMAIL_VERIFICATION_REQUEST_ACCEPTED',
+              'message': 'Email verification request accepted',
+              'data': null,
+            }, statusCode: 202),
+          ('POST', '/api/v1/auth/email-verifications') => _jsonResponse({
+            'success': true,
+            'code': 'EMAIL_VERIFIED',
+            'message': 'Email verified',
+            'data': {
+              'nextAction': 'COMPLETE_ELIGIBILITY',
+              'continuationCredential': 'synthetic-continuation',
+              'expiresIn': 600,
+            },
+          }),
+          _ =>
+            throw StateError(
+          'Unexpected request: ${options.method} ${options.uri.path}',
+            ),
+        };
+      });
+      final repository = AuthRepository(ApiClient(config: _config, dio: dio));
+
+      final policy = await repository.registrationPolicy();
+      await repository.register(
+        email: 'member@example.test',
+        password: 'synthetic-password',
+        acceptedTermsVersion: policy.termsVersion,
+        acceptedPrivacyVersion: policy.privacyVersion,
+      );
+      await repository.requestVerificationEmail(email: 'member@example.test');
+      final verification = await repository.verifyEmail(
+        token: 'synthetic-token',
+      );
+
+      expect(policy.termsUrl, 'https://example.test/terms');
+      expect(policy.privacyUrl, 'https://example.test/privacy');
+      expect(verification.nextAction, 'COMPLETE_ELIGIBILITY');
+      expect(verification.continuationCredential, 'synthetic-continuation');
+    expect(requests.map((request) => request.uri.path), [
+        '/api/v1/auth/registration-policy',
+        '/api/v1/auth/register',
+        '/api/v1/auth/email-verification-requests',
+        '/api/v1/auth/email-verifications',
+      ]);
+      expect(requests[1].data, {
+        'email': 'member@example.test',
+        'password': 'synthetic-password',
+        'acceptedTermsVersion': 'terms-v1',
+        'acceptedPrivacyVersion': 'privacy-v1',
+      });
+      expect(
+        (requests[1].data as Map<String, Object?>).containsKey('account'),
+        isFalse,
+      );
+      expect(
+        (requests[1].data as Map<String, Object?>).containsKey('userName'),
+        isFalse,
+      );
+    },
+  );
 }
 
 const _config = AppConfig(

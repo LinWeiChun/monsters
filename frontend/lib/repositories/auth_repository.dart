@@ -2,7 +2,7 @@ import '../core/network/api_client.dart';
 import '../core/network/api_error_type.dart';
 import '../core/network/api_exception.dart';
 import '../models/login_result.dart';
-import '../models/register_result.dart';
+import '../models/registration_policy.dart';
 import 'auth_session_store.dart';
 
 class AuthRepository {
@@ -98,29 +98,80 @@ class AuthRepository {
     }
   }
 
-  Future<RegisterResult> register({
-    required String account,
+  Future<RegistrationPolicy> registrationPolicy() async {
+    final response = await _apiClient.get<RegistrationPolicy>(
+      '/v1/auth/registration-policy',
+      fromJsonT:
+          (json) => RegistrationPolicy.fromJson(json! as Map<String, dynamic>),
+      retryOnUnauthorized: false,
+    );
+    if (!response.success) {
+      throw ApiException(
+        type: ApiErrorType.unknown,
+        message: response.message,
+        code: response.code,
+      );
+    }
+    return response.data;
+  }
+
+  Future<void> register({
     required String email,
     required String password,
-    required String userName,
+    required String acceptedTermsVersion,
+    required String acceptedPrivacyVersion,
   }) async {
-    final response = await _apiClient.post<RegisterResult>(
-      '/auth/register',
+    final response = await _apiClient.post<void>(
+      '/v1/auth/register',
       data: {
-        'account': account,
         'email': email,
         'password': password,
-        'userName': userName,
+        'acceptedTermsVersion': acceptedTermsVersion,
+        'acceptedPrivacyVersion': acceptedPrivacyVersion,
       },
-      fromJsonT:
-          (json) => RegisterResult.fromJson(json! as Map<String, dynamic>),
+      fromJsonT: (_) {},
       retryOnUnauthorized: false,
     );
 
     if (!response.success) {
-      throw ApiException(type: ApiErrorType.unknown, message: response.message);
+      throw ApiException(
+        type: ApiErrorType.unknown,
+        message: response.message,
+        code: response.code,
+      );
     }
+  }
 
+  Future<void> requestVerificationEmail({required String email}) async {
+    final response = await _apiClient.post<void>(
+      '/v1/auth/email-verification-requests',
+      data: {'email': email},
+      fromJsonT: (_) {},
+      retryOnUnauthorized: false,
+    );
+    if (!response.success) {
+      throw ApiException(
+        type: ApiErrorType.unknown,
+        message: response.message,
+        code: response.code,
+      );
+    }
+  }
+
+  Future<LoginResult> verifyEmail({required String token}) async {
+    final response = await _apiClient.post<LoginResult>(
+      '/v1/auth/email-verifications',
+      data: {'token': token},
+      fromJsonT: (json) => LoginResult.fromJson(json! as Map<String, dynamic>),
+      retryOnUnauthorized: false,
+    );
+    if (!response.success) {
+      throw ApiException(
+        type: ApiErrorType.unknown,
+        message: response.message,
+        code: response.code,
+      );
+    }
     return response.data;
   }
 

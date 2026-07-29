@@ -122,7 +122,7 @@ Spring Boot 只能透過 JPA / Repository 存取資料庫；Flutter 不得直接
 
 ## 三、目前 `develop` 資料表設計（Phase 4.5 逐步 Flyway Migration）
 
-本章描述現有基線與已完成的 expand 欄位，供 Migration 與相容測試使用。Task 02 已導入 Flyway V1 baseline 與 V2 會員狀態結構；凡與第二章衝突者仍以第二章為目標規格，不得再新增對 `account`、公開 `avatar_url`、JWT Refresh Token、伺服器 PIN、`entries.is_shared`、`entry_likes` 或 `entry_comments` 的新依賴。
+本章描述現有基線與已完成的 expand 欄位，供 Migration 與相容測試使用。Task 02 已導入 Flyway V1 baseline 與 V2 會員狀態結構；Task 03 以 V3 導入 Email-only 註冊、文件同意、Email Token 與限流桶。凡與第二章衝突者仍以第二章為目標規格，不得再新增對 `account`、公開 `avatar_url`、JWT Refresh Token、伺服器 PIN、`entries.is_shared`、`entry_likes` 或 `entry_comments` 的新依賴。
 
 ### 3.1 users
 
@@ -132,9 +132,9 @@ Spring Boot 只能透過 JPA / Repository 存取資料庫；Flutter 不得直接
 |---|---|---|---|
 | id | BIGINT | PK | 使用者 ID |
 | public_id | VARCHAR(36) | UNIQUE NOT NULL | 對外不可推測 UUID；既有會員於 V2 回填 |
-| account | VARCHAR(50) | UNIQUE NOT NULL | 舊基線帳號欄位；目標 Schema 移除 |
+| account | VARCHAR(50) | UNIQUE NULL | 舊會員相容欄位；V3 起新註冊不建立，最終於 contract migration 移除 |
 | email | VARCHAR(255) | UNIQUE NOT NULL | Email |
-| user_name | VARCHAR(80) | NOT NULL | 顯示名稱 |
+| user_name | VARCHAR(80) | NULL | V3 起初始註冊不收；Email 驗證後由 Eligibility／公開暱稱流程建立 |
 | birthday | DATE | NULL | 生日 |
 | avatar_url | VARCHAR(500) | NULL | 舊基線公開頭像 URL；目標 Schema 改為已取得貘怪素材關聯 |
 | created_at | DATETIME | NOT NULL | 建立時間 |
@@ -157,7 +157,33 @@ Email / Password 登入憑證。
 | created_at | DATETIME | NOT NULL | 建立時間 |
 | updated_at | DATETIME | NOT NULL | 更新時間 |
 
-### 3.2.1 password_reset_tokens
+### 3.2.1 member_document_acceptances
+
+保存會員對版本化文件的同意歷程；Task 03 初始註冊建立 `TERMS` 與 `PRIVACY`，不覆寫舊版本。
+
+| 主要欄位 | 約束 |
+|---|---|
+| `user_id` | FK NOT NULL |
+| `document_type` | `TERMS`、`PRIVACY`、`COMMUNITY_RULES`、`MINOR_NOTICE` |
+| `document_version` | VARCHAR(80) NOT NULL |
+| `accepted_at` | DATETIME NOT NULL |
+| `revoked_at` | DATETIME NULL |
+
+唯一鍵為 `(user_id, document_type, document_version)`。
+
+### 3.2.2 email_verification_tokens
+
+- `token_hash` 為唯一 64 字元 SHA-256 hex；不得保存 raw Token。
+- `expires_at` 固定為核發後 24 小時，`used_at` 與 `revoked_at` 分離。
+- 重寄前撤銷同會員所有未使用 Token；寄送失敗也不得留下可用 Token。
+
+### 3.2.3 registration_rate_limit_buckets
+
+- 唯一鍵為 `(bucket_scope, key_hash)`，`bucket_scope` 只允許 `EMAIL`、`IP`。
+- `key_hash` 使用部署環境 secret 的 HMAC-SHA-256；不得保存 Email 或 IP 原文。
+- 以 `SELECT ... FOR UPDATE` 鎖定桶後更新視窗、次數與最後受理時間，支援多 Railway instance 共用 MySQL 的一致限流。
+
+### 3.2.4 password_reset_tokens
 
 忘記密碼 reset token。
 
@@ -183,7 +209,7 @@ Index：
 - token 使用後必須寫入 `used_at`。
 - 過期、已使用或對應已刪除使用者的 token 不得重設密碼。
 
-### 3.2.2 revoked_tokens（舊基線）
+### 3.2.5 revoked_tokens（舊基線）
 
 登出或 refresh rotation 後撤銷的 JWT。目標模型改由 `user_sessions` 與不透明 Refresh Token family 管理；本表只作 Migration 輸入。
 
@@ -777,14 +803,15 @@ database/init/01_schema.sql
 ```text
 backend/src/main/resources/db/migration/V1__current_schema_baseline.sql
 backend/src/main/resources/db/migration/V2__add_member_state_machine.sql
+backend/src/main/resources/db/migration/V3__add_registration_and_email_verification.sql
 ```
 
 注意事項：
 
 - `database/init/*.sql` 只會在 MySQL Docker volume 第一次建立時執行。
 - 若本機已有 `mysql_data` volume，修改 init SQL 後不會自動套用到既有資料庫。
-- Backend 啟動時由 Flyway 驗證不可改寫的版本 migration；空庫由 V1 起建立，既有非空資料庫以 V1 baseline 接軌後套用 V2。
-- 已執行的 V1／V2 不得修改；後續修正只能新增 forward migration。
+- Backend 啟動時由 Flyway 驗證不可改寫的版本 migration；空庫由 V1 起建立，既有非空資料庫以 V1 baseline 接軌後依序套用 V2、V3。
+- 已執行的 V1／V2／V3 不得修改；後續修正只能新增 forward migration。
 - Docker init SQL 固定對齊 V1 baseline，由 Backend 接續執行 V2 以上 migration；不得把新版欄位提前合併回 init 後又重複套用 Flyway。
 
 若需從 `system_data/` 舊資料庫匯入資料，應建立明確的 migration mapping，不得直接將舊表結構搬入新版資料庫。

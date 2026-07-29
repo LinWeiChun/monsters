@@ -43,6 +43,9 @@
 - Email／密碼註冊與 Google 登入
 - 不提供使用者自訂 `account`；Email／密碼帳號以已驗證 Email 登入，Google 帳號以已連結 Google `sub` 登入
 - Email／密碼註冊後進入 `PENDING_EMAIL_VERIFICATION`，完成 Email 驗證前不得建立私人內容
+- 初始註冊只收 Email、密碼與目前 Terms／Privacy 接受版本；新會員與既有 Email 的公開結果一致為已受理
+- Email 驗證連結有效 24 小時且單次使用；重寄有 60 秒冷卻、Email／IP 多維度限流與可靠寄送重試
+- 七日仍未驗證且沒有任何私人、社群或個人化資料的空會員可由排程安全清除
 - 完成 Email 驗證後進入生日、服務地區與年齡資格流程
 - 13 至 17 歲的 Guardian Consent 為 `PENDING_ELIGIBILITY` 內的資格子流程，以 `nextAction` 表達；監護人以一次性 Email 連結同意特定版本條款，但不能查看會員內容
 - Google Email 必須為已驗證；Google Email 與既有會員相同時不得自動合併，需先重新驗證既有登入方式並明確連結

@@ -40,6 +40,21 @@
 
 Web 使用 Cookie 的 Auth endpoint 必須驗證可信任 Origin／CSRF 防護；SameSite 不能作為唯一防護。任何 Token、Cookie、Authorization Header 或驗證連結不得寫入 Log。
 
+#### 0.2.1 已實作的註冊與 Email 驗證垂直接縫
+
+| Method | Path | 成功結果 |
+|---|---|---|
+| `GET` | `/api/v1/auth/registration-policy` | `200 REGISTRATION_POLICY_AVAILABLE`，回目前 Terms／Privacy version 與 HTTPS URL |
+| `POST` | `/api/v1/auth/register` | 新會員與既有 Email 一律 `202 REGISTRATION_ACCEPTED`，不回會員資料 |
+| `POST` | `/api/v1/auth/email-verification-requests` | 已知與未知 Email 一律 `202 EMAIL_VERIFICATION_REQUEST_ACCEPTED` |
+| `POST` | `/api/v1/auth/email-verifications` | `200 EMAIL_VERIFIED`，回 `COMPLETE_ELIGIBILITY` 與 10 分鐘 Continuation Credential |
+
+- 初始註冊只收 `email`、`password`、`acceptedTermsVersion`、`acceptedPrivacyVersion`；拒絕未知欄位，不收 `account`、生日、服務地區、暱稱、Guardian Email 或頭貼。
+- Email Token 有效 24 小時、單次使用且只保存 SHA-256 hash；重寄成功寄送新信前後均不將 Email、Token 或密碼寫入 Outbox payload／Log。
+- 初次註冊與重寄共用 MySQL 持久化 HMAC 限流桶：Email 60 秒冷卻、每 15 分鐘最多 5 次；IP 每 15 分鐘最多 20 次。受限時回 `429 RATE_LIMITED`、`Retry-After` Header 與安全 `data.retryAfter`。
+- 條款版本或 URL、限流 HMAC key 未設定時安全失敗為 `503 SERVICE_TEMPORARILY_UNAVAILABLE`，不得使用程式內 placeholder。
+- SMTP 透過 Spring Mail 的通用 Adapter；SMTP 未啟用或寄送失敗時由 Transactional Outbox 重試，最多五次後為 `FAILED`。
+
 ### 0.3 核心資源契約
 
 | 資源 | v1 行為 |
@@ -98,10 +113,10 @@ Flutter API Client：
 frontend/lib/core/network/ApiClient
 ```
 
-前端 API Base URL 預設值：
+前端 API Host Base URL 預設值：
 
 ```text
-http://localhost:8080/api/v1
+http://localhost:8080/api
 ```
 
 前端可透過 dart-define 覆寫：
@@ -111,6 +126,15 @@ API_BASE_URL
 ```
 
 Flutter UI 不得直接呼叫 Dio。API 存取必須經由 Provider / Repository 使用 `ApiClient`。
+
+Railway 與 Flutter build 對照：
+
+| Git 分支 | Railway Backend | Flutter `API_BASE_URL` |
+|---|---|---|
+| `develop` | `https://monsters-staging.up.railway.app` | `https://monsters-staging.up.railway.app/api` |
+| `main` | `https://monsters-production-9535.up.railway.app` | `https://monsters-production-9535.up.railway.app/api` |
+
+`EMAIL_VERIFICATION_PUBLIC_URL` 必須另設為同環境 Flutter Web 的 `/verify-email` 公開頁，不得填 Railway Backend URL；驗證頁再以 `POST /api/v1/auth/email-verifications` 消耗 Token。
 Flutter API 錯誤處理：
 
 ```text

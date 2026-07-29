@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../layout/responsive_layout.dart';
+import '../models/registration_policy.dart';
 import '../providers/auth_provider.dart';
 import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
@@ -19,19 +20,26 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   static const _desktopFormWidth = 520.0;
 
   final _formKey = GlobalKey<FormState>();
-  final _accountController = TextEditingController();
   final _emailController = TextEditingController();
-  final _userNameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _termsAccepted = false;
+  bool _privacyAccepted = false;
+  String? _localError;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(
+      () => ref.read(authControllerProvider.notifier).loadRegistrationPolicy(),
+    );
+  }
 
   @override
   void dispose() {
-    _accountController.dispose();
     _emailController.dispose();
-    _userNameController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -91,9 +99,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }) {
     return _RegisterForm(
       formKey: _formKey,
-      accountController: _accountController,
       emailController: _emailController,
-      userNameController: _userNameController,
       passwordController: _passwordController,
       confirmPasswordController: _confirmPasswordController,
       obscurePassword: _obscurePassword,
@@ -101,6 +107,20 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       authState: authState,
       onTogglePassword: _togglePassword,
       onToggleConfirmPassword: _toggleConfirmPassword,
+      policy: authState.registrationPolicy,
+      termsAccepted: _termsAccepted,
+      privacyAccepted: _privacyAccepted,
+      onTermsChanged:
+          (value) => setState(() {
+            _termsAccepted = value ?? false;
+            _localError = null;
+          }),
+      onPrivacyChanged:
+          (value) => setState(() {
+            _privacyAccepted = value ?? false;
+            _localError = null;
+          }),
+      localError: _localError,
       onSubmit: _submit,
       isDesktop: isDesktop,
       isMobile: isMobile,
@@ -119,23 +139,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     });
   }
 
-  String? _validateAccount(String? value) {
-    final account = value?.trim() ?? '';
-    if (account.isEmpty) {
-      return '請輸入帳號';
-    }
-    if (account.length < 4) {
-      return '帳號至少 4 字元';
-    }
-    if (account.length > 50) {
-      return '帳號最多 50 字元';
-    }
-    if (!RegExp(r'^[A-Za-z][A-Za-z0-9_]*$').hasMatch(account)) {
-      return '帳號需以英文開頭，僅可使用英文、數字與底線';
-    }
-    return null;
-  }
-
   String? _validateEmail(String? value) {
     final email = value?.trim() ?? '';
     if (email.isEmpty) {
@@ -143,17 +146,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     }
     if (!email.contains('@')) {
       return '請輸入正確的 Email';
-    }
-    return null;
-  }
-
-  String? _validateUserName(String? value) {
-    final userName = value?.trim() ?? '';
-    if (userName.isEmpty) {
-      return '請輸入暱稱';
-    }
-    if (userName.length > 80) {
-      return '暱稱最多 80 字元';
     }
     return null;
   }
@@ -183,27 +175,40 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) {
+    final formValid = _formKey.currentState!.validate();
+    final policy = ref.read(authControllerProvider).registrationPolicy;
+    if (policy == null) {
+      setState(() {
+        _localError = '目前無法載入註冊條款，請稍後再試';
+      });
+      return;
+    }
+    if (!_termsAccepted || !_privacyAccepted) {
+      setState(() {
+        _localError = '請同意目前的服務條款與隱私權政策';
+      });
+    }
+    if (!formValid || !_termsAccepted || !_privacyAccepted) {
       return;
     }
 
     final success = await ref
         .read(authControllerProvider.notifier)
         .register(
-          account: _accountController.text.trim().toLowerCase(),
           email: _emailController.text.trim().toLowerCase(),
           password: _passwordController.text,
-          userName: _userNameController.text.trim(),
+          acceptedTermsVersion: policy.termsVersion,
+          acceptedPrivacyVersion: policy.privacyVersion,
         );
 
     if (!mounted || !success) {
       return;
     }
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('註冊成功，請重新登入')));
-    context.goNamed(AppRoute.login);
+    context.goNamed(
+      AppRoute.emailVerificationPending,
+      extra: _emailController.text.trim().toLowerCase(),
+    );
   }
 }
 
@@ -242,7 +247,7 @@ class _RegisterBrandPanel extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                '從一個帳號開始，\n把每一天好好收進來。',
+                '從 Email 驗證開始，\n把每一天好好收進來。',
                 style: textTheme.headlineSmall?.copyWith(
                   color: AppColors.registerAccentText,
                   fontWeight: FontWeight.w800,
@@ -308,9 +313,7 @@ class _RegisterCompactLayout extends StatelessWidget {
 class _RegisterForm extends StatelessWidget {
   const _RegisterForm({
     required this.formKey,
-    required this.accountController,
     required this.emailController,
-    required this.userNameController,
     required this.passwordController,
     required this.confirmPasswordController,
     required this.obscurePassword,
@@ -318,15 +321,19 @@ class _RegisterForm extends StatelessWidget {
     required this.authState,
     required this.onTogglePassword,
     required this.onToggleConfirmPassword,
+    required this.policy,
+    required this.termsAccepted,
+    required this.privacyAccepted,
+    required this.onTermsChanged,
+    required this.onPrivacyChanged,
+    required this.localError,
     required this.onSubmit,
     this.isDesktop = false,
     this.isMobile = false,
   });
 
   final GlobalKey<FormState> formKey;
-  final TextEditingController accountController;
   final TextEditingController emailController;
-  final TextEditingController userNameController;
   final TextEditingController passwordController;
   final TextEditingController confirmPasswordController;
   final bool obscurePassword;
@@ -334,6 +341,12 @@ class _RegisterForm extends StatelessWidget {
   final AuthState authState;
   final VoidCallback onTogglePassword;
   final VoidCallback onToggleConfirmPassword;
+  final RegistrationPolicy? policy;
+  final bool termsAccepted;
+  final bool privacyAccepted;
+  final ValueChanged<bool?> onTermsChanged;
+  final ValueChanged<bool?> onPrivacyChanged;
+  final String? localError;
   final VoidCallback onSubmit;
   final bool isDesktop;
   final bool isMobile;
@@ -394,28 +407,13 @@ class _RegisterForm extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            isMobile ? '帳號建立後，請回到登入頁登入。' : '註冊完成後，請使用新帳號登入。',
+            '送出後請前往 Email 信箱完成驗證。',
             style: textTheme.bodyMedium?.copyWith(
               color: AppColors.registerMuted,
               fontSize: isMobile ? 13 : null,
             ),
           ),
           SizedBox(height: isMobile ? 28 : 38),
-          _RegisterTextField(
-            label: '帳號',
-            height: fieldHeight,
-            labelGap: labelGap,
-            child: TextFormField(
-              key: const Key('registerAccountField'),
-              controller: accountController,
-              keyboardType: TextInputType.text,
-              textInputAction: TextInputAction.next,
-              autofillHints: const [AutofillHints.username],
-              decoration: _inputDecoration(hintText: '英文開頭，4–50 字元'),
-              validator: _RegisterValidators.of(context).account,
-            ),
-          ),
-          SizedBox(height: fieldGap),
           _RegisterTextField(
             label: 'Email',
             height: fieldHeight,
@@ -428,20 +426,6 @@ class _RegisterForm extends StatelessWidget {
               autofillHints: const [AutofillHints.email],
               decoration: _inputDecoration(hintText: 'name@example.com'),
               validator: _RegisterValidators.of(context).email,
-            ),
-          ),
-          SizedBox(height: fieldGap),
-          _RegisterTextField(
-            label: '暱稱',
-            height: fieldHeight,
-            labelGap: labelGap,
-            child: TextFormField(
-              key: const Key('registerUserNameField'),
-              controller: userNameController,
-              textInputAction: TextInputAction.next,
-              autofillHints: const [AutofillHints.nickname],
-              decoration: _inputDecoration(hintText: '想讓怪獸怎麼稱呼你？'),
-              validator: _RegisterValidators.of(context).userName,
             ),
           ),
           SizedBox(height: fieldGap),
@@ -499,11 +483,32 @@ class _RegisterForm extends StatelessWidget {
               onFieldSubmitted: authState.isLoading ? null : (_) => onSubmit(),
             ),
           ),
+          const SizedBox(height: 18),
+          if (policy != null)
+            _RegistrationPolicyCard(
+              policy: policy!,
+              termsAccepted: termsAccepted,
+              privacyAccepted: privacyAccepted,
+              onTermsChanged: onTermsChanged,
+              onPrivacyChanged: onPrivacyChanged,
+            )
+          else if (authState.isLoading)
+            const Center(child: CircularProgressIndicator())
+          else
+            const Text('目前無法載入註冊條款，請稍後再試'),
           if (authState.errorMessage != null) ...[
             const SizedBox(height: AppSpacing.md),
             Text(
               authState.errorMessage!,
               key: const Key('registerErrorMessage'),
+              style: const TextStyle(color: AppColors.registerError),
+            ),
+          ],
+          if (localError != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              localError!,
+              key: const Key('registerLocalErrorMessage'),
               style: const TextStyle(color: AppColors.registerError),
             ),
           ],
@@ -514,7 +519,8 @@ class _RegisterForm extends StatelessWidget {
             height: fieldHeight,
             child: FilledButton(
               key: const Key('registerSubmitButton'),
-              onPressed: authState.isLoading ? null : onSubmit,
+              onPressed:
+                  authState.isLoading || policy == null ? null : onSubmit,
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.registerPrimary,
                 foregroundColor: AppColors.registerOnPrimary,
@@ -614,23 +620,80 @@ class _RegisterRuleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: AppColors.registerRuleBackground,
-        borderRadius: BorderRadius.circular(14),
-      ),
+    return Material(
+      color: AppColors.registerRuleBackground,
+      borderRadius: BorderRadius.circular(14),
       child: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: isMobile ? AppSpacing.lg : 22,
           vertical: isMobile ? AppSpacing.md : 22,
         ),
         child: Text(
-          isMobile ? '帳號可使用英文、數字與底線\n密碼至少 8 字元' : '帳號可使用英文、數字與底線　·　密碼至少 8 字元',
+          isMobile
+              ? '第一步只需要 Email 與密碼\n暱稱、生日與資格資料將於驗證後填寫'
+              : '第一步只需要 Email 與密碼　·　其他資格資料將於驗證後填寫',
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
             color: AppColors.registerMuted,
             fontWeight: FontWeight.w600,
             height: 1.25,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RegistrationPolicyCard extends StatelessWidget {
+  const _RegistrationPolicyCard({
+    required this.policy,
+    required this.termsAccepted,
+    required this.privacyAccepted,
+    required this.onTermsChanged,
+    required this.onPrivacyChanged,
+  });
+
+  final RegistrationPolicy policy;
+  final bool termsAccepted;
+  final bool privacyAccepted;
+  final ValueChanged<bool?> onTermsChanged;
+  final ValueChanged<bool?> onPrivacyChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.registerRuleBackground,
+      borderRadius: BorderRadius.circular(14),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            CheckboxListTile(
+              key: const Key('termsAcceptanceCheckbox'),
+              contentPadding: EdgeInsets.zero,
+              value: termsAccepted,
+              onChanged: onTermsChanged,
+              controlAffinity: ListTileControlAffinity.leading,
+              title: const Text('我已閱讀並同意目前的服務條款'),
+            ),
+            SelectableText(
+              policy.termsUrl,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            CheckboxListTile(
+              key: const Key('privacyAcceptanceCheckbox'),
+              contentPadding: EdgeInsets.zero,
+              value: privacyAccepted,
+              onChanged: onPrivacyChanged,
+              controlAffinity: ListTileControlAffinity.leading,
+              title: const Text('我已閱讀並同意目前的隱私權政策'),
+            ),
+            SelectableText(
+              policy.privacyUrl,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
         ),
       ),
     );
@@ -682,11 +745,7 @@ class _RegisterValidators {
     return _RegisterValidators._(state);
   }
 
-  String? account(String? value) => state._validateAccount(value);
-
   String? email(String? value) => state._validateEmail(value);
-
-  String? userName(String? value) => state._validateUserName(value);
 
   String? password(String? value) => state._validatePassword(value);
 

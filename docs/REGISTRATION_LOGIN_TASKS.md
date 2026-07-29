@@ -69,9 +69,9 @@
 
 **Blocked by:** 01 — 建立 Auth／Member 真實驗收骨架。
 
-**Status:** REVIEW
+**Status:** DONE
 
-**Evidence:** 本機已通過 Backend 完整單元測試、MySQL 8.4 完整整合測試、Flyway V1→V2 升級、Flutter 168 項測試、Flutter analyze 與 OpenAPI 契約測試；待推送及 CI／PR review。
+**Evidence:** PR #89 已合併至 `feature/phase4.5`；commit `a754a38` 的 `Registration and login checks` GitHub Actions 已通過，Backend、MySQL、Flyway、Flutter 與 OpenAPI 驗證完成。
 
 - [x] 支援`PENDING_EMAIL_VERIFICATION`、`PENDING_ELIGIBILITY`、`ACTIVE`、`USER_DEACTIVATED`、`ADMIN_SUSPENDED`、`DELETION_PENDING`及`DELETED`。
 - [x] 不合法狀態轉換回`409 MEMBER_STATE_CONFLICT`。
@@ -88,15 +88,15 @@
 
 **Blocked by:** 02 — 建立會員狀態機與 Continuation Credential。
 
-**Status:** ready-for-agent
+**Status:** REVIEW
 
-- [ ] 初始註冊不收`account`、生日、地區、暱稱、Guardian Email或使用者頭貼。
-- [ ] 新註冊與相同Email恢復流程對外統一回`202 REGISTRATION_ACCEPTED`。
-- [ ] Email驗證Token有效24小時、單次使用且Server只保存hash。
-- [ ] 重寄驗證信淘汰舊Token並有60秒冷卻與多維度限流。
-- [ ] Email驗證前不得建立私人內容或取得一般Session。
-- [ ] 七天未驗證且沒有私人資料的空會員可由可靠工作安全清除。
-- [ ] Flutter呈現已受理、待驗證、重寄冷卻、Token過期及重新開始流程。
+- [x] 初始註冊不收`account`、生日、地區、暱稱、Guardian Email或使用者頭貼。
+- [x] 新註冊與相同Email恢復流程對外統一回`202 REGISTRATION_ACCEPTED`。
+- [x] Email驗證Token有效24小時、單次使用且Server只保存hash。
+- [x] 重寄驗證信淘汰舊Token並有60秒冷卻與多維度限流。
+- [x] Email驗證前不得建立私人內容或取得一般Session。
+- [x] 七天未驗證且沒有私人資料的空會員可由可靠工作安全清除。
+- [x] Flutter呈現已受理、待驗證、重寄冷卻、Token過期及重新開始流程。
 
 ---
 

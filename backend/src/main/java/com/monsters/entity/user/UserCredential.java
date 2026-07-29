@@ -27,9 +27,13 @@ public class UserCredential extends BaseEntity {
     }
 
     public UserCredential(User user, String passwordHash) {
+        this(user, passwordHash, LocalDateTime.now());
+    }
+
+    public UserCredential(User user, String passwordHash, LocalDateTime passwordUpdatedAt) {
         this.user = user;
         this.passwordHash = passwordHash;
-        this.passwordUpdatedAt = LocalDateTime.now();
+        this.passwordUpdatedAt = passwordUpdatedAt;
     }
 
     public User getUser() {

@@ -23,6 +23,7 @@
 |---|---|
 | `../../backend/src/main/resources/db/migration/V1__current_schema_baseline.sql` | 將目前 init schema 固定為不可改寫的 Flyway baseline |
 | `../../backend/src/main/resources/db/migration/V2__add_member_state_machine.sql` | 新增會員 UUID、七態狀態機、optimistic version、continuation credential、Audit 與 Outbox |
+| `../../backend/src/main/resources/db/migration/V3__add_registration_and_email_verification.sql` | 導入 Email-only 註冊、文件同意、Email 驗證 Token 與持久化限流桶 |
 
 注意事項：
 
@@ -34,5 +35,5 @@
 - `20260711_03` 會在 mood score 重複，或既有 1～5 分資料與 `SCORE_1`～`SCORE_5` 對應衝突時中止，不會靜默覆寫既有語意。
 - 若新增煩惱送出時出現 `Annoyance category not found`，先查詢 `annoyance_types` 是否存在 `ACADEMIC`、`CAREER`、`LOVE`、`FRIENDSHIP`、`FAMILY`、`OTHER` 六筆 code；缺漏時套用 `20260713_01`。
 - 進入正式資料保存階段後，資料庫異動應建立 migration script，不得直接依賴 Docker init SQL。
-- Backend 啟動時由 Flyway 驗證並執行 migration；Docker init 建立的非空 V1 資料庫會 baseline 為 V1 後套用 V2，真正空資料庫由 Flyway V1 起完整建立。
+- Backend 啟動時由 Flyway 驗證並執行 migration；Docker init 建立的非空 V1 資料庫會 baseline 為 V1 後依序套用 V2、V3，真正空資料庫由 Flyway V1 起完整建立。
 - 不得把 V2 以上欄位直接合併回 `01_schema.sql`，否則非空 Docker 資料庫 baseline 後會重複執行相同 migration。

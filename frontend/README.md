@@ -77,6 +77,8 @@ UI 不得直接呼叫 Dio，後續功能需透過 Provider / Repository 使用 `
 
 - `lib/pages/login_page.dart`
 - `lib/pages/register_page.dart`
+- `lib/pages/email_verification_pending_page.dart`
+- `lib/pages/email_verification_page.dart`
 - `lib/providers/auth_provider.dart`
 - `lib/repositories/auth_repository.dart`
 - `lib/repositories/auth_session_store.dart`
@@ -84,7 +86,7 @@ UI 不得直接呼叫 Dio，後續功能需透過 Provider / Repository 使用 `
 - `lib/models/auth_user.g.dart`
 - `lib/models/login_result.dart`
 - `lib/models/login_result.g.dart`
-- `lib/models/register_result.dart`
+- `lib/models/registration_policy.dart`
 
 登入流程使用 `AuthRepository` 呼叫 `POST /api/auth/login`，成功後由 `ApiClient.setAccessToken()` 將 access token 套用到目前執行階段的 Authorization header，並透過 `AuthSessionStore` 保存 `LoginResult` 與最後開啟時間。使用者未登出且 30 天內再次開啟 App 時，`SplashPage` 會先以保存的 refresh token 呼叫 `POST /api/auth/refresh` 完成 rotation，再使用新 access token 進入首頁；不得直接重用可能已過期的 access token。
 
@@ -92,7 +94,16 @@ UI 不得直接呼叫 Dio，後續功能需透過 Provider / Repository 使用 `
 
 Google 登入流程使用 `GoogleSignInService` 透過 `google_sign_in` / `google_sign_in_web` 取得 Google ID Token，再由 `AuthRepository` 呼叫 `POST /api/auth/google-login` 交給後端驗證並換發本系統 JWT。Web 版使用 Google Identity Services 官方按鈕，Android / iOS 使用共用 Flutter 登入按鈕；成功後同樣由 `AuthSessionStore` 保存 30 天登入狀態。
 
-註冊流程使用 `AuthRepository` 呼叫 `POST /api/auth/register`，成功後導回登入頁，不自動登入，也不保存密碼或 token。帳號為必填且唯一，需英文開頭，只能包含英文、數字、底線，長度 4 到 50，前端送出前會轉為小寫。
+註冊流程先由 `AuthRepository` 呼叫 `GET /api/v1/auth/registration-policy` 取得目前 Terms／Privacy version 與 URL，再以 Email、密碼和兩個接受版本呼叫 `POST /api/v1/auth/register`。初始註冊不顯示或傳送 `account`、暱稱、生日、地區、Guardian Email 或頭貼；安全受理後進入等待頁，不自動登入，也不保存密碼、Email Token 或 Continuation Credential。
+
+等待頁以 `POST /api/v1/auth/email-verification-requests` 重寄並顯示 60 秒冷卻；`/verify-email?token=...` 以 `POST /api/v1/auth/email-verifications` 完成驗證。Token 過期／無效時依穩定 code 顯示重新開始，不解析後端自由文字決定流程。
+
+Cloudflare branch build 應設定：
+
+```text
+develop: --dart-define=API_BASE_URL=https://monsters-staging.up.railway.app/api
+main:    --dart-define=API_BASE_URL=https://monsters-production-9535.up.railway.app/api
+```
 
 密碼不得寫入 SharedPreferences；登入 session 僅由 `AuthSessionStore` 集中管理，頁面不得直接讀寫 token。Refresh token 每次換發後必須覆蓋舊 session，前端不得重複使用舊 refresh token。Google 登入不得假造 ID Token 或沿用舊系統空密碼登入流程。
 

@@ -415,6 +415,18 @@ docker compose down
 | `JWT_SECRET` | JWT 簽章密鑰 | 空字串，正式環境必須提供 |
 | `JWT_ACCESS_TOKEN_EXPIRATION_SECONDS` | 現行 Access token 有效秒數；Phase 4.5 目標改為 600 秒 | `3600` |
 | `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` | 待淘汰 JWT Refresh token 有效秒數；目標改為 opaque session | `2592000`（30 天，rotation） |
+| `REGISTRATION_TERMS_VERSION` | 目前服務條款版本 | 空字串，註冊前必須提供 |
+| `REGISTRATION_TERMS_URL` | 目前服務條款 HTTPS URL | 空字串，註冊前必須提供 |
+| `REGISTRATION_PRIVACY_VERSION` | 目前隱私權政策版本 | 空字串，註冊前必須提供 |
+| `REGISTRATION_PRIVACY_URL` | 目前隱私權政策 HTTPS URL | 空字串，註冊前必須提供 |
+| `REGISTRATION_RATE_LIMIT_HASH_KEY` | 註冊／重寄 HMAC 限流 secret | 空字串，註冊前必須提供 |
+| `EMAIL_VERIFICATION_PUBLIC_URL` | Flutter Web `/verify-email` 完整 HTTPS URL | 空字串，寄信前必須提供 |
+| `SMTP_HOST`、`SMTP_PORT` | 通用 SMTP 連線 | 空字串、`587` |
+| `SMTP_USERNAME`、`SMTP_PASSWORD` | SMTP secret | 空字串 |
+| `REGISTRATION_SMTP_FROM` | Email 驗證寄件者 | 空字串 |
+| `REGISTRATION_SMTP_ENABLED` | 啟用 SMTP Adapter | `false` |
+| `EMAIL_VERIFICATION_WORKER_ENABLED` | 啟用 Email Outbox Worker | `false` |
+| `UNVERIFIED_MEMBER_CLEANUP_ENABLED` | 啟用七日空會員清理 | `false` |
 | `R2_ACCOUNT_ID` | Cloudflare R2 Account ID | 空字串，使用 R2 前必須提供 |
 | `R2_ACCESS_KEY_ID` | R2 S3 Access Key ID | 空字串，使用 R2 前必須提供 |
 | `R2_SECRET_ACCESS_KEY` | R2 S3 Secret Access Key | 空字串，使用 R2 前必須提供 |
