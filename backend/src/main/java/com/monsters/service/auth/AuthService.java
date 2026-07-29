@@ -62,16 +62,6 @@ public class AuthService {
 			UserOAuthAccountRepository userOAuthAccountRepository,
 			PasswordResetTokenRepository passwordResetTokenRepository, PasswordEncoder passwordEncoder,
 			JwtTokenService jwtTokenService, JwtProperties jwtProperties, GoogleIdTokenVerifier googleIdTokenVerifier,
-			PasswordResetTokenService passwordResetTokenService, TokenRevocationService tokenRevocationService) {
-		this(userRepository, userCredentialRepository, userOAuthAccountRepository, passwordResetTokenRepository,
-				passwordEncoder, jwtTokenService, jwtProperties, googleIdTokenVerifier, passwordResetTokenService,
-				tokenRevocationService, Clock.systemDefaultZone());
-	}
-
-	AuthService(UserRepository userRepository, UserCredentialRepository userCredentialRepository,
-			UserOAuthAccountRepository userOAuthAccountRepository,
-			PasswordResetTokenRepository passwordResetTokenRepository, PasswordEncoder passwordEncoder,
-			JwtTokenService jwtTokenService, JwtProperties jwtProperties, GoogleIdTokenVerifier googleIdTokenVerifier,
 			PasswordResetTokenService passwordResetTokenService, TokenRevocationService tokenRevocationService,
 			Clock clock) {
 		this.userRepository = userRepository;

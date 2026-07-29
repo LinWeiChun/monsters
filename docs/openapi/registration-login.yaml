@@ -1,0 +1,30 @@
+openapi: 3.1.0
+info:
+  title: Monsters Registration and Login Contract
+  version: 0.1.0
+paths: {}
+components:
+  schemas:
+    ApiEnvelope:
+      type: object
+      required:
+        - success
+        - code
+        - message
+        - fieldErrors
+        - requestId
+      properties:
+        success:
+          type: boolean
+        code:
+          type: string
+        message:
+          type: string
+        data: {}
+        fieldErrors:
+          type: object
+          additionalProperties:
+            type: string
+        requestId:
+          type: string
+          format: uuid

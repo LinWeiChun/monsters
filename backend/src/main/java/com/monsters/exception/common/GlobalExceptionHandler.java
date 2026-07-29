@@ -2,6 +2,8 @@ package com.monsters.exception.common;
 
 import com.monsters.dto.common.ApiResponse;
 import jakarta.validation.ConstraintViolationException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +28,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException exception) {
-        log.error("Business exception", exception);
-        return buildErrorResponse(exception.getStatus(), exception.getMessage());
+        log.warn("Business request rejected: status={}, type={}",
+                exception.getStatus().value(), exception.getClass().getSimpleName());
+        return buildErrorResponse(
+                exception.getStatus(),
+                errorCode(exception.getStatus()),
+                exception.getMessage(),
+                Map.of()
+        );
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -42,8 +50,20 @@ public class GlobalExceptionHandler {
                 .findFirst()
                 .orElse(DEFAULT_VALIDATION_MESSAGE);
 
-        log.error("Request validation failed", exception);
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, message);
+        Map<String, String> fieldErrors = exception.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .collect(
+                        LinkedHashMap::new,
+                        (errors, error) -> errors.putIfAbsent(
+                                error.getField(),
+                                Objects.requireNonNullElse(error.getDefaultMessage(), DEFAULT_VALIDATION_MESSAGE)
+                        ),
+                        Map::putAll
+                );
+
+        log.warn("Request validation failed: fields={}", fieldErrors.keySet());
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", message, fieldErrors);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -57,59 +77,104 @@ public class GlobalExceptionHandler {
                 .findFirst()
                 .orElse(DEFAULT_VALIDATION_MESSAGE);
 
-        log.error("Constraint validation failed", exception);
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, message);
+        log.warn("Constraint validation failed: count={}", exception.getConstraintViolations().size());
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", message, Map.of());
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadableException(
             HttpMessageNotReadableException exception
     ) {
-        log.error("Request body is not readable", exception);
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Request body is not readable");
+        log.warn("Request body is not readable");
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "REQUEST_BODY_INVALID",
+                "Request body is not readable",
+                Map.of()
+        );
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ApiResponse<Void>> handleMaxUploadSizeExceededException(
             MaxUploadSizeExceededException exception
     ) {
-        log.error("Upload exceeds request size limit", exception);
-        return buildErrorResponse(HttpStatus.PAYLOAD_TOO_LARGE, "Uploaded file is too large");
+        log.warn("Upload exceeds request size limit");
+        return buildErrorResponse(
+                HttpStatus.PAYLOAD_TOO_LARGE,
+                "PAYLOAD_TOO_LARGE",
+                "Uploaded file is too large",
+                Map.of()
+        );
     }
 
     @ExceptionHandler(MultipartException.class)
     public ResponseEntity<ApiResponse<Void>> handleMultipartException(
             MultipartException exception
     ) {
-        log.error("Multipart request is invalid", exception);
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Multipart request is invalid");
+        log.warn("Multipart request is invalid");
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "MULTIPART_REQUEST_INVALID",
+                "Multipart request is invalid",
+                Map.of()
+        );
     }
 
     @ExceptionHandler(MissingServletRequestPartException.class)
     public ResponseEntity<ApiResponse<Void>> handleMissingServletRequestPartException(
             MissingServletRequestPartException exception
     ) {
-        log.error("Required multipart request part is missing", exception);
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Required multipart request part is missing");
+        log.warn("Required multipart request part is missing");
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "MULTIPART_PART_MISSING",
+                "Required multipart request part is missing",
+                Map.of()
+        );
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiResponse<Void>> handleMethodArgumentTypeMismatchException(
             MethodArgumentTypeMismatchException exception
     ) {
-        log.error("Request parameter type is invalid", exception);
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Request parameter is invalid");
+        log.warn("Request parameter type is invalid: parameter={}", exception.getName());
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "REQUEST_PARAMETER_INVALID",
+                "Request parameter is invalid",
+                Map.of()
+        );
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleException(Exception exception) {
         log.error("Unhandled exception", exception);
-        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, DEFAULT_ERROR_MESSAGE);
+        return buildErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "INTERNAL_SERVER_ERROR",
+                DEFAULT_ERROR_MESSAGE,
+                Map.of()
+        );
     }
 
-    private ResponseEntity<ApiResponse<Void>> buildErrorResponse(HttpStatus status, String message) {
+    private ResponseEntity<ApiResponse<Void>> buildErrorResponse(
+            HttpStatus status,
+            String code,
+            String message,
+            Map<String, String> fieldErrors
+    ) {
         return ResponseEntity
                 .status(status)
-                .body(ApiResponse.failure(message));
+                .body(ApiResponse.failure(code, message, fieldErrors));
+    }
+
+    private String errorCode(HttpStatus status) {
+        return switch (status) {
+            case UNAUTHORIZED -> "AUTH_INVALID_CREDENTIALS";
+            case FORBIDDEN -> "PERMISSION_DENIED";
+            case NOT_FOUND -> "RESOURCE_NOT_FOUND";
+            case CONFLICT -> "RESOURCE_CONFLICT";
+            default -> "REQUEST_FAILED";
+        };
     }
 }
