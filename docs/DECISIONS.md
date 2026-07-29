@@ -6,6 +6,8 @@
 
 Phase 4.5 已核准決策的可交付規格與測試接縫整理於 [`PHASE4_5_FOUNDATION_SPEC.md`](PHASE4_5_FOUNDATION_SPEC.md)；該文件不得反向弱化本文件、`CONTEXT.md` 或 ADR。
 
+註冊、登入與會員管理第 1–38 題確認結果以 [`REGISTRATION_LOGIN_MEMBER_MANAGEMENT_SPEC.md`](REGISTRATION_LOGIN_MEMBER_MANAGEMENT_SPEC.md) 為準；其中 2026-07-28 公開暱稱決策由 ADR-0009 取代 ADR-0006 的跨貼文匿名身分。
+
 ## 零、2026-07-26 Grilling 核准基線
 
 本章決策已由使用者逐項確認。若與後續既有決策、舊系統或目前程式衝突，以本章、`CONTEXT.md` 與 `docs/adr/` 為目標規格；衝突程式須列入 Phase 4 後的基礎安全階段，不得把舊實作反向視為新規格。
@@ -80,10 +82,11 @@ Phase 4.5 已核准決策的可交付規格與測試接縫整理於 [`PHASE4_5_F
 | 項目 | 決策 |
 |---|---|
 | Community Boundary | 封閉、需登入、只對具資格成人開放；不公開索引、外部嵌入或永久媒體 URL |
-| Identity | 對外不可連結、平台內可問責；不顯示 account、暱稱、個人頭貼、Profile 或跨貼文識別 |
+| Identity | 以非唯一公開暱稱形成跨貼文可辨識身分、平台內可問責；不顯示 account、Email、會員 UUID、私人頭貼或私人 Profile |
 | Public Snapshot | 分享建立獨立 Community Post；私人 Entry 修改不得自動同步 |
 | Public Fields | 只公開逐項確認文字、媒體與 Public Topic；不帶 Emotional Load、Private Category、原始日期或歷史 |
 | Post Version | 編輯建立版本並標示已編輯；報告與互動保持關聯，審核中／下架時不得藉編輯重發 |
+| Public Nickname | 2–30 Unicode code points、NFC、禁止控制／雙向字元與官方冒充名稱；首次公開前明確確認，不用於登入或 owner 判斷 |
 | Interaction | 單層留言；無私訊、追蹤、好友、標記或巢狀回覆 |
 | Support | 只有一種正向支持；作者可看 aggregate，其他讀者不見公開總數；不做排行 |
 | Ranking | 第一版依時間與安全條件，不以支持／留言量建立熱門排行 |

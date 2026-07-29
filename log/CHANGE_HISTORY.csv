@@ -1,4 +1,9 @@
 日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
+2026-07-28,17:36,DOC-015,Documentation,docs/REGISTRATION_LOGIN_MEMBER_MANAGEMENT_SPEC.md,新增,建立註冊登入會員管理完整需求驗收測試差距與實作順序,Codex,是,是,是,是,文件 only 不執行程式或 Migration
+2026-07-28,17:36,DOC-015,Documentation,CONTEXT.md and docs/adr,修改,公開暱稱社群取代跨貼文匿名身分並新增 ADR-0009,Codex,是,是,是,是,仍維持封閉成人資格與治理 Gate
+2026-07-28,17:36,DOC-015,Documentation,AGENTS.md README.md and formal specs,修改,同步公開暱稱註冊登入會員管理與資料權利契約,Codex,是,是,是,是,AGENTS version v3.5
+2026-07-28,17:36,DOC-015,Documentation,docs/TASKS.md,修改,新增 DOC-015 REVIEW 狀態與工作限制,Codex,否,否,否,否,待文件 Review 與 Git PR
+2026-07-28,17:36,DOC-015,Documentation,log/CHANGE_LOG.md and log/CHANGE_HISTORY.csv,修改,新增 DOC-015 文件異動紀錄,Codex,否,否,否,否,已檢查一個月保存期限無過期 Log
 2026-07-28,15:32,DOC-014,Documentation,docs/PHASE4_5_FOUNDATION_SPEC.md,新增,建立 Phase 4.5 to-spec 完整規格與跨平台 E2E 驗收接縫,Codex,是,是,是,是,文件 only 不執行實作或 Issue 發布
 2026-07-28,15:32,DOC-014,Documentation,docs formal specs,修改,同步 Project Database API UI Coding Standard Decisions 規格索引,Codex,是,是,是,是,正式契約仍以各 Spec 與 ADR 為準
 2026-07-28,15:32,DOC-014,Documentation,docs/TASKS.md,修改,新增 DOC-014 REVIEW 狀態與工作限制,Codex,否,否,否,否,待文件 Review 與 Git PR

@@ -2,7 +2,7 @@
 
 # 貘nsters REST API 規格
 
-> Phase 4.5 的跨平台 E2E、OpenAPI Contract 與 Session／Entry／Data Rights 驗收範圍以 [`PHASE4_5_FOUNDATION_SPEC.md`](PHASE4_5_FOUNDATION_SPEC.md) 為準；本文件保存正式 API 契約。
+> Phase 4.5 的跨平台 E2E、OpenAPI Contract 與 Session／Entry／Data Rights 驗收範圍以 [`PHASE4_5_FOUNDATION_SPEC.md`](PHASE4_5_FOUNDATION_SPEC.md) 為準；註冊、登入、會員管理、公開暱稱及其 Status／error matrix 以 [`REGISTRATION_LOGIN_MEMBER_MANAGEMENT_SPEC.md`](REGISTRATION_LOGIN_MEMBER_MANAGEMENT_SPEC.md) 為準；本文件保存正式 API 契約。
 
 > 狀態說明：本文件以「零、已核准 v1 目標契約」為正式目標。第二章以後仍包含 `develop` 目前無版本 API 的實作細節，供 Phase 4 整合與相容 Migration 使用；凡涉及 `/api`、`account`、公開頭貼上傳、JWT Refresh Token、伺服器密碼鎖、`isShared`、分數／分類必填、隨機怪獸或深度心理測驗者，均屬待淘汰基線，不得新增依賴。
 
@@ -35,6 +35,7 @@
 | Reauthentication | 敏感操作需五分鐘內取得、用途受限且不可延長的 reauth credential |
 | Password Reset | 對外統一回應，Email reset link 15 分鐘單次使用；成功後撤銷所有工作階段 |
 | Privileged MFA | Moderator、Admin、Content Reviewer 必須完成 TOTP 與備援碼才能使用後台 |
+| Public Nickname | 2–30 Unicode code points、NFC、非唯一且不可登入；首次社群公開前明確確認，禁止官方冒充名稱 |
 
 Web 使用 Cookie 的 Auth endpoint 必須驗證可信任 Origin／CSRF 防護；SameSite 不能作為唯一防護。任何 Token、Cookie、Authorization Header 或驗證連結不得寫入 Log。
 
@@ -57,8 +58,8 @@ Web 使用 Cookie 的 Auth endpoint 必須驗證可信任 Origin／CSRF 防護�
 ### 0.4 社群與後台契約
 
 - Community API 只接受具 Community Eligibility 的成年會員。
-- 社群提供時間／公開主題查詢、單層留言、單一支持、檢舉、封鎖、取消分享及申訴。
-- 不提供公開支持數、排行榜、私訊、追蹤、標記、使用者搜尋、社群全文搜尋或永久媒體 URL。
+- 社群提供時間／公開主題查詢、公開暱稱、單層留言、單一支持、檢舉、封鎖、取消分享及申訴。
+- 公開暱稱可跨貼文辨識但不能用於登入、owner 判斷或查詢私人 Profile；不提供公開支持數、排行榜、私訊、追蹤、標記、使用者搜尋、社群全文搜尋或永久媒體 URL。
 - Report 建立後只對檢舉者隱藏內容，不因檢舉數自動下架；自傷／傷人疑慮進入人工優先佇列。
 - Moderator 只處理已檢舉公開內容；Admin 管理角色、設定與正式停權；Content Reviewer 只審閱版本化內容。
 - 所有特權操作須 MFA、最小權限與不可修改稽核；任何角色都不得查詢私人 Entry 或模擬會員登入。

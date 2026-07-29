@@ -2,7 +2,7 @@
 
 # 貘nsters Database Spec
 
-> Phase 4.5 的 Database Migration 與資料生命週期驗收範圍以 [`PHASE4_5_FOUNDATION_SPEC.md`](PHASE4_5_FOUNDATION_SPEC.md) 為準；本文件保存正式 Schema 契約。
+> Phase 4.5 的 Database Migration 與資料生命週期驗收範圍以 [`PHASE4_5_FOUNDATION_SPEC.md`](PHASE4_5_FOUNDATION_SPEC.md) 為準；註冊、登入、會員管理與公開暱稱資料需求以 [`REGISTRATION_LOGIN_MEMBER_MANAGEMENT_SPEC.md`](REGISTRATION_LOGIN_MEMBER_MANAGEMENT_SPEC.md) 為準；本文件保存正式 Schema 契約。
 
 > 狀態說明：本文件同時記錄 `develop` 目前 Schema 與 2026-07-26 已核准的目標 Schema。第二章的目標模型具有規格優先權；第三章既有表格是 Migration 輸入，不代表仍可新增依賴。所有目標變更必須於基礎安全階段透過 Flyway 實作，不得直接覆蓋正式資料庫。
 
@@ -80,7 +80,7 @@ Spring Boot 只能透過 JPA / Repository 存取資料庫；Flutter 不得直接
 
 | 領域 | 目標資料結構與不可變規則 |
 |---|---|
-| 使用者 | `users` 新增 UUID `public_id`、服務地區、生日、資格狀態與選定貘怪頭貼關聯；移除 `account`、`avatar_url` 與使用者頭貼上傳依賴 |
+| 使用者 | `users` 新增 UUID `public_id`、2–30 Unicode公開暱稱、暱稱公開確認版本／時間、服務地區、生日、資格狀態與選定貘怪頭貼關聯；暱稱不建立唯一索引，並移除 `account`、`avatar_url` 與使用者頭貼上傳依賴 |
 | Email 驗證 | 一次性驗證 Token 只保存 hash、到期時間與使用時間；七天未驗證且無內容的空帳號可清除 |
 | 憑證 | `user_credentials` 保存 Argon2id 參數版本；舊 BCrypt 只供登入時漸進遷移 |
 | OAuth | `user_oauth_accounts` 以 provider＋`sub` 唯一；同 Email 不得自動連結，連結／解除需重新驗證 |
@@ -89,7 +89,7 @@ Spring Boot 只能透過 JPA / Repository 存取資料庫；Flutter 不得直接
 | 角色 | `MEMBER`、`MODERATOR`、`ADMIN`、`CONTENT_REVIEWER` 分離；Community Eligibility 另存，不是角色 |
 | Entry | Diary／Annoyance 共用核心；`public_id`、`version`、UTC 時間、本地日期、timezone、offset、選填情緒負荷、選填私人分類與刪除狀態 |
 | Entry Media | 保存私人 object key、真實格式、處理狀態、掃描狀態、大小、時長與清除狀態；未通過隔離處理不得成為可用媒體 |
-| Community Post | 保存 Entry owner、獨立快照、公開主題、版本、發布／取消分享／審核狀態；不保存私人分數、私人分類或原始日期 |
+| Community Post | 保存 Entry owner、獨立快照、公開主題、版本、發布／取消分享／審核狀態；顯示時依 owner 目前公開暱稱解析，不保存歷史暱稱快照，且不保存私人分數、私人分類或原始日期 |
 | 社群治理 | 留言、支持、檢舉、封鎖、處置、申訴與敏感警示皆依附 Community Post；留言為單層，支持只有一種且不建立公開排行 |
 | 內容系統 | 自我探索、教育小測驗、外部資源與固定貘怪回應使用版本化內容、適用年齡、來源、Reviewer 與發布狀態 |
 | 圖鑑 | `user_monsters` 維持唯一擁有關聯，另保存固定 Unlock Milestone 與防重達成事件；不建立隨機抽取或代幣 |
@@ -796,7 +796,7 @@ Migration 應包含：
 |---|---|
 | Register | `users.email`、Email verification status、Argon2id `user_credentials`；不建立 `account` |
 | Login | `users.email`＋credential hash 或 OAuth provider＋`sub`；建立 `user_sessions` 與 opaque Refresh Token hash |
-| Profile | UUID public user identity、private user name、locked birthday、region、eligibility 與 selected owned monster asset |
+| Profile | UUID public user identity、非唯一 public nickname、nickname disclosure confirmation、locked birthday、region、eligibility 與 selected owned monster asset |
 | Email Change | reauth evidence、pending verified email、old／new notification events 與 session revocation |
 | Local Privacy Lock | Database 無 PIN table、hash 或 verify endpoint；只存在 App secure storage |
 
