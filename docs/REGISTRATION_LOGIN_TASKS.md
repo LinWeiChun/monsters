@@ -1,0 +1,392 @@
+# Registration Login Tasks
+
+> 狀態：APPROVED
+> 日期：2026-07-29
+> 來源：`REGISTRATION_LOGIN_MEMBER_MANAGEMENT_SPEC.md`
+> 範圍：Registration／Login／Eligibility／Session／Member Management／Data Rights／Privileged Administration
+
+## 執行規則
+
+- 本文件獨立管理 `registration_login` Task，不併入 `docs/TASKS.md`。
+- 每張 Task 都是可獨立展示與驗證的垂直切片，應在單一工作階段內完成。
+- `Blocked by` 所列 Task 全部完成前，不得開始該 Task。
+- 可立即工作的 Task frontier 為阻擋項目皆已完成的 `ready-for-agent` Task。
+- 每張 Task 仍須依 Repository 規範經過 `TODO → IN PROGRESS → REVIEW → DONE`。
+- `ready-for-agent` 只代表前置依賴已清楚，不代表 Task 已進入 `IN PROGRESS`。
+- 完成條件包含實作、真實 Security Filter／MySQL 驗證、Flutter測試、正式文件、Log及Git／PR證據。
+- 管理者相關功能安排於會員本人流程之後，避免阻擋註冊、登入與資料權利主線。
+
+## 依賴總覽
+
+```text
+01
+├─ 02
+│  ├─ 03
+│  │  └─ 06
+│  └─ 05 ← 03 + 04
+│     ├─ 07
+│     │  ├─ 08
+│     │  │  └─ 09
+│     │  ├─ 10
+│     │  ├─ 11
+│     │  ├─ 12 ← 06
+│     │  │  ├─ 13
+│     │  │  └─ 14
+│     │  └─ 15
+│     └─ 10
+└─ 04
+
+15 ← 02 + 07
+16 ← 12 + 15
+17 ← 14 + 15 + 16
+18 ← 05–17
+```
+
+---
+
+# 01 — 建立 Auth／Member 真實驗收骨架
+
+**What to build:** 建立可重複執行的 Auth／Member 驗收接縫，使後續每張 Task 都能以真實 MySQL、啟用 Security Filter 的 HTTP 請求及可控制外部依賴驗證完整行為。
+
+**Blocked by:** None — can start immediately.
+
+**Status:** ready-for-agent
+
+- [ ] 測試環境使用與正式環境相同 major version 的 MySQL，不以 H2 作主要驗收。
+- [ ] Auth與Member HTTP整合測試啟用真實Security Filter。
+- [ ] 測試可控制時間、Email寄送、Google身分驗證及非同步工作。
+- [ ] 共用API envelope可驗證穩定`code`、安全`fieldErrors`與opaque `requestId`。
+- [ ] 測試資料使用synthetic data，不記錄密碼、Token、完整Email、生日或Guardian資料。
+- [ ] Backend測試、Flutter既有測試及OpenAPI檢查可在CI中分層執行。
+
+---
+
+# 02 — 建立會員狀態機與 Continuation Credential
+
+**What to build:** 讓會員依驗證、資格、停用、停權及刪除狀態取得正確的完整Session或用途受限流程，不再以單一刪除旗標代表會員生命週期。
+
+**Blocked by:** 01 — 建立 Auth／Member 真實驗收骨架。
+
+**Status:** ready-for-agent
+
+- [ ] 支援`PENDING_EMAIL_VERIFICATION`、`PENDING_ELIGIBILITY`、`ACTIVE`、`USER_DEACTIVATED`、`ADMIN_SUSPENDED`、`DELETION_PENDING`及`DELETED`。
+- [ ] 不合法狀態轉換回`409 MEMBER_STATE_CONFLICT`。
+- [ ] 憑證正確但流程未完成時回`200`、`nextAction`及用途受限continuation credential。
+- [ ] Continuation credential不得存取一般會員API。
+- [ ] Community Eligibility與Community Restriction不以會員狀態或Role取代。
+- [ ] 狀態、Outbox、Audit及optimistic version在同一交易更新。
+
+---
+
+# 03 — 完成註冊與 Email 驗證流程
+
+**What to build:** 讓台灣使用者只以Email、密碼及必要條款開始註冊，完成Email驗證後才進入資格資料流程，且公開回應不洩漏Email是否存在。
+
+**Blocked by:** 02 — 建立會員狀態機與 Continuation Credential。
+
+**Status:** ready-for-agent
+
+- [ ] 初始註冊不收`account`、生日、地區、暱稱、Guardian Email或使用者頭貼。
+- [ ] 新註冊與相同Email恢復流程對外統一回`202 REGISTRATION_ACCEPTED`。
+- [ ] Email驗證Token有效24小時、單次使用且Server只保存hash。
+- [ ] 重寄驗證信淘汰舊Token並有60秒冷卻與多維度限流。
+- [ ] Email驗證前不得建立私人內容或取得一般Session。
+- [ ] 七天未驗證且沒有私人資料的空會員可由可靠工作安全清除。
+- [ ] Flutter呈現已受理、待驗證、重寄冷卻、Token過期及重新開始流程。
+
+---
+
+# 04 — 導入新密碼政策與 BCrypt 漸進遷移
+
+**What to build:** 讓新密碼使用現行安全政策與Argon2id，同時讓既有BCrypt會員在成功登入時無感遷移。
+
+**Blocked by:** 01 — 建立 Auth／Member 真實驗收骨架。
+
+**Status:** ready-for-agent
+
+- [ ] 密碼接受15–128個Unicode code points，且不trim。
+- [ ] 密碼驗證使用NFC正規化與弱密碼blocklist，不強制固定字元組合。
+- [ ] 新密碼使用Argon2id並保存可辨識的參數版本。
+- [ ] 既有BCrypt密碼只在成功登入後原子rehash；失敗登入不得修改hash。
+- [ ] 14／15／128／129 code points、Emoji、空白與弱密碼案例皆有測試。
+- [ ] 密碼、hash及blocklist命中內容不得進入Log、Audit或分析事件。
+- [ ] Flutter與Backend使用一致的長度與錯誤碼契約。
+
+---
+
+# 05 — 改為 Verified Email 登入並展開 Account Migration
+
+**What to build:** 讓新會員只以已驗證Email登入，同時以expand方式保留既有`account`會員的受控遷移能力，維持部署期間可登入。
+
+**Blocked by:** 02 — 建立會員狀態機與 Continuation Credential；03 — 完成註冊與 Email 驗證流程；04 — 導入新密碼政策與 BCrypt 漸進遷移。
+
+**Status:** ready-for-agent
+
+- [ ] v1登入欄位與正式契約只接受verified Email。
+- [ ] 不存在、密碼錯誤或不可揭露狀態統一回`401 AUTH_INVALID_CREDENTIALS`。
+- [ ] 相同Email依會員狀態進入驗證、資格、恢復或刪除等待流程。
+- [ ] Email正規化不得擅自套用Gmail點號或`+tag`合併。
+- [ ] 舊`account`只存在於一次性Migration路徑，新註冊不再建立`account`。
+- [ ] Migration期間新舊資料可安全共存，且每一批遷移都維持CI綠燈。
+- [ ] Flutter登入頁不再顯示或送出`account`。
+
+---
+
+# 06 — 完成 Eligibility、Guardian Consent與公開暱稱 Onboarding
+
+**What to build:** 讓Email已驗證會員完成台灣地區、生日、必要同意、公開暱稱與未成年監護人同意後，取得符合年齡的功能資格。
+
+**Blocked by:** 03 — 完成註冊與 Email 驗證流程。
+
+**Status:** ready-for-agent
+
+- [ ] Email驗證後才收地區、生日、公開暱稱與必要Guardian Email。
+- [ ] 未滿13歲不能取得一般功能，只保留必要申訴、匯出與刪除入口。
+- [ ] 13至17歲需完成特定條款版本的Guardian Consent，且不得使用社群。
+- [ ] Guardian Consent不授予查看會員私人內容的權限，並可撤回及重新取得。
+- [ ] 公開暱稱為2–30 Unicode code points、NFC、非唯一且不可用於登入或owner判斷。
+- [ ] 禁止控制字元、雙向控制、純空白、不可見字元及官方冒充名稱。
+- [ ] 首次社群公開前需預覽並明確確認暱稱；未確認不得發布或留言。
+- [ ] 12／13／17／18歲及時區日期邊界皆有Backend與Flutter測試。
+
+---
+
+# 07 — 建立 Opaque Refresh Session Family
+
+**What to build:** 讓每台裝置具有獨立、可輪替及可撤銷的Refresh Session Family，並在Token遭重播時限制受影響範圍。
+
+**Blocked by:** 05 — 改為 Verified Email 登入並展開 Account Migration。
+
+**Status:** ready-for-agent
+
+- [ ] Access Token為10分鐘JWT，只包含最少聲明及Session識別。
+- [ ] Refresh Credential為高強度opaque值，Server只保存hash。
+- [ ] 每裝置建立獨立family並保存建立、最後活動、idle、absolute及撤銷狀態。
+- [ ] 每次Refresh成功都輪替Credential。
+- [ ] Server允許同一輪替結果10秒合理並行容忍，逾期reuse撤銷該family。
+- [ ] 一般Session閒置30天、絕對90天；特權期限留待Task 15完成。
+- [ ] 無效、過期、撤銷與reuse使用穩定401錯誤碼。
+- [ ] Session、Token rotation、Outbox與Audit更新具交易一致性。
+
+---
+
+# 08 — 遷移三平台 Credential Store與Single-flight Refresh
+
+**What to build:** 讓Web、Android及iOS以各自安全的Credential Store維持登入，並在並行401時只執行一次Refresh。
+
+**Blocked by:** 07 — 建立 Opaque Refresh Session Family。
+
+**Status:** ready-for-agent
+
+- [ ] Web Refresh Credential由`__Host-` HttpOnly／Secure／SameSite Cookie管理，Access Token只存記憶體。
+- [ ] Web Cookie Auth具可信Origin與CSRF防護，不能只依賴SameSite。
+- [ ] Android／iOS Refresh Credential存於Keychain／Keystore，Access Token只存記憶體。
+- [ ] SharedPreferences不再保存Token或完整Login Result。
+- [ ] 並行401共用single-flight Refresh，成功後每個原request最多重試一次。
+- [ ] 暫時網路錯誤不得誤清Session；確定失效才清除Credential並導向登入。
+- [ ] 三平台Adapter通過同一Credential Store contract test。
+- [ ] Flutter Widget／Repository／Router測試涵蓋恢復、失效與重試。
+
+---
+
+# 09 — 完成裝置管理與三種登出流程
+
+**What to build:** 讓會員查看並控制自己的裝置Session，可只登出目前裝置、保留目前裝置並登出其他裝置，或全部登出。
+
+**Blocked by:** 07 — 建立 Opaque Refresh Session Family；08 — 遷移三平台 Credential Store與Single-flight Refresh。
+
+**Status:** ready-for-agent
+
+- [ ] 裝置清單只顯示安全的裝置類型、約略資訊、最後活動與目前裝置標記。
+- [ ] 一般登出只撤銷目前Session Family。
+- [ ] 登出其他裝置保留目前Session，且需要五分鐘內reauth。
+- [ ] 全部登出包含目前Session，且需要五分鐘內reauth。
+- [ ] 登出Command為idempotent，不依賴Client傳入Refresh Token。
+- [ ] 被撤銷裝置的Access與Refresh後續請求皆被拒絕。
+- [ ] Flutter完整處理成功、重複操作、網路失敗及目前Session被撤銷。
+
+---
+
+# 10 — 完成 Google 既有會員明確連結
+
+**What to build:** 讓會員安全連結Google登入方式，不因相同Email自動合併或讓第三方身分接管既有會員。
+
+**Blocked by:** 05 — 改為 Verified Email 登入並展開 Account Migration；07 — 建立 Opaque Refresh Session Family。
+
+**Status:** ready-for-agent
+
+- [ ] Google ID Token由Backend驗證issuer、audience、expiration、signature及verified Email。
+- [ ] 已連結Google帳號以provider與`sub`精確登入。
+- [ ] 相同Email但尚未連結時不得自動合併或核發一般Session。
+- [ ] 會員需先reauth既有登入方式，再明確確認連結。
+- [ ] 連結成功留下安全Audit並依敏感登入方式變更規則處理Session。
+- [ ] Google ID Token、Email及驗證細節不得進入Log。
+- [ ] Flutter呈現已連結、需驗證既有方式、衝突及取消流程。
+
+---
+
+# 11 — 完成 Forgot／Reset Password正式流程
+
+**What to build:** 讓會員透過Email安全重設密碼，公開端無法判斷會員是否存在，重設後所有舊裝置失效。
+
+**Blocked by:** 04 — 導入新密碼政策與 BCrypt 漸進遷移；07 — 建立 Opaque Refresh Session Family。
+
+**Status:** ready-for-agent
+
+- [ ] Forgot Password對所有Email統一回`202`，API不得回reset Token。
+- [ ] Reset Token有效15分鐘、單次使用且Server只保存hash。
+- [ ] 新請求使同一會員舊的未使用Token失效。
+- [ ] 重設密碼套用Task 04密碼政策與Argon2id。
+- [ ] 重設成功撤銷會員全部Session Family。
+- [ ] 無效、過期及已使用Token使用穩定錯誤碼且不洩漏會員狀態。
+- [ ] Email寄送透過可靠Outbox／Worker並具重試、failed狀態及告警。
+- [ ] Flutter涵蓋已受理、連結無效、過期、成功及重新登入流程。
+
+---
+
+# 12 — 分離會員一般與敏感資料修改
+
+**What to build:** 讓會員安全修改公開暱稱、Email與生日，並能自行停用或恢復帳號，不以通用Profile Update繞過資格與Session規則。
+
+**Blocked by:** 06 — 完成 Eligibility、Guardian Consent與公開暱稱 Onboarding；07 — 建立 Opaque Refresh Session Family。
+
+**Status:** ready-for-agent
+
+- [ ] 一般Profile、公開暱稱、Email變更、生日更正、停用及恢復使用分離Command與欄位白名單。
+- [ ] 所有修改使用optimistic version，舊版本回`409 VERSION_CONFLICT`。
+- [ ] Email變更需五分鐘reauth，新Email驗證前保留舊Email。
+- [ ] Email切換原子完成、撤銷其他Session並通知新舊Email。
+- [ ] 生日更正跨13／18歲邊界時立即採保守資格限制，並進入必要審核／申訴。
+- [ ] 本人停用立即撤銷全部Session及公開可見性；恢復後不自動恢復分享。
+- [ ] 公開暱稱變更後既有社群內容顯示新暱稱。
+- [ ] Flutter呈現修改衝突、驗證中、受限、停用及恢復狀態。
+
+---
+
+# 13 — 完成會員 Data Export
+
+**What to build:** 讓會員經重新驗證後取得自己的可攜資料與原始媒體，下載檔案保持私有並在期限後清除。
+
+**Blocked by:** 07 — 建立 Opaque Refresh Session Family；12 — 分離會員一般與敏感資料修改。
+
+**Status:** ready-for-agent
+
+- [ ] 申請前需五分鐘內reauth；密碼與Google會員使用各自既有登入方式。
+- [ ] 停用、停權或資格受限會員仍可由用途受限流程申請。
+- [ ] 匯出以opaque request ID非同步執行，狀態可安全查詢。
+- [ ] 內容至少包含會員自身machine-readable JSON與原始媒體，不含其他會員個資或內部安全資訊。
+- [ ] 匯出檔加密、私有保存，不以Email附件寄送。
+- [ ] 七天期限從`READY`時間起算，到期後刪除檔案。
+- [ ] 失敗工作可idempotent重試並具安全錯誤碼、failed狀態及告警。
+- [ ] 未授權下載、七天邊界、重試及受限會員流程有整合與E2E測試。
+
+---
+
+# 14 — 完成會員 Account Deletion與可重試清除
+
+**What to build:** 讓會員經重新驗證提出帳號刪除，在七天內可取消，期滿後進入不可取消且可追蹤的跨系統清除。
+
+**Blocked by:** 07 — 建立 Opaque Refresh Session Family；12 — 分離會員一般與敏感資料修改。
+
+**Status:** ready-for-agent
+
+- [ ] 申請前需五分鐘內reauth，接受後回opaque deletion request ID。
+- [ ] 接受後立即進入`DELETION_PENDING`、撤銷一般Session並取消公開可見性。
+- [ ] 七天取消期從Server `acceptedAt`精確起算。
+- [ ] 取消刪除需再次reauth，且不自動恢復分享或公開內容。
+- [ ] 七天期滿後進入不可取消清除階段。
+- [ ] 清除涵蓋正式資料、媒體、搜尋索引、快取及外部處理副本。
+- [ ] 可重試失敗進入`PURGE_FAILED_RETRYING`，需人工處理進入`PURGE_REVIEW_REQUIRED`。
+- [ ] 部分失敗不得把會員恢復為一般可用狀態。
+- [ ] Email僅在永久清除完成後可建立全新會員。
+
+---
+
+# 15 — 建立特權角色、Permission、MFA與權限版本
+
+**What to build:** 在會員本人主線完成後，建立受最小權限、MFA、即時Session撤銷及責任分離保護的特權管理基礎。
+
+**Blocked by:** 02 — 建立會員狀態機與 Continuation Credential；07 — 建立 Opaque Refresh Session Family。
+
+**Status:** ready-for-agent
+
+- [ ] 支援MEMBER、MODERATOR、ADMIN及CONTENT_REVIEWER，Community Eligibility不是Role。
+- [ ] 特權能力使用細分Permission，不以單一Admin Role授予全部權限。
+- [ ] 所有特權API要求TOTP MFA Session，備援碼單次使用。
+- [ ] 特權Session閒置30分鐘、絕對8小時，高風險操作需五分鐘reauth。
+- [ ] Role／Permission升級或降級立即撤銷全部特權Session。
+- [ ] Backend每次授權檢查帳號狀態、MFA、Session類型及`permissionVersion`。
+- [ ] Role／Permission變更需理由、idempotency、Audit及雙人核准，不得自我核准。
+- [ ] 交易不得讓有效MFA Admin少於兩位。
+- [ ] Break-glass受控、限時、可稽核且不具私人內容權限。
+
+---
+
+# 16 — 完成 Admin會員查詢、PII揭露與Suspension
+
+**What to build:** 讓具權限管理者在不接觸私人內容的前提下精確查詢會員、受控揭露Email並執行可申訴及可複查的停權。
+
+**Blocked by:** 12 — 分離會員一般與敏感資料修改；15 — 建立特權角色、Permission、MFA與權限版本。
+
+**Status:** ready-for-agent
+
+- [ ] 一般會員查詢使用不可推測UUID精確查詢，不接受舊`account`。
+- [ ] Email只允許具`MEMBER_PII_LOOKUP`的MFA Session精確搜尋，需理由、限流及Audit。
+- [ ] 不支援Email模糊、前綴或批次搜尋。
+- [ ] 搜尋結果預設遮罩Email；完整Email使用獨立揭露Command、Permission、理由及Audit。
+- [ ] Admin不得查看私人Entry、媒體、自我探索結果、取得會員Token或模擬登入。
+- [ ] Suspension使用穩定原因、期限、通知、申訴及複查時間。
+- [ ] 停權立即撤銷全部Session，但保留申訴、匯出與刪除入口。
+- [ ] 緊急停權需在限定時間內由第二人覆核，解除不得由原執行者自我核准。
+- [ ] 不存在、已刪除、無權及owner錯誤依防枚舉規則回一致`404`。
+
+---
+
+# 17 — 完成 Legal Hold、特殊清除與雙人核准
+
+**What to build:** 讓少數依法需要的資料保全與特殊清除具有最小範圍、期限、責任分離及清除續行能力，不讓Admin直接永久刪除會員。
+
+**Blocked by:** 14 — 完成會員 Account Deletion與可重試清除；15 — 建立特權角色、Permission、MFA與權限版本；16 — 完成 Admin會員查詢、PII揭露與Suspension。
+
+**Status:** ready-for-agent
+
+- [ ] 一般Admin不能直接永久刪除會員。
+- [ ] 特殊清除需特定Permission、正式理由、高風險reauth及雙人核准。
+- [ ] Legal Hold只接受正式具拘束力依據，保存範圍與期限必須最小化。
+- [ ] Legal Hold不恢復會員可見性、一般Session或社群內容。
+- [ ] 可揭露時顯示安全的清除延遲；不可揭露時使用通用合法限制說明。
+- [ ] Hold解除後自動續行清除，不要求會員重新申請。
+- [ ] 申請者、核准者、執行者及解除者符合責任分離規則。
+- [ ] Restore後重播deletion、unshare、suspension及revocation marker，社群在完成前保持關閉。
+- [ ] Audit不得保存私人內容、完整Email、生日、Guardian資料或可逆刪除身分。
+
+---
+
+# 18 — 移除舊契約並完成跨平台 E2E驗收
+
+**What to build:** 在所有新流程可用後，完成expand–migrate–contract的contract階段，移除待淘汰契約並以三平台完整故事證明registration_login主線可正式使用。
+
+**Blocked by:** 05–17 全部完成。
+
+**Status:** ready-for-agent
+
+- [ ] 移除新流程對舊`account`登入及註冊的依賴。
+- [ ] 移除JWT Refresh、`revoked_tokens`舊用途及Client明文Refresh response契約。
+- [ ] 移除SharedPreferences Credential與完整Login Result。
+- [ ] 移除Google相同Email自動連結。
+- [ ] 移除開發Forgot Password reset Token response。
+- [ ] 移除Backend server PIN與public avatar upload契約。
+- [ ] Flyway空資料庫建立及上一版本升級測試通過，舊資料遷移具可驗證結果。
+- [ ] 啟用Security Filter的Auth、Member、Admin及Data Rights HTTP矩陣全部通過。
+- [ ] Web、Android、iOS至少完成「註冊→Email驗證→Eligibility→登入→Refresh→登出」E2E。
+- [ ] Data Export、Account Deletion、Admin停權、權限變更及Legal Hold關鍵E2E通過。
+- [ ] OpenAPI、Project、Database、API、UI、Decision、Task與Log文件同步。
+- [ ] 未完成部署、Migration、E2E、Git／PR或工作報告證據前不得標記`DONE`。
+
+## Frontier
+
+目前只有下列Task沒有阻擋，可立即開始：
+
+- 01 — 建立 Auth／Member 真實驗收骨架
+
+後續只處理所有阻擋均已完成的Task，不得為了平行開發跳過狀態機、Migration或安全驗收前置條件。
