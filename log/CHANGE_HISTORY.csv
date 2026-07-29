@@ -7,6 +7,9 @@
 2026-07-29,10:10,REGISTRATION-LOGIN-01,API,ApiResponse GlobalExceptionHandler SecurityExceptionHandler,修改,新增穩定code安全fieldErrors與opaque requestId,Codex,是,否,否,否,既有Endpoint不變
 2026-07-29,10:10,REGISTRATION-LOGIN-01,CI,.github/workflows/registration-login-ci.yml,新增,分層執行Backend unit integration Flutter及OpenAPI檢查,Codex,否,否,否,否,PR與手動觸發
 2026-07-29,10:10,REGISTRATION-LOGIN-01,Documentation,docs/API_SPEC.md docs/REGISTRATION_LOGIN_TASKS.md docs/openapi/registration-login.yaml,修改,同步API envelope與Task 01 REVIEW狀態,Codex,是,否,否,否,docs TASKS.md未修改
+2026-07-29,10:54,FLUTTER-CI-GOOGLE-SIGN-IN,Frontend,frontend/pubspec.yaml 與 frontend/pubspec.lock,修改,固定 google_sign_in_web 1.1.0 並以 Flutter 3.29.2 重新解析相依,Codex,否,否,否,否,Dart 3.7.2 可解析且維持既有 Google Web 登入
+2026-07-29,10:54,FLUTTER-CI-GOOGLE-SIGN-IN,Test,Flutter 3.29.2,驗證,執行 pub get 完整測試與 Web 建置,Codex,否,否,否,否,166 項測試通過且 Web 建置成功
+2026-07-29,10:54,FLUTTER-CI-GOOGLE-SIGN-IN,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,記錄 CI 相依修正及 Log 保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
 2026-07-29,09:26,DOC-016,Documentation,log/CHANGE_HISTORY.csv,修改,新增DOC-016文件異動歷程,Codex,否,否,否,否,已檢查一個月保存期限無過期Log
 2026-07-28,17:36,DOC-015,Documentation,docs/REGISTRATION_LOGIN_MEMBER_MANAGEMENT_SPEC.md,新增,建立註冊登入會員管理完整需求驗收測試差距與實作順序,Codex,是,是,是,是,文件 only 不執行程式或 Migration
 2026-07-28,17:36,DOC-015,Documentation,CONTEXT.md and docs/adr,修改,公開暱稱社群取代跨貼文匿名身分並新增 ADR-0009,Codex,是,是,是,是,仍維持封閉成人資格與治理 Gate

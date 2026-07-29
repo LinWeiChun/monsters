@@ -8,6 +8,63 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-29 10:54
+
+Task
+Flutter CI Google Sign-In 相依相容性修正（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 將直接使用的 `google_sign_in_web` 固定為 `1.1.0`，維持既有 Google Web 登入實作，不更換套件或框架。
+- 使用 GitHub Actions 相同的 Flutter 3.29.2／Dart 3.7.2 重新解析鎖檔，避免新版相依將最低 Dart 版本提高至 3.9。
+- 鎖定 Flutter 3.29.2 可解析的間接相依版本，確保 CI 執行 `flutter pub get` 可重現。
+
+### Modified
+
+- `frontend/pubspec.yaml`
+- `frontend/pubspec.lock`
+- `log/CHANGE_LOG.md`
+- `log/CHANGE_HISTORY.csv`
+
+### Tests
+
+- Flutter 3.29.2／Dart 3.7.2 `pub get`：通過。
+- Flutter 3.29.2／Dart 3.7.2 `test --no-pub`：166 項通過。
+- Flutter 3.29.2／Dart 3.7.2 `build web --no-pub`：成功。
+
+### system_data Reference
+
+- 本次為 CI 相依版本修正，無需採用舊系統流程。
+- 未修改 `system_data/`。
+
+### API
+
+- 無異動。
+
+### Database
+
+- 無異動，無 Migration。
+
+### UI
+
+- 無功能或版面異動。
+
+### Log Retention
+
+- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與既有 `CHANGE_HISTORY.xlsx`。
+- 保存期限截止日為 2026-06-29；最早紀錄為 2026-06-29，未發現早於截止日的紀錄，本次未刪除 Log。
+- `CHANGE_HISTORY.csv` 既有第 974 至 1014 筆資料為 9 欄舊格式；本次未修改該既有紀錄，新增資料維持目前 13 欄格式。
+
+### Pending
+
+- 等待此修正分支推送並由 GitHub Actions 驗證；未取得推送或建立 PR 授權，本次僅建立本機提交。
+- Registration Login Task 01 在修正合併前維持 REVIEW；Task 02 依已確認的 7 狀態方案接續處理。
+
+---
+
 ## 2026-07-29 10:10
 
 Task
