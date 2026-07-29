@@ -28,6 +28,7 @@ import com.monsters.entity.user.User;
 import com.monsters.entity.user.UserCredential;
 import com.monsters.entity.user.UserOAuthAccount;
 import com.monsters.repository.user.PasswordResetTokenRepository;
+import com.monsters.repository.user.MemberContinuationCredentialRepository;
 import com.monsters.repository.user.UserCredentialRepository;
 import com.monsters.repository.user.UserOAuthAccountRepository;
 import com.monsters.repository.user.UserRepository;
@@ -76,6 +77,9 @@ class AuthServiceTest {
     @Mock
     private TokenRevocationService tokenRevocationService;
 
+    @Mock
+    private MemberContinuationCredentialRepository memberContinuationCredentialRepository;
+
     private AuthService authService;
 
     @BeforeEach
@@ -91,6 +95,10 @@ class AuthServiceTest {
                 googleIdTokenVerifier,
                 passwordResetTokenService,
                 tokenRevocationService,
+                new ContinuationCredentialService(
+                        memberContinuationCredentialRepository,
+                        Clock.systemDefaultZone()
+                ),
                 Clock.systemDefaultZone()
         );
     }

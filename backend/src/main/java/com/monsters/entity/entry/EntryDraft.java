@@ -36,7 +36,7 @@ public class EntryDraft extends BaseEntity {
     @Column(name = "wants_drawing")
     private Boolean wantsDrawing;
 
-    @Column(name = "score")
+    @Column(name = "score", columnDefinition = "TINYINT")
     private Integer score;
 
     @Column(name = "is_shared")

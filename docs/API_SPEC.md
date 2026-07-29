@@ -24,6 +24,7 @@
 |---|---|
 | Email 註冊 | 不接受 `account`；建立 `PENDING_EMAIL_VERIFICATION` 會員並寄送一次性驗證連結 |
 | Email 驗證 | Token 短效、單次使用、Backend 只保存 hash |
+| Login Continuation | 憑證正確但流程未完成時回 `200 AUTH_CONTINUATION_REQUIRED`、`nextAction`、10 分鐘用途受限 credential；不回 Access／Refresh Token |
 | Google 登入 | 只接受已驗證 Email；同 Email 不自動合併，回傳需連結狀態 |
 | 年齡資格 | Email 驗證後提交生日、服務地區與條款版本；13–17 歲進入監護人同意流程 |
 | Guardian Consent | 一次性 Email 連結；核准／撤回特定條款版本，不授予內容存取 |
@@ -433,6 +434,23 @@ Response：
 }
 ```
 
+會員流程未完成的 Response：
+
+```json
+{
+  "success": true,
+  "code": "AUTH_CONTINUATION_REQUIRED",
+  "message": "Additional member verification is required",
+  "data": {
+    "nextAction": "COMPLETE_ELIGIBILITY",
+    "continuationCredential": "opaque-one-time-response-value",
+    "expiresIn": 600
+  },
+  "fieldErrors": {},
+  "requestId": "opaque-request-id"
+}
+```
+
 規則：
 
 - `email` 為相容既有前端保留的欄位名稱，實際可傳入已註冊的 Account 或 Email，必填且最大長度 255。
@@ -441,6 +459,11 @@ Response：
 - Account / Email 不存在、帳號已刪除、憑證不存在或密碼錯誤時，回傳 401。
 - `accessToken` 與 `refreshToken` 使用 HMAC-SHA256 JWT 產生。
 - `JWT_SECRET` 必須設定，否則不得產生 JWT。
+- `ACTIVE` 回 `200 AUTHENTICATED` 與完整 Session；`PENDING_EMAIL_VERIFICATION`、`PENDING_ELIGIBILITY`、`USER_DEACTIVATED`、`ADMIN_SUSPENDED`、`DELETION_PENDING` 回 `200 AUTH_CONTINUATION_REQUIRED`。
+- `nextAction` 僅允許 `VERIFY_EMAIL`、`COMPLETE_ELIGIBILITY`、`REACTIVATE_ACCOUNT`、`REVIEW_SUSPENSION`、`REVIEW_DELETION`。
+- Continuation Credential 使用 32-byte 安全隨機值、URL-safe Base64、10 分鐘有效，Backend 只保存 SHA-256 hash；新核發、會員狀態或 version 改變時撤銷舊值。
+- Continuation Credential 不是 Access Token，不得存取一般會員 API；Flutter 不得把它放入 Authorization Header、SharedPreferences 或一般 Session。
+- `DELETED` 不核發任何 Credential，使用與無效憑證一致的公開錯誤。
 
 ### 2.3 Google 登入
 

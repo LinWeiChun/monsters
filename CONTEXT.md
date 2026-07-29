@@ -8,6 +8,14 @@
 已建立貘nsters 使用者身分的人；會員以驗證過的登入方式存取自己的資料。
 _Avoid_: 病患、個案、帳號名稱
 
+**會員狀態（Member State）**：
+描述會員身分生命週期的七態狀態機；它不包含社群資格或社群限制。
+_Avoid_: 角色、社群資格、單一刪除旗標
+
+**延續憑證（Continuation Credential）**：
+憑證正確但會員尚須完成 Email 驗證、資格、恢復、停權處理或刪除流程時核發的短效用途受限憑證；它不是一般 Session，也不能存取會員 API。
+_Avoid_: Access Token、Refresh Token、登入 Session
+
 **未成年會員（Minor Member）**：
 年滿 13 歲但未滿 18 歲，且必須取得監護人同意才能使用私人核心功能的會員。
 _Avoid_: 兒童使用者、一般成年會員

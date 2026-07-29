@@ -50,7 +50,9 @@
 
 **Blocked by:** None — can start immediately.
 
-**Status:** REVIEW
+**Status:** DONE
+
+**Evidence:** PR #87 已合併至 `feature/phase4.5`；PR #88 修正 Flutter 3.29.2 相依後，Backend unit、MySQL integration、Flutter 與 OpenAPI CI 全部通過。
 
 - [x] 測試環境使用與正式環境相同 major version 的 MySQL，不以 H2 作主要驗收。
 - [x] Auth與Member HTTP整合測試啟用真實Security Filter。
@@ -67,14 +69,16 @@
 
 **Blocked by:** 01 — 建立 Auth／Member 真實驗收骨架。
 
-**Status:** ready-for-agent
+**Status:** REVIEW
 
-- [ ] 支援`PENDING_EMAIL_VERIFICATION`、`PENDING_ELIGIBILITY`、`ACTIVE`、`USER_DEACTIVATED`、`ADMIN_SUSPENDED`、`DELETION_PENDING`及`DELETED`。
-- [ ] 不合法狀態轉換回`409 MEMBER_STATE_CONFLICT`。
-- [ ] 憑證正確但流程未完成時回`200`、`nextAction`及用途受限continuation credential。
-- [ ] Continuation credential不得存取一般會員API。
-- [ ] Community Eligibility與Community Restriction不以會員狀態或Role取代。
-- [ ] 狀態、Outbox、Audit及optimistic version在同一交易更新。
+**Evidence:** 本機已通過 Backend 完整單元測試、MySQL 8.4 完整整合測試、Flyway V1→V2 升級、Flutter 168 項測試、Flutter analyze 與 OpenAPI 契約測試；待推送及 CI／PR review。
+
+- [x] 支援`PENDING_EMAIL_VERIFICATION`、`PENDING_ELIGIBILITY`、`ACTIVE`、`USER_DEACTIVATED`、`ADMIN_SUSPENDED`、`DELETION_PENDING`及`DELETED`。
+- [x] 不合法狀態轉換回`409 MEMBER_STATE_CONFLICT`。
+- [x] 憑證正確但流程未完成時回`200`、`nextAction`及用途受限continuation credential。
+- [x] Continuation credential不得存取一般會員API。
+- [x] Community Eligibility與Community Restriction不以會員狀態或Role取代。
+- [x] 狀態、Outbox、Audit及optimistic version在同一交易更新。
 
 ---
 

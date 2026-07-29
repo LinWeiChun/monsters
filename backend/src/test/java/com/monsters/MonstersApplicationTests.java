@@ -1,11 +1,14 @@
 package com.monsters;
 
 import com.monsters.repository.annoyance.AnnoyanceTypeRepository;
+import com.monsters.repository.audit.MemberStateAuditRepository;
 import com.monsters.repository.entry.EntryMediaRepository;
 import com.monsters.repository.entry.EntryRepository;
 import com.monsters.repository.entry.EntryDraftMediaRepository;
 import com.monsters.repository.entry.EntryDraftRepository;
 import com.monsters.repository.entry.MoodRepository;
+import com.monsters.repository.outbox.OutboxEventRepository;
+import com.monsters.repository.user.MemberContinuationCredentialRepository;
 import com.monsters.repository.user.PasswordResetTokenRepository;
 import com.monsters.repository.user.RevokedTokenRepository;
 import com.monsters.repository.user.UserCredentialRepository;
@@ -40,6 +43,15 @@ class MonstersApplicationTests {
 
     @MockBean
     private UserPasswordLockRepository userPasswordLockRepository;
+
+    @MockBean
+    private MemberContinuationCredentialRepository memberContinuationCredentialRepository;
+
+    @MockBean
+    private MemberStateAuditRepository memberStateAuditRepository;
+
+    @MockBean
+    private OutboxEventRepository outboxEventRepository;
 
     @MockBean
     private EntryRepository entryRepository;

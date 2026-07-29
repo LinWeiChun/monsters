@@ -120,9 +120,9 @@ Spring Boot 只能透過 JPA / Repository 存取資料庫；Flutter 不得直接
 | 加密備份與 R2 舊版本 | 最長 30 天 |
 | 法律保全 | 僅依正式要求的最小範圍與明確期限，定期複核 |
 
-## 三、目前 `develop` 資料表設計（待 Flyway Migration）
+## 三、目前 `develop` 資料表設計（Phase 4.5 逐步 Flyway Migration）
 
-本章描述現有基線，供 Migration 與相容測試使用。凡與第二章衝突者，以第二章為目標規格；不得再新增對 `account`、公開 `avatar_url`、JWT Refresh Token、伺服器 PIN、`entries.is_shared`、`entry_likes` 或 `entry_comments` 的新依賴。
+本章描述現有基線與已完成的 expand 欄位，供 Migration 與相容測試使用。Task 02 已導入 Flyway V1 baseline 與 V2 會員狀態結構；凡與第二章衝突者仍以第二章為目標規格，不得再新增對 `account`、公開 `avatar_url`、JWT Refresh Token、伺服器 PIN、`entries.is_shared`、`entry_likes` 或 `entry_comments` 的新依賴。
 
 ### 3.1 users
 
@@ -131,6 +131,7 @@ Spring Boot 只能透過 JPA / Repository 存取資料庫；Flutter 不得直接
 | 欄位 | 型別 | 約束 | 說明 |
 |---|---|---|---|
 | id | BIGINT | PK | 使用者 ID |
+| public_id | VARCHAR(36) | UNIQUE NOT NULL | 對外不可推測 UUID；既有會員於 V2 回填 |
 | account | VARCHAR(50) | UNIQUE NOT NULL | 舊基線帳號欄位；目標 Schema 移除 |
 | email | VARCHAR(255) | UNIQUE NOT NULL | Email |
 | user_name | VARCHAR(80) | NOT NULL | 顯示名稱 |
@@ -140,6 +141,8 @@ Spring Boot 只能透過 JPA / Repository 存取資料庫；Flutter 不得直接
 | updated_at | DATETIME | NOT NULL | 更新時間 |
 | is_deleted | BOOLEAN | NOT NULL | 是否刪除 |
 | deleted_at | DATETIME | NULL | 刪除時間 |
+| member_state | VARCHAR(40) | NOT NULL DEFAULT `ACTIVE` | 七態會員生命週期；既有會員於 V2 安全回填為 `ACTIVE` |
+| version | BIGINT | NOT NULL DEFAULT 0 | optimistic version |
 
 ### 3.2 user_credentials
 
@@ -203,6 +206,30 @@ Index：
 - Refresh token 成功換發時必須保存舊 refresh token hash 與原 token 過期時間，防止 rotation 後重複使用。
 - JWT 驗證流程必須拒絕存在於本表且尚未過期的 token。
 - 可定期刪除 `expires_at` 已過期的紀錄。
+
+### 3.2.3 member_continuation_credentials
+
+用途受限延續憑證；只保存 SHA-256 hash，不保存或記錄原值。
+
+| 欄位 | 型別 | 約束 | 說明 |
+|---|---|---|---|
+| user_id | BIGINT | FK NOT NULL | 對應會員 |
+| token_hash | VARCHAR(64) | UNIQUE NOT NULL | 32-byte 隨機 credential 的 SHA-256 hex |
+| next_action | VARCHAR(40) | NOT NULL | 限定後續流程 |
+| issued_for_state | VARCHAR(40) | NOT NULL | 核發時會員狀態 |
+| issued_for_version | BIGINT | NOT NULL | 核發時 optimistic version |
+| expires_at | DATETIME | NOT NULL | 固定 10 分鐘到期 |
+| revoked_at | DATETIME | NULL | 新核發、狀態或 version 改變時撤銷 |
+
+Index：`user_id, revoked_at, expires_at`。
+
+### 3.2.4 member_state_audits
+
+保存會員狀態轉移的最小稽核事件：`event_id`、可於會員刪除時設為 NULL 的內部關聯、前後狀態、allowlist `reason_code`、`actor_type` 與事件時間。不得保存 Email、生日、Token、Guardian 資料或私人內容。
+
+### 3.2.5 outbox_events
+
+Task 02 建立共用 Transactional Outbox 基礎，保存 `event_id`、aggregate type／UUID、event type、最小 payload、狀態、嘗試次數與可執行時間。會員狀態、version、Credential 撤銷、Audit 與 Outbox 必須在同一交易提交。
 
 ### 3.3 user_oauth_accounts
 
@@ -745,11 +772,20 @@ Annoyance 與 Diary 列表的 `page`、`size`、`sort` 由共用 Entry 查詢的
 database/init/01_schema.sql
 ```
 
+正式 Flyway：
+
+```text
+backend/src/main/resources/db/migration/V1__current_schema_baseline.sql
+backend/src/main/resources/db/migration/V2__add_member_state_machine.sql
+```
+
 注意事項：
 
 - `database/init/*.sql` 只會在 MySQL Docker volume 第一次建立時執行。
 - 若本機已有 `mysql_data` volume，修改 init SQL 後不會自動套用到既有資料庫。
-- 正式進入資料保存階段後，資料庫結構異動應改用正式 migration 工具或手動 migration script，不得直接依賴 Docker init SQL。
+- Backend 啟動時由 Flyway 驗證不可改寫的版本 migration；空庫由 V1 起建立，既有非空資料庫以 V1 baseline 接軌後套用 V2。
+- 已執行的 V1／V2 不得修改；後續修正只能新增 forward migration。
+- Docker init SQL 固定對齊 V1 baseline，由 Backend 接續執行 V2 以上 migration；不得把新版欄位提前合併回 init 後又重複套用 Flyway。
 
 若需從 `system_data/` 舊資料庫匯入資料，應建立明確的 migration mapping，不得直接將舊表結構搬入新版資料庫。
 

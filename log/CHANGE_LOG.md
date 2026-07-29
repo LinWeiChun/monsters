@@ -8,6 +8,76 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-29 12:32
+
+Task
+Registration Login 02 會員狀態機與 Continuation Credential（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 建立七態會員生命週期、安全優先序與 `DELETED` terminal 規則；外部不提供泛用 `targetState` API。
+- 建立 `completeEligibility` 專用 Command，合法轉移在同一交易更新 optimistic version、撤銷舊 Continuation Credential、寫入 Audit 與 Transactional Outbox。
+- Continuation Credential 使用 32-byte 安全隨機值、10 分鐘到期、Server 只保存 SHA-256 hash；一般 Security Filter 不接受此憑證。
+- 登入與 Google 登入依會員狀態回 `AUTHENTICATED` 或 `AUTH_CONTINUATION_REQUIRED`；Refresh 只允許 `ACTIVE`。
+- Flutter 可解析 continuation 回應，但不設定 Authorization、不保存 credential、不建立 Session或導向首頁。
+- 導入 Flyway V1 baseline 與 V2 會員狀態 migration，驗證空庫建立及既有會員升級。
+- 將 Auth／Member 整合測試改為 Flyway schema＋JPA `validate`，並修正既有 `entry_drafts.score`、`moods.score` 的 `TINYINT` Entity mapping 漂移。
+
+### Modified
+
+- Backend：Auth Controller／Service／DTO、會員狀態與 Continuation Entity／Repository／Service、會員生命週期 Command、Audit、Outbox、錯誤碼、既有 `TINYINT` mapping 與測試。
+- Database：`backend/src/main/resources/db/migration/`、`database/init/README.md`；`database/init/01_schema.sql` 保持 V1 baseline，避免與 V2 重複。
+- Frontend：登入結果模型、Auth Repository／Session Store／Provider、登入頁、首頁 nullable member 顯示與測試。
+- Documentation：`CONTEXT.md`、Project／API／Database／UI／Decision、ADR 0003／0008、OpenAPI 及獨立 Registration Login Task 文件。
+- 未修改 `docs/TASKS.md` 或 `system_data/`。
+
+### system_data Reference
+
+- 檢查舊系統註冊、登入、Google 登入與個人資料流程；舊系統沒有七態會員狀態機、用途受限 Continuation Credential 或 Transactional Outbox 可直接沿用。
+- 正式 Registration Login 規格、決策與 ADR 優先；未修改 `system_data/`。
+
+### API
+
+- `POST /api/auth/login` 與 `POST /api/auth/google-login` 新增穩定 `AUTHENTICATED`／`AUTH_CONTINUATION_REQUIRED` code。
+- 未完成流程回 `nextAction`、`continuationCredential`、`expiresIn: 600`，且不回 Access／Refresh Token。
+- 不合法狀態與 version 衝突分別使用 `409 MEMBER_STATE_CONFLICT`、`409 VERSION_CONFLICT`。
+- OpenAPI 明確分離完整 Session 與 Continuation Response。
+
+### Database
+
+- `users` 新增唯一 `public_id`、`member_state` 與 optimistic `version`。
+- 新增 `member_continuation_credentials`、`member_state_audits`、`outbox_events`。
+- Flyway V1 固定現況 baseline；V2 回填既有會員 UUID、`ACTIVE` 與 version 0，再建立 Task 02 結構。
+
+### UI
+
+- Continuation 回應停留登入頁，依 `nextAction` 顯示安全下一步提示。
+- Continuation Credential 不顯示、不放入 Authorization Header、不寫入 SharedPreferences 或一般 Session。
+
+### Tests
+
+- TDD 紅綠循環：Continuation HTTP／Security Filter、狀態交易、非法狀態、version 衝突、公開錯誤碼、Flyway V1→V2、Flutter Repository／Widget、狀態優先序與 OpenAPI。
+- Backend 完整單元測試：通過。
+- Backend MySQL 8.4 完整整合測試：通過。
+- Flutter 完整測試：168 項通過；`flutter analyze --no-pub` 無問題。
+- 本機 Flutter 為 3.44.6；為避免改寫專案 Flutter 3.29.2／Dart 3.7.2 lockfile，完整測試使用 `--no-pub`。正式版本門檻待 GitHub CI 3.29.2 驗證。
+
+### Log Retention
+
+- 已檢查 `CHANGE_LOG.md`、以原始 CSV parser 檢查 `CHANGE_HISTORY.csv`，並讀取 `CHANGE_HISTORY.xlsx`。
+- 保存期限截止日為 2026-06-29；CSV 與 XLSX 最早紀錄皆為 2026-06-29，未發現早於截止日的紀錄，本次未刪除 Log。
+- CSV 既有 41 筆 9 欄舊格式及 4 個空列未修改；本次新增資料維持 13 欄格式。XLSX 未作為本次紀錄來源且未修改。
+
+### Pending
+
+- Task 02 維持 REVIEW，待推送、GitHub CI 及 PR review；未取得推送或建立 PR 授權。
+- Task 03 必須在 Task 02 合併並轉為 DONE 後才能開始。
+
+---
+
 ## 2026-07-29 10:54
 
 Task

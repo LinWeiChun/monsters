@@ -49,7 +49,7 @@ public class AuthController {
             @Valid @RequestBody LoginRequest request
     ) {
         LoginResponse response = authService.login(request);
-        return ResponseEntity.ok(ApiResponse.success("Login success", response));
+        return ResponseEntity.ok(loginApiResponse(response, "Login success"));
     }
 
     @PostMapping("/google-login")
@@ -57,7 +57,7 @@ public class AuthController {
             @Valid @RequestBody GoogleLoginRequest request
     ) {
         LoginResponse response = authService.googleLogin(request);
-        return ResponseEntity.ok(ApiResponse.success("Google login success", response));
+        return ResponseEntity.ok(loginApiResponse(response, "Google login success"));
     }
 
     @PostMapping("/refresh")
@@ -65,7 +65,11 @@ public class AuthController {
             @Valid @RequestBody RefreshTokenRequest request
     ) {
         LoginResponse response = authService.refresh(request);
-        return ResponseEntity.ok(ApiResponse.success("Token refresh success", response));
+        return ResponseEntity.ok(ApiResponse.success(
+                "AUTHENTICATED",
+                "Token refresh success",
+                response
+        ));
     }
 
     @PostMapping("/forgot-password")
@@ -108,5 +112,16 @@ public class AuthController {
             throw new UnauthorizedException("尚未登入或 Token 無效");
         }
         return token;
+    }
+
+    private ApiResponse<LoginResponse> loginApiResponse(LoginResponse response, String successMessage) {
+        if (response.requiresContinuation()) {
+            return ApiResponse.success(
+                    "AUTH_CONTINUATION_REQUIRED",
+                    "Additional member verification is required",
+                    response
+            );
+        }
+        return ApiResponse.success("AUTHENTICATED", successMessage, response);
     }
 }

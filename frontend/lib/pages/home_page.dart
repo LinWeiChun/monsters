@@ -15,7 +15,7 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userName = ref.watch(
       authControllerProvider.select(
-        (state) => state.loginResult?.user.userName.trim(),
+        (state) => state.loginResult?.user?.userName.trim(),
       ),
     );
     final greetingName = userName == null || userName.isEmpty ? '你' : userName;

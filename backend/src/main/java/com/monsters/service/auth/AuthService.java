@@ -22,6 +22,7 @@ import com.monsters.dto.auth.RegisterResponse;
 import com.monsters.dto.auth.RefreshTokenRequest;
 import com.monsters.dto.auth.ResetPasswordRequest;
 import com.monsters.entity.user.PasswordResetToken;
+import com.monsters.entity.user.MemberState;
 import com.monsters.entity.user.User;
 import com.monsters.entity.user.UserCredential;
 import com.monsters.entity.user.UserOAuthAccount;
@@ -55,6 +56,7 @@ public class AuthService {
 	private final GoogleIdTokenVerifier googleIdTokenVerifier;
 	private final PasswordResetTokenService passwordResetTokenService;
 	private final TokenRevocationService tokenRevocationService;
+	private final ContinuationCredentialService continuationCredentialService;
 	private final Clock clock;
 
 	@Autowired
@@ -63,7 +65,7 @@ public class AuthService {
 			PasswordResetTokenRepository passwordResetTokenRepository, PasswordEncoder passwordEncoder,
 			JwtTokenService jwtTokenService, JwtProperties jwtProperties, GoogleIdTokenVerifier googleIdTokenVerifier,
 			PasswordResetTokenService passwordResetTokenService, TokenRevocationService tokenRevocationService,
-			Clock clock) {
+			ContinuationCredentialService continuationCredentialService, Clock clock) {
 		this.userRepository = userRepository;
 		this.userCredentialRepository = userCredentialRepository;
 		this.userOAuthAccountRepository = userOAuthAccountRepository;
@@ -74,6 +76,7 @@ public class AuthService {
 		this.googleIdTokenVerifier = googleIdTokenVerifier;
 		this.passwordResetTokenService = passwordResetTokenService;
 		this.tokenRevocationService = tokenRevocationService;
+		this.continuationCredentialService = continuationCredentialService;
 		this.clock = clock;
 	}
 
@@ -99,7 +102,7 @@ public class AuthService {
 				savedUser.getUserName());
 	}
 
-	@Transactional(readOnly = true)
+	@Transactional
 	public LoginResponse login(LoginRequest request) {
 		String email = normalizeEmail(request.email());
 
@@ -113,7 +116,7 @@ public class AuthService {
 			throw new UnauthorizedException("Invalid email or password");
 		}
 
-		return createLoginResponse(user);
+		return createAuthenticationResponse(user);
 	}
 
 	@Transactional
@@ -127,7 +130,7 @@ public class AuthService {
 
 		User user = oauthAccount.map(UserOAuthAccount::getUser).orElseGet(() -> findOrCreateGoogleUser(googleUser));
 
-		return createLoginResponse(user);
+		return createAuthenticationResponse(user);
 	}
 
 	@Transactional
@@ -135,7 +138,10 @@ public class AuthService {
 		JwtTokenPayload payload = tokenRevocationService.consumeRefreshToken(request.refreshToken());
 		User user = userRepository.findByIdAndDeletedFalse(payload.userId())
 				.orElseThrow(() -> new UnauthorizedException("Invalid refresh token"));
-		return createLoginResponse(user);
+		if (user.getMemberState() != MemberState.ACTIVE) {
+			throw new UnauthorizedException("Invalid refresh token");
+		}
+		return createAuthenticatedResponse(user);
 	}
 
 	@Transactional
@@ -184,11 +190,31 @@ public class AuthService {
 		return user;
 	}
 
-	private LoginResponse createLoginResponse(User user) {
+	private LoginResponse createAuthenticationResponse(User user) {
+		if (user.getMemberState() == MemberState.DELETED) {
+			throw new UnauthorizedException("Invalid email or password");
+		}
+		if (user.getMemberState() != MemberState.ACTIVE) {
+			IssuedContinuationCredential credential = continuationCredentialService.issueFor(user);
+			return LoginResponse.continuation(
+					credential.credential(),
+					credential.nextAction(),
+					credential.expiresIn()
+			);
+		}
+		return createAuthenticatedResponse(user);
+	}
+
+	private LoginResponse createAuthenticatedResponse(User user) {
 		AuthUserResponse authUser = new AuthUserResponse(user.getId(), user.getAccount(), user.getEmail(),
 				user.getUserName(), user.getAvatarUrl());
-		return new LoginResponse(jwtTokenService.createAccessToken(user), jwtTokenService.createRefreshToken(user),
-				"Bearer", jwtProperties.accessTokenExpirationSeconds(), authUser);
+		return LoginResponse.authenticated(
+				jwtTokenService.createAccessToken(user),
+				jwtTokenService.createRefreshToken(user),
+				"Bearer",
+				jwtProperties.accessTokenExpirationSeconds(),
+				authUser
+		);
 	}
 
 	private String displayName(GoogleUserInfo googleUser) {

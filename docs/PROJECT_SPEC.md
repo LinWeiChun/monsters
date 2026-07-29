@@ -44,7 +44,7 @@
 - 不提供使用者自訂 `account`；Email／密碼帳號以已驗證 Email 登入，Google 帳號以已連結 Google `sub` 登入
 - Email／密碼註冊後進入 `PENDING_EMAIL_VERIFICATION`，完成 Email 驗證前不得建立私人內容
 - 完成 Email 驗證後進入生日、服務地區與年齡資格流程
-- 13 至 17 歲進入 `PENDING_GUARDIAN_CONSENT`；監護人以一次性 Email 連結同意特定版本條款，但不能查看會員內容
+- 13 至 17 歲的 Guardian Consent 為 `PENDING_ELIGIBILITY` 內的資格子流程，以 `nextAction` 表達；監護人以一次性 Email 連結同意特定版本條款，但不能查看會員內容
 - Google Email 必須為已驗證；Google Email 與既有會員相同時不得自動合併，需先重新驗證既有登入方式並明確連結
 - 一般會員 Access Token 有效 10 分鐘；工作階段閒置 30 天或最長 90 天後需完整登入
 - Refresh Token 為可輪替的不透明 Token；Web 存於 HttpOnly Cookie，Android／iOS 存於 Keychain／Keystore

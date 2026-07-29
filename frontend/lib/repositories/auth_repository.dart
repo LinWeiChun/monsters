@@ -32,9 +32,7 @@ class AuthRepository {
       throw ApiException(type: ApiErrorType.unknown, message: response.message);
     }
 
-    _apiClient.setAccessToken(response.data.accessToken);
-    await _sessionStore.saveSession(response.data);
-    _onAuthenticationChanged?.call(true);
+    await _applyLoginResult(response.data);
     return response.data;
   }
 
@@ -50,9 +48,7 @@ class AuthRepository {
       throw ApiException(type: ApiErrorType.unknown, message: response.message);
     }
 
-    _apiClient.setAccessToken(response.data.accessToken);
-    await _sessionStore.saveSession(response.data);
-    _onAuthenticationChanged?.call(true);
+    await _applyLoginResult(response.data);
     return response.data;
   }
 
@@ -63,7 +59,7 @@ class AuthRepository {
       return null;
     }
 
-    return _exchangeRefreshToken(loginResult.refreshToken);
+    return _exchangeRefreshToken(loginResult.refreshToken!);
   }
 
   Future<String?> refreshAccessToken() async {
@@ -74,7 +70,7 @@ class AuthRepository {
     }
 
     try {
-      final refreshed = await _exchangeRefreshToken(loginResult.refreshToken);
+      final refreshed = await _exchangeRefreshToken(loginResult.refreshToken!);
       return refreshed.accessToken;
     } on ApiException catch (error) {
       if (error.type == ApiErrorType.unauthorized) {
@@ -145,9 +141,14 @@ class AuthRepository {
         );
       }
 
-      _apiClient.setAccessToken(response.data.accessToken);
-      await _sessionStore.saveSession(response.data);
-      _onAuthenticationChanged?.call(true);
+      if (!response.data.isAuthenticated) {
+        await _invalidateSession();
+        throw const ApiException(
+          type: ApiErrorType.unauthorized,
+          message: 'Session refresh did not return an authenticated session',
+        );
+      }
+      await _applyLoginResult(response.data);
       return response.data;
     } on ApiException catch (error) {
       if (error.type == ApiErrorType.unauthorized) {
@@ -161,5 +162,16 @@ class AuthRepository {
     _apiClient.setAccessToken(null);
     await _sessionStore.clearSession();
     _onAuthenticationChanged?.call(false);
+  }
+
+  Future<void> _applyLoginResult(LoginResult result) async {
+    if (!result.isAuthenticated) {
+      await _invalidateSession();
+      return;
+    }
+
+    _apiClient.setAccessToken(result.accessToken);
+    await _sessionStore.saveSession(result);
+    _onAuthenticationChanged?.call(true);
   }
 }

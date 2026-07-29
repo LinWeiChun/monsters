@@ -12,6 +12,13 @@ class AuthSessionStore {
   static const String _lastOpenedAtKey = 'auth.lastOpenedAt';
 
   Future<void> saveSession(LoginResult loginResult, {DateTime? now}) async {
+    if (!loginResult.isAuthenticated) {
+      throw ArgumentError.value(
+        loginResult,
+        'loginResult',
+        'Only authenticated sessions can be saved',
+      );
+    }
     final preferences = await SharedPreferences.getInstance();
     final openedAt = now ?? DateTime.now();
 

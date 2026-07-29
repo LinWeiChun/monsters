@@ -4,24 +4,37 @@ import 'auth_user.dart';
 
 part 'login_result.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class LoginResult {
   const LoginResult({
-    required this.accessToken,
-    required this.refreshToken,
-    required this.tokenType,
+    this.accessToken,
+    this.refreshToken,
+    this.tokenType,
     required this.expiresIn,
-    required this.user,
+    this.user,
+    this.nextAction,
+    this.continuationCredential,
   });
 
   factory LoginResult.fromJson(Map<String, dynamic> json) =>
       _$LoginResultFromJson(json);
 
-  final String accessToken;
-  final String refreshToken;
-  final String tokenType;
+  final String? accessToken;
+  final String? refreshToken;
+  final String? tokenType;
   final int expiresIn;
-  final AuthUser user;
+  final AuthUser? user;
+  final String? nextAction;
+  final String? continuationCredential;
+
+  bool get isAuthenticated =>
+      accessToken != null &&
+      refreshToken != null &&
+      tokenType != null &&
+      user != null;
+
+  bool get requiresContinuation =>
+      continuationCredential != null && nextAction != null && !isAuthenticated;
 
   Map<String, dynamic> toJson() => _$LoginResultToJson(this);
 }

@@ -43,6 +43,52 @@ class RegistrationLoginOpenApiContractTest {
                 .containsEntry("format", "uuid");
     }
 
+    @Test
+    void loginContractShouldSeparateAuthenticatedAndContinuationResponses() throws IOException {
+        Map<String, Object> document;
+        try (var reader = Files.newBufferedReader(CONTRACT_PATH)) {
+            document = new Yaml().load(reader);
+        }
+
+        Map<String, Object> authenticated = mapAt(
+                document,
+                "components",
+                "schemas",
+                "AuthenticatedLoginData"
+        );
+        assertThat(listAt(authenticated, "required")).contains(
+                "accessToken",
+                "refreshToken",
+                "tokenType",
+                "expiresIn",
+                "user"
+        );
+
+        Map<String, Object> continuation = mapAt(
+                document,
+                "components",
+                "schemas",
+                "ContinuationLoginData"
+        );
+        assertThat(listAt(continuation, "required")).containsExactlyInAnyOrder(
+                "nextAction",
+                "continuationCredential",
+                "expiresIn"
+        );
+        assertThat(mapAt(continuation, "properties").keySet())
+                .doesNotContain("accessToken", "refreshToken");
+
+        Map<String, Object> successResponse = mapAt(
+                document,
+                "paths",
+                "/api/auth/login",
+                "post",
+                "responses",
+                "200"
+        );
+        assertThat(successResponse).containsKey("content");
+    }
+
     @SuppressWarnings("unchecked")
     private Map<String, Object> mapAt(Map<String, Object> source, String... path) {
         Object current = source;
