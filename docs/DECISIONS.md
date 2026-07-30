@@ -223,13 +223,14 @@ Phase 4.5 已核准決策的可交付規格與測試接縫整理於 [`PHASE4_5_F
 | ORM | Spring Data JPA |
 | Validation | Jakarta Validation |
 | Security | Spring Security + JWT |
+| Email Adapter | Spring Boot Mail Starter + provider-neutral SMTP |
 | Build Tool | Gradle |
 
 ## 三、待細化事項
 
 | 項目 | 目前狀態 |
 |------|----------|
-| SMTP 供應商與設定 | 原則已定案為正式 Email link、環境隔離與 Secret 管理；實際 provider、host、port、TLS 與寄件網域待部署 Task 選型 |
+| SMTP 供應商與設定 | Backend 固定使用 Spring Boot Mail Starter 的 provider-neutral SMTP Adapter；實際 provider、host、port、TLS 與寄件網域由各 Railway 環境選型並以 Secret 注入 |
 | Web 管理後台 UI | 權限模型已由 0.4 定案；實際路由、畫面與 provider 待管理後台 Task 細化 |
 | 舊 API 對照表 | 待建立：需依 `system_data/` 舊後端與舊前端呼叫整理完整對照 |
 | 舊 Flutter UI 對照清單 | 待建立：需依 `system_data/` 舊 Flutter 頁面整理流程、元件、狀態與素材 |

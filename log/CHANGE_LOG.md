@@ -8,6 +8,82 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-29 16:14
+
+Task
+Registration Login 03 註冊與 Email 驗證流程（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 建立目前條款／隱私版本查詢、只收 Email 與密碼的初始註冊，以及新舊 Email 不可列舉的統一 `202 REGISTRATION_ACCEPTED` 回應。
+- 建立 24 小時單次 Email 驗證 Token；Server 只保存 SHA-256 hash，完成驗證後原子轉為 `PENDING_ELIGIBILITY` 並建立用途受限 Continuation Credential。
+- 建立重寄驗證信、舊 Token 撤銷、Email 60 秒冷卻、Email／IP 15 分鐘多維度限流與 `Retry-After`。
+- 建立 provider-neutral SMTP Adapter、Transactional Outbox 寄信 Worker、最多五次指數退避，以及七日空會員批次清理。
+- Flutter 完成註冊、條款／隱私版本提交、已受理、待驗證、重寄冷卻、Token 過期／無效與重新開始流程。
+- Railway 公開 Backend 環境已文件化：develop 對應 `https://monsters-staging.up.railway.app`，main 對應 `https://monsters-production-9535.up.railway.app`；Flutter 使用各自 `/api` Base URL。
+
+### Modified
+
+- Backend：Registration Controller／Service／DTO、驗證 Token／條款接受／限流 Entity 與 Repository、SMTP Adapter、Outbox Worker、清理工作、例外處理、Security 與測試。
+- Database：新增 Flyway V3 註冊、Email 驗證、條款接受與限流結構；既有 `users.account`／`user_name` 改為可空。
+- Frontend：Registration Policy model、Auth Repository／Provider、註冊頁、待驗證頁、驗證結果頁、Route、錯誤處理與測試。
+- Documentation：README、Backend／Frontend README、Project／API／Database／UI／Decision、OpenAPI、Migration README 與獨立 Registration Login Task 文件。
+- 未修改 `docs/TASKS.md`、`system_data/` 或管理者功能。
+
+### system_data Reference
+
+- 已檢查舊系統註冊、登入與 Email 流程；可參考既有 Spring／Flutter 分層，但舊流程沒有不可列舉回應、用途受限 Continuation Credential、持久化多維度限流或 Outbox 寄信保證可直接沿用。
+- 正式 Registration Login 規格、決策與 ADR 優先；未修改 `system_data/`。
+
+### API
+
+- 新增 `GET /api/v1/auth/registration-policy`。
+- 新增 `POST /api/v1/auth/register`、`POST /api/v1/auth/email-verification-requests` 與 `POST /api/v1/auth/email-verifications`。
+- 新增穩定 `REGISTRATION_ACCEPTED`、`EMAIL_VERIFIED`、Token 錯誤與 `RATE_LIMITED` 回應；限流回傳 `Retry-After` 及 `data.retryAfter`。
+- 所有 Email 存在性相關公開回應維持不可列舉，驗證前不發一般 Session。
+
+### Database
+
+- 新增 `member_document_acceptances`、`email_verification_tokens`、`registration_rate_limit_buckets`。
+- V3 Migration 支援空庫及既有 V2 schema 升級；Email／IP 限流識別只保存 HMAC hash。
+- 七日清理只刪除未驗證且沒有私人資料或關聯資料的空會員，使用批次鎖避免競爭。
+
+### UI
+
+- 初始註冊不再要求帳號或暱稱，只提交 Email、密碼與目前條款／隱私版本。
+- 待驗證頁使用一般化已受理文案，重寄後顯示 60 秒冷卻。
+- `/verify-email?token=...` 依穩定 code 顯示完成、過期、無效或重新開始流程。
+- 條款與隱私 URL 以可選取文字呈現；未新增未授權的外部連結套件。
+
+### Tests
+
+- Backend 完整單元測試：282 項通過、4 項 skipped。
+- Backend MySQL 8.4 完整整合測試：通過。
+- Flutter 完整測試：169 項通過；`flutter analyze --no-pub` 無問題。
+- Flutter Web staging build：使用 `API_BASE_URL=https://monsters-staging.up.railway.app/api` 通過；僅有既存 CupertinoIcons font 警告。
+- OpenAPI 契約測試、Flyway 空庫與 V2→V3 升級測試：通過。
+
+### Log Retention
+
+- 已檢查 `CHANGE_LOG.md`、以試算表工具唯讀檢查 `CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`。
+- 保存期限截止日為 2026-06-29；CSV 與 XLSX 最早紀錄皆為 2026-06-29，未發現早於截止日的紀錄，本次未刪除 Log。
+- CSV 與 XLSX 使用範圍皆為 13 欄；XLSX 未修改。
+
+### Deployment
+
+- Railway Backend URL 不寫死於應用程式碼；Flutter 由各分支建置時的 `API_BASE_URL` 注入。
+- Railway 尚需依環境設定條款／隱私版本與 URL、Frontend 驗證 URL、CORS、限流 HMAC secret、SMTP 及 Worker／Cleanup 開關。
+
+### Pending
+
+- Task 03 維持 REVIEW；本地提交已完成，待使用者決定是否推送並建立 PR，再由 GitHub CI 與 PR review 驗證。
+- 未取得各環境 Flutter Web 公開 URL 與 SMTP provider 設定，因此寄信 Worker 預設維持停用；不影響程式碼與契約驗收。
+
+---
+
 ## 2026-07-29 12:32
 
 Task

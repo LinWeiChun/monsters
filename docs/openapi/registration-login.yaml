@@ -1,8 +1,134 @@
 openapi: 3.1.0
 info:
   title: Monsters Registration and Login Contract
-  version: 0.1.0
+  version: 0.2.0
 paths:
+  /api/v1/auth/registration-policy:
+    get:
+      summary: Read the current required Terms and Privacy documents
+      operationId: getRegistrationPolicy
+      responses:
+        "200":
+          description: Current registration policy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegistrationPolicyEnvelope"
+        "503":
+          description: Required document configuration is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+  /api/v1/auth/register:
+    post:
+      summary: Accept an email registration without disclosing membership
+      operationId: registerMember
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegistrationRequest"
+      responses:
+        "202":
+          description: Registration request safely accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegistrationAcceptedEnvelope"
+        "400":
+          description: Request validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "409":
+          description: Accepted document versions are no longer current
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "429":
+          description: Registration or resend rate limit reached
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RateLimitEnvelope"
+        "503":
+          description: Registration configuration is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+  /api/v1/auth/email-verification-requests:
+    post:
+      summary: Safely request another email verification message
+      operationId: resendEmailVerification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailVerificationResendRequest"
+      responses:
+        "202":
+          description: Request accepted for known and unknown email alike
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailVerificationRequestAcceptedEnvelope"
+        "400":
+          description: Request validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "429":
+          description: Cooldown or multidimensional rate limit reached
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RateLimitEnvelope"
+        "503":
+          description: Registration configuration is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+  /api/v1/auth/email-verifications:
+    post:
+      summary: Consume a single-use email verification token
+      operationId: verifyMemberEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailVerificationRequest"
+      responses:
+        "200":
+          description: Email verified and eligibility continuation issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailVerifiedEnvelope"
+        "400":
+          description: Token is invalid, used, revoked, or expired
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
   /api/auth/login:
     post:
       summary: Authenticate a member or continue an incomplete member flow
@@ -59,6 +185,131 @@ components:
         requestId:
           type: string
           format: uuid
+    RegistrationPolicyData:
+      type: object
+      additionalProperties: false
+      required:
+        - termsVersion
+        - termsUrl
+        - privacyVersion
+        - privacyUrl
+      properties:
+        termsVersion:
+          type: string
+          minLength: 1
+        termsUrl:
+          type: string
+          format: uri
+          pattern: "^https://"
+        privacyVersion:
+          type: string
+          minLength: 1
+        privacyUrl:
+          type: string
+          format: uri
+          pattern: "^https://"
+    RegistrationPolicyEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            code:
+              const: REGISTRATION_POLICY_AVAILABLE
+            data:
+              $ref: "#/components/schemas/RegistrationPolicyData"
+    RegistrationRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - email
+        - password
+        - acceptedTermsVersion
+        - acceptedPrivacyVersion
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        password:
+          type: string
+          format: password
+          writeOnly: true
+        acceptedTermsVersion:
+          type: string
+          minLength: 1
+          maxLength: 80
+        acceptedPrivacyVersion:
+          type: string
+          minLength: 1
+          maxLength: 80
+    RegistrationAcceptedEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            code:
+              const: REGISTRATION_ACCEPTED
+            data:
+              type: "null"
+    EmailVerificationResendRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+    EmailVerificationRequestAcceptedEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            code:
+              const: EMAIL_VERIFICATION_REQUEST_ACCEPTED
+            data:
+              type: "null"
+    EmailVerificationRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 512
+          writeOnly: true
+          description: Raw 24-hour single-use token; the server stores only its SHA-256 hash.
+    EmailVerifiedEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            code:
+              const: EMAIL_VERIFIED
+            data:
+              $ref: "#/components/schemas/ContinuationLoginData"
+    RateLimitData:
+      type: object
+      additionalProperties: false
+      required:
+        - retryAfter
+      properties:
+        retryAfter:
+          type: integer
+          format: int64
+          minimum: 1
+    RateLimitEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            code:
+              const: RATE_LIMITED
+            data:
+              $ref: "#/components/schemas/RateLimitData"
     LoginRequest:
       type: object
       required:

@@ -7,6 +7,8 @@ class AppRoute {
   static const home = 'home';
   static const login = 'login';
   static const register = 'register';
+  static const emailVerificationPending = 'emailVerificationPending';
+  static const emailVerification = 'emailVerification';
   static const profile = 'profile';
   static const passwordLock = 'passwordLock';
 }
@@ -20,6 +22,8 @@ class AppPath {
   static const home = '/home';
   static const login = '/login';
   static const register = '/register';
+  static const emailVerificationPending = '/register/email-pending';
+  static const emailVerification = '/verify-email';
   static const profile = '/profile';
   static const passwordLock = '/password-lock';
 }

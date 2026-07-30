@@ -57,4 +57,38 @@ public class OutboxEvent extends BaseEntity {
         this.attempts = 0;
         this.availableAt = availableAt;
     }
+
+    public String getAggregateId() {
+        return aggregateId;
+    }
+
+    public String getEventType() {
+        return eventType;
+    }
+
+    public OutboxStatus getStatus() {
+        return status;
+    }
+
+    public int getAttempts() {
+        return attempts;
+    }
+
+    public void markCompleted() {
+        status = OutboxStatus.COMPLETED;
+    }
+
+    public void markProcessing() {
+        status = OutboxStatus.PROCESSING;
+    }
+
+    public void markDeliveryFailure(LocalDateTime nextAttemptAt, int maxAttempts) {
+        attempts++;
+        if (attempts >= maxAttempts) {
+            status = OutboxStatus.FAILED;
+            return;
+        }
+        status = OutboxStatus.PENDING;
+        availableAt = nextAttemptAt;
+    }
 }

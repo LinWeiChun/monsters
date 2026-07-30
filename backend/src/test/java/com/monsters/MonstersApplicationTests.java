@@ -8,6 +8,9 @@ import com.monsters.repository.entry.EntryDraftMediaRepository;
 import com.monsters.repository.entry.EntryDraftRepository;
 import com.monsters.repository.entry.MoodRepository;
 import com.monsters.repository.outbox.OutboxEventRepository;
+import com.monsters.repository.registration.RegistrationRateLimitBucketRepository;
+import com.monsters.repository.user.EmailVerificationTokenRepository;
+import com.monsters.repository.user.MemberDocumentAcceptanceRepository;
 import com.monsters.repository.user.MemberContinuationCredentialRepository;
 import com.monsters.repository.user.PasswordResetTokenRepository;
 import com.monsters.repository.user.RevokedTokenRepository;
@@ -18,6 +21,7 @@ import com.monsters.repository.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @SpringBootTest(properties = {
         "spring.autoconfigure.exclude="
@@ -52,6 +56,18 @@ class MonstersApplicationTests {
 
     @MockBean
     private OutboxEventRepository outboxEventRepository;
+
+    @MockBean
+    private MemberDocumentAcceptanceRepository memberDocumentAcceptanceRepository;
+
+    @MockBean
+    private EmailVerificationTokenRepository emailVerificationTokenRepository;
+
+    @MockBean
+    private RegistrationRateLimitBucketRepository registrationRateLimitBucketRepository;
+
+    @MockBean
+    private JdbcTemplate jdbcTemplate;
 
     @MockBean
     private EntryRepository entryRepository;

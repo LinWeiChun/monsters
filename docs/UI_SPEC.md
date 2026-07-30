@@ -512,14 +512,19 @@ REST API
 | Page | `frontend/lib/pages/register_page.dart` |
 | Provider | `frontend/lib/providers/auth_provider.dart` |
 | Repository | `frontend/lib/repositories/auth_repository.dart` |
-| Model | `frontend/lib/models/register_result.dart` |
+| Model | `frontend/lib/models/registration_policy.dart`、`frontend/lib/models/login_result.dart` |
+| Waiting Page | `frontend/lib/pages/email_verification_pending_page.dart` |
+| Verification Page | `frontend/lib/pages/email_verification_page.dart` |
 
 規則：
 
 - 註冊頁不得直接呼叫 Dio。
 - 註冊頁不得保存密碼或 token 至 SharedPreferences。
 - 註冊頁不得顯示或傳送 `account`。
-- 註冊後顯示重新寄送驗證信、修正 Email 與刪除未完成帳號入口。
+- 註冊頁必須先讀取公開 Registration Policy，顯示目前 Terms／Privacy URL，並送出兩個實際接受版本。
+- 註冊後顯示通用受理說明、修正 Email 與重新寄送驗證信入口；不得揭露 Email 是否已有會員。
+- 重寄按鈕顯示 60 秒倒數；Backend 的 `429 RATE_LIMITED` 與 `retryAfter` 仍是安全強制來源。
+- `/verify-email?token=...` 只在記憶體消耗 Token；成功顯示 Eligibility 下一步，過期或無效時提供重新開始，不保存 Continuation Credential。
 - 13 至 17 歲使用者完成 Email 驗證後仍處於 `PENDING_ELIGIBILITY`，以 `nextAction` 進入監護人同意等待頁；未滿 13 歲或非台灣服務地區不得進入 App。
 ## Flutter Profile Page 實作規範
 

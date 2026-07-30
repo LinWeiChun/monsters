@@ -5,12 +5,16 @@ class ApiException implements Exception {
     required this.type,
     required this.message,
     this.statusCode,
+    this.code,
+    this.retryAfter,
     this.cause,
   });
 
   final ApiErrorType type;
   final String message;
   final int? statusCode;
+  final String? code;
+  final int? retryAfter;
   final Object? cause;
 
   @override

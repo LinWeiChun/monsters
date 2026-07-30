@@ -76,6 +76,8 @@ class ApiErrorHandler {
       type: type,
       message: _messageFromResponse(response) ?? _defaultMessage(type),
       statusCode: statusCode,
+      code: _codeFromResponse(response),
+      retryAfter: _retryAfterFromResponse(response),
       cause: exception,
     );
   }
@@ -95,6 +97,7 @@ class ApiErrorHandler {
       403 => ApiErrorType.forbidden,
       404 => ApiErrorType.notFound,
       409 => ApiErrorType.conflict,
+      429 => ApiErrorType.rateLimited,
       _ => ApiErrorType.unknown,
     };
   }
@@ -111,6 +114,28 @@ class ApiErrorHandler {
     return null;
   }
 
+  String? _codeFromResponse(Response<Object?>? response) {
+    final data = response?.data;
+    if (data is Map<String, dynamic>) {
+      return data['code'] as String?;
+    }
+    return null;
+  }
+
+  int? _retryAfterFromResponse(Response<Object?>? response) {
+    final data = response?.data;
+    if (data is Map<String, dynamic>) {
+      final responseData = data['data'];
+      if (responseData is Map<String, dynamic>) {
+        final retryAfter = responseData['retryAfter'];
+        if (retryAfter is int) {
+          return retryAfter;
+        }
+      }
+    }
+    return int.tryParse(response?.headers.value('retry-after') ?? '');
+  }
+
   String _defaultMessage(ApiErrorType type) {
     return switch (type) {
       ApiErrorType.network => 'Network connection failed.',
@@ -121,6 +146,7 @@ class ApiErrorHandler {
       ApiErrorType.conflict => 'Resource conflict.',
       ApiErrorType.validation => 'Invalid request.',
       ApiErrorType.server => 'Server error.',
+      ApiErrorType.rateLimited => 'Too many requests.',
       ApiErrorType.cancelled => 'Request was cancelled.',
       ApiErrorType.unknown => 'Unexpected error.',
     };

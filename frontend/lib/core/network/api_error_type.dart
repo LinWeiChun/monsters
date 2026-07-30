@@ -7,6 +7,7 @@ enum ApiErrorType {
   conflict,
   validation,
   server,
+  rateLimited,
   cancelled,
   unknown,
 }

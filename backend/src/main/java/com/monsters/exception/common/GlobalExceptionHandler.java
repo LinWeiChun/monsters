@@ -1,6 +1,7 @@
 package com.monsters.exception.common;
 
 import com.monsters.dto.common.ApiResponse;
+import com.monsters.dto.common.RateLimitResponse;
 import jakarta.validation.ConstraintViolationException;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -36,6 +37,22 @@ public class GlobalExceptionHandler {
                 exception.getMessage(),
                 Map.of()
         );
+    }
+
+    @ExceptionHandler(RateLimitException.class)
+    public ResponseEntity<ApiResponse<RateLimitResponse>> handleRateLimitException(
+            RateLimitException exception
+    ) {
+        log.warn("Registration request rate limited");
+        return ResponseEntity
+                .status(HttpStatus.TOO_MANY_REQUESTS)
+                .header("Retry-After", Long.toString(exception.getRetryAfter()))
+                .body(ApiResponse.failure(
+                        exception.getCode(),
+                        exception.getMessage(),
+                        Map.of(),
+                        new RateLimitResponse(exception.getRetryAfter())
+                ));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

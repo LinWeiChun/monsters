@@ -46,14 +46,28 @@ public class AuthMemberControlledDependencies {
     public static final class RecordingEmailDelivery implements EmailDeliveryPort {
 
         private final List<EmailDeliveryRequest> requests = new ArrayList<>();
+        private int failuresRemaining;
 
         @Override
         public void deliver(EmailDeliveryRequest request) {
+            if (failuresRemaining > 0) {
+                failuresRemaining--;
+                throw new IllegalStateException("Synthetic email delivery failure");
+            }
             requests.add(request);
         }
 
         public List<EmailDeliveryRequest> requests() {
             return List.copyOf(requests);
+        }
+
+        public void failNext(int count) {
+            failuresRemaining = count;
+        }
+
+        public void reset() {
+            failuresRemaining = 0;
+            requests.clear();
         }
     }
 
@@ -68,6 +82,10 @@ public class AuthMemberControlledDependencies {
 
         public List<AsyncJob> jobs() {
             return List.copyOf(jobs);
+        }
+
+        public void reset() {
+            jobs.clear();
         }
     }
 

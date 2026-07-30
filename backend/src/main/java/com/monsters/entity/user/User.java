@@ -24,7 +24,7 @@ public class User extends BaseEntity {
     @Column(name = "email", nullable = false, length = 255, unique = true)
     private String email;
 
-    @Column(name = "user_name", nullable = false, length = 80)
+    @Column(name = "user_name", length = 80)
     private String userName;
 
     @Column(name = "birthday")
@@ -59,6 +59,15 @@ public class User extends BaseEntity {
         this.memberState = MemberState.ACTIVE;
     }
 
+    public static User pendingEmailVerification(String email) {
+        User user = new User();
+        user.publicId = UUID.randomUUID().toString();
+        user.email = email;
+        user.deleted = false;
+        user.memberState = MemberState.PENDING_EMAIL_VERIFICATION;
+        return user;
+    }
+
     public void updateProfile(String userName, LocalDate birthday) {
         this.userName = userName;
         this.birthday = birthday;
@@ -73,6 +82,13 @@ public class User extends BaseEntity {
             throw new IllegalStateException("Member is not pending eligibility");
         }
         memberState = MemberState.ACTIVE;
+    }
+
+    public void completeEmailVerification() {
+        if (memberState != MemberState.PENDING_EMAIL_VERIFICATION) {
+            throw new IllegalStateException("Member is not pending email verification");
+        }
+        memberState = MemberState.PENDING_ELIGIBILITY;
     }
 
     public String getAccount() {
