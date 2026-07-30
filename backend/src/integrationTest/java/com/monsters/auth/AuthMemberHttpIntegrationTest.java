@@ -216,6 +216,7 @@ class AuthMemberHttpIntegrationTest {
                 .containsEntry("event_type", "EMAIL_VERIFICATION_REQUESTED")
                 .containsEntry("status", "PENDING");
         assertThat(outbox.get("payload").toString()).doesNotContain(syntheticEmail, syntheticPassword);
+        assertThat(output.getAll()).contains("Registration request accepted");
         assertThat(output.getAll()).doesNotContain(syntheticEmail, syntheticPassword);
     }
 
@@ -673,6 +674,13 @@ class AuthMemberHttpIntegrationTest {
                 Integer.class,
                 syntheticEmail
         )).isZero();
+        assertThat(output.getAll())
+                .contains(
+                        "Email verification delivery failed",
+                        "EMAIL_VERIFICATION_DELIVERY_FAILED",
+                        "at com.monsters"
+                )
+                .doesNotContain("Synthetic email delivery failure");
         assertThat(output.getAll()).doesNotContain(syntheticEmail);
     }
 

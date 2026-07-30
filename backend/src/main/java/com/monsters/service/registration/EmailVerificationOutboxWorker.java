@@ -20,6 +20,8 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.HexFormat;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,8 @@ import org.springframework.util.StringUtils;
 @Service
 public class EmailVerificationOutboxWorker {
 
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(EmailVerificationOutboxWorker.class);
     private static final String EVENT_TYPE = "EMAIL_VERIFICATION_REQUESTED";
     private static final int TOKEN_BYTES = 32;
 
@@ -100,6 +104,7 @@ public class EmailVerificationOutboxWorker {
             outboxRepository.saveAndFlush(event);
             return true;
         } catch (RuntimeException exception) {
+            logDeliveryFailure(exception);
             if (member != null) {
                 tokenRepository.revokeActiveForUser(member, now);
             }
@@ -111,6 +116,13 @@ public class EmailVerificationOutboxWorker {
             outboxRepository.saveAndFlush(event);
             return false;
         }
+    }
+
+    private void logDeliveryFailure(RuntimeException exception) {
+        IllegalStateException sanitizedFailure =
+                new IllegalStateException("EMAIL_VERIFICATION_DELIVERY_FAILED");
+        sanitizedFailure.setStackTrace(exception.getStackTrace());
+        LOGGER.error("Email verification delivery failed", sanitizedFailure);
     }
 
     private void validateConfiguration() {

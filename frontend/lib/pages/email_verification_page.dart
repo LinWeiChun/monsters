@@ -82,11 +82,7 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage> {
                     ),
                   const SizedBox(height: AppSpacing.xl),
                   if (verified)
-                    FilledButton(
-                      key: const Key('emailVerificationContinueButton'),
-                      onPressed: () => context.goNamed(AppRoute.login),
-                      child: const Text('返回登入'),
-                    )
+                    const Text('資格資料流程將在後續步驟開放', textAlign: TextAlign.center)
                   else if (!state.isLoading)
                     FilledButton(
                       key: const Key('emailVerificationRestartButton'),
