@@ -131,11 +131,6 @@
 2026-07-10,18:40,TASK-042,Documentation,docs/TASKS.md,修改,將 Phase 2 REVIEW 項目依 develop 合併狀態標記為 DONE,Codex,否,否,否,否,Phase 0 與 Phase 1 已全數 DONE；Phase 2 已收尾
 2026-07-10,18:40,TASK-042,Documentation,log/CHANGE_LOG.md,修改,新增 Phase 2 狀態收尾紀錄並修正相關 log 標題,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
 2026-07-10,18:40,TASK-042,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-042 history 紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 log
-2026-06-29,17:10,DOC-001,Documentation,CHANGE_LOG.md,新增,建立文字版專案異動紀錄,ChatGPT,否,否,否,否,
-2026-06-29,17:10,DOC-001,Documentation,CHANGE_HISTORY.csv,新增,建立 CSV 版專案異動歷程,ChatGPT,否,否,否,否,
-2026-06-29,17:10,DOC-001,Documentation,CHANGE_HISTORY.xlsx,新增,建立 Excel 版專案異動歷程,ChatGPT,否,否,否,否,
-2026-06-29,17:10,DOC-001,Documentation,README.md,修改,更新 AI Coding Agent 使用指令與文件閱讀順序,ChatGPT,否,否,否,否,
-2026-06-29,17:10,DOC-001,Documentation,AGENTS.md,修改,套用使用者提供的最新 AGENTS.md,ChatGPT,否,否,否,否,
 2026-06-30,09:44,DOC-002,Documentation,docs/CODING_STANDARD.md,修改,將後端 Java 版本規範調整為 JDK 18,Codex,否,否,否,否,
 2026-06-30,09:44,DOC-002,Documentation,log/CHANGE_LOG.md,修改,新增 DOC-002 異動紀錄,Codex,否,否,否,否,
 2026-06-30,09:44,DOC-002,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-002 表格異動紀錄,Codex,否,否,否,否,
@@ -1204,3 +1199,7 @@
 2026-07-29,16:14,REGISTRATION-LOGIN-03,Documentation,README與docs規格OpenAPI及REGISTRATION_LOGIN_TASKS.md,修改,同步Task03契約資料庫UI決策部署設定並轉REVIEW,Codex,是,是,是,是,docs TASKS.md與system_data未修改
 2026-07-29,16:14,REGISTRATION-LOGIN-03,Deployment,frontend/README.md與docs/API_SPEC.md,修改,記錄Railway develop與main公開Backend URL及Flutter build define,Codex,是,否,是,否,URL由環境注入未寫死於應用程式碼
 2026-07-29,16:14,REGISTRATION-LOGIN-03,Documentation,log/CHANGE_LOG.md與log/CHANGE_HISTORY.csv,修改,新增Task03工作報告與一個月保存期限檢查,Codex,否,否,否,否,CSV與XLSX最早2026-06-29無過期Log且XLSX未修改
+2026-07-30,09:41,REGISTRATION-LOGIN-03-REVIEW,Backend,service registration與repository registration,修改與新增,補上安全操作Log並將空會員資料存取移至Repository,Codex,否,否,否,否,Log不含Email Token密碼或hash
+2026-07-30,09:41,REGISTRATION-LOGIN-03-REVIEW,Frontend,email_verification_page.dart與register_page.dart,修改,移除尚未可用Eligibility流程前返回登入迴圈並修正Widget長度,Codex,否,否,是,否,Continuation結果保留記憶體供Task06接手
+2026-07-30,09:41,REGISTRATION-LOGIN-03-REVIEW,Test,backend與frontend測試,修改,驗證操作Log隱私清理流程與Email驗證安全提示,Codex,否,是,是,否,Backend282項 MySQL整合 Flutter169項與Analyze通過
+2026-07-30,09:41,REGISTRATION-LOGIN-03-REVIEW,Documentation,REGISTRATION_LOGIN_TASKS.md與Log,修改,同步Task03審查修正Frontier與保存期限,Codex,否,否,否,否,Task03維持REVIEW且未開始Task04

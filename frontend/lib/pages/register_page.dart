@@ -424,7 +424,9 @@ class _RegisterForm extends StatelessWidget {
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
               autofillHints: const [AutofillHints.email],
-              decoration: _inputDecoration(hintText: 'name@example.com'),
+              decoration: _registerInputDecoration(
+                hintText: 'name@example.com',
+              ),
               validator: _RegisterValidators.of(context).email,
             ),
           ),
@@ -439,7 +441,7 @@ class _RegisterForm extends StatelessWidget {
               obscureText: obscurePassword,
               textInputAction: TextInputAction.next,
               autofillHints: const [AutofillHints.newPassword],
-              decoration: _inputDecoration(
+              decoration: _registerInputDecoration(
                 hintText: '••••••••',
                 suffixIcon: IconButton(
                   tooltip: obscurePassword ? '顯示密碼' : '隱藏密碼',
@@ -466,7 +468,7 @@ class _RegisterForm extends StatelessWidget {
               obscureText: obscureConfirmPassword,
               textInputAction: TextInputAction.done,
               autofillHints: const [AutofillHints.newPassword],
-              decoration: _inputDecoration(
+              decoration: _registerInputDecoration(
                 hintText: '••••••••',
                 suffixIcon: IconButton(
                   tooltip: obscureConfirmPassword ? '顯示密碼' : '隱藏密碼',
@@ -582,35 +584,35 @@ class _RegisterForm extends StatelessWidget {
       ),
     );
   }
+}
 
-  InputDecoration _inputDecoration({String? hintText, Widget? suffixIcon}) {
-    return InputDecoration(
-      hintText: hintText,
-      suffixIcon: suffixIcon,
-      filled: true,
-      fillColor: AppColors.registerFieldFill,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: AppColors.registerFieldBorder),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(
-          color: AppColors.registerPrimary,
-          width: 2,
-        ),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: AppColors.registerError),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: AppColors.registerError, width: 2),
-      ),
-    );
-  }
+InputDecoration _registerInputDecoration({
+  String? hintText,
+  Widget? suffixIcon,
+}) {
+  return InputDecoration(
+    hintText: hintText,
+    suffixIcon: suffixIcon,
+    filled: true,
+    fillColor: AppColors.registerFieldFill,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: const BorderSide(color: AppColors.registerFieldBorder),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: const BorderSide(color: AppColors.registerPrimary, width: 2),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: const BorderSide(color: AppColors.registerError),
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: const BorderSide(color: AppColors.registerError, width: 2),
+    ),
+  );
 }
 
 class _RegisterRuleCard extends StatelessWidget {

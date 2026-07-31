@@ -19,6 +19,8 @@ import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RegistrationService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RegistrationService.class);
 
     private final UserRepository userRepository;
     private final UserCredentialRepository userCredentialRepository;
@@ -63,6 +67,7 @@ public class RegistrationService {
 
         String email = normalizeEmail(request.email());
         rateLimitService.accept(email, remoteAddress);
+        LOGGER.info("Registration request accepted");
         Optional<User> existingMember = userRepository.findByEmail(email);
         if (existingMember.isPresent()) {
             User member = existingMember.orElseThrow();

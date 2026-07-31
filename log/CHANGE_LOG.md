@@ -8,6 +8,75 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-30 09:41
+
+Task
+Registration Login 03 合併後雙軸審查修正（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 以 `feature/phase4.5` 合併前固定點審查 Task 03；PR #90 已合併至 Phase 分支，但 GitHub 未回報該提交的 CI status 或 workflow run。
+- 補上註冊受理與 Email 驗證寄送失敗的安全操作 Log；使用穩定錯誤碼與移除敏感訊息的完整 stack trace，不記錄 Email、密碼、Token、hash 或 payload。
+- 將七日空會員清理的 SQL 從 Service 移至 Repository，維持原交易、鎖定與刪除條件。
+- 移除 Email 驗證完成後返回登入造成的 continuation 迴圈；Eligibility 尚未完成時顯示安全提示並保留記憶體中的 verification result。
+- 將註冊表單輸入樣式抽為檔案內 helper，使 `_RegisterForm` 回到 Widget 行數上限內。
+
+### Modified
+
+- Backend：`RegistrationService`、`EmailVerificationOutboxWorker`、`UnverifiedMemberCleanupService`。
+- Backend 新增：`UnverifiedMemberCleanupRepository`。
+- Frontend：`email_verification_page.dart`、`register_page.dart`。
+- Test：`AuthMemberHttpIntegrationTest`、`email_verification_page_test.dart`。
+- Documentation：`REGISTRATION_LOGIN_TASKS.md`、`CHANGE_LOG.md`、`CHANGE_HISTORY.csv`、`CHANGE_HISTORY.xlsx`。
+
+### system_data Reference
+
+- 已檢查系統手冊的註冊、登入、忘記密碼與舊 SHA-256 密碼保護流程；只保留流程理解，不沿用舊 account 登入、SHA-256 密碼雜湊或 Server 密碼鎖。
+- 系統簡介只提供舊四位數 App 密碼鎖定位；Task 03／04 仍以正式規格、ADR 與現有新版程式為準。
+- 未修改 `system_data/`。
+
+### API
+
+- 無 endpoint、request、response、error code 或 OpenAPI 異動。
+
+### Database
+
+- 無 schema、資料、SQL 語意或 Flyway Migration 異動；只將既有清理 SQL 移至 Repository 分層。
+
+### UI
+
+- Email 驗證成功頁在 Task 06 Eligibility 尚未完成前不再導回登入；顯示安全下一步提示。
+- 註冊表單功能與版面不變。
+
+### Tests
+
+- Backend 完整單元測試：282 項通過、4 項 skipped、0 failure／error。
+- Backend MySQL 8.4 `AuthMemberHttpIntegrationTest`：通過。
+- Flutter 目標測試：`email_verification_page_test.dart` 4 項通過。
+- Flutter 完整測試：169 項通過；`flutter analyze --no-pub` 無問題。
+
+### Review Result
+
+- Standards 軸原有 4 項硬性缺口已修正；2 項重複程式 smell 為 judgement call，本次不做無關重構。
+- Spec 軸提出的非待驗證會員分流屬 Task 05／06／12／14；完整 Eligibility UI 屬 Task 06，本次未提前擴張。
+- Task 03 維持 `REVIEW`，待本修正分支整合後才能轉 `DONE` 並開始 Task 04。
+
+### Log Retention
+
+- 保存期限截止日為 2026-06-30。
+- 已刪除 `CHANGE_LOG.md` 的 2026-06-29 條目、`CHANGE_HISTORY.csv` 的 5 筆 2026-06-29 紀錄，以及 `CHANGE_HISTORY.xlsx` 的 5 筆 2026-06-29 紀錄。
+- CSV 與 XLSX 均維持 13 欄結構；XLSX 僅保留表頭。
+
+### Pending
+
+- 本分支尚未推送或建立 PR；依交接權限邊界，需使用者明確要求發布。
+- Task 04 尚未開始。
+
+---
+
 ## 2026-07-29 16:14
 
 Task
@@ -7013,65 +7082,6 @@ chore(project): 建立 monorepo 基礎結構
 
 - Flutter SDK 指令逾時，下一項「建立 Flutter 專案」前需再次確認 Flutter 環境。
 - 目前 Java 版本為 1.8，低於 `docs/CODING_STANDARD.md` 建議的 Java 21；建立 Spring Boot 專案前需確認是否升級或調整規範。
-
----
-
-## 2026-06-29 17:10
-
-Task
-DOC-001 建立異動紀錄檔並更新 README 使用指令
-
-修改人
-ChatGPT
-
-### 本次完成
-
-- 新增 `CHANGE_LOG.md`，作為專案文字版異動紀錄。
-- 新增 `CHANGE_HISTORY.csv`，作為專案表格版異動歷程。
-- 新增 `CHANGE_HISTORY.xlsx`，作為 Excel 版異動歷程。
-- 更新 `README.md` 的 AI 使用指令，使文件閱讀順序與 `docs/` 路徑一致。
-
-### 新增
-
-- CHANGE_LOG.md
-- CHANGE_HISTORY.csv
-- CHANGE_HISTORY.xlsx
-
-### 修改
-
-- README.md
-- AGENTS.md
-
-### 刪除
-
-- 無
-
-### Migration
-
-- 無
-
-### API
-
-- 無
-
-### Database
-
-- 無
-
-### 測試
-
-- 確認根目錄已包含 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv`、`CHANGE_HISTORY.xlsx`。
-- 確認 `README.md` 已明確要求 AI 依序閱讀 `AGENTS.md` 與 `docs/` 內規格文件。
-
-### Commit 建議
-
-```text
-docs(project): 新增異動紀錄檔並更新 README 使用指令
-```
-
-### 備註 / 待確認事項
-
-- 無
 
 ---
 
