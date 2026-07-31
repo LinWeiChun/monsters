@@ -62,26 +62,22 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   child: ColoredBox(
                     color: AppColors.loginFormBackground,
                     child: SafeArea(
-                      child: Center(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.xxl,
-                            vertical: AppSpacing.xl,
-                          ),
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 500),
-                            child: _LoginForm(
-                              formKey: _formKey,
-                              emailController: _emailController,
-                              passwordController: _passwordController,
-                              obscurePassword: _obscurePassword,
-                              authState: authState,
-                              onTogglePassword: _togglePassword,
-                              onSubmit: _submit,
-                              onSubmitGoogle: _submitGoogle,
-                              onForgotPassword: _showForgotPassword,
-                            ),
-                          ),
+                      child: _ViewportFit(
+                        maxWidth: 500,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.xxl,
+                          vertical: AppSpacing.xl,
+                        ),
+                        child: _LoginForm(
+                          formKey: _formKey,
+                          emailController: _emailController,
+                          passwordController: _passwordController,
+                          obscurePassword: _obscurePassword,
+                          authState: authState,
+                          onTogglePassword: _togglePassword,
+                          onSubmit: _submit,
+                          onSubmitGoogle: _submitGoogle,
+                          onForgotPassword: _showForgotPassword,
                         ),
                       ),
                     ),
@@ -93,23 +89,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             (context, constraints) => ColoredBox(
               color: AppColors.loginFormBackground,
               child: SafeArea(
-                child: SingleChildScrollView(
+                child: _ViewportFit(
+                  maxWidth: 600,
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.xxl,
-                    vertical: AppSpacing.xl,
+                    vertical: AppSpacing.lg,
                   ),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 600),
-                      child: _buildForm(authState, isMobile: true),
-                    ),
-                  ),
+                  child: _buildForm(authState, isMobile: true),
                 ),
               ),
             ),
         mobile:
             (context, constraints) => SafeArea(
-              child: SingleChildScrollView(
+              child: _ViewportFit(
+                maxWidth: 318,
                 padding: const EdgeInsets.fromLTRB(36, 46, 36, 48),
                 child: _buildForm(authState, isMobile: true),
               ),
@@ -169,6 +162,36 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('忘記密碼流程將於後續 Task 開放')));
+  }
+}
+
+class _ViewportFit extends StatelessWidget {
+  const _ViewportFit({
+    required this.maxWidth,
+    required this.padding,
+    required this.child,
+  });
+
+  final double maxWidth;
+  final EdgeInsets padding;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: padding,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final contentWidth = constraints.maxWidth.clamp(0.0, maxWidth);
+          return Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: SizedBox(width: contentWidth, child: child),
+            ),
+          );
+        },
+      ),
+    );
   }
 }
 
@@ -291,7 +314,7 @@ class _LoginForm extends StatelessWidget {
             ),
           ),
           SizedBox(height: isMobile ? 28 : 48),
-          const _FieldLabel('帳號或 Email'),
+          const _FieldLabel('Email'),
           const SizedBox(height: AppSpacing.sm),
           SizedBox(
             height: fieldHeight,
@@ -306,9 +329,12 @@ class _LoginForm extends StatelessWidget {
               ],
               decoration: _inputDecoration(hintText: ''),
               validator: (value) {
-                final account = value?.trim() ?? '';
-                if (account.isEmpty) {
-                  return '請輸入帳號或 Email';
+                final email = value?.trim() ?? '';
+                if (email.isEmpty) {
+                  return '請輸入 Email';
+                }
+                if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)) {
+                  return '請輸入有效的 Email';
                 }
                 return null;
               },

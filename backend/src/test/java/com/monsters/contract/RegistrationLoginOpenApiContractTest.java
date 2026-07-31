@@ -81,12 +81,35 @@ class RegistrationLoginOpenApiContractTest {
         Map<String, Object> successResponse = mapAt(
                 document,
                 "paths",
-                "/api/auth/login",
+                "/api/v1/auth/login",
                 "post",
                 "responses",
                 "200"
         );
         assertThat(successResponse).containsKey("content");
+
+        Map<String, Object> loginRequest = mapAt(
+                document,
+                "components",
+                "schemas",
+                "VerifiedEmailLoginRequest"
+        );
+        assertThat(loginRequest).containsEntry("additionalProperties", false);
+        assertThat(listAt(loginRequest, "required"))
+                .containsExactlyInAnyOrder("email", "password");
+        assertThat(mapAt(loginRequest, "properties", "email"))
+                .containsEntry("format", "email")
+                .containsEntry("maxLength", 255);
+
+        Map<String, Object> authenticatedMember = mapAt(
+                document,
+                "components",
+                "schemas",
+                "AuthenticatedMember"
+        );
+        assertThat(mapAt(authenticatedMember, "properties").keySet())
+                .contains("publicId", "email", "userName")
+                .doesNotContain("account", "userId");
     }
 
     @Test

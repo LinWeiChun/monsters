@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.monsters.dto.auth.AuthUserResponse;
+import com.monsters.dto.auth.AuthenticatedMemberResponse;
 import com.monsters.dto.auth.ForgotPasswordRequest;
 import com.monsters.dto.auth.ForgotPasswordResponse;
 import com.monsters.dto.auth.GoogleLoginRequest;
@@ -20,6 +21,8 @@ import com.monsters.dto.auth.RegisterRequest;
 import com.monsters.dto.auth.RegisterResponse;
 import com.monsters.dto.auth.RefreshTokenRequest;
 import com.monsters.dto.auth.ResetPasswordRequest;
+import com.monsters.dto.auth.VerifiedEmailLoginRequest;
+import com.monsters.dto.auth.VerifiedEmailLoginResponse;
 import com.monsters.entity.user.PasswordResetToken;
 import com.monsters.entity.user.MemberState;
 import com.monsters.entity.user.User;
@@ -114,17 +117,18 @@ public class AuthService {
 		User user = userRepository.findByEmailOrAccountAndDeletedFalse(email)
 				.orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
 
-		UserCredential credential = userCredentialRepository.findByUser(user)
+		verifyPassword(user, request.password());
+		return createAuthenticationResponse(user);
+	}
+
+	@Transactional
+	public VerifiedEmailLoginResponse loginVerifiedEmail(VerifiedEmailLoginRequest request) {
+		String email = normalizeEmail(request.email());
+		User user = userRepository.findByEmailAndDeletedFalse(email)
 				.orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
 
-		if (!passwordHashService.matches(request.password(), credential.getPasswordHash())) {
-			throw new UnauthorizedException("Invalid email or password");
-		}
-		if (passwordHashService.needsRehash(credential.getPasswordHash())) {
-			credential.updatePasswordHash(passwordHashService.encode(request.password()));
-		}
-
-		return createAuthenticationResponse(user);
+		verifyPassword(user, request.password());
+		return createVerifiedEmailAuthenticationResponse(user);
 	}
 
 	@Transactional
@@ -212,6 +216,42 @@ public class AuthService {
 			);
 		}
 		return createAuthenticatedResponse(user);
+	}
+
+	private VerifiedEmailLoginResponse createVerifiedEmailAuthenticationResponse(User user) {
+		if (user.getMemberState() == MemberState.DELETED) {
+			throw new UnauthorizedException("Invalid email or password");
+		}
+		if (user.getMemberState() != MemberState.ACTIVE) {
+			IssuedContinuationCredential credential = continuationCredentialService.issueFor(user);
+			return VerifiedEmailLoginResponse.continuation(
+					credential.credential(),
+					credential.nextAction(),
+					credential.expiresIn()
+			);
+		}
+		return VerifiedEmailLoginResponse.authenticated(
+				jwtTokenService.createAccessToken(user),
+				jwtTokenService.createRefreshToken(user),
+				"Bearer",
+				jwtProperties.accessTokenExpirationSeconds(),
+				new AuthenticatedMemberResponse(
+						user.getPublicId(),
+						user.getEmail(),
+						user.getUserName()
+				)
+		);
+	}
+
+	private void verifyPassword(User user, String password) {
+		UserCredential credential = userCredentialRepository.findByUser(user)
+				.orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
+		if (!passwordHashService.matches(password, credential.getPasswordHash())) {
+			throw new UnauthorizedException("Invalid email or password");
+		}
+		if (passwordHashService.needsRehash(credential.getPasswordHash())) {
+			credential.updatePasswordHash(passwordHashService.encode(password));
+		}
 	}
 
 	private LoginResponse createAuthenticatedResponse(User user) {

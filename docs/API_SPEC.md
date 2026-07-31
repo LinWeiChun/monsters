@@ -427,7 +427,9 @@ Response：
 
 ### 2.2 登入
 
-`POST /api/auth/login`
+正式 v1 endpoint：
+
+`POST /api/v1/auth/login`
 
 Request：
 
@@ -450,11 +452,9 @@ Response：
     "tokenType": "Bearer",
     "expiresIn": 3600,
     "user": {
-      "userId": 1,
-      "account": "wei_account",
+      "publicId": "00000000-0000-0000-0000-000000000001",
       "email": "user@example.com",
-      "userName": "使用者名稱",
-      "avatarUrl": null
+      "userName": "使用者名稱"
     }
   }
 }
@@ -479,17 +479,25 @@ Response：
 
 規則：
 
-- `email` 為相容既有前端保留的欄位名稱，實際可傳入已註冊的 Account 或 Email，必填且最大長度 255。
-- Account 或 Email 必須轉為小寫並去除前後空白後查詢。
+- v1 `email` 只接受 Email 格式，必填且最大長度 255；未知欄位（包含 `account`）回 `400 REQUEST_BODY_INVALID`。
+- Email 只做前後空白移除與 locale-independent 小寫正規化後精確查詢；不得套用 Gmail 點號消除或 `+tag` 合併。
 - 登入依 hash 前綴使用 Argon2id 或既有 BCrypt 比對；BCrypt 只在成功後原子升級為 Argon2id，不得將密碼或 hash 寫入 log。
-- Account / Email 不存在、帳號已刪除、憑證不存在或密碼錯誤時，回傳 401。
+- Email 不存在、帳號為不可揭露狀態、憑證不存在或密碼錯誤時，統一回 `401 AUTH_INVALID_CREDENTIALS`。
 - `accessToken` 與 `refreshToken` 使用 HMAC-SHA256 JWT 產生。
 - `JWT_SECRET` 必須設定，否則不得產生 JWT。
 - `ACTIVE` 回 `200 AUTHENTICATED` 與完整 Session；`PENDING_EMAIL_VERIFICATION`、`PENDING_ELIGIBILITY`、`USER_DEACTIVATED`、`ADMIN_SUSPENDED`、`DELETION_PENDING` 回 `200 AUTH_CONTINUATION_REQUIRED`。
+- v1 `user` 只回公開 UUID、Email 與顯示名稱，不得包含 `account` 或內部 `userId`。
 - `nextAction` 僅允許 `VERIFY_EMAIL`、`COMPLETE_ELIGIBILITY`、`REACTIVATE_ACCOUNT`、`REVIEW_SUSPENSION`、`REVIEW_DELETION`。
 - Continuation Credential 使用 32-byte 安全隨機值、URL-safe Base64、10 分鐘有效，Backend 只保存 SHA-256 hash；新核發、會員狀態或 version 改變時撤銷舊值。
 - Continuation Credential 不是 Access Token，不得存取一般會員 API；Flutter 不得把它放入 Authorization Header、SharedPreferences 或一般 Session。
 - `DELETED` 不核發任何 Credential，使用與無效憑證一致的公開錯誤。
+
+Account expand migration 期間暫留 deprecated `POST /api/auth/login`：
+
+- Request key 仍為 `email`，但可傳入既有 Email 或 legacy `account`，供已部署舊 Client 與既有會員過渡。
+- 新 Flutter 與所有新 Client 不得呼叫此 endpoint，也不得顯示、送出或保存 `account`。
+- 舊 endpoint 暫維持 historical response 相容；Task 18 完成使用觀測與 contract migration 後才移除 endpoint 與 `users.account`。
+- 新舊 endpoint 共用相同密碼驗證、成功 BCrypt rehash、會員狀態 continuation 與 `AUTH_INVALID_CREDENTIALS` 安全邊界。
 
 ### 2.3 Google 登入
 

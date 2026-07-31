@@ -190,7 +190,7 @@ Flutter Web 實作位於 `frontend/lib/pages/diary_chat_page.dart`，並以 `dia
 
 進入 `/diaries/new` 時先讀取 owner 的伺服器草稿；還原與自動暫存行為沿用煩惱流程。內容按鈕文字使用「暫存並繼續」，並顯示草稿保存 30 天、可跨裝置繼續的狀態。離開頁面不得刪除草稿；明確重新開始才顯示確認並呼叫 DELETE Draft API。送出前完成最後一次同步，改呼叫 `POST /api/diaries/draft/submit`，成功後由後端刪除草稿。
 
-Flutter Mobile 以 `frontend/lib/widgets/diary/diary_mobile_flow.dart` 實作 Penpot 390×844 單欄畫布，並透過 `ResponsiveFixedCanvas` 在 320px 至 599px 等比例填滿 viewport 寬度；縮放後高度超過 viewport 時允許垂直捲動，不得在 391px 至 599px 保留靠左的固定 390px 留白。Mobile 依 `01` 至 `08` 與 `09 Completed / Phase 4` 呈現品牌、步驟、進度、標題、說明、主要操作及完成頁底部導覽。記錄方式、分數與分享選擇在 Mobile 先保存選項，再由明確的下一步按鈕確認；Web／Tablet 保留既有快速選擇行為，三種 window class 仍共用同一份 `DiaryChatState`、Controller、Repository 與 API contract。
+Flutter Mobile 以 `frontend/lib/widgets/diary/diary_mobile_flow.dart` 實作 Penpot 390×844 單欄畫布，並透過 `ResponsiveFixedCanvas` 在 320px 至 599px 等比例填滿 viewport；高度不足時必須縮減非必要留白、收合說明或 responsive reflow，不得加入主畫面垂直捲動，也不得在 391px 至 599px 保留靠左的固定 390px 留白。Mobile 依 `01` 至 `08` 與 `09 Completed / Phase 4` 呈現品牌、步驟、進度、標題、說明、主要操作及完成頁底部導覽。記錄方式、分數與分享選擇在 Mobile 先保存選項，再由明確的下一步按鈕確認；Web／Tablet 保留既有快速選擇行為，三種 window class 仍共用同一份 `DiaryChatState`、Controller、Repository 與 API contract。
 
 Penpot `Diary / Mobile / 02 記錄方式` 的說明已由「可混合使用」校正為「目前先選擇一種主要記錄方式，之後仍可編輯」，與 Project、Database 及 API 規格一致。Mobile 每篇日記仍只允許文字、圖片、錄音或影片其中一種主要記錄方式，並可另外附加一張 optional 心情圖。
 
@@ -453,6 +453,8 @@ REST API
 規則：
 
 - 登入識別欄位顯示「Email」；不得再接受或顯示 `account`。
+- Login Page 呼叫 `POST /api/v1/auth/login`，不得呼叫 deprecated `/api/auth/login`；`AUTH_INVALID_CREDENTIALS` 統一顯示「Email 或密碼不正確」。
+- Web 1440×900 與 Mobile 390×844 Penpot 登入畫板已改為 Email-only；Flutter 以 responsive reflow 與可用高度縮放直接呈現全部必要內容，不使用整頁 `SingleChildScrollView` 或其他主畫面捲動容器。
 - 登入頁不得直接呼叫 Dio。
 - 登入頁不得直接保存 JWT、Refresh Token 或密碼至 SharedPreferences；登入狀態保存必須集中由 `AuthRepository` 與 `AuthSessionStore` 管理。
 - `AUTH_CONTINUATION_REQUIRED` 不視為已登入；`LoginPage` 不導向首頁，`AuthRepository` 不設定 Authorization、不保存 continuation credential，並清除可能殘留的一般 Session。
@@ -923,7 +925,7 @@ Logo 規範：
 
 - `ResponsiveLayout` 依 `LayoutBuilder` constraints 即時判斷 window class，不快取初次 viewport。
 - `ResponsiveContent` 集中管理最大寬度、水平 padding 與對齊方式。
-- 390 x 844 Mobile Penpot canvas 必須透過 `ResponsiveFixedCanvas` 依實際 viewport 寬度等比例縮放；391 至 599px 不得維持 390px 固定寬度靠左，縮放後高度超過 viewport 時改為垂直捲動。
+- 390 x 844 Mobile Penpot canvas 必須依實際 viewport 等比例縮放或 responsive reflow；391 至 599px 不得維持 390px 固定寬度靠左，內容高度超過時應收合非必要說明或縮放，不得改成主畫面垂直捲動。
 - Web 主版面不使用整頁 `FittedBox`、固定 1440 x 900 canvas 或固定 x/y 座標。
 - Home 在舊 breakpoint 900／950／1024px 曾發生的負 padding 與 nav overflow，已由 Tablet flow layout 排除。
 - Widget tests 覆蓋 breakpoint 邊界與 390 至 1920px 常用 viewport，並驗證同一 widget tree 可在 599／600／1199／1200px 即時切換。

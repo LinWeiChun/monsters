@@ -161,6 +161,48 @@ void main() {
     },
   );
 
+  test('email login uses only the v1 verified email contract', () async {
+    RequestOptions? request;
+    final dio = Dio();
+    dio.httpClientAdapter = _CallbackAdapter((options) {
+      request = options;
+      return _jsonResponse({
+        'success': true,
+        'code': 'AUTHENTICATED',
+        'message': 'Login success',
+        'data': {
+          'accessToken': 'access-token',
+          'refreshToken': 'refresh-token',
+          'tokenType': 'Bearer',
+          'expiresIn': 3600,
+          'user': {
+            'publicId': '00000000-0000-0000-0000-000000000001',
+            'email': 'member@example.test',
+            'userName': 'Member',
+          },
+        },
+      });
+    });
+    final repository = AuthRepository(ApiClient(config: _config, dio: dio));
+
+    final result = await repository.login(
+      email: 'member@example.test',
+      password: 'synthetic-password',
+    );
+
+    expect(request?.uri.path, '/api/v1/auth/login');
+    expect(result.user?.publicId, '00000000-0000-0000-0000-000000000001');
+    expect(result.user?.userId, isNull);
+    expect(request?.data, {
+      'email': 'member@example.test',
+      'password': 'synthetic-password',
+    });
+    expect(
+      (request?.data as Map<String, Object?>).containsKey('account'),
+      false,
+    );
+  });
+
   test(
     'registration lifecycle uses only the v1 email verification contract',
     () async {
@@ -168,7 +210,7 @@ void main() {
       final dio = Dio();
       dio.httpClientAdapter = _CallbackAdapter((options) {
         requests.add(options);
-      return switch ((options.method, options.uri.path)) {
+        return switch ((options.method, options.uri.path)) {
           ('GET', '/api/v1/auth/registration-policy') => _jsonResponse({
             'success': true,
             'code': 'REGISTRATION_POLICY_AVAILABLE',
@@ -205,7 +247,7 @@ void main() {
           }),
           _ =>
             throw StateError(
-          'Unexpected request: ${options.method} ${options.uri.path}',
+              'Unexpected request: ${options.method} ${options.uri.path}',
             ),
         };
       });
@@ -227,7 +269,7 @@ void main() {
       expect(policy.privacyUrl, 'https://example.test/privacy');
       expect(verification.nextAction, 'COMPLETE_ELIGIBILITY');
       expect(verification.continuationCredential, 'synthetic-continuation');
-    expect(requests.map((request) => request.uri.path), [
+      expect(requests.map((request) => request.uri.path), [
         '/api/v1/auth/registration-policy',
         '/api/v1/auth/register',
         '/api/v1/auth/email-verification-requests',
@@ -275,8 +317,8 @@ const _newLoginResult = LoginResult(
 );
 
 const _user = AuthUser(
+  publicId: '00000000-0000-0000-0000-000000000001',
   userId: 1,
-  account: 'wei_account',
   email: 'user@example.com',
   userName: 'Wei',
   avatarUrl: null,

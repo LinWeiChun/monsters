@@ -70,6 +70,7 @@ Docker Compose 會使用 `mysql` 作為 MySQL service hostname。
 
 - `POST /api/auth/register`
 - `POST /api/auth/login`
+- `POST /api/v1/auth/login`
 - `POST /api/auth/google-login`
 - `POST /api/auth/refresh`
 - `POST /api/auth/forgot-password`
@@ -165,7 +166,7 @@ The register flow creates `users` and `user_credentials` records. Passwords are 
 
 ### Login
 
-`POST /api/auth/login`
+`POST /api/v1/auth/login`
 
 Request:
 
@@ -188,16 +189,17 @@ Response:
     "tokenType": "Bearer",
     "expiresIn": 3600,
     "user": {
-      "userId": 1,
+      "publicId": "00000000-0000-0000-0000-000000000001",
       "email": "user@example.com",
-      "userName": "Wei",
-      "avatarUrl": null
+      "userName": "Wei"
     }
   }
 }
 ```
 
-Login normalizes email before lookup, verifies the stored BCrypt password hash, and returns JWT access and refresh tokens. `JWT_SECRET` must be configured before login can issue tokens.
+Login trims and lowercases Email before an exact lookup, verifies Argon2id or historical BCrypt, and returns JWT access and refresh tokens. Gmail dot and `+tag` forms are not merged. Unknown Email, invalid password, missing credential and non-disclosable state return the same `401 AUTH_INVALID_CREDENTIALS`. `JWT_SECRET` must be configured before login can issue tokens.
+
+Deprecated `POST /api/auth/login` remains temporarily available for existing Email／legacy account clients during expand migration. New clients must not use it; Task 18 removes it only after migration observation and contract cleanup.
 
 ### Google Login
 

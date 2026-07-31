@@ -88,7 +88,7 @@ UI 不得直接呼叫 Dio，後續功能需透過 Provider / Repository 使用 `
 - `lib/models/login_result.g.dart`
 - `lib/models/registration_policy.dart`
 
-登入流程使用 `AuthRepository` 呼叫 `POST /api/auth/login`，成功後由 `ApiClient.setAccessToken()` 將 access token 套用到目前執行階段的 Authorization header，並透過 `AuthSessionStore` 保存 `LoginResult` 與最後開啟時間。使用者未登出且 30 天內再次開啟 App 時，`SplashPage` 會先以保存的 refresh token 呼叫 `POST /api/auth/refresh` 完成 rotation，再使用新 access token 進入首頁；不得直接重用可能已過期的 access token。
+登入流程只顯示與送出 Email，使用 `AuthRepository` 呼叫 `POST /api/v1/auth/login`；不得呼叫 legacy account migration endpoint。成功後由 `ApiClient.setAccessToken()` 將 access token 套用到目前執行階段的 Authorization header，並透過 `AuthSessionStore` 保存 `LoginResult` 與最後開啟時間。使用者未登出且 30 天內再次開啟 App 時，`SplashPage` 會先以保存的 refresh token 呼叫 `POST /api/auth/refresh` 完成 rotation，再使用新 access token 進入首頁；不得直接重用可能已過期的 access token。
 
 受保護 API 若回傳 401，`ApiClient` 會共用單一 refresh request 換發 Token，成功後只重試原 request 一次，避免並行 API 觸發多次 rotation。Refresh API 本身、登入、Google 登入、註冊與登出不得啟動 401 refresh retry。Refresh token 驗證失敗、超過 30 天、session 格式無效或使用者登出時，必須清除 Authorization header 與本地 session，並回到登入頁；暫時性網路錯誤保留 session 供下次重試。
 

@@ -1,4 +1,11 @@
 日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
+2026-07-31,16:22,REGISTRATION-LOGIN-05,Backend,controller dto AuthService SecurityConfig,新增與修改,建立v1 Verified Email登入並保留legacy account migration endpoint,Codex,是,否,否,否,新舊endpoint共用密碼驗證與會員狀態continuation
+2026-07-31,16:22,REGISTRATION-LOGIN-05,API,docs/openapi/registration-login.yaml與API_SPEC,修改,正式v1只收Email且authenticated member不含account與內部userId,Codex,是,否,否,否,無效憑證與不可揭露狀態統一AUTH_INVALID_CREDENTIALS
+2026-07-31,16:22,REGISTRATION-LOGIN-05,Migration,AuthService與DATABASE_SPEC,修改,expand期間保留舊Email或account端點且新註冊account維持NULL,Codex,是,否,否,否,Task18觀測完成後才contract移除
+2026-07-31,16:22,REGISTRATION-LOGIN-05,Frontend,models auth provider repository login_page,修改,改走v1 Email-only並移除登入主畫面捲動與account資料模型,Codex,是,否,是,否,AUTH_INVALID_CREDENTIALS映射繁體中文
+2026-07-31,16:22,REGISTRATION-LOGIN-05,Design,Penpot APP與WEB登入畫板,修改,同步Email欄位範例並確認390x844與1440x900完整顯示,Codex,否,否,是,否,主畫面無捲動
+2026-07-31,16:22,REGISTRATION-LOGIN-05,Test,backend與frontend測試,新增與修改,TDD驗證精確Email狀態分流舊account共存無捲動與responsive,Codex,是,是,是,否,Backend301 MySQL28 Flutter184 Analyze Web與Android build通過
+2026-07-31,16:22,REGISTRATION-LOGIN-05,Documentation,README正式規格Task與Log,修改,同步API Database UI account expand與一個月Log保存期限,Codex,是,是,是,否,最早2026-06-30無過期Log且XLSX未修改
 2026-07-31,14:40,REGISTRATION-LOGIN-04,Backend,backend/src/main/java/com/monsters/security/password 與 auth,新增與修改,建立Unicode密碼政策Argon2id雜湊與成功登入BCrypt漸進遷移,Codex,是,否,否,否,Argon2id m19456 t2 p1且失敗登入不改hash
 2026-07-31,14:40,REGISTRATION-LOGIN-04,Security,backend/src/main/resources/security 與 backend/build.gradle,新增與修改,加入Bouncy Castle 1.84及SecLists 2026.1版本化本機SHA256 blocklist,Codex,否,否,否,否,保存來源授權checksum且不保存命中內容至Log
 2026-07-31,14:40,REGISTRATION-LOGIN-04,API,DTO GlobalExceptionHandler OpenAPI,修改,同步15至128 Unicode NFC不trim與穩定password field error key,Codex,是,否,否,否,Endpoint與成功response不變

@@ -149,7 +149,12 @@ class AuthController extends StateNotifier<AuthState> {
       state = AuthState(loginResult: result);
       return true;
     } on ApiException catch (error) {
-      state = AuthState(errorMessage: error.message);
+      state = AuthState(
+        errorMessage:
+            error.code == 'AUTH_INVALID_CREDENTIALS'
+                ? 'Email 或密碼不正確'
+                : error.message,
+      );
       return false;
     } on Object {
       state = const AuthState(errorMessage: '系統忙碌，請稍後再試');

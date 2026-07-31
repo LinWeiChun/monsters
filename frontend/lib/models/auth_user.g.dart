@@ -7,16 +7,16 @@ part of 'auth_user.dart';
 // **************************************************************************
 
 AuthUser _$AuthUserFromJson(Map<String, dynamic> json) => AuthUser(
-  userId: (json['userId'] as num).toInt(),
-  account: json['account'] as String,
+  publicId: json['publicId'] as String?,
+  userId: (json['userId'] as num?)?.toInt(),
   email: json['email'] as String,
   userName: json['userName'] as String,
   avatarUrl: json['avatarUrl'] as String?,
 );
 
 Map<String, dynamic> _$AuthUserToJson(AuthUser instance) => <String, dynamic>{
+  'publicId': instance.publicId,
   'userId': instance.userId,
-  'account': instance.account,
   'email': instance.email,
   'userName': instance.userName,
   'avatarUrl': instance.avatarUrl,

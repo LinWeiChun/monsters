@@ -28,6 +28,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('歡迎回來'), findsOneWidget);
+    expect(find.text('Email'), findsOneWidget);
+    expect(find.text('帳號或 Email'), findsNothing);
     expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
     expect(find.byKey(const Key('loginPasswordField')), findsOneWidget);
     expect(find.text('登入'), findsOneWidget);
@@ -52,6 +54,11 @@ void main() {
       expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
       expect(find.byKey(const Key('loginPasswordField')), findsOneWidget);
       expect(find.byKey(const Key('loginSubmitButton')), findsOneWidget);
+      expect(find.byType(SingleChildScrollView), findsNothing);
+      expect(
+        tester.getRect(find.byKey(const Key('loginSubmitButton'))).height,
+        greaterThanOrEqualTo(48),
+      );
       expect(tester.takeException(), isNull);
     });
   }
@@ -64,8 +71,24 @@ void main() {
     await tester.tap(find.byKey(const Key('loginSubmitButton')));
     await tester.pumpAndSettle();
 
-    expect(find.text('請輸入帳號或 Email'), findsOneWidget);
+    expect(find.text('請輸入 Email'), findsOneWidget);
     expect(find.text('請輸入密碼'), findsOneWidget);
+  });
+
+  testWidgets('rejects a legacy account identifier', (tester) async {
+    await _setMobileSurface(tester);
+    await tester.pumpWidget(_loginApp(_FakeAuthRepository()));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('loginEmailField')),
+      'legacy_account',
+    );
+    await tester.enterText(find.byKey(const Key('loginPasswordField')), 'p');
+    await tester.tap(find.byKey(const Key('loginSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('請輸入有效的 Email'), findsOneWidget);
   });
 
   testWidgets('submits credentials and navigates to home on success', (
@@ -175,6 +198,33 @@ void main() {
 
     expect(find.byKey(const Key('loginErrorMessage')), findsOneWidget);
     expect(find.text('Login failed'), findsOneWidget);
+  });
+
+  testWidgets('localizes the stable invalid credentials code', (tester) async {
+    await _setMobileSurface(tester);
+    await tester.pumpWidget(
+      _loginApp(
+        _FakeAuthRepository(
+          exception: const ApiException(
+            type: ApiErrorType.unauthorized,
+            code: 'AUTH_INVALID_CREDENTIALS',
+            message: 'Internal authentication detail',
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('loginEmailField')),
+      'user@example.com',
+    );
+    await tester.enterText(find.byKey(const Key('loginPasswordField')), 'p');
+    await tester.tap(find.byKey(const Key('loginSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Email 或密碼不正確'), findsOneWidget);
+    expect(find.text('Internal authentication detail'), findsNothing);
   });
 
   testWidgets('shows Google repository error message', (tester) async {
@@ -400,8 +450,8 @@ const _loginResult = LoginResult(
   tokenType: 'Bearer',
   expiresIn: 3600,
   user: AuthUser(
+    publicId: '00000000-0000-0000-0000-000000000001',
     userId: 1,
-    account: 'wei_account',
     email: 'user@example.com',
     userName: 'Wei',
     avatarUrl: null,

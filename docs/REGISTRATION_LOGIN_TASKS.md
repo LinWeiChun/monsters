@@ -108,7 +108,9 @@
 
 **Blocked by:** 01 — 建立 Auth／Member 真實驗收骨架。
 
-**Status:** REVIEW
+**Status:** DONE
+
+**Evidence:** PR #92 已合併至 `feature/phase4.5`；Backend、Flutter、MySQL 整合與 OpenAPI 驗收皆通過。
 
 - [x] 密碼接受15–128個Unicode code points，且不trim。
 - [x] 密碼驗證使用NFC正規化與弱密碼blocklist，不強制固定字元組合。
@@ -126,15 +128,17 @@
 
 **Blocked by:** 02 — 建立會員狀態機與 Continuation Credential；03 — 完成註冊與 Email 驗證流程；04 — 導入新密碼政策與 BCrypt 漸進遷移。
 
-**Status:** ready-for-agent
+**Status:** REVIEW
 
-- [ ] v1登入欄位與正式契約只接受verified Email。
-- [ ] 不存在、密碼錯誤或不可揭露狀態統一回`401 AUTH_INVALID_CREDENTIALS`。
-- [ ] 相同Email依會員狀態進入驗證、資格、恢復或刪除等待流程。
-- [ ] Email正規化不得擅自套用Gmail點號或`+tag`合併。
-- [ ] 舊`account`只存在於一次性Migration路徑，新註冊不再建立`account`。
-- [ ] Migration期間新舊資料可安全共存，且每一批遷移都維持CI綠燈。
-- [ ] Flutter登入頁不再顯示或送出`account`。
+**Evidence:** v1 Email-only、legacy account expand 共存、Penpot／Flutter 無主畫面捲動、301 項 Backend 單元測試、28 項 MySQL 整合測試與 184 項 Flutter 測試已通過；待 PR 合併後轉 `DONE`。
+
+- [x] v1登入欄位與正式契約只接受verified Email。
+- [x] 不存在、密碼錯誤或不可揭露狀態統一回`401 AUTH_INVALID_CREDENTIALS`。
+- [x] 相同Email依會員狀態進入驗證、資格、恢復或刪除等待流程。
+- [x] Email正規化不得擅自套用Gmail點號或`+tag`合併。
+- [x] 舊`account`只存在於一次性Migration路徑，新註冊不再建立`account`。
+- [x] Migration期間新舊資料可安全共存，且每一批遷移都維持CI綠燈。
+- [x] Flutter登入頁不再顯示或送出`account`。
 
 ---
 

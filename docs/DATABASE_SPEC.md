@@ -877,14 +877,16 @@ Register API must not store raw passwords, JWT values, or secrets in logs.
 
 ## Login API Database Mapping
 
-`POST /api/auth/login` reads data from the normalized auth tables:
+`POST /api/v1/auth/login` reads data from the normalized auth tables:
 
 | API Field | Table | Column | Note |
 |---|---|---|---|
-| email | users | email | Lowercase normalized before lookup; deleted users are rejected |
+| email | users | email | Trim＋lowercase 後精確查詢；不得做 Gmail 點號或 `+tag` 合併；deleted users are rejected |
 | password | user_credentials | password_hash | 依 PHC／BCrypt 前綴比對；舊 BCrypt 成功後於同一交易升級為 Argon2id |
 
-Historical Login API returns JWT access and refresh tokens；v1 改為短效 JWT Access 與 opaque Refresh session，任何 Token 都不得寫入 Log。
+V3 已完成 expand：新註冊 `users.account = NULL`，既有會員的 `account` 暫時保留。Deprecated `POST /api/auth/login` 仍可查既有 `account`，正式 v1 只查 `users.email`；本 Task 不新增 Flyway Migration。Task 18 完成使用觀測與 Client contract migration 後才執行 account contract／column cleanup。
+
+Historical Login API returns JWT access and refresh tokens；v1 Session 將於 Task 07 改為短效 JWT Access 與 opaque Refresh session，任何 Token 都不得寫入 Log。
 
 ## User API Database Mapping
 

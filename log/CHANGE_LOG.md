@@ -8,6 +8,79 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-31 16:22
+
+Task
+Registration Login 05 Verified Email 登入與 Account expand migration（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 新增正式 `POST /api/v1/auth/login`，只接受 Email 格式與 password；未知欄位（含 `account`）直接拒絕。
+- v1 只以 trim＋lowercase 後的完整 Email 精確查詢，不套用 Gmail 點號消除或 `+tag` 合併。
+- v1 登入成功只回 public UUID、Email 與顯示名稱，不回 legacy `account` 或內部 `userId`。
+- 不存在 Email、密碼錯誤、缺少憑證與不可揭露狀態統一使用 `401 AUTH_INVALID_CREDENTIALS`；未完成流程依會員狀態回用途受限 continuation。
+- Deprecated `POST /api/auth/login` 保留既有 Email／account 查詢，讓新舊 Client 與資料在 expand 階段安全共存；新註冊維持 `account = NULL`。
+- Flutter 改呼叫 v1，只顯示與驗證 Email；穩定錯誤碼映射為「Email 或密碼不正確」。
+- Penpot Web 1440×900 與 Mobile 390×844 登入畫板已改為 Email-only，並匯出確認所有內容直接位於 viewport 內。
+- Flutter 登入頁移除三種 window class 的整頁 `SingleChildScrollView`，使用 responsive viewport fit 直接呈現全部必要內容。
+
+### Modified
+
+- Backend 新增：Verified Email Login Controller、Request／Response DTO 與公開 Member response。
+- Backend 修改：`AuthService`、Security allowlist、單元／Controller／Security／OpenAPI／MySQL HTTP integration tests。
+- Frontend 修改：Auth Repository／Provider、Login Page、AuthUser migration model 與相關測試。
+- Documentation：Backend／Frontend README、API／Database／UI、OpenAPI 與 Registration Login Task。
+- 外部設計：Penpot APP／WEB 登入畫板文案與 Email 範例。
+
+### system_data Reference
+
+- 已檢查舊系統手冊、系統簡介，以及 Spring／Flutter account＋password 登入流程；只參考登入導向、欄位與分層意圖。
+- 舊 account 主登入、直接 HTTP、SharedPreferences account 與敏感登入 Log 不符合正式 v1 契約，未沿用。
+- 未修改 `system_data/`。
+
+### API
+
+- 新增正式 `POST /api/v1/auth/login`；Request 只允許 `email`、`password`。
+- v1 authenticated user response 為 `publicId`、`email`、`userName`，不含 `account`、`userId`。
+- `/api/auth/login` 標記為 deprecated migration endpoint，暫時維持 legacy account 相容。
+- 成功、continuation 與 `AUTH_INVALID_CREDENTIALS` 皆維持統一 ApiResponse envelope。
+
+### Database
+
+- 無 schema 或 Flyway Migration 異動。
+- V3 已是 expand schema：新註冊不建立 account，既有 account column 暫留至 Task 18 contract migration。
+- 真實 MySQL 驗證新 Email 與舊 account 登入可同時運作。
+
+### UI
+
+- 登入欄位與驗證訊息改為 Email-only，不再顯示或送出 account。
+- 390×844、600×700、900×700、1024×768、1199×800、1440×900、1920×1080 皆無整頁捲動或 overflow。
+- 同步全域文件：主畫面不得改成垂直捲動；長篇條款／隱私等只允許在彈跳視窗內容區捲動。
+
+### Tests
+
+- Backend 完整單元測試：301 項通過，0 failure／error。
+- Backend MySQL 8.4 完整整合測試：28 項通過，包含真實 Security Filter 與新舊登入共存。
+- Flutter 完整測試：184 項通過；`flutter analyze --no-pub` 無問題。
+- Flutter Web release build 與 Android debug APK build通過。
+- `git diff --check` 通過。
+
+### Log Retention
+
+- 以試算表工具唯讀檢查 `CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`，並檢查 `CHANGE_LOG.md`。
+- 保存期限截止日為 2026-06-30；CSV 與 Markdown 最早紀錄為 2026-06-30，XLSX 只含 13 欄表頭，未發現早於截止日的過期紀錄。
+- 本次未刪除過期 Log，未修改 XLSX。
+
+### Pending
+
+- Task 05 已進入 `REVIEW`；待 PR 合併至 `feature/phase4.5` 後轉 `DONE`。
+- Task 07 將以 opaque Refresh Session 取代目前 historical JWT Refresh；Task 18 才移除 legacy endpoint 與 `users.account`。
+
+---
+
 ## 2026-07-31 14:40
 
 Task

@@ -163,6 +163,67 @@ class AuthMemberHttpIntegrationTest {
     }
 
     @Test
+    void verifiedEmailLoginShouldCoexistWithTheLegacyAccountMigrationPath()
+            throws Exception {
+        String syntheticEmail = "first.last+tag@gmail.com";
+        String syntheticPassword = "synthetic-password";
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "account", "legacy_login_member",
+                                "email", syntheticEmail,
+                                "password", syntheticPassword,
+                                "userName", "Synthetic Member"
+                        ))))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", "FIRST.LAST+TAG@GMAIL.COM",
+                                "password", syntheticPassword
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("AUTHENTICATED"))
+                .andExpect(jsonPath("$.data.user.publicId").isString())
+                .andExpect(jsonPath("$.data.user.email").value(syntheticEmail))
+                .andExpect(jsonPath("$.data.user.account").doesNotExist())
+                .andExpect(jsonPath("$.data.user.userId").doesNotExist());
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", "firstlast@gmail.com",
+                                "password", syntheticPassword
+                        ))))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTH_INVALID_CREDENTIALS"));
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", "legacy_login_member",
+                                "password", syntheticPassword
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("AUTHENTICATED"))
+                .andExpect(jsonPath("$.data.user.account").value("legacy_login_member"));
+
+        registerWithoutDelivery("pending.v1.login@example.test", syntheticPassword);
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", "pending.v1.login@example.test",
+                                "password", syntheticPassword
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("AUTH_CONTINUATION_REQUIRED"))
+                .andExpect(jsonPath("$.data.nextAction").value("VERIFY_EMAIL"))
+                .andExpect(jsonPath("$.data.accessToken").doesNotExist());
+    }
+
+    @Test
     void registrationShouldReturnAUniformAcceptedResponse(CapturedOutput output) throws Exception {
         String syntheticEmail = "new.registration@example.test";
         String syntheticPassword = "synthetic-password";

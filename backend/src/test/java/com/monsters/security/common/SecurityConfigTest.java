@@ -82,6 +82,14 @@ class SecurityConfigTest {
     }
 
     @Test
+    void verifiedEmailLoginShouldPermitAnonymousRequest() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/login"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.status").value("verified-email-login"));
+    }
+
+    @Test
     void authRefreshShouldPermitAnonymousRequest() throws Exception {
         mockMvc.perform(post("/api/auth/refresh"))
                 .andExpect(status().isOk())
@@ -131,6 +139,11 @@ class SecurityConfigTest {
         @PostMapping("/api/auth/login")
         public ApiResponse<Map<String, String>> login() {
             return ApiResponse.success(Map.of("status", "login"));
+        }
+
+        @PostMapping("/api/v1/auth/login")
+        public ApiResponse<Map<String, String>> verifiedEmailLogin() {
+            return ApiResponse.success(Map.of("status", "verified-email-login"));
         }
 
         @PostMapping("/api/auth/refresh")
