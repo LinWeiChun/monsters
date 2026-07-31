@@ -54,14 +54,34 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       body: ResponsiveLayout(
         mobile:
             (context, constraints) => SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(36, 46, 36, 48),
-                child: _buildForm(authState, isMobile: true),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 520),
+                    child: _buildForm(
+                      authState,
+                      isMobile: true,
+                      compactHeight:
+                          constraints.maxHeight < 700 ||
+                          MediaQuery.viewInsetsOf(context).bottom > 0,
+                    ),
+                  ),
+                ),
               ),
             ),
         tablet:
-            (context, constraints) =>
-                _RegisterCompactLayout(form: _buildForm(authState)),
+            (context, constraints) => _RegisterCompactLayout(
+              form: _buildForm(
+                authState,
+                compactHeight:
+                    constraints.maxHeight < 760 ||
+                    MediaQuery.viewInsetsOf(context).bottom > 0,
+              ),
+            ),
         desktop:
             (context, constraints) => Row(
               children: [
@@ -71,15 +91,23 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   child: ColoredBox(
                     color: AppColors.registerFormBackground,
                     child: SafeArea(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(64, 46, 64, 56),
-                        child: Align(
-                          alignment: Alignment.topCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 40,
+                          vertical: 20,
+                        ),
+                        child: Center(
                           child: ConstrainedBox(
                             constraints: const BoxConstraints(
                               maxWidth: _desktopFormWidth,
                             ),
-                            child: _buildForm(authState, isDesktop: true),
+                            child: _buildForm(
+                              authState,
+                              isDesktop: true,
+                              compactHeight:
+                                  constraints.maxHeight < 760 ||
+                                  MediaQuery.viewInsetsOf(context).bottom > 0,
+                            ),
                           ),
                         ),
                       ),
@@ -96,6 +124,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     AuthState authState, {
     bool isDesktop = false,
     bool isMobile = false,
+    bool compactHeight = false,
   }) {
     return _RegisterForm(
       formKey: _formKey,
@@ -124,6 +153,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       onSubmit: _submit,
       isDesktop: isDesktop,
       isMobile: isMobile,
+      compactHeight: compactHeight,
     );
   }
 
@@ -154,12 +184,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final password = value ?? '';
     if (password.isEmpty) {
       return '請輸入密碼';
-    }
-    if (password.length < 8) {
-      return '密碼至少 8 字元';
-    }
-    if (password.length > 72) {
-      return '密碼最多 72 字元';
     }
     return null;
   }
@@ -280,28 +304,15 @@ class _RegisterCompactLayout extends StatelessWidget {
     return ColoredBox(
       color: AppColors.registerFormBackground,
       child: SafeArea(
-        child: SingleChildScrollView(
+        child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.xxl,
-            vertical: AppSpacing.xl,
+            vertical: AppSpacing.md,
           ),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 600),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Image.asset(
-                      'assets/images/title.png',
-                      width: 170,
-                      semanticLabel: '貘nsters',
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  form,
-                ],
-              ),
+              child: form,
             ),
           ),
         ),
@@ -330,6 +341,7 @@ class _RegisterForm extends StatelessWidget {
     required this.onSubmit,
     this.isDesktop = false,
     this.isMobile = false,
+    this.compactHeight = false,
   });
 
   final GlobalKey<FormState> formKey;
@@ -350,13 +362,14 @@ class _RegisterForm extends StatelessWidget {
   final VoidCallback onSubmit;
   final bool isDesktop;
   final bool isMobile;
+  final bool compactHeight;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final fieldHeight = isMobile ? 54.0 : 56.0;
-    final fieldGap = isMobile ? 18.0 : 12.0;
-    final labelGap = isMobile ? AppSpacing.sm : 9.0;
+    final fieldHeight = isMobile ? 48.0 : 50.0;
+    const fieldGap = 8.0;
+    const labelGap = 4.0;
 
     return Form(
       key: formKey,
@@ -382,17 +395,17 @@ class _RegisterForm extends StatelessWidget {
                 child: const Text('‹  返回登入'),
               ),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: compactHeight ? 8 : 12),
           ],
-          if (isMobile) ...[
+          if (isMobile && !compactHeight) ...[
             Center(
               child: Image.asset(
                 'assets/images/title.png',
-                width: 150,
+                width: 100,
                 semanticLabel: '貘nsters',
               ),
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 8),
           ],
           Text(
             isMobile ? '開始你的陪伴旅程' : '建立新帳號',
@@ -405,15 +418,17 @@ class _RegisterForm extends StatelessWidget {
                   height: 1.2,
                 ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            '送出後請前往 Email 信箱完成驗證。',
-            style: textTheme.bodyMedium?.copyWith(
-              color: AppColors.registerMuted,
-              fontSize: isMobile ? 13 : null,
+          if (!compactHeight) ...[
+            const SizedBox(height: 4),
+            Text(
+              '送出後請前往 Email 信箱完成驗證。',
+              style: textTheme.bodyMedium?.copyWith(
+                color: AppColors.registerMuted,
+                fontSize: isMobile ? 13 : null,
+              ),
             ),
-          ),
-          SizedBox(height: isMobile ? 28 : 38),
+          ],
+          SizedBox(height: compactHeight ? 8 : 12),
           _RegisterTextField(
             label: 'Email',
             height: fieldHeight,
@@ -430,7 +445,7 @@ class _RegisterForm extends StatelessWidget {
               validator: _RegisterValidators.of(context).email,
             ),
           ),
-          SizedBox(height: fieldGap),
+          const SizedBox(height: fieldGap),
           _RegisterTextField(
             label: '密碼',
             height: fieldHeight,
@@ -457,7 +472,7 @@ class _RegisterForm extends StatelessWidget {
               validator: _RegisterValidators.of(context).password,
             ),
           ),
-          SizedBox(height: fieldGap),
+          const SizedBox(height: fieldGap),
           _RegisterTextField(
             label: '確認密碼',
             height: fieldHeight,
@@ -485,7 +500,7 @@ class _RegisterForm extends StatelessWidget {
               onFieldSubmitted: authState.isLoading ? null : (_) => onSubmit(),
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 8),
           if (policy != null)
             _RegistrationPolicyCard(
               policy: policy!,
@@ -499,7 +514,7 @@ class _RegisterForm extends StatelessWidget {
           else
             const Text('目前無法載入註冊條款，請稍後再試'),
           if (authState.errorMessage != null) ...[
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: 4),
             Text(
               authState.errorMessage!,
               key: const Key('registerErrorMessage'),
@@ -507,16 +522,18 @@ class _RegisterForm extends StatelessWidget {
             ),
           ],
           if (localError != null) ...[
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: 4),
             Text(
               localError!,
               key: const Key('registerLocalErrorMessage'),
               style: const TextStyle(color: AppColors.registerError),
             ),
           ],
-          const SizedBox(height: 18),
-          _RegisterRuleCard(isMobile: isMobile),
-          SizedBox(height: isMobile ? 18 : 32),
+          if (!compactHeight) ...[
+            const SizedBox(height: 8),
+            _RegisterRuleCard(isMobile: isMobile),
+          ],
+          const SizedBox(height: 10),
           SizedBox(
             height: fieldHeight,
             child: FilledButton(
@@ -547,7 +564,7 @@ class _RegisterForm extends StatelessWidget {
             ),
           ),
           if (!isDesktop) ...[
-            SizedBox(height: isMobile ? 24 : AppSpacing.xl),
+            const SizedBox(height: 8),
             Wrap(
               alignment: WrapAlignment.center,
               crossAxisAlignment: WrapCrossAlignment.center,
@@ -627,8 +644,8 @@ class _RegisterRuleCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(14),
       child: Padding(
         padding: EdgeInsets.symmetric(
-          horizontal: isMobile ? AppSpacing.lg : 22,
-          vertical: isMobile ? AppSpacing.md : 22,
+          horizontal: isMobile ? AppSpacing.md : 18,
+          vertical: 8,
         ),
         child: Text(
           isMobile
@@ -666,40 +683,146 @@ class _RegistrationPolicyCard extends StatelessWidget {
       color: AppColors.registerRuleBackground,
       borderRadius: BorderRadius.circular(14),
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: 4,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            CheckboxListTile(
-              key: const Key('termsAcceptanceCheckbox'),
-              contentPadding: EdgeInsets.zero,
+            _PolicyAcceptanceRow(
+              checkboxKey: const Key('termsAcceptanceCheckbox'),
+              buttonKey: const Key('showTermsDialogButton'),
+              label: '我同意目前的服務條款',
+              buttonLabel: '查看服務條款',
               value: termsAccepted,
               onChanged: onTermsChanged,
-              controlAffinity: ListTileControlAffinity.leading,
-              title: const Text('我已閱讀並同意目前的服務條款'),
+              onShow:
+                  () => _showPolicyDialog(
+                    context,
+                    title: '服務條款',
+                    version: policy.termsVersion,
+                    url: policy.termsUrl,
+                  ),
             ),
-            SelectableText(
-              policy.termsUrl,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            CheckboxListTile(
-              key: const Key('privacyAcceptanceCheckbox'),
-              contentPadding: EdgeInsets.zero,
+            _PolicyAcceptanceRow(
+              checkboxKey: const Key('privacyAcceptanceCheckbox'),
+              buttonKey: const Key('showPrivacyDialogButton'),
+              label: '我同意目前的隱私權政策',
+              buttonLabel: '查看隱私權政策',
               value: privacyAccepted,
               onChanged: onPrivacyChanged,
-              controlAffinity: ListTileControlAffinity.leading,
-              title: const Text('我已閱讀並同意目前的隱私權政策'),
-            ),
-            SelectableText(
-              policy.privacyUrl,
-              style: Theme.of(context).textTheme.bodySmall,
+              onShow:
+                  () => _showPolicyDialog(
+                    context,
+                    title: '隱私權政策',
+                    version: policy.privacyVersion,
+                    url: policy.privacyUrl,
+                  ),
             ),
           ],
         ),
       ),
     );
   }
+}
+
+class _PolicyAcceptanceRow extends StatelessWidget {
+  const _PolicyAcceptanceRow({
+    required this.checkboxKey,
+    required this.buttonKey,
+    required this.label,
+    required this.buttonLabel,
+    required this.value,
+    required this.onChanged,
+    required this.onShow,
+  });
+
+  final Key checkboxKey;
+  final Key buttonKey;
+  final String label;
+  final String buttonLabel;
+  final bool value;
+  final ValueChanged<bool?> onChanged;
+  final VoidCallback onShow;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 48),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 40,
+            child: Checkbox(
+              key: checkboxKey,
+              value: value,
+              onChanged: onChanged,
+            ),
+          ),
+          Expanded(
+            child: Text(label, style: Theme.of(context).textTheme.bodySmall),
+          ),
+          TextButton(
+            key: buttonKey,
+            onPressed: onShow,
+            style: TextButton.styleFrom(
+              minimumSize: const Size(44, 36),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(buttonLabel),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Future<void> _showPolicyDialog(
+  BuildContext context, {
+  required String title,
+  required String version,
+  required String url,
+}) async {
+  final scrollController = ScrollController();
+  await showDialog<void>(
+    context: context,
+    builder:
+        (dialogContext) => AlertDialog(
+          title: Text(title),
+          content: SizedBox(
+            width: 560,
+            height: 360,
+            child: Scrollbar(
+              controller: scrollController,
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                controller: scrollController,
+                padding: const EdgeInsets.only(right: AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('版本：$version'),
+                    const SizedBox(height: AppSpacing.md),
+                    const Text('請透過以下官方網址閱讀此版本的完整內容：'),
+                    const SizedBox(height: AppSpacing.sm),
+                    SelectableText(url),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              key: const Key('closePolicyDialogButton'),
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('關閉'),
+            ),
+          ],
+        ),
+  );
+  scrollController.dispose();
 }
 
 class _RegisterTextField extends StatelessWidget {

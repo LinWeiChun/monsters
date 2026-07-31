@@ -77,6 +77,7 @@ class ApiErrorHandler {
       message: _messageFromResponse(response) ?? _defaultMessage(type),
       statusCode: statusCode,
       code: _codeFromResponse(response),
+      fieldErrors: _fieldErrorsFromResponse(response),
       retryAfter: _retryAfterFromResponse(response),
       cause: exception,
     );
@@ -120,6 +121,22 @@ class ApiErrorHandler {
       return data['code'] as String?;
     }
     return null;
+  }
+
+  Map<String, String> _fieldErrorsFromResponse(Response<Object?>? response) {
+    final data = response?.data;
+    if (data is! Map<String, dynamic>) {
+      return const {};
+    }
+    final fieldErrors = data['fieldErrors'];
+    if (fieldErrors is! Map) {
+      return const {};
+    }
+    return {
+      for (final entry in fieldErrors.entries)
+        if (entry.key is String && entry.value is String)
+          entry.key as String: entry.value as String,
+    };
   }
 
   int? _retryAfterFromResponse(Response<Object?>? response) {

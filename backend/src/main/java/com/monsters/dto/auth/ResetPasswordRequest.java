@@ -1,14 +1,13 @@
 package com.monsters.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 
 public record ResetPasswordRequest(
         @NotBlank
         String resetToken,
 
-        @NotBlank
-        @Size(min = 8, max = 72)
+        @NotNull(message = "PASSWORD_REQUIRED")
         String newPassword
 ) {
 }

@@ -117,6 +117,10 @@ class RegistrationLoginOpenApiContractTest {
         );
         assertThat(mapAt(registrationRequest, "properties").keySet())
                 .doesNotContain("account", "userName", "birthday", "guardianEmail");
+        assertThat(mapAt(registrationRequest, "properties", "password"))
+                .containsEntry("minLength", 15)
+                .containsEntry("maxLength", 128)
+                .containsEntry("writeOnly", true);
         assertThat(registrationRequest).containsEntry("additionalProperties", false);
         assertThat(mapAt(
                 document,

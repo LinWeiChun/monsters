@@ -1080,6 +1080,8 @@ Build：
 - `Stack`／`Positioned` 僅限 Mobile Penpot 精準畫布或元件內局部疊圖，不得用於整張 Web 頁面。
 - 可使用固定尺寸保存設計資產比例或觸控目標，但頁面寬高、主要欄位與區塊間距必須由 constraints 推導並設定合理上限。
 - 瀏覽器視窗跨越 breakpoint 時必須即時 reflow，不能依賴啟動時快取的 `MediaQuery.size`。
+- 主畫面不得以整頁 `SingleChildScrollView`、隱藏 scrollbar 或其他可捲動容器作為一般版面解法；優先使用 responsive reflow、合理密度與依可用高度收合非必要內容，讓必要內容及主要操作直接呈現在 viewport。
+- 服務條款、隱私權政策等長篇獨立文件使用彈跳視窗呈現；可見 scrollbar 只放在彈窗內容區。無障礙大字或極小 viewport 的必要例外須在 UI 規格與測試中明確記錄。
 - Widget test 至少驗證 breakpoint 邊界、900／1024px 常見平板寬度與 1440／1920px 桌面寬度，並確認沒有 overflow 或 layout exception。
 
 ---
@@ -2041,9 +2043,16 @@ Password：
 
 Hash。
 
-建議：
+新密碼：
 
-BCrypt。
+- 使用 Argon2id，參數版本保存在 PHC 格式 hash。
+- 驗證前執行 NFC、以 Unicode code points 套用 15–128 長度規則。
+- 使用本機版本化弱密碼 blocklist；不得記錄密碼、hash 或命中內容。
+
+既有 BCrypt：
+
+- 只在密碼驗證成功後於同一交易漸進 rehash。
+- 驗證失敗不得修改 hash。
 
 ---
 

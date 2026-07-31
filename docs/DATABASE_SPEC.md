@@ -736,7 +736,7 @@ Unique：`user_id, answered_date`
 |---|---|---|
 | `personal_info.account` | `users.account` | 僅保留舊系統匯入與相容用途，不作為主要關聯鍵 |
 | `personal_info.mail` | `users.email` | Email 改為 unique |
-| `personal_info.password` | `user_credentials.password_hash` | 密碼只存 BCrypt hash |
+| `personal_info.password` | `user_credentials.password_hash` | 歷史 BCrypt 可匯入；新密碼與成功登入後的漸進升級只存可辨識參數的 Argon2id PHC hash |
 | `personal_info.lock` | `user_password_locks.lock_password_hash` | 隱私鎖密碼需 hash |
 | `personal_info.photo` | `users.avatar_url` | 頭像 URL |
 | `personal_info.daily_test` | `user_daily_test_answers` | 每日測驗狀態改為作答紀錄 |
@@ -882,7 +882,7 @@ Register API must not store raw passwords, JWT values, or secrets in logs.
 | API Field | Table | Column | Note |
 |---|---|---|---|
 | email | users | email | Lowercase normalized before lookup; deleted users are rejected |
-| password | user_credentials | password_hash | Compared with BCrypt `PasswordEncoder.matches` |
+| password | user_credentials | password_hash | 依 PHC／BCrypt 前綴比對；舊 BCrypt 成功後於同一交易升級為 Argon2id |
 
 Historical Login API returns JWT access and refresh tokens；v1 改為短效 JWT Access 與 opaque Refresh session，任何 Token 都不得寫入 Log。
 

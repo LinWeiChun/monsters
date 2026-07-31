@@ -14,6 +14,8 @@ import com.monsters.repository.user.MemberDocumentAcceptanceRepository;
 import com.monsters.repository.user.UserCredentialRepository;
 import com.monsters.repository.user.UserRepository;
 import com.monsters.service.registration.RegistrationRateLimitService;
+import com.monsters.security.password.PasswordHashService;
+import com.monsters.security.password.PasswordPolicy;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Locale;
@@ -22,7 +24,6 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +36,8 @@ public class RegistrationService {
     private final UserCredentialRepository userCredentialRepository;
     private final MemberDocumentAcceptanceRepository acceptanceRepository;
     private final OutboxEventRepository outboxRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordPolicy passwordPolicy;
+    private final PasswordHashService passwordHashService;
     private final RegistrationPolicyService registrationPolicyService;
     private final RegistrationRateLimitService rateLimitService;
     private final Clock clock;
@@ -45,7 +47,8 @@ public class RegistrationService {
             UserCredentialRepository userCredentialRepository,
             MemberDocumentAcceptanceRepository acceptanceRepository,
             OutboxEventRepository outboxRepository,
-            PasswordEncoder passwordEncoder,
+            PasswordPolicy passwordPolicy,
+            PasswordHashService passwordHashService,
             RegistrationPolicyService registrationPolicyService,
             RegistrationRateLimitService rateLimitService,
             Clock clock
@@ -54,7 +57,8 @@ public class RegistrationService {
         this.userCredentialRepository = userCredentialRepository;
         this.acceptanceRepository = acceptanceRepository;
         this.outboxRepository = outboxRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.passwordPolicy = passwordPolicy;
+        this.passwordHashService = passwordHashService;
         this.registrationPolicyService = registrationPolicyService;
         this.rateLimitService = rateLimitService;
         this.clock = clock;
@@ -62,6 +66,7 @@ public class RegistrationService {
 
     @Transactional
     public void register(RegistrationRequest request, String remoteAddress) {
+        String normalizedPassword = passwordPolicy.normalizeAndValidate(request.password());
         RegistrationPolicyResponse policy = registrationPolicyService.currentPolicy();
         requireCurrentPolicy(request, policy);
 
@@ -82,7 +87,7 @@ public class RegistrationService {
         User member = userRepository.save(User.pendingEmailVerification(email));
         userCredentialRepository.save(new UserCredential(
                 member,
-                passwordEncoder.encode(request.password()),
+                passwordHashService.encode(normalizedPassword),
                 now
         ));
         acceptanceRepository.save(new MemberDocumentAcceptance(
