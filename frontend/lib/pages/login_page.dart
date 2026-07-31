@@ -93,7 +93,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   maxWidth: 600,
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.xxl,
-                    vertical: AppSpacing.lg,
+                    vertical: AppSpacing.xs,
                   ),
                   child: _buildForm(authState, isMobile: true),
                 ),

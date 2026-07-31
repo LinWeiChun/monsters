@@ -1,4 +1,7 @@
 日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
+2026-07-31,16:32,REGISTRATION-LOGIN-05-CI,Frontend,frontend/lib/pages/login_page.dart,修改,縮減平板viewport垂直留白以保留Linux CI下48px按鈕高度,Codex,否,否,是,否,主畫面維持無捲動且完整直接顯示
+2026-07-31,16:32,REGISTRATION-LOGIN-05-CI,Test,frontend/test/login_page_test.dart,驗證,登入頁20項responsive與靜態檢查通過,Codex,否,否,是,否,涵蓋CI失敗的900x700尺寸
+2026-07-31,16:32,REGISTRATION-LOGIN-05-CI,Documentation,log/CHANGE_LOG.md與log/CHANGE_HISTORY.csv,修改,記錄CI審查修正與保存期限結果,Codex,否,否,否,否,截止2026-06-30無過期Log且XLSX未修改
 2026-07-31,16:22,REGISTRATION-LOGIN-05,Backend,controller dto AuthService SecurityConfig,新增與修改,建立v1 Verified Email登入並保留legacy account migration endpoint,Codex,是,否,否,否,新舊endpoint共用密碼驗證與會員狀態continuation
 2026-07-31,16:22,REGISTRATION-LOGIN-05,API,docs/openapi/registration-login.yaml與API_SPEC,修改,正式v1只收Email且authenticated member不含account與內部userId,Codex,是,否,否,否,無效憑證與不可揭露狀態統一AUTH_INVALID_CREDENTIALS
 2026-07-31,16:22,REGISTRATION-LOGIN-05,Migration,AuthService與DATABASE_SPEC,修改,expand期間保留舊Email或account端點且新註冊account維持NULL,Codex,是,否,否,否,Task18觀測完成後才contract移除

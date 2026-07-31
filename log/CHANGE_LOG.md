@@ -8,6 +8,42 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-07-31 16:32
+
+Task
+Registration Login 05 CI Review 修正（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 修正 Flutter Linux 字型度量下，900×700 平板版登入按鈕被縮放至 46.14px 的問題。
+- 僅將平板 viewport 的垂直留白由 `lg` 縮為 `xs`，保留主畫面無捲動、完整直接顯示及按鈕至少 48px 的規則。
+- 登入頁 20 項 targeted tests 全數通過，包含 600×700 至 1920×1080 的 responsive／overflow／點擊高度檢查。
+- `flutter analyze --no-pub` 無問題。
+
+### Modified
+
+- 修改 `frontend/lib/pages/login_page.dart`。
+- 修改 `log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv`。
+- 無 API、Database、Migration 或 `system_data/` 異動。
+
+### CI
+
+- Flutter CI 原失敗已在本機以同一測試案例重現範圍並修正。
+- Backend unit 原失敗發生於 `actions/setup-java@v4`、尚未執行專案測試；同次 MySQL integration 與 OpenAPI 工作均已通過，推送後重跑確認。
+
+### Log Retention
+
+- 沿用本 Task 16:22 新增紀錄前的完整檢查：截止日 2026-06-30，未發現早於截止日的過期紀錄，未刪除 Log，XLSX 未修改。
+
+### Pending
+
+- Task 05 維持 `REVIEW`；待 PR CI 通過並合併至 `feature/phase4.5` 後轉 `DONE`。
+
+---
+
 ## 2026-07-31 16:22
 
 Task
