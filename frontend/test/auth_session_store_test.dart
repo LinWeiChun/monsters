@@ -51,8 +51,8 @@ const _loginResult = LoginResult(
   tokenType: 'Bearer',
   expiresIn: 3600,
   user: AuthUser(
+    publicId: '00000000-0000-0000-0000-000000000001',
     userId: 1,
-    account: 'wei_account',
     email: 'user@example.com',
     userName: 'Wei',
     avatarUrl: null,

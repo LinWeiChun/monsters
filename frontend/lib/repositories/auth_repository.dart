@@ -22,7 +22,7 @@ class AuthRepository {
     required String password,
   }) async {
     final response = await _apiClient.post<LoginResult>(
-      '/auth/login',
+      '/v1/auth/login',
       data: {'email': email, 'password': password},
       fromJsonT: (json) => LoginResult.fromJson(json! as Map<String, dynamic>),
       retryOnUnauthorized: false,

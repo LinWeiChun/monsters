@@ -16,6 +16,8 @@ import com.monsters.dto.auth.RegisterRequest;
 import com.monsters.dto.auth.RegisterResponse;
 import com.monsters.dto.auth.RefreshTokenRequest;
 import com.monsters.dto.auth.ResetPasswordRequest;
+import com.monsters.dto.auth.VerifiedEmailLoginRequest;
+import com.monsters.dto.auth.VerifiedEmailLoginResponse;
 import com.monsters.exception.common.ConflictException;
 import com.monsters.exception.common.UnauthorizedException;
 import com.monsters.security.common.GoogleIdTokenVerifier;
@@ -245,6 +247,43 @@ class AuthServiceTest {
 
         assertThat(response.user().account()).isEqualTo("wei_account");
         verify(userRepository).findByEmailOrAccountAndDeletedFalse("wei_account");
+    }
+
+    @Test
+    void verifiedEmailLoginShouldUseOnlyTheNormalizedExactEmail() {
+        VerifiedEmailLoginRequest request =
+                new VerifiedEmailLoginRequest(" FIRST.Last+tag@GMAIL.com ", "password123");
+        User user = new User("legacy_account", "first.last+tag@gmail.com", "Wei");
+        UserCredential credential = new UserCredential(user, "encoded-password");
+
+        when(userRepository.findByEmailAndDeletedFalse("first.last+tag@gmail.com"))
+                .thenReturn(Optional.of(user));
+        when(userCredentialRepository.findByUser(user)).thenReturn(Optional.of(credential));
+        when(passwordHashService.matches("password123", "encoded-password")).thenReturn(true);
+        when(jwtTokenService.createAccessToken(user)).thenReturn("access-token");
+        when(jwtTokenService.createRefreshToken(user)).thenReturn("refresh-token");
+        when(jwtProperties.accessTokenExpirationSeconds()).thenReturn(3600L);
+
+        VerifiedEmailLoginResponse response = authService.loginVerifiedEmail(request);
+
+        assertThat(response.user().publicId()).isEqualTo(user.getPublicId());
+        assertThat(response.user().email()).isEqualTo("first.last+tag@gmail.com");
+        assertThat(response.user().userName()).isEqualTo("Wei");
+        verify(userRepository).findByEmailAndDeletedFalse("first.last+tag@gmail.com");
+        verify(userRepository, never())
+                .findByEmailOrAccountAndDeletedFalse("first.last+tag@gmail.com");
+    }
+
+    @Test
+    void verifiedEmailLoginShouldRejectLegacyAccountIdentifier() {
+        VerifiedEmailLoginRequest request =
+                new VerifiedEmailLoginRequest("legacy_account", "password123");
+        when(userRepository.findByEmailAndDeletedFalse("legacy_account"))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.loginVerifiedEmail(request))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("Invalid email or password");
     }
 
     @Test
