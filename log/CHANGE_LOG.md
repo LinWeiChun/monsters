@@ -22,7 +22,8 @@ Codex
 - 新密碼使用 Argon2id PHC hash，固定核准參數 `m=19456 KiB`、`t=2`、`p=1`，並加入 Bouncy Castle 1.84。
 - 版本化本機 blocklist 由 SecLists 2026.1 的 10,000 筆常見密碼加一筆產品回歸值產生；Repository 只保存 SHA-256，來源、授權、checksum 與轉換方式保存在 NOTICE。
 - 登入依 hash 前綴相容既有 BCrypt；錯誤密碼不修改憑證，正確登入才在同一資料庫交易升級為 Argon2id。
-- Flutter 與 Backend 共用 `VALIDATION_FAILED` 及穩定 password field error key；Flutter 以 Unicode runes 計算長度並顯示繁體中文訊息。
+- 登入端在進入高成本雜湊比對前以 Unicode code point 拒絕超過 128 的輸入，並保留 128 個 Emoji 的合法邊界。
+- Flutter 與 Backend 共用 `VALIDATION_FAILED` 及穩定 password field error key；NFC／長度／blocklist 由 Backend 唯一判定，Flutter 顯示對應繁體中文訊息。
 - 依使用者新增的全域 UI 規則，註冊主畫面移除整頁捲動，矮視窗／鍵盤狀態收合非必要說明；Terms／Privacy 改由有獨立 scrollbar 的彈跳視窗呈現。
 
 ### Modified
@@ -51,17 +52,23 @@ Codex
 
 ### UI
 
-- 註冊頁不再使用主畫面 `SingleChildScrollView`，390×844、900×700、1440×900 皆直接呈現且無 overflow。
+- 註冊頁不再使用主畫面 `SingleChildScrollView`，390、600、900、1024、1200、1440、1920 寬度皆直接呈現且無 overflow。
 - 主畫面無 scrollbar；服務條款與隱私權政策由彈跳視窗呈現，只有彈窗內容區有 scrollbar。
 - 弱密碼及長度錯誤使用穩定錯誤鍵映射繁體中文，不顯示 Backend 內部訊息。
 
 ### Tests
 
-- Backend unit／OpenAPI：293 項通過，0 failure／error。
-- MySQL 8.4 integration：25 項通過，包含 22 項真實 Security Filter Auth／Member HTTP、Flyway 與註冊 Migration。
-- Flutter：`flutter analyze --no-pub` 無問題；完整 173 項測試通過。
+- Backend unit／OpenAPI：294 項通過，0 failure／error。
+- MySQL 8.4 integration：27 項通過，包含 24 項真實 Security Filter Auth／Member HTTP、Flyway 與註冊 Migration。
+- Flutter：`flutter analyze --no-pub` 無問題；完整 181 項測試通過；14／15／128／129 Emoji、NFC 與保留前後空白由 Widget／HTTP integration test 驗證。
 - Flutter Web release build 與 Android debug APK build 通過；APK 壓縮結構檢查無錯誤。
 - `git diff --check` 通過。
+
+### Review
+
+- Backend 審查缺口已修正：登入在高成本 hash 比對前拒絕超長輸入、NFC 正規化只執行一次，且不重複執行同一個 BCrypt 比對。
+- API／Database／NOTICE 審查缺口已修正：移除過期的 8–72 與 BCrypt-only 敘述，補上產出 blocklist 的 checksum。
+- Flutter 審查缺口已修正：Backend 成為 Unicode 政策唯一判定者，補齊 390–1920 寬度驗收、48px 操作高度、具體條款按鈕名稱與主畫面無捲動測試。
 
 ### Log Retention
 
@@ -72,6 +79,7 @@ Codex
 ### Pending
 
 - Task 04 已進入 `REVIEW`；待本 Task PR 合併至 `feature/phase4.5` 後才可轉 `DONE`。
+- 目前公開 Registration Policy API 只提供文件名稱、版本與正式 URL，彈窗先呈現這些正式參照；若要在彈窗內顯示完整法律本文，需由後續 Task 提供已核准的本文內容契約或可信來源。
 
 ---
 

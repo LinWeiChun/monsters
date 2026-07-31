@@ -47,4 +47,12 @@ class PasswordHashServiceTest {
         assertThat(passwordHashService.matches(" synthetic-password ", passwordHash)).isTrue();
         assertThat(passwordHashService.matches("synthetic-password", passwordHash)).isFalse();
     }
+
+    @Test
+    void shouldRejectLoginInputAboveTheUnicodeCodePointLimit() {
+        String passwordHash = passwordHashService.encode("😀".repeat(128));
+
+        assertThat(passwordHashService.matches("😀".repeat(128), passwordHash)).isTrue();
+        assertThat(passwordHashService.matches("😀".repeat(129), passwordHash)).isFalse();
+    }
 }

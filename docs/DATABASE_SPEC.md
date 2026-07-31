@@ -882,7 +882,7 @@ Register API must not store raw passwords, JWT values, or secrets in logs.
 | API Field | Table | Column | Note |
 |---|---|---|---|
 | email | users | email | Lowercase normalized before lookup; deleted users are rejected |
-| password | user_credentials | password_hash | Compared with BCrypt `PasswordEncoder.matches` |
+| password | user_credentials | password_hash | 依 PHC／BCrypt 前綴比對；舊 BCrypt 成功後於同一交易升級為 Argon2id |
 
 Historical Login API returns JWT access and refresh tokens；v1 改為短效 JWT Access 與 opaque Refresh session，任何 Token 都不得寫入 Log。
 

@@ -244,6 +244,72 @@ class AuthMemberHttpIntegrationTest {
     }
 
     @Test
+    void registrationShouldAcceptFifteenAndOneHundredTwentyEightButRejectOneHundredTwentyNine()
+            throws Exception {
+        for (int codePointCount : new int[]{15, 128}) {
+            mockMvc.perform(post("/api/v1/auth/register")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(Map.of(
+                                    "email", "boundary." + codePointCount + "@example.test",
+                                    "password", boundaryPassword(codePointCount),
+                                    "acceptedTermsVersion", "terms-synthetic-v1",
+                                    "acceptedPrivacyVersion", "privacy-synthetic-v1"
+                            ))))
+                    .andExpect(status().isAccepted())
+                    .andExpect(jsonPath("$.code").value("REGISTRATION_ACCEPTED"));
+        }
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", "boundary.129@example.test",
+                                "password", boundaryPassword(129),
+                                "acceptedTermsVersion", "terms-synthetic-v1",
+                                "acceptedPrivacyVersion", "privacy-synthetic-v1"
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+                .andExpect(jsonPath("$.fieldErrors.password").value("PASSWORD_TOO_LONG"));
+    }
+
+    @Test
+    void registrationAndLoginShouldNormalizeNfcWithoutTrimmingSpaces() throws Exception {
+        String spacedEmail = "spaces.password@example.test";
+        String spacedPassword = " synthetic-password ";
+        registerWithoutDelivery(spacedEmail, spacedPassword);
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", spacedEmail,
+                                "password", spacedPassword
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("AUTH_CONTINUATION_REQUIRED"));
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", spacedEmail,
+                                "password", spacedPassword.trim()
+                        ))))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTH_INVALID_CREDENTIALS"));
+
+        String nfcEmail = "nfc.password@example.test";
+        registerWithoutDelivery(nfcEmail, "cafe\u0301 synthetic-password");
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", nfcEmail,
+                                "password", "café synthetic-password"
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("AUTH_CONTINUATION_REQUIRED"));
+    }
+
+    @Test
     void registrationShouldRejectExactLocalBlocklistMatch() throws Exception {
         mockMvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1156,11 +1222,15 @@ class AuthMemberHttpIntegrationTest {
     }
 
     private void registerWithoutDelivery(String email) throws Exception {
+        registerWithoutDelivery(email, "synthetic-password");
+    }
+
+    private void registerWithoutDelivery(String email, String password) throws Exception {
         mockMvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
                                 "email", email,
-                                "password", "synthetic-password",
+                                "password", password,
                                 "acceptedTermsVersion", "terms-synthetic-v1",
                                 "acceptedPrivacyVersion", "privacy-synthetic-v1"
                         ))))
@@ -1177,6 +1247,11 @@ class AuthMemberHttpIntegrationTest {
                 String.class,
                 email
         );
+    }
+
+    private String boundaryPassword(int codePointCount) {
+        String suffix = "-Boundary9!";
+        return "x".repeat(codePointCount - suffix.codePointCount(0, suffix.length())) + suffix;
     }
 
 }

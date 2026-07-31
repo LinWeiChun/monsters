@@ -481,6 +481,7 @@ REST API
 - Email 輸入與格式驗證
 - 初始註冊不收暱稱；Email 驗證後的 Eligibility 流程才收 2–30 Unicode公開暱稱
 - 15 至 128 Unicode 密碼輸入、確認與弱密碼錯誤提示
+- Client 只做必填與兩次輸入一致性；NFC、Unicode code point 長度與 blocklist 由 Backend 唯一判定，Flutter 依穩定 `fieldErrors.password` 鍵顯示在地化訊息，避免不同平台正規化結果不一致。
 - 呼叫 `POST /api/v1/auth/register`
 - Loading 狀態
 - API 錯誤訊息呈現

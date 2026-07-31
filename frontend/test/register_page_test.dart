@@ -58,7 +58,15 @@ void main() {
     expect(find.text('https://example.test/terms'), findsNothing);
   });
 
-  for (final size in const [Size(390, 844), Size(900, 700), Size(1440, 900)]) {
+  for (final size in const [
+    Size(390, 844),
+    Size(600, 700),
+    Size(900, 700),
+    Size(1024, 768),
+    Size(1200, 800),
+    Size(1440, 900),
+    Size(1920, 1080),
+  ]) {
     testWidgets('email registration form reflows without overflow at $size', (
       tester,
     ) async {
@@ -89,39 +97,82 @@ void main() {
     expect(find.text('請同意目前的服務條款與隱私權政策'), findsOneWidget);
   });
 
-  testWidgets('uses Unicode code points for the 15 to 128 password boundary', (
-    tester,
-  ) async {
+  for (final codePointCount in const [14, 15, 128, 129]) {
+    testWidgets(
+      'maps backend Unicode policy for $codePointCount emoji code points',
+      (tester) async {
+        await _setSurface(tester, const Size(390, 844));
+        await tester.pumpWidget(
+          _registerApp(
+            _FakeAuthRepository(enforceSyntheticPasswordPolicy: true),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final password = List.filled(codePointCount, '😀').join();
+        await tester.enterText(
+          find.byKey(const Key('registerEmailField')),
+          'boundary.$codePointCount@example.test',
+        );
+        await tester.enterText(
+          find.byKey(const Key('registerPasswordField')),
+          password,
+        );
+        await tester.enterText(
+          find.byKey(const Key('registerConfirmPasswordField')),
+          password,
+        );
+        await tester.tap(find.byKey(const Key('termsAcceptanceCheckbox')));
+        await tester.tap(find.byKey(const Key('privacyAcceptanceCheckbox')));
+        await tester.tap(find.byKey(const Key('registerSubmitButton')));
+        await tester.pumpAndSettle();
+
+        if (codePointCount == 14) {
+          expect(find.text('密碼至少需要 15 個字元'), findsOneWidget);
+        } else if (codePointCount == 129) {
+          expect(find.text('密碼最多可有 128 個字元'), findsOneWidget);
+        } else {
+          expect(find.text('請查看你的 Email'), findsOneWidget);
+        }
+      },
+    );
+  }
+
+  testWidgets('maps the backend NFC-normalized length result', (tester) async {
     await _setSurface(tester, const Size(390, 844));
-    await tester.pumpWidget(_registerApp(_FakeAuthRepository()));
+    await tester.pumpWidget(
+      _registerApp(
+        _FakeAuthRepository(
+          registerException: const ApiException(
+            type: ApiErrorType.validation,
+            code: 'VALIDATION_FAILED',
+            message: 'Request validation failed',
+            fieldErrors: {'password': 'PASSWORD_TOO_SHORT'},
+          ),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
+    final decomposedPassword = '${List.filled(13, 'a').join()}e\u0301';
+    await tester.enterText(
+      find.byKey(const Key('registerEmailField')),
+      'nfc.boundary@example.test',
+    );
     await tester.enterText(
       find.byKey(const Key('registerPasswordField')),
-      List.filled(14, '😀').join(),
+      decomposedPassword,
     );
     await tester.enterText(
       find.byKey(const Key('registerConfirmPasswordField')),
-      List.filled(14, '😀').join(),
+      decomposedPassword,
     );
-    await tester.ensureVisible(find.byKey(const Key('registerSubmitButton')));
+    await tester.tap(find.byKey(const Key('termsAcceptanceCheckbox')));
+    await tester.tap(find.byKey(const Key('privacyAcceptanceCheckbox')));
     await tester.tap(find.byKey(const Key('registerSubmitButton')));
     await tester.pumpAndSettle();
 
     expect(find.text('密碼至少需要 15 個字元'), findsOneWidget);
-
-    await tester.enterText(
-      find.byKey(const Key('registerPasswordField')),
-      List.filled(15, '😀').join(),
-    );
-    await tester.enterText(
-      find.byKey(const Key('registerConfirmPasswordField')),
-      List.filled(15, '😀').join(),
-    );
-    await tester.tap(find.byKey(const Key('registerSubmitButton')));
-    await tester.pumpAndSettle();
-
-    expect(find.text('密碼至少需要 15 個字元'), findsNothing);
   });
 
   testWidgets('shows a localized backend weak-password error', (tester) async {
@@ -252,9 +303,13 @@ Widget _registerApp(AuthRepository authRepository) {
 }
 
 class _FakeAuthRepository extends AuthRepository {
-  _FakeAuthRepository({this.registerException}) : super(_dummyClient());
+  _FakeAuthRepository({
+    this.registerException,
+    this.enforceSyntheticPasswordPolicy = false,
+  }) : super(_dummyClient());
 
   final ApiException? registerException;
+  final bool enforceSyntheticPasswordPolicy;
   String? email;
   String? password;
   String? termsVersion;
@@ -284,6 +339,25 @@ class _FakeAuthRepository extends AuthRepository {
     final exception = registerException;
     if (exception != null) {
       throw exception;
+    }
+    if (enforceSyntheticPasswordPolicy) {
+      final codePointCount = password.runes.length;
+      if (codePointCount < 15) {
+        throw const ApiException(
+          type: ApiErrorType.validation,
+          code: 'VALIDATION_FAILED',
+          message: 'Request validation failed',
+          fieldErrors: {'password': 'PASSWORD_TOO_SHORT'},
+        );
+      }
+      if (codePointCount > 128) {
+        throw const ApiException(
+          type: ApiErrorType.validation,
+          code: 'VALIDATION_FAILED',
+          message: 'Request validation failed',
+          fieldErrors: {'password': 'PASSWORD_TOO_LONG'},
+        );
+      }
     }
   }
 }

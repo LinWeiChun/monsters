@@ -646,7 +646,7 @@ Response：
 規則：
 
 - `resetToken` 必填。
-- `newPassword` 必填，長度 8 到 72 字元。
+- `newPassword` 必填，NFC 後長度為 15 到 128 Unicode code points，不 trim，並套用版本化本機弱密碼 blocklist。
 - 後端必須先 hash `resetToken` 後查詢，不得以明文 token 查詢資料庫。
 - reset token 不存在、已使用、已過期或對應使用者已刪除時，回傳 401。
 - 新密碼需套用正式密碼政策並使用 Argon2id 重新雜湊。

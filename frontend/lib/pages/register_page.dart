@@ -185,13 +185,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     if (password.isEmpty) {
       return '請輸入密碼';
     }
-    final codePointCount = password.runes.length;
-    if (codePointCount < 15) {
-      return '密碼至少需要 15 個字元';
-    }
-    if (codePointCount > 128) {
-      return '密碼最多可有 128 個字元';
-    }
     return null;
   }
 
@@ -701,7 +694,7 @@ class _RegistrationPolicyCard extends StatelessWidget {
               checkboxKey: const Key('termsAcceptanceCheckbox'),
               buttonKey: const Key('showTermsDialogButton'),
               label: '我同意目前的服務條款',
-              buttonLabel: '查看',
+              buttonLabel: '查看服務條款',
               value: termsAccepted,
               onChanged: onTermsChanged,
               onShow:
@@ -716,7 +709,7 @@ class _RegistrationPolicyCard extends StatelessWidget {
               checkboxKey: const Key('privacyAcceptanceCheckbox'),
               buttonKey: const Key('showPrivacyDialogButton'),
               label: '我同意目前的隱私權政策',
-              buttonLabel: '查看',
+              buttonLabel: '查看隱私權政策',
               value: privacyAccepted,
               onChanged: onPrivacyChanged,
               onShow:
@@ -755,8 +748,8 @@ class _PolicyAcceptanceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 40,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 48),
       child: Row(
         children: [
           SizedBox(
@@ -768,12 +761,7 @@ class _PolicyAcceptanceRow extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+            child: Text(label, style: Theme.of(context).textTheme.bodySmall),
           ),
           TextButton(
             key: buttonKey,

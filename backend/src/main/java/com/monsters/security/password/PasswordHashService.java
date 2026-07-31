@@ -37,12 +37,18 @@ public class PasswordHashService {
         if (rawPassword == null || passwordHash == null) {
             return false;
         }
+        String normalizedPassword = normalize(rawPassword);
+        if (normalizedPassword.codePointCount(0, normalizedPassword.length())
+                > PasswordPolicy.MAXIMUM_CODE_POINTS) {
+            return false;
+        }
         if (isBcrypt(passwordHash)) {
             return bcryptPasswordEncoder.matches(rawPassword, passwordHash)
-                    || bcryptPasswordEncoder.matches(normalize(rawPassword), passwordHash);
+                    || (!rawPassword.toString().equals(normalizedPassword)
+                    && bcryptPasswordEncoder.matches(normalizedPassword, passwordHash));
         }
         if (passwordHash.startsWith("$argon2id$")) {
-            return argon2PasswordEncoder.matches(normalize(rawPassword), passwordHash);
+            return argon2PasswordEncoder.matches(normalizedPassword, passwordHash);
         }
         return false;
     }
