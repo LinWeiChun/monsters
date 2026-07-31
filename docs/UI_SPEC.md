@@ -17,6 +17,9 @@
 - 第一版不持久化離線私人資料；尚未同步的本機草稿只在目前 App 執行期間保留，已同步的 owner-scoped 伺服器草稿依 30 天規則保存，送出失敗時可於原畫面重試。
 - 通知預設只顯示「貘nsters 有一則新通知」，不得顯示日記、貼文、留言、媒體或情緒負荷。
 - 高風險功能由 Backend 功能開關強制；Client 設定無法取得時採關閉狀態，但仍保留資料查看、匯出與刪除入口。
+- Web、Android 與 iOS 的主畫面預設不得設計成可捲動頁面，也不得只隱藏 scrollbar；應優先以 responsive reflow、縮減非必要留白、調整資訊層級與在矮視窗／鍵盤開啟時收合非必要說明，讓必要內容與主要操作直接完整呈現在 viewport 內。
+- 只有內容本質上無法在單一 viewport 合理呈現的獨立文件或次要詳情，例如服務條款、隱私權政策與長篇法律說明，才可使用彈跳視窗；scrollbar 只允許出現在該彈跳視窗的內容區。
+- 若因無障礙大字、極小 viewport 或內容動態增加而確實無法避免捲動，必須先保證內容可達與操作安全，並在對應 Task／UI 文件記錄例外原因、替代版面及驗收尺寸，不得默默加入整頁 `SingleChildScrollView`。
 
 ## 一、平台
 
@@ -521,7 +524,7 @@ REST API
 - 註冊頁不得直接呼叫 Dio。
 - 註冊頁不得保存密碼或 token 至 SharedPreferences。
 - 註冊頁不得顯示或傳送 `account`。
-- 註冊頁必須先讀取公開 Registration Policy，顯示目前 Terms／Privacy URL，並送出兩個實際接受版本。
+- 註冊頁必須先讀取公開 Registration Policy，將目前 Terms／Privacy version 與 URL 放在各自的彈跳視窗中呈現，並送出兩個實際接受版本；註冊主畫面不可捲動，只有文件彈窗內容區可顯示 scrollbar。
 - 註冊後顯示通用受理說明、修正 Email 與重新寄送驗證信入口；不得揭露 Email 是否已有會員。
 - 重寄按鈕顯示 60 秒倒數；Backend 的 `429 RATE_LIMITED` 與 `retryAfter` 仍是安全強制來源。
 - `/verify-email?token=...` 只在記憶體消耗 Token；成功顯示 Eligibility 下一步，過期或無效時提供重新開始，不保存 Continuation Credential。

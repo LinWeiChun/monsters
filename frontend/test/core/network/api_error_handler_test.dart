@@ -26,6 +26,28 @@ void main() {
       expect(error.message, 'Token expired.');
     });
 
+    test('maps stable backend field error keys', () {
+      final requestOptions = RequestOptions(path: '/v1/auth/register');
+      final exception = DioException(
+        requestOptions: requestOptions,
+        response: Response<Object?>(
+          requestOptions: requestOptions,
+          statusCode: 400,
+          data: {
+            'success': false,
+            'code': 'VALIDATION_FAILED',
+            'message': 'Request validation failed',
+            'fieldErrors': {'password': 'PASSWORD_TOO_WEAK'},
+          },
+        ),
+        type: DioExceptionType.badResponse,
+      );
+
+      final error = handler.fromDioException(exception);
+
+      expect(error.fieldErrors, {'password': 'PASSWORD_TOO_WEAK'});
+    });
+
     test('maps timeout exception', () {
       final error = handler.fromDioException(
         DioException(

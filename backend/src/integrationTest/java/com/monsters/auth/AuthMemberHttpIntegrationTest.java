@@ -42,6 +42,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -198,7 +199,8 @@ class AuthMemberHttpIntegrationTest {
                 "SELECT password_hash FROM user_credentials WHERE user_id = ?",
                 String.class,
                 memberId
-        )).doesNotContain(syntheticPassword);
+        )).startsWith("$argon2id$v=19$m=19456,t=2,p=1$")
+                .doesNotContain(syntheticPassword);
         assertThat(jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM member_document_acceptances WHERE user_id = ?",
                 Integer.class,
@@ -218,6 +220,95 @@ class AuthMemberHttpIntegrationTest {
         assertThat(outbox.get("payload").toString()).doesNotContain(syntheticEmail, syntheticPassword);
         assertThat(output.getAll()).contains("Registration request accepted");
         assertThat(output.getAll()).doesNotContain(syntheticEmail, syntheticPassword);
+    }
+
+    @Test
+    void registrationShouldRejectPasswordOutsideUnicodePolicyWithoutLoggingIt(
+            CapturedOutput output
+    ) throws Exception {
+        String syntheticPassword = "😀".repeat(14);
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", "short.password@example.test",
+                                "password", syntheticPassword,
+                                "acceptedTermsVersion", "terms-synthetic-v1",
+                                "acceptedPrivacyVersion", "privacy-synthetic-v1"
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+                .andExpect(jsonPath("$.fieldErrors.password").value("PASSWORD_TOO_SHORT"));
+
+        assertThat(output.getAll()).doesNotContain(syntheticPassword);
+    }
+
+    @Test
+    void registrationShouldRejectExactLocalBlocklistMatch() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", "weak.password@example.test",
+                                "password", "passwordpassword",
+                                "acceptedTermsVersion", "terms-synthetic-v1",
+                                "acceptedPrivacyVersion", "privacy-synthetic-v1"
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+                .andExpect(jsonPath("$.fieldErrors.password").value("PASSWORD_TOO_WEAK"));
+    }
+
+    @Test
+    void successfulLoginShouldAtomicallyUpgradeBcryptButFailedLoginShouldNot(
+            CapturedOutput output
+    ) throws Exception {
+        String syntheticEmail = "bcrypt.migration@example.test";
+        String syntheticPassword = "synthetic-password";
+        registerWithoutDelivery(syntheticEmail);
+        jdbcTemplate.update(
+                "UPDATE users SET member_state = 'ACTIVE' WHERE email = ?",
+                syntheticEmail
+        );
+        String legacyHash = new BCryptPasswordEncoder().encode(syntheticPassword);
+        jdbcTemplate.update(
+                """
+                UPDATE user_credentials
+                SET password_hash = ?
+                WHERE user_id = (SELECT id FROM users WHERE email = ?)
+                """,
+                legacyHash,
+                syntheticEmail
+        );
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", syntheticEmail,
+                                "password", "incorrect-password"
+                        ))))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTH_INVALID_CREDENTIALS"));
+
+        assertThat(passwordHashFor(syntheticEmail)).isEqualTo(legacyHash);
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", syntheticEmail,
+                                "password", syntheticPassword
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("AUTHENTICATED"));
+
+        assertThat(passwordHashFor(syntheticEmail))
+                .startsWith("$argon2id$v=19$m=19456,t=2,p=1$")
+                .isNotEqualTo(legacyHash);
+        assertThat(output.getAll()).doesNotContain(
+                syntheticEmail,
+                syntheticPassword,
+                legacyHash,
+                passwordHashFor(syntheticEmail)
+        );
     }
 
     @Test
@@ -1074,6 +1165,18 @@ class AuthMemberHttpIntegrationTest {
                                 "acceptedPrivacyVersion", "privacy-synthetic-v1"
                         ))))
                 .andExpect(status().isAccepted());
+    }
+
+    private String passwordHashFor(String email) {
+        return jdbcTemplate.queryForObject(
+                """
+                SELECT password_hash
+                FROM user_credentials
+                WHERE user_id = (SELECT id FROM users WHERE email = ?)
+                """,
+                String.class,
+                email
+        );
     }
 
 }

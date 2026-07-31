@@ -2,6 +2,7 @@ package com.monsters.exception.common;
 
 import com.monsters.dto.common.ApiResponse;
 import com.monsters.dto.common.RateLimitResponse;
+import com.monsters.security.password.PasswordPolicyException;
 import jakarta.validation.ConstraintViolationException;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -26,6 +27,19 @@ public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     private static final String DEFAULT_VALIDATION_MESSAGE = "Request validation failed";
     private static final String DEFAULT_ERROR_MESSAGE = "Internal server error";
+
+    @ExceptionHandler(PasswordPolicyException.class)
+    public ResponseEntity<ApiResponse<Void>> handlePasswordPolicyException(
+            PasswordPolicyException exception
+    ) {
+        log.warn("Password policy validation failed: reason={}", exception.getFieldErrorCode());
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "VALIDATION_FAILED",
+                exception.getMessage(),
+                Map.of("password", exception.getFieldErrorCode())
+        );
+    }
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException exception) {

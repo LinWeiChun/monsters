@@ -30,8 +30,32 @@ void main() {
     );
     expect(find.byKey(const Key('termsAcceptanceCheckbox')), findsOneWidget);
     expect(find.byKey(const Key('privacyAcceptanceCheckbox')), findsOneWidget);
+    expect(find.byKey(const Key('showTermsDialogButton')), findsOneWidget);
+    expect(find.byKey(const Key('showPrivacyDialogButton')), findsOneWidget);
+    expect(find.text('https://example.test/terms'), findsNothing);
+    expect(find.text('https://example.test/privacy'), findsNothing);
+    expect(find.byType(Scrollbar), findsNothing);
+    expect(find.byType(SingleChildScrollView), findsNothing);
+  });
+
+  testWidgets('shows policy documents in a scrollable dialog only', (
+    tester,
+  ) async {
+    await _setSurface(tester, const Size(390, 844));
+    await tester.pumpWidget(_registerApp(_FakeAuthRepository()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('showTermsDialogButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('服務條款'), findsOneWidget);
     expect(find.text('https://example.test/terms'), findsOneWidget);
-    expect(find.text('https://example.test/privacy'), findsOneWidget);
+    expect(find.byType(Scrollbar), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('closePolicyDialogButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('https://example.test/terms'), findsNothing);
   });
 
   for (final size in const [Size(390, 844), Size(900, 700), Size(1440, 900)]) {
@@ -63,6 +87,78 @@ void main() {
     expect(find.text('請輸入密碼'), findsOneWidget);
     expect(find.text('請再次輸入密碼'), findsOneWidget);
     expect(find.text('請同意目前的服務條款與隱私權政策'), findsOneWidget);
+  });
+
+  testWidgets('uses Unicode code points for the 15 to 128 password boundary', (
+    tester,
+  ) async {
+    await _setSurface(tester, const Size(390, 844));
+    await tester.pumpWidget(_registerApp(_FakeAuthRepository()));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('registerPasswordField')),
+      List.filled(14, '😀').join(),
+    );
+    await tester.enterText(
+      find.byKey(const Key('registerConfirmPasswordField')),
+      List.filled(14, '😀').join(),
+    );
+    await tester.ensureVisible(find.byKey(const Key('registerSubmitButton')));
+    await tester.tap(find.byKey(const Key('registerSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('密碼至少需要 15 個字元'), findsOneWidget);
+
+    await tester.enterText(
+      find.byKey(const Key('registerPasswordField')),
+      List.filled(15, '😀').join(),
+    );
+    await tester.enterText(
+      find.byKey(const Key('registerConfirmPasswordField')),
+      List.filled(15, '😀').join(),
+    );
+    await tester.tap(find.byKey(const Key('registerSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('密碼至少需要 15 個字元'), findsNothing);
+  });
+
+  testWidgets('shows a localized backend weak-password error', (tester) async {
+    await _setSurface(tester, const Size(390, 844));
+    await tester.pumpWidget(
+      _registerApp(
+        _FakeAuthRepository(
+          registerException: const ApiException(
+            type: ApiErrorType.validation,
+            code: 'VALIDATION_FAILED',
+            message: 'Request validation failed',
+            fieldErrors: {'password': 'PASSWORD_TOO_WEAK'},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('registerEmailField')),
+      'member@example.test',
+    );
+    await tester.enterText(
+      find.byKey(const Key('registerPasswordField')),
+      'not-on-local-list',
+    );
+    await tester.enterText(
+      find.byKey(const Key('registerConfirmPasswordField')),
+      'not-on-local-list',
+    );
+    await tester.tap(find.byKey(const Key('termsAcceptanceCheckbox')));
+    await tester.tap(find.byKey(const Key('privacyAcceptanceCheckbox')));
+    await tester.ensureVisible(find.byKey(const Key('registerSubmitButton')));
+    await tester.tap(find.byKey(const Key('registerSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('這組密碼太常見，請改用較不容易猜到的密碼'), findsOneWidget);
   });
 
   testWidgets('submits current policy versions and opens waiting page', (

@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +37,8 @@ import com.monsters.security.common.JwtProperties;
 import com.monsters.security.common.JwtTokenPayload;
 import com.monsters.security.common.JwtTokenService;
 import com.monsters.security.common.PasswordResetTokenService;
+import com.monsters.security.password.PasswordHashService;
+import com.monsters.security.password.PasswordPolicy;
 
 @Service
 public class AuthService {
@@ -50,7 +51,8 @@ public class AuthService {
 	private final UserCredentialRepository userCredentialRepository;
 	private final UserOAuthAccountRepository userOAuthAccountRepository;
 	private final PasswordResetTokenRepository passwordResetTokenRepository;
-	private final PasswordEncoder passwordEncoder;
+	private final PasswordPolicy passwordPolicy;
+	private final PasswordHashService passwordHashService;
 	private final JwtTokenService jwtTokenService;
 	private final JwtProperties jwtProperties;
 	private final GoogleIdTokenVerifier googleIdTokenVerifier;
@@ -62,7 +64,8 @@ public class AuthService {
 	@Autowired
 	public AuthService(UserRepository userRepository, UserCredentialRepository userCredentialRepository,
 			UserOAuthAccountRepository userOAuthAccountRepository,
-			PasswordResetTokenRepository passwordResetTokenRepository, PasswordEncoder passwordEncoder,
+			PasswordResetTokenRepository passwordResetTokenRepository, PasswordPolicy passwordPolicy,
+			PasswordHashService passwordHashService,
 			JwtTokenService jwtTokenService, JwtProperties jwtProperties, GoogleIdTokenVerifier googleIdTokenVerifier,
 			PasswordResetTokenService passwordResetTokenService, TokenRevocationService tokenRevocationService,
 			ContinuationCredentialService continuationCredentialService, Clock clock) {
@@ -70,7 +73,8 @@ public class AuthService {
 		this.userCredentialRepository = userCredentialRepository;
 		this.userOAuthAccountRepository = userOAuthAccountRepository;
 		this.passwordResetTokenRepository = passwordResetTokenRepository;
-		this.passwordEncoder = passwordEncoder;
+		this.passwordPolicy = passwordPolicy;
+		this.passwordHashService = passwordHashService;
 		this.jwtTokenService = jwtTokenService;
 		this.jwtProperties = jwtProperties;
 		this.googleIdTokenVerifier = googleIdTokenVerifier;
@@ -95,7 +99,8 @@ public class AuthService {
 		User user = new User(account, email, request.userName().trim());
 		User savedUser = userRepository.save(user);
 
-		String passwordHash = passwordEncoder.encode(request.password());
+		String passwordHash = passwordHashService.encode(
+				passwordPolicy.normalizeAndValidate(request.password()));
 		userCredentialRepository.save(new UserCredential(savedUser, passwordHash));
 
 		return new RegisterResponse(savedUser.getId(), savedUser.getAccount(), savedUser.getEmail(),
@@ -112,8 +117,11 @@ public class AuthService {
 		UserCredential credential = userCredentialRepository.findByUser(user)
 				.orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
 
-		if (!passwordEncoder.matches(request.password(), credential.getPasswordHash())) {
+		if (!passwordHashService.matches(request.password(), credential.getPasswordHash())) {
 			throw new UnauthorizedException("Invalid email or password");
+		}
+		if (passwordHashService.needsRehash(credential.getPasswordHash())) {
+			credential.updatePasswordHash(passwordHashService.encode(request.password()));
 		}
 
 		return createAuthenticationResponse(user);
@@ -171,7 +179,8 @@ public class AuthService {
 			throw new UnauthorizedException("Invalid password reset token");
 		}
 
-		String passwordHash = passwordEncoder.encode(request.newPassword());
+		String passwordHash = passwordHashService.encode(
+				passwordPolicy.normalizeAndValidate(request.newPassword()));
 		User user = resetToken.getUser();
 		userCredentialRepository.findByUser(user).ifPresentOrElse(
 				credential -> credential.updatePasswordHash(passwordHash),

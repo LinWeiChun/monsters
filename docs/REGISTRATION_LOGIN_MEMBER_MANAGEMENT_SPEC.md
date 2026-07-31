@@ -110,7 +110,8 @@
 - 驗證前執行 NFC 正規化。
 - 不強制大小寫、數字或特殊字元組合。
 - 使用弱密碼 blocklist。
-- 新密碼使用 Argon2id。
+- 弱密碼 blocklist 使用版本化本機 SHA-256 清單，對 NFC 後的完整密碼做精確比對；來源、版本、授權與轉換 checksum 必須隨資源保存。
+- 新密碼使用可辨識版本的 Argon2id PHC hash；目前核准參數為 m=19456 KiB、t=2、p=1。
 - 既有 BCrypt 密碼在成功登入後漸進 rehash。
 - 密碼、hash、blocklist 命中內容不得進入 Log、Audit 或分析事件。
 

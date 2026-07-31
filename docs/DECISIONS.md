@@ -42,7 +42,7 @@ Phase 4.5 已核准決策的可交付規格與測試接縫整理於 [`PHASE4_5_F
 | 忘記密碼 | 正式 Email reset link，15 分鐘單次 hash Token、統一對外回應、成功後撤銷全部工作階段 |
 | Email 變更 | reauth、新 Email 驗證、新舊 Email 通知、撤銷其他工作階段 |
 | Password Policy | 15–128 Unicode、弱密碼 blocklist、無固定 composition、無定期強制更換；參考 [NIST SP 800-63B](https://pages.nist.gov/800-63-4/sp800-63b.html) |
-| Password Hash | 新密碼 Argon2id；既有 BCrypt 成功登入時漸進 rehash；參考 [OWASP Password Storage](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html) |
+| Password Hash | 新密碼使用 Argon2id PHC hash（m=19456 KiB、t=2、p=1，Bouncy Castle 1.84）；既有 BCrypt 只在成功登入後於同一交易漸進 rehash；參考 [OWASP Password Storage](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html) |
 | Access Token | 10 分鐘 JWT，只放記憶體 |
 | Refresh Token | 不透明隨機值、Server 只存 hash；rotation、family 與 reuse detection |
 | Web Credential | Refresh 使用 `__Host-` HttpOnly／Secure／SameSite Cookie；Access 只放記憶體 |

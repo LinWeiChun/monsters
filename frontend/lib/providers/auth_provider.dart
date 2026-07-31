@@ -275,6 +275,16 @@ class AuthController extends StateNotifier<AuthState> {
   }
 
   String _registrationMessage(ApiException error) {
+    final passwordError = error.fieldErrors['password'];
+    if (passwordError != null) {
+      return switch (passwordError) {
+        'PASSWORD_REQUIRED' => '請輸入密碼',
+        'PASSWORD_TOO_SHORT' => '密碼至少需要 15 個字元',
+        'PASSWORD_TOO_LONG' => '密碼最多可有 128 個字元',
+        'PASSWORD_TOO_WEAK' => '這組密碼太常見，請改用較不容易猜到的密碼',
+        _ => '密碼不符合目前的安全規則',
+      };
+    }
     return switch (error.code) {
       'REGISTRATION_POLICY_OUTDATED' => '條款內容已更新，請重新確認後再送出',
       'EMAIL_VERIFICATION_TOKEN_EXPIRED' => '驗證連結已過期，請重新開始驗證流程',

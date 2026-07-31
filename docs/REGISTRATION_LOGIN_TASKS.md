@@ -88,7 +88,9 @@
 
 **Blocked by:** 02 — 建立會員狀態機與 Continuation Credential。
 
-**Status:** REVIEW
+**Status:** DONE
+
+**Evidence:** PR #91 已合併至 `feature/phase4.5`；註冊、Email 驗證、MySQL 整合、Flutter 與 OpenAPI 驗收已完成。
 
 - [x] 初始註冊不收`account`、生日、地區、暱稱、Guardian Email或使用者頭貼。
 - [x] 新註冊與相同Email恢復流程對外統一回`202 REGISTRATION_ACCEPTED`。
@@ -106,15 +108,15 @@
 
 **Blocked by:** 01 — 建立 Auth／Member 真實驗收骨架。
 
-**Status:** ready-for-agent
+**Status:** REVIEW
 
-- [ ] 密碼接受15–128個Unicode code points，且不trim。
-- [ ] 密碼驗證使用NFC正規化與弱密碼blocklist，不強制固定字元組合。
-- [ ] 新密碼使用Argon2id並保存可辨識的參數版本。
-- [ ] 既有BCrypt密碼只在成功登入後原子rehash；失敗登入不得修改hash。
-- [ ] 14／15／128／129 code points、Emoji、空白與弱密碼案例皆有測試。
-- [ ] 密碼、hash及blocklist命中內容不得進入Log、Audit或分析事件。
-- [ ] Flutter與Backend使用一致的長度與錯誤碼契約。
+- [x] 密碼接受15–128個Unicode code points，且不trim。
+- [x] 密碼驗證使用NFC正規化與弱密碼blocklist，不強制固定字元組合。
+- [x] 新密碼使用Argon2id並保存可辨識的參數版本。
+- [x] 既有BCrypt密碼只在成功登入後原子rehash；失敗登入不得修改hash。
+- [x] 14／15／128／129 code points、Emoji、空白與弱密碼案例皆有測試。
+- [x] 密碼、hash及blocklist命中內容不得進入Log、Audit或分析事件。
+- [x] Flutter與Backend使用一致的長度與錯誤碼契約。
 
 ---
 

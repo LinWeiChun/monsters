@@ -23,6 +23,8 @@ import com.monsters.security.common.GoogleUserInfo;
 import com.monsters.security.common.JwtProperties;
 import com.monsters.security.common.JwtTokenService;
 import com.monsters.security.common.PasswordResetTokenService;
+import com.monsters.security.password.PasswordHashService;
+import com.monsters.security.password.PasswordPolicy;
 import com.monsters.entity.user.PasswordResetToken;
 import com.monsters.entity.user.User;
 import com.monsters.entity.user.UserCredential;
@@ -41,7 +43,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,7 +61,10 @@ class AuthServiceTest {
     private PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Mock
-    private PasswordEncoder passwordEncoder;
+    private PasswordPolicy passwordPolicy;
+
+    @Mock
+    private PasswordHashService passwordHashService;
 
     @Mock
     private JwtTokenService jwtTokenService;
@@ -89,7 +93,8 @@ class AuthServiceTest {
                 userCredentialRepository,
                 userOAuthAccountRepository,
                 passwordResetTokenRepository,
-                passwordEncoder,
+                passwordPolicy,
+                passwordHashService,
                 jwtTokenService,
                 jwtProperties,
                 googleIdTokenVerifier,
@@ -152,7 +157,8 @@ class AuthServiceTest {
         when(userRepository.existsByAccount("wei_account")).thenReturn(false);
         when(userRepository.existsByEmail("user@example.com")).thenReturn(false);
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(passwordEncoder.encode("password123")).thenReturn("encoded-password");
+        when(passwordPolicy.normalizeAndValidate("password123")).thenReturn("password123");
+        when(passwordHashService.encode("password123")).thenReturn("encoded-password");
 
         RegisterResponse response = authService.register(request);
 
@@ -204,7 +210,7 @@ class AuthServiceTest {
 
         when(userRepository.findByEmailOrAccountAndDeletedFalse("user@example.com")).thenReturn(Optional.of(user));
         when(userCredentialRepository.findByUser(user)).thenReturn(Optional.of(credential));
-        when(passwordEncoder.matches("password123", "encoded-password")).thenReturn(true);
+        when(passwordHashService.matches("password123", "encoded-password")).thenReturn(true);
         when(jwtTokenService.createAccessToken(user)).thenReturn("access-token");
         when(jwtTokenService.createRefreshToken(user)).thenReturn("refresh-token");
         when(jwtProperties.accessTokenExpirationSeconds()).thenReturn(3600L);
@@ -230,7 +236,7 @@ class AuthServiceTest {
 
         when(userRepository.findByEmailOrAccountAndDeletedFalse("wei_account")).thenReturn(Optional.of(user));
         when(userCredentialRepository.findByUser(user)).thenReturn(Optional.of(credential));
-        when(passwordEncoder.matches("password123", "encoded-password")).thenReturn(true);
+        when(passwordHashService.matches("password123", "encoded-password")).thenReturn(true);
         when(jwtTokenService.createAccessToken(user)).thenReturn("access-token");
         when(jwtTokenService.createRefreshToken(user)).thenReturn("refresh-token");
         when(jwtProperties.accessTokenExpirationSeconds()).thenReturn(3600L);
@@ -259,11 +265,35 @@ class AuthServiceTest {
 
         when(userRepository.findByEmailOrAccountAndDeletedFalse("user@example.com")).thenReturn(Optional.of(user));
         when(userCredentialRepository.findByUser(user)).thenReturn(Optional.of(credential));
-        when(passwordEncoder.matches("wrong-password", "encoded-password")).thenReturn(false);
+        when(passwordHashService.matches("wrong-password", "encoded-password")).thenReturn(false);
 
         assertThatThrownBy(() -> authService.login(request))
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessage("Invalid email or password");
+        assertThat(credential.getPasswordHash()).isEqualTo("encoded-password");
+        verify(passwordHashService, never()).encode("wrong-password");
+    }
+
+    @Test
+    void loginShouldRehashLegacyCredentialOnlyAfterSuccessfulVerification() {
+        LoginRequest request = new LoginRequest("user@example.com", "password123");
+        User user = new User("wei_account", "user@example.com", "Wei");
+        ReflectionTestUtils.setField(user, "id", 1L);
+        UserCredential credential = new UserCredential(user, "legacy-bcrypt-hash");
+
+        when(userRepository.findByEmailOrAccountAndDeletedFalse("user@example.com"))
+                .thenReturn(Optional.of(user));
+        when(userCredentialRepository.findByUser(user)).thenReturn(Optional.of(credential));
+        when(passwordHashService.matches("password123", "legacy-bcrypt-hash")).thenReturn(true);
+        when(passwordHashService.needsRehash("legacy-bcrypt-hash")).thenReturn(true);
+        when(passwordHashService.encode("password123")).thenReturn("argon2id-hash");
+        when(jwtTokenService.createAccessToken(user)).thenReturn("access-token");
+        when(jwtTokenService.createRefreshToken(user)).thenReturn("refresh-token");
+        when(jwtProperties.accessTokenExpirationSeconds()).thenReturn(3600L);
+
+        authService.login(request);
+
+        assertThat(credential.getPasswordHash()).isEqualTo("argon2id-hash");
     }
 
     @Test
@@ -393,7 +423,8 @@ class AuthServiceTest {
         when(passwordResetTokenService.hashToken("reset-token")).thenReturn("token-hash");
         when(passwordResetTokenRepository.findByTokenHashAndUsedAtIsNull("token-hash"))
                 .thenReturn(Optional.of(resetToken));
-        when(passwordEncoder.encode("password123")).thenReturn("new-password-hash");
+        when(passwordPolicy.normalizeAndValidate("password123")).thenReturn("password123");
+        when(passwordHashService.encode("password123")).thenReturn("new-password-hash");
         when(userCredentialRepository.findByUser(user)).thenReturn(Optional.of(credential));
 
         authService.resetPassword(request);
@@ -415,7 +446,8 @@ class AuthServiceTest {
         when(passwordResetTokenService.hashToken("reset-token")).thenReturn("token-hash");
         when(passwordResetTokenRepository.findByTokenHashAndUsedAtIsNull("token-hash"))
                 .thenReturn(Optional.of(resetToken));
-        when(passwordEncoder.encode("password123")).thenReturn("new-password-hash");
+        when(passwordPolicy.normalizeAndValidate("password123")).thenReturn("password123");
+        when(passwordHashService.encode("password123")).thenReturn("new-password-hash");
         when(userCredentialRepository.findByUser(user)).thenReturn(Optional.empty());
 
         authService.resetPassword(request);

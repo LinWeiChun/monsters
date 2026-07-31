@@ -50,6 +50,8 @@ Web 使用 Cookie 的 Auth endpoint 必須驗證可信任 Origin／CSRF 防護�
 | `POST` | `/api/v1/auth/email-verifications` | `200 EMAIL_VERIFIED`，回 `COMPLETE_ELIGIBILITY` 與 10 分鐘 Continuation Credential |
 
 - 初始註冊只收 `email`、`password`、`acceptedTermsVersion`、`acceptedPrivacyVersion`；拒絕未知欄位，不收 `account`、生日、服務地區、暱稱、Guardian Email 或頭貼。
+- 新密碼先做 NFC 且不 trim，以 15–128 Unicode code points 驗證，再對版本化本機 blocklist 做完整值比對；違反時回 `400 VALIDATION_FAILED`，`fieldErrors.password` 使用 `PASSWORD_REQUIRED`、`PASSWORD_TOO_SHORT`、`PASSWORD_TOO_LONG` 或 `PASSWORD_TOO_WEAK`。
+- 新密碼保存為 `$argon2id$` PHC hash，參數為 `m=19456,t=2,p=1`；既有 BCrypt 只在成功登入後於同一交易升級，失敗登入不得改寫 hash。
 - Email Token 有效 24 小時、單次使用且只保存 SHA-256 hash；重寄成功寄送新信前後均不將 Email、Token 或密碼寫入 Outbox payload／Log。
 - 初次註冊與重寄共用 MySQL 持久化 HMAC 限流桶：Email 60 秒冷卻、每 15 分鐘最多 5 次；IP 每 15 分鐘最多 20 次。受限時回 `429 RATE_LIMITED`、`Retry-After` Header 與安全 `data.retryAfter`。
 - 條款版本或 URL、限流 HMAC key 未設定時安全失敗為 `503 SERVICE_TEMPORARILY_UNAVAILABLE`，不得使用程式內 placeholder。
@@ -416,10 +418,10 @@ Response：
 
 - `account` 必填，長度 4 到 50，必須英文開頭，且只能包含英文、數字、底線；後端需轉為小寫保存。
 - `email` 必填，必須符合 Email 格式。
-- `password` 必填，長度 8 到 72 字元。
+- `password` 必填，NFC 後長度為 15 到 128 Unicode code points，不 trim，並套用版本化本機弱密碼 blocklist。
 - `userName` 必填，最大長度 80。
 - 註冊成功後建立 `users` 與 `user_credentials`。
-- 密碼必須以 BCrypt hash 保存，不得保存或記錄明文。
+- 新密碼必須以 Argon2id PHC hash 保存；既有 BCrypt 只供成功登入時漸進升級。不得保存或記錄明文、hash 或 blocklist 命中內容。
 - Account 已被註冊時回傳 409。
 - Email 已被註冊時回傳 409。
 
@@ -479,7 +481,7 @@ Response：
 
 - `email` 為相容既有前端保留的欄位名稱，實際可傳入已註冊的 Account 或 Email，必填且最大長度 255。
 - Account 或 Email 必須轉為小寫並去除前後空白後查詢。
-- 密碼以 BCrypt `PasswordEncoder.matches` 比對，不得明文保存或寫入 log。
+- 登入依 hash 前綴使用 Argon2id 或既有 BCrypt 比對；BCrypt 只在成功後原子升級為 Argon2id，不得將密碼或 hash 寫入 log。
 - Account / Email 不存在、帳號已刪除、憑證不存在或密碼錯誤時，回傳 401。
 - `accessToken` 與 `refreshToken` 使用 HMAC-SHA256 JWT 產生。
 - `JWT_SECRET` 必須設定，否則不得產生 JWT。
@@ -647,7 +649,7 @@ Response：
 - `newPassword` 必填，長度 8 到 72 字元。
 - 後端必須先 hash `resetToken` 後查詢，不得以明文 token 查詢資料庫。
 - reset token 不存在、已使用、已過期或對應使用者已刪除時，回傳 401。
-- 密碼需使用 BCrypt 重新雜湊。
+- 新密碼需套用正式密碼政策並使用 Argon2id 重新雜湊。
 - 使用者已有 Email / Password 憑證時，更新既有 `user_credentials.password_hash`。
 - 僅有 Google 登入的使用者若完成 reset token 驗證，可建立新的 `user_credentials`。
 - 密碼重設成功後，reset token 必須標記為已使用。
@@ -1498,7 +1500,7 @@ Validation:
 | Field | Rule |
 |---|---|
 | email | Required, valid email format |
-| password | Required, 8 to 72 characters |
+| password | Required, 15 to 128 Unicode code points after NFC; not trimmed; exact blocklist match rejected |
 | userName | Required, max 80 characters |
 
 Success response: `201 Created`
