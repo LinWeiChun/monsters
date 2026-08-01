@@ -178,8 +178,8 @@ class AuthRepository {
   Future<LoginResult> _exchangeRefreshToken(String refreshToken) async {
     try {
       final response = await _apiClient.post<LoginResult>(
-        '/auth/refresh',
-        data: {'refreshToken': refreshToken},
+        '/v1/auth/session-refreshes',
+        data: {'refreshCredential': refreshToken},
         fromJsonT:
             (json) => LoginResult.fromJson(json! as Map<String, dynamic>),
         retryOnUnauthorized: false,

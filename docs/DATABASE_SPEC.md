@@ -122,7 +122,7 @@ Spring Boot 只能透過 JPA / Repository 存取資料庫；Flutter 不得直接
 
 ## 三、目前 `develop` 資料表設計（Phase 4.5 逐步 Flyway Migration）
 
-本章描述現有基線與已完成的 expand 欄位，供 Migration 與相容測試使用。Task 02 已導入 Flyway V1 baseline 與 V2 會員狀態結構；Task 03 以 V3 導入 Email-only 註冊、文件同意、Email Token 與限流桶。凡與第二章衝突者仍以第二章為目標規格，不得再新增對 `account`、公開 `avatar_url`、JWT Refresh Token、伺服器 PIN、`entries.is_shared`、`entry_likes` 或 `entry_comments` 的新依賴。
+本章描述現有基線與已完成的 expand 欄位，供 Migration 與相容測試使用。Task 02 已導入 Flyway V1 baseline 與 V2 會員狀態結構；Task 03以V3導入Email-only註冊、文件同意、Email Token與限流桶；Task 06以V4加入Eligibility／Guardian Consent；Task 07以V5加入Opaque Refresh Session Family。凡與第二章衝突者仍以第二章為目標規格，不得再新增對 `account`、公開 `avatar_url`、JWT Refresh Token、伺服器 PIN、`entries.is_shared`、`entry_likes` 或 `entry_comments` 的新依賴。
 
 ### 3.1 users
 
@@ -232,6 +232,39 @@ Index：
 - Refresh token 成功換發時必須保存舊 refresh token hash 與原 token 過期時間，防止 rotation 後重複使用。
 - JWT 驗證流程必須拒絕存在於本表且尚未過期的 token。
 - 可定期刪除 `expires_at` 已過期的紀錄。
+
+### 3.2.6 user_sessions
+
+每次v1完整登入建立獨立裝置Session Family；Session對Client的識別固定使用不可推測的`public_id`作為JWT `sid`，不得回傳Session內部`id`。
+
+| 欄位 | 型別 | 約束 | 說明 |
+|---|---|---|---|
+| public_id | VARCHAR(36) | UNIQUE NOT NULL | Session UUID |
+| user_id | BIGINT | FK NOT NULL | owner會員 |
+| session_type | VARCHAR(20) | NOT NULL | Task 07固定`MEMBER` |
+| last_activity_at | DATETIME | NOT NULL | 最近成功輪替時間 |
+| idle_expires_at | DATETIME | NOT NULL | 一般會員30天閒置期限 |
+| absolute_expires_at | DATETIME | NOT NULL | 一般會員90天絕對期限 |
+| revoked_at | DATETIME | NULL | 撤銷時間 |
+| revocation_reason | VARCHAR(80) | NULL | 安全原因碼，不含Token或PII |
+
+### 3.2.7 refresh_session_credentials
+
+| 欄位 | 型別 | 約束 | 說明 |
+|---|---|---|---|
+| session_id | BIGINT | FK NOT NULL | 所屬Session Family |
+| token_hash | VARCHAR(64) | UNIQUE NOT NULL | opaque Credential SHA-256 hex；唯一保存形式 |
+| sequence_number | BIGINT | UNIQUE(session_id, sequence_number) | family內輪替序號 |
+| issued_at | DATETIME | NOT NULL | 核發時間 |
+| rotated_at | DATETIME | NULL | 成功輪替時間 |
+| grace_expires_at | DATETIME | NULL | 相同結果10秒容忍期限 |
+| reuse_detected_at | DATETIME | NULL | 逾期reuse偵測時間 |
+
+規則：不得保存Credential明文、可還原密文、Email或裝置指紋。輪替以row lock序列化；Session、Credential、Audit與Outbox必須在同一交易提交。
+
+### 3.2.8 session_security_audits
+
+只保存`SESSION_CREATED`、`SESSION_REFRESH_ROTATED`與`SESSION_REFRESH_REUSE_DETECTED`安全事件、Session FK、opaque event UUID及發生時間；不得保存Token、hash、Email或會員私人資料。相同event UUID同時作為Outbox防重鍵。
 
 ### 3.2.3 member_continuation_credentials
 
@@ -930,7 +963,7 @@ Register API must not store raw passwords, JWT values, or secrets in logs.
 
 V3 已完成 expand：新註冊 `users.account = NULL`，既有會員的 `account` 暫時保留。Deprecated `POST /api/auth/login` 仍可查既有 `account`，正式 v1 只查 `users.email`；本 Task 不新增 Flyway Migration。Task 18 完成使用觀測與 Client contract migration 後才執行 account contract／column cleanup。
 
-Historical Login API returns JWT access and refresh tokens；v1 Session 將於 Task 07 改為短效 JWT Access 與 opaque Refresh session，任何 Token 都不得寫入 Log。
+Historical Login API仍只供Migration相容；v1 Login已建立短效JWT Access與opaque Refresh Session Family，任何Token或hash都不得寫入Log、Audit或Outbox。
 
 ## User API Database Mapping
 

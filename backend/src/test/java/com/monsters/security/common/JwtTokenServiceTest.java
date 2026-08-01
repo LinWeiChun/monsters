@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monsters.exception.common.UnauthorizedException;
 import com.monsters.entity.user.User;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Base64;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -31,6 +32,31 @@ class JwtTokenServiceTest {
         assertThat(payload).contains("\"sub\":\"1\"");
         assertThat(payload).contains("\"email\":\"user@example.com\"");
         assertThat(payload).contains("\"type\":\"access\"");
+    }
+
+    @Test
+    void sessionAccessTokenShouldContainOnlyMinimalClaimsAndSessionId() {
+        JwtProperties jwtProperties = jwtProperties("test-secret");
+        jwtProperties.setAccessTokenExpirationSeconds(600);
+        JwtTokenService jwtTokenService = new JwtTokenService(jwtProperties, objectMapper);
+        User user = new User("wei_account", "user@example.com", "Wei");
+        ReflectionTestUtils.setField(user, "id", 1L);
+        Instant issuedAt = Instant.now();
+
+        String token = jwtTokenService.createAccessToken(user, "session-public-id", issuedAt);
+        String payload = new String(
+                Base64.getUrlDecoder().decode(token.split("\\.")[1]),
+                StandardCharsets.UTF_8
+        );
+
+        assertThat(payload)
+                .contains("\"sub\":\"1\"")
+                .contains("\"sid\":\"session-public-id\"")
+                .doesNotContain("email", "user@example.com", "type", "refresh");
+        JwtTokenPayload verified = jwtTokenService.verifyAccessToken(token);
+        assertThat(verified.sessionId()).isEqualTo("session-public-id");
+        assertThat(verified.expiresAt().getEpochSecond() - verified.issuedAt().getEpochSecond())
+                .isEqualTo(600);
     }
 
     @Test

@@ -8,6 +8,69 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-08-01 20:31
+
+Task
+Registration Login 07 Opaque Refresh Session Family（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 依使用者核准的方案1，以32-byte初始CSPRNG Credential及獨立HMAC Secret推導後續Credential；Backend只保存SHA-256 hash。
+- v1完整登入為每次登入建立獨立`user_sessions` family，保存建立、最後活動、30天idle、90天absolute與撤銷狀態。
+- 新增`POST /api/v1/auth/session-refreshes`；每次成功輪替Credential，同一舊Credential在10秒內回傳完全相同的Access／Refresh結果。
+- 逾期reuse於同一交易撤銷被影響family並寫入不含Token、hash或Email的Audit／Outbox；其他登入family維持可用。
+- Access JWT改為10分鐘並只包含`iss`、`sub`、`sid`、`iat`、`exp`；Security Filter以`sid`即時檢查Session與會員狀態。
+- Flutter暫時換發路徑切至v1 endpoint；Web Cookie、App Keychain／Keystore及SharedPreferences移除明確留待Task08。
+- 使用者回報Spring Mail import提示後，以重新整理dependencies的乾淨編譯確認既有`spring-boot-starter-mail`、`SimpleMailMessage`及`JavaMailSender`均可解析，未加入重複套件。
+
+### Modified / Added / Deleted
+
+- 新增Session Family Controller、DTO、Service、Properties、Credential Generator、Entity、Repository、Audit及穩定例外。
+- 新增`backend/src/main/resources/db/migration/V5__add_refresh_session_families.sql`。
+- 修改JWT核發／驗證、Security Filter、v1登入Session核發、Security Config及Flutter Auth Repository。
+- 新增或修改Backend unit、OpenAPI、真實Security Filter／MySQL、Flyway及Flutter Repository測試。
+- 更新`README.md`、Backend／Frontend README、正式API／Database／Project／UI規格、OpenAPI、Task與Log。
+- 未刪除檔案，未修改`system_data/`。
+
+### system_data Reference
+
+- 舊系統手冊與程式只有單一登入Token及本機清除登出，沒有opaque family、rotation、reuse detection、裝置隔離或Server Session期限可沿用。
+- 未沿用舊系統記錄帳密、完整會員資料或本機SharedPreferences Token的不安全模式；`system_data/`保持唯讀。
+
+### API
+
+- 新增`POST /api/v1/auth/session-refreshes`，request為`refreshCredential`。
+- 成功回`200 AUTHENTICATED`；無效、過期或撤銷回`401 AUTH_SESSION_INVALID`；逾期reuse回`401 AUTH_REFRESH_REUSE_DETECTED`。
+- 既有legacy JWT Refresh API只保留Migration相容，不作為v1 Client新依賴。
+
+### Database
+
+- Flyway V5新增`user_sessions`、`refresh_session_credentials`、`session_security_audits`。
+- Credential表只保存64字元SHA-256 hex、sequence、rotation／grace／reuse時間，不保存明文或可還原密文。
+
+### Tests
+
+- TDD先確認新HTTP／MySQL與OpenAPI契約為Red，再完成實作轉Green。
+- 已通過Task07 targeted Backend、真實MySQL、Migration、OpenAPI、Credential Generator、JWT及Flutter Repository測試。
+- 已以`./gradlew clean compileJava --refresh-dependencies`確認Spring Mail imports乾淨編譯成功。
+- Backend 316項單元／契約測試與31項真實MySQL整合測試、Flutter Analyze、185項完整測試及Web Build全部通過。
+- Draft PR #96 的 Backend unit、MySQL integration、Flutter 與 OpenAPI 四個GitHub CI job全部通過。
+
+### Log Retention
+
+- 保存期限截止日為2026-07-01；Markdown與CSV最早紀錄為2026-07-01，沒有超過一個月的紀錄，不需刪除。
+- XLSX原本只有13欄表頭；本次依相同表格格式同步Task07紀錄並進行值、錯誤及視覺檢查。
+
+### Pending
+
+- Draft PR #96 已建立且四個CI job全綠；Task07維持`REVIEW`，待使用者審查並合併後才能轉`DONE`。
+- Task08才處理Web HttpOnly Cookie、App Keychain／Keystore、Credential Store與移除SharedPreferences Token。
+
+---
+
 ## 2026-08-01 19:48
 
 Task

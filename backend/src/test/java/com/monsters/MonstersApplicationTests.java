@@ -9,6 +9,9 @@ import com.monsters.repository.entry.EntryDraftRepository;
 import com.monsters.repository.entry.MoodRepository;
 import com.monsters.repository.outbox.OutboxEventRepository;
 import com.monsters.repository.registration.RegistrationRateLimitBucketRepository;
+import com.monsters.repository.session.RefreshSessionCredentialRepository;
+import com.monsters.repository.session.UserSessionRepository;
+import com.monsters.repository.audit.SessionSecurityAuditRepository;
 import com.monsters.repository.user.EmailVerificationTokenRepository;
 import com.monsters.repository.user.MemberDocumentAcceptanceRepository;
 import com.monsters.repository.user.MemberContinuationCredentialRepository;
@@ -63,6 +66,15 @@ class MonstersApplicationTests {
 
     @MockBean
     private OutboxEventRepository outboxEventRepository;
+
+    @MockBean
+    private UserSessionRepository userSessionRepository;
+
+    @MockBean
+    private RefreshSessionCredentialRepository refreshSessionCredentialRepository;
+
+    @MockBean
+    private SessionSecurityAuditRepository sessionSecurityAuditRepository;
 
     @MockBean
     private MemberDocumentAcceptanceRepository memberDocumentAcceptanceRepository;

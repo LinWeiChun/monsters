@@ -6,11 +6,14 @@ import com.monsters.exception.common.UnauthorizedException;
 import com.monsters.entity.user.User;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,14 +25,41 @@ public class JwtTokenService {
 
     private final JwtProperties jwtProperties;
     private final ObjectMapper objectMapper;
+    private final Clock clock;
 
     public JwtTokenService(JwtProperties jwtProperties, ObjectMapper objectMapper) {
         this.jwtProperties = jwtProperties;
         this.objectMapper = objectMapper;
+        this.clock = Clock.systemUTC();
+    }
+
+    @Autowired
+    public JwtTokenService(
+            JwtProperties jwtProperties,
+            ObjectMapper objectMapper,
+            ObjectProvider<Clock> clockProvider
+    ) {
+        this.jwtProperties = jwtProperties;
+        this.objectMapper = objectMapper;
+        this.clock = clockProvider.getIfAvailable(Clock::systemUTC);
     }
 
     public String createAccessToken(User user) {
         return createToken(user, TOKEN_TYPE_ACCESS, jwtProperties.accessTokenExpirationSeconds());
+    }
+
+    public String createAccessToken(User user, String sessionId, Instant issuedAt) {
+        requireSecret();
+        Instant expiresAt = issuedAt.plusSeconds(jwtProperties.accessTokenExpirationSeconds());
+        String headerJson = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
+        String payloadJson = "{"
+                + "\"iss\":\"" + escapeJson(jwtProperties.issuer()) + "\","
+                + "\"sub\":\"" + user.getId() + "\","
+                + "\"sid\":\"" + escapeJson(sessionId) + "\","
+                + "\"iat\":" + issuedAt.getEpochSecond() + ","
+                + "\"exp\":" + expiresAt.getEpochSecond()
+                + "}";
+        return signToken(headerJson, payloadJson);
     }
 
     public String createRefreshToken(User user) {
@@ -38,7 +68,7 @@ public class JwtTokenService {
 
     public JwtTokenPayload verifyAccessToken(String token) {
         JwtTokenPayload payload = verify(token);
-        if (!TOKEN_TYPE_ACCESS.equals(payload.tokenType())) {
+        if (payload.sessionId() == null && !TOKEN_TYPE_ACCESS.equals(payload.tokenType())) {
             throw invalidToken();
         }
         return payload;
@@ -65,7 +95,7 @@ public class JwtTokenService {
     private String createToken(User user, String tokenType, long expirationSeconds) {
         requireSecret();
 
-        Instant issuedAt = Instant.now();
+        Instant issuedAt = clock.instant();
         Instant expiresAt = issuedAt.plusSeconds(expirationSeconds);
         String headerJson = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
         String payloadJson = "{"
@@ -77,6 +107,10 @@ public class JwtTokenService {
                 + "\"exp\":" + expiresAt.getEpochSecond()
                 + "}";
 
+        return signToken(headerJson, payloadJson);
+    }
+
+    private String signToken(String headerJson, String payloadJson) {
         String header = base64Url(headerJson.getBytes(StandardCharsets.UTF_8));
         String payload = base64Url(payloadJson.getBytes(StandardCharsets.UTF_8));
         String unsignedToken = header + "." + payload;
@@ -111,14 +145,15 @@ public class JwtTokenService {
             }
 
             Instant expiresAt = Instant.ofEpochSecond(numberValue(payload, "exp"));
-            if (!expiresAt.isAfter(Instant.now())) {
+            if (!expiresAt.isAfter(clock.instant())) {
                 throw invalidToken();
             }
 
             return new JwtTokenPayload(
                     Long.parseLong(requiredString(payload, "sub")),
-                    requiredString(payload, "email"),
-                    requiredString(payload, "type"),
+                    optionalString(payload, "email"),
+                    optionalString(payload, "type"),
+                    optionalString(payload, "sid"),
                     Instant.ofEpochSecond(numberValue(payload, "iat")),
                     expiresAt
             );
@@ -162,6 +197,17 @@ public class JwtTokenService {
 
     private String requiredString(Map<String, Object> map, String key) {
         Object value = map.get(key);
+        if (!(value instanceof String stringValue) || stringValue.isBlank()) {
+            throw invalidToken();
+        }
+        return stringValue;
+    }
+
+    private String optionalString(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) {
+            return null;
+        }
         if (!(value instanceof String stringValue) || stringValue.isBlank()) {
             throw invalidToken();
         }

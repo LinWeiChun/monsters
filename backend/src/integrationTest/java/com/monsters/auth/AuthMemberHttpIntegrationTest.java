@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.monsters.job.AsyncJob;
 import com.monsters.job.AsyncJobDispatcher;
 import com.monsters.notification.email.EmailDeliveryPort;
@@ -29,6 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Base64;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
@@ -72,6 +74,10 @@ class AuthMemberHttpIntegrationTest {
         registry.add("spring.datasource.password", mysql::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
         registry.add("app.security.jwt.secret", () -> "synthetic-jwt-secret-for-integration-tests");
+        registry.add(
+                "app.security.session.refresh-derivation-key",
+                () -> "synthetic-refresh-derivation-key-for-integration-tests"
+        );
         registry.add("app.security.google.client-ids", () -> "synthetic-google-client");
         registry.add("app.registration.documents.terms.version", () -> "terms-synthetic-v1");
         registry.add("app.registration.documents.terms.url", () -> "https://example.test/terms/v1");
@@ -228,6 +234,178 @@ class AuthMemberHttpIntegrationTest {
                 .andExpect(jsonPath("$.code").value("AUTH_CONTINUATION_REQUIRED"))
                 .andExpect(jsonPath("$.data.nextAction").value("VERIFY_EMAIL"))
                 .andExpect(jsonPath("$.data.accessToken").doesNotExist());
+    }
+
+    @Test
+    void opaqueRefreshFamilyShouldRotateTolerateConcurrencyAndContainReuse()
+            throws Exception {
+        String syntheticEmail = "session.family@example.test";
+        String syntheticPassword = "synthetic-password";
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "account", "session_family_member",
+                                "email", syntheticEmail,
+                                "password", syntheticPassword,
+                                "userName", "Session Family Member"
+                        ))))
+                .andExpect(status().isCreated());
+
+        JsonNode firstLogin = responseData(mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", syntheticEmail,
+                                "password", syntheticPassword
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("AUTHENTICATED"))
+                .andReturn().getResponse().getContentAsString());
+
+        String firstAccess = firstLogin.path("accessToken").asText();
+        String firstRefresh = firstLogin.path("refreshToken").asText();
+        JsonNode accessClaims = objectMapper.readTree(Base64.getUrlDecoder().decode(
+                firstAccess.split("\\.")[1]
+        ));
+        assertThat(accessClaims.has("sid")).isTrue();
+        assertThat(accessClaims.has("email")).isFalse();
+        assertThat(accessClaims.path("exp").asLong() - accessClaims.path("iat").asLong())
+                .isEqualTo(600);
+        mockMvc.perform(get("/api/users/me")
+                        .header("Authorization", "Bearer " + firstAccess))
+                .andExpect(status().isOk());
+
+        Map<String, Object> firstSession = jdbcTemplate.queryForMap(
+                """
+                SELECT public_id, last_activity_at, idle_expires_at, absolute_expires_at, revoked_at
+                FROM user_sessions
+                WHERE user_id = (SELECT id FROM users WHERE email = ?)
+                """,
+                syntheticEmail
+        );
+        assertThat(firstSession.get("revoked_at")).isNull();
+        assertThat(firstSession.get("idle_expires_at")).isEqualTo(
+                LocalDateTime.ofInstant(AuthMemberControlledDependencies.TEST_NOW, ZoneOffset.UTC)
+                        .plusDays(30)
+        );
+        assertThat(firstSession.get("absolute_expires_at")).isEqualTo(
+                LocalDateTime.ofInstant(AuthMemberControlledDependencies.TEST_NOW, ZoneOffset.UTC)
+                        .plusDays(90)
+        );
+        String storedHash = jdbcTemplate.queryForObject(
+                "SELECT token_hash FROM refresh_session_credentials WHERE sequence_number = 0 "
+                        + "AND session_id = (SELECT id FROM user_sessions WHERE public_id = ?)",
+                String.class,
+                firstSession.get("public_id")
+        );
+        assertThat(storedHash).hasSize(64).isNotEqualTo(firstRefresh);
+
+        JsonNode rotated = refresh(firstRefresh, 200, "AUTHENTICATED");
+        JsonNode concurrent = refresh(firstRefresh, 200, "AUTHENTICATED");
+        assertThat(concurrent.path("accessToken").asText())
+                .isEqualTo(rotated.path("accessToken").asText());
+        assertThat(concurrent.path("refreshToken").asText())
+                .isEqualTo(rotated.path("refreshToken").asText());
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM refresh_session_credentials WHERE session_id = "
+                        + "(SELECT id FROM user_sessions WHERE public_id = ?)",
+                Integer.class,
+                firstSession.get("public_id")
+        )).isEqualTo(2);
+
+        jdbcTemplate.update(
+                """
+                UPDATE refresh_session_credentials
+                SET grace_expires_at = ?
+                WHERE sequence_number = 0
+                  AND session_id = (SELECT id FROM user_sessions WHERE public_id = ?)
+                """,
+                LocalDateTime.ofInstant(AuthMemberControlledDependencies.TEST_NOW, ZoneOffset.UTC).minusSeconds(1),
+                firstSession.get("public_id")
+        );
+        refresh(firstRefresh, 401, "AUTH_REFRESH_REUSE_DETECTED");
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT revoked_at IS NOT NULL FROM user_sessions WHERE public_id = ?",
+                Boolean.class,
+                firstSession.get("public_id")
+        )).isTrue();
+        mockMvc.perform(get("/api/users/me")
+                        .header("Authorization", "Bearer " + firstAccess))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
+        refresh(rotated.path("refreshToken").asText(), 401, "AUTH_SESSION_INVALID");
+
+        JsonNode secondLogin = responseData(mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", syntheticEmail,
+                                "password", syntheticPassword
+                        ))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString());
+        refresh(secondLogin.path("refreshToken").asText(), 200, "AUTHENTICATED");
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM user_sessions WHERE user_id = "
+                        + "(SELECT id FROM users WHERE email = ?)",
+                Integer.class,
+                syntheticEmail
+        )).isEqualTo(2);
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM session_security_audits WHERE session_id = "
+                        + "(SELECT id FROM user_sessions WHERE public_id = ?)",
+                Integer.class,
+                firstSession.get("public_id")
+        )).isEqualTo(3);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM outbox_events WHERE aggregate_id = ? "
+                        + "AND event_type IN ('SESSION_CREATED', 'SESSION_REFRESH_ROTATED', "
+                        + "'SESSION_REFRESH_REUSE_DETECTED')",
+                Integer.class,
+                firstSession.get("public_id")
+        )).isEqualTo(3);
+    }
+
+    @Test
+    void opaqueRefreshFamilyShouldRejectUnknownIdleAndAbsoluteExpiredCredentials()
+            throws Exception {
+        String syntheticEmail = "session.expiry@example.test";
+        String syntheticPassword = "synthetic-password";
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "account", "session_expiry_member",
+                                "email", syntheticEmail,
+                                "password", syntheticPassword,
+                                "userName", "Session Expiry Member"
+                        ))))
+                .andExpect(status().isCreated());
+
+        refresh("unknown-refresh-credential", 401, "AUTH_SESSION_INVALID");
+
+        JsonNode idleSession = loginV1(syntheticEmail, syntheticPassword);
+        jdbcTemplate.update(
+                """
+                UPDATE user_sessions
+                SET idle_expires_at = ?
+                WHERE public_id = ?
+                """,
+                LocalDateTime.ofInstant(AuthMemberControlledDependencies.TEST_NOW, ZoneOffset.UTC),
+                accessSessionId(idleSession.path("accessToken").asText())
+        );
+        refresh(idleSession.path("refreshToken").asText(), 401, "AUTH_SESSION_INVALID");
+
+        JsonNode absoluteSession = loginV1(syntheticEmail, syntheticPassword);
+        jdbcTemplate.update(
+                """
+                UPDATE user_sessions
+                SET absolute_expires_at = ?
+                WHERE public_id = ?
+                """,
+                LocalDateTime.ofInstant(AuthMemberControlledDependencies.TEST_NOW, ZoneOffset.UTC),
+                accessSessionId(absoluteSession.path("accessToken").asText())
+        );
+        refresh(absoluteSession.path("refreshToken").asText(), 401, "AUTH_SESSION_INVALID");
     }
 
     @Test
@@ -1330,6 +1508,41 @@ class AuthMemberHttpIntegrationTest {
                 URI.create(verificationUrl).getRawQuery().substring("token=".length()),
                 StandardCharsets.UTF_8
         );
+    }
+
+    private JsonNode refresh(String credential, int expectedStatus, String expectedCode)
+            throws Exception {
+        String body = mockMvc.perform(post("/api/v1/auth/session-refreshes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "refreshCredential", credential
+                        ))))
+                .andExpect(status().is(expectedStatus))
+                .andExpect(jsonPath("$.code").value(expectedCode))
+                .andReturn().getResponse().getContentAsString();
+        return responseData(body);
+    }
+
+    private JsonNode responseData(String responseBody) throws Exception {
+        return objectMapper.readTree(responseBody).path("data");
+    }
+
+    private JsonNode loginV1(String email, String password) throws Exception {
+        return responseData(mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", email,
+                                "password", password
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("AUTHENTICATED"))
+                .andReturn().getResponse().getContentAsString());
+    }
+
+    private String accessSessionId(String accessToken) throws Exception {
+        return objectMapper.readTree(Base64.getUrlDecoder().decode(accessToken.split("\\.")[1]))
+                .path("sid")
+                .asText();
     }
 
     private void registerAndDeliverVerification(String email) throws Exception {

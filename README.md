@@ -413,8 +413,12 @@ docker compose down
 | `CORS_MAX_AGE` | preflight cache 秒數 | `3600` |
 | `JWT_ISSUER` | JWT issuer | `monsters` |
 | `JWT_SECRET` | JWT 簽章密鑰 | 空字串，正式環境必須提供 |
-| `JWT_ACCESS_TOKEN_EXPIRATION_SECONDS` | 現行 Access token 有效秒數；Phase 4.5 目標改為 600 秒 | `3600` |
+| `JWT_ACCESS_TOKEN_EXPIRATION_SECONDS` | v1 Access token 有效秒數 | `600` |
 | `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` | 待淘汰 JWT Refresh token 有效秒數；目標改為 opaque session | `2592000`（30 天，rotation） |
+| `SESSION_IDLE_EXPIRATION_SECONDS` | 一般Session閒置期限 | `2592000`（30天） |
+| `SESSION_ABSOLUTE_EXPIRATION_SECONDS` | 一般Session絕對期限 | `7776000`（90天） |
+| `SESSION_REFRESH_CONCURRENCY_GRACE_SECONDS` | 相同輪替結果並行容忍 | `10` |
+| `SESSION_REFRESH_DERIVATION_KEY` | opaque Refresh輪替獨立Secret | 空字串；正式環境至少32-byte |
 | `REGISTRATION_TERMS_VERSION` | 目前服務條款版本 | 空字串，註冊前必須提供 |
 | `REGISTRATION_TERMS_URL` | 目前服務條款 HTTPS URL | 空字串，註冊前必須提供 |
 | `REGISTRATION_PRIVACY_VERSION` | 目前隱私權政策版本 | 空字串，註冊前必須提供 |

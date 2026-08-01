@@ -12,11 +12,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import com.monsters.security.session.SessionProperties;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-@EnableConfigurationProperties({JwtProperties.class, GoogleProperties.class})
+@EnableConfigurationProperties({JwtProperties.class, GoogleProperties.class, SessionProperties.class})
 public class SecurityConfig {
 
     @Bean
@@ -39,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/email-verifications").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/email-verification-requests").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/session-refreshes").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/eligibility-policy").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/eligibility-completions")
                                 .hasAuthority("CONTINUATION_COMPLETE_ELIGIBILITY")

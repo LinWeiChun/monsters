@@ -92,7 +92,22 @@ Web 使用 Cookie 的 Auth endpoint 必須驗證可信任 Origin／CSRF 防護�
 - Guardian 撤回要求使用 opaque `consentReference` 加 Guardian Email，公開回應一律相同；Email、生日、Token、Guardian資料不得進入 Log、Audit、Outbox payload或錯誤訊息。
 - 同意 Email 只含安全文件連結與 opaque action link，不含生日、公開暱稱、會員 Email、私人內容或會員 UUID。
 - `ELIGIBILITY_CONTINUATION_INVALID`、`GUARDIAN_CONSENT_TOKEN_INVALID` 與 `GUARDIAN_CONSENT_TOKEN_EXPIRED` 使用穩定錯誤碼；欄位錯誤使用 `VALIDATION_FAILED` 與安全 `fieldErrors`。
-- Task 07 尚未導入 Session Family 前，成人完成或 Guardian 核准後回 `nextAction = SIGN_IN`，由會員重新登入取得現行遷移期 Session，不在本 endpoint 新增 legacy Refresh 依賴。
+- 成人完成或 Guardian 核准後回 `nextAction = SIGN_IN`，由會員重新登入建立新的裝置 Session Family；Eligibility endpoint 本身不核發一般 Session。
+
+#### 0.2.3 Opaque Refresh Session Family 垂直接縫
+
+| Method | Path | Auth | 成功結果 |
+|---|---|---|---|
+| `POST` | `/api/v1/auth/login` | Public credential body | `200 AUTHENTICATED`，建立獨立 `user_sessions` family並回10分鐘Access JWT與opaque Refresh Credential |
+| `POST` | `/api/v1/auth/session-refreshes` | Public opaque credential body | `200 AUTHENTICATED`，輪替Credential；同一輪替10秒內回相同結果 |
+
+- Request只接受`refreshCredential`；Credential為32-byte高強度opaque值，Backend只保存SHA-256 hash，不保存明文或可還原密文。
+- 初始Credential使用CSPRNG；後續Credential以獨立`SESSION_REFRESH_DERIVATION_KEY`、上一Credential、Session UUID及sequence透過HMAC-SHA256推導，使Server在不保存明文下可於10秒內重建完全相同的輪替結果。
+- 一般Session閒置期限30天、絕對期限90天；每次有效輪替只延長idle期限且不得超過absolute期限。
+- 10秒後再次提交已輪替Credential視為reuse，於同一交易撤銷該family並寫入安全Audit與Outbox；其他裝置family不受影響。
+- 無效、過期或已撤銷回`401 AUTH_SESSION_INVALID`；reuse回`401 AUTH_REFRESH_REUSE_DETECTED`。
+- Access JWT只包含`iss`、`sub`、`sid`、`iat`、`exp`；不得包含Email、Refresh值或會員私人資料。Security Filter每次以`sid`確認Session及會員仍可用。
+- Task 08完成前Flutter仍暫用既有Credential Store；Web Cookie、App Keychain／Keystore及移除SharedPreferences不得在本Task宣告完成。
 
 ### 0.3 核心資源契約
 
@@ -319,6 +334,7 @@ com.monsters.security.common.SecurityConfig
 |---|---|---|
 | /api/v1/auth/register | POST | 允許匿名 |
 | /api/v1/auth/login | POST | 允許匿名 |
+| /api/v1/auth/session-refreshes | POST | 允許匿名 |
 | /api/v1/auth/google-login | POST | 允許匿名 |
 | /api/v1/auth/forgot-password | POST | 允許匿名 |
 | /api/v1/auth/reset-password | POST | 允許匿名 |
@@ -342,6 +358,8 @@ JWT 基礎設定：
 | app.security.jwt.access-token-expiration-seconds | JWT_ACCESS_TOKEN_EXPIRATION_SECONDS | 600 |
 | app.security.session.idle-expiration-seconds | SESSION_IDLE_EXPIRATION_SECONDS | 2592000 |
 | app.security.session.absolute-expiration-seconds | SESSION_ABSOLUTE_EXPIRATION_SECONDS | 7776000 |
+| app.security.session.refresh-concurrency-grace-seconds | SESSION_REFRESH_CONCURRENCY_GRACE_SECONDS | 10 |
+| app.security.session.refresh-derivation-key | SESSION_REFRESH_DERIVATION_KEY | 空字串；啟用v1完整Session前必須提供至少32-byte獨立Secret |
 
 Google 登入設定：
 

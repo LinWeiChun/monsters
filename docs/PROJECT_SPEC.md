@@ -51,6 +51,7 @@
 - Google Email 必須為已驗證；Google Email 與既有會員相同時不得自動合併，需先重新驗證既有登入方式並明確連結
 - 一般會員 Access Token 有效 10 分鐘；工作階段閒置 30 天或最長 90 天後需完整登入
 - Refresh Token 為可輪替的不透明 Token；Web 存於 HttpOnly Cookie，Android／iOS 存於 Keychain／Keystore
+- 每次完整登入建立獨立Session Family；Backend只保存Refresh Credential hash，10秒內合理並行回相同輪替結果，逾期reuse只撤銷該family
 - 受保護 API 遇到 access token 401 時，前端只允許執行一次共用 refresh request 並重試原 request 一次；refresh token 驗證失敗需清除 session 並回登入頁，暫時性網路錯誤不得誤清使用者 session
 - 提供裝置工作階段清單、撤銷單一裝置與登出其他裝置
 - 忘記密碼使用 15 分鐘、一次性、只保存雜湊的 Email 重設連結；正式 API 不回傳 Token

@@ -148,9 +148,9 @@
 
 **Blocked by:** 03 — 完成註冊與 Email 驗證流程。
 
-**Status:** REVIEW
+**Status:** DONE
 
-**Evidence:** PR #94 已合併至 `feature/phase4.5`；Backend、MySQL integration 與 OpenAPI CI 通過，但 Flutter 3.29.2 CI 發現 Eligibility 地區下拉欄位使用較新版 `initialValue` API。2026-08-01 使用者選定相容修正方案 1，改用 3.29.2 支援的 `value` 並保留新版 Analyze 的範圍化棄用說明；Draft PR #95 的 Flutter 3.29.2、Backend、MySQL integration 與 OpenAPI 四個 CI job 已全部通過，Task 維持 `REVIEW` 等待修復 PR 合併。
+**Evidence:** PR #94 與Flutter 3.29.2相容修復PR #95均已合併至`feature/phase4.5`；Backend、MySQL integration、Flutter與OpenAPI CI全部通過。
 
 - [x] Email驗證後才收地區、生日、公開暱稱與必要Guardian Email。
 - [x] 未滿13歲不能取得一般功能，只保留必要申訴、匯出與刪除入口。
@@ -169,16 +169,18 @@
 
 **Blocked by:** 05 — 改為 Verified Email 登入並展開 Account Migration。
 
-**Status:** ready-for-agent
+**Status:** REVIEW
 
-- [ ] Access Token為10分鐘JWT，只包含最少聲明及Session識別。
-- [ ] Refresh Credential為高強度opaque值，Server只保存hash。
-- [ ] 每裝置建立獨立family並保存建立、最後活動、idle、absolute及撤銷狀態。
-- [ ] 每次Refresh成功都輪替Credential。
-- [ ] Server允許同一輪替結果10秒合理並行容忍，逾期reuse撤銷該family。
-- [ ] 一般Session閒置30天、絕對90天；特權期限留待Task 15完成。
-- [ ] 無效、過期、撤銷與reuse使用穩定401錯誤碼。
-- [ ] Session、Token rotation、Outbox與Audit更新具交易一致性。
+**Evidence:** 方案1以獨立HMAC Secret重建10秒內相同輪替結果，Backend只保存SHA-256 hash；Flyway V5、v1 Refresh API、期限、reuse containment與Audit／Outbox已完成。Draft PR #96 的 Backend unit、MySQL integration、Flutter 與 OpenAPI 四個CI job均通過；本機Backend 316項單元／契約、31項真實MySQL整合、Flutter Analyze、185項完整測試及Web Build亦通過。
+
+- [x] Access Token為10分鐘JWT，只包含最少聲明及Session識別。
+- [x] Refresh Credential為高強度opaque值，Server只保存hash。
+- [x] 每裝置建立獨立family並保存建立、最後活動、idle、absolute及撤銷狀態。
+- [x] 每次Refresh成功都輪替Credential。
+- [x] Server允許同一輪替結果10秒合理並行容忍，逾期reuse撤銷該family。
+- [x] 一般Session閒置30天、絕對90天；特權期限留待Task 15完成。
+- [x] 無效、過期、撤銷與reuse使用穩定401錯誤碼。
+- [x] Session、Token rotation、Outbox與Audit更新具交易一致性。
 
 ---
 
