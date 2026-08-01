@@ -8,6 +8,57 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-08-01 19:48
+
+Task
+Registration Login 06 Flutter 3.29.2 Eligibility CI 相容修正（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 確認 PR #94 的 Backend unit、MySQL integration 與 OpenAPI CI 通過，只有 Flutter job 失敗。
+- 根因為 CI 固定 Flutter 3.29.2，而 `DropdownButtonFormField.initialValue` 尚未存在；失敗造成 9 個測試檔無法編譯載入。
+- 依使用者核准的方案 1 改用 Flutter 3.29.2 支援的 `value`，並以範圍化棄用說明保持本機 Flutter 3.35.5 Analyze 無警告。
+- UI、預設台灣地區、選擇行為與無主畫面捲動規則皆未改變。
+
+### Modified
+
+- 修改 `frontend/lib/pages/eligibility_page.dart`。
+- 更新 `docs/REGISTRATION_LOGIN_TASKS.md`、`log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv`。
+
+### system_data Reference
+
+- 本次為新版 Flutter SDK 相容性修正，舊系統未使用相同 Widget API，沒有可直接採用的參考實作。
+- 未修改 `system_data/`。
+
+### API
+
+- 無異動。
+
+### Database
+
+- 無異動，無 Migration。
+
+### Tests
+
+- Eligibility targeted test 1 項通過。
+- Flutter 完整 185 項測試通過。
+- Flutter 3.35.5 Analyze 無問題；Draft PR #95 的 Flutter 3.29.2、Backend、MySQL integration 與 OpenAPI 四個 CI job 全部通過。
+- `git diff --check` 通過。
+
+### Log Retention
+
+- 保存期限截止日為 2026-07-01；Markdown 與 CSV 均無 2026-06 或更早紀錄，不需刪除。
+- XLSX 經試算表工具讀取與視覺檢查，仍只有 13 欄表頭且無資料，本次未修改。
+
+### Pending
+
+- Draft PR #95 已建立且四個 CI job 全綠；Task 06 維持 `REVIEW`，待修復 PR 合併後才能轉 `DONE`。
+
+---
+
 ## 2026-08-01 18:19
 
 Task
