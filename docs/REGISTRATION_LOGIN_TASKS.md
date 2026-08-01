@@ -171,7 +171,7 @@
 
 **Status:** REVIEW
 
-**Evidence:** 方案1以獨立HMAC Secret重建10秒內相同輪替結果，Backend只保存SHA-256 hash；Flyway V5、v1 Refresh API、期限、reuse containment與Audit／Outbox已完成，Backend 316項單元／契約、31項真實MySQL整合、Flutter Analyze、185項完整測試及Web Build通過，等待Draft PR與CI審查。
+**Evidence:** 方案1以獨立HMAC Secret重建10秒內相同輪替結果，Backend只保存SHA-256 hash；Flyway V5、v1 Refresh API、期限、reuse containment與Audit／Outbox已完成。Draft PR #96 的 Backend unit、MySQL integration、Flutter 與 OpenAPI 四個CI job均通過；本機Backend 316項單元／契約、31項真實MySQL整合、Flutter Analyze、185項完整測試及Web Build亦通過。
 
 - [x] Access Token為10分鐘JWT，只包含最少聲明及Session識別。
 - [x] Refresh Credential為高強度opaque值，Server只保存hash。
