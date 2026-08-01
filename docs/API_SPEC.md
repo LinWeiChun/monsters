@@ -57,6 +57,43 @@ Web 使用 Cookie 的 Auth endpoint 必須驗證可信任 Origin／CSRF 防護�
 - 條款版本或 URL、限流 HMAC key 未設定時安全失敗為 `503 SERVICE_TEMPORARILY_UNAVAILABLE`，不得使用程式內 placeholder。
 - SMTP 透過 Spring Mail 的通用 Adapter；SMTP 未啟用或寄送失敗時由 Transactional Outbox 重試，最多五次後為 `FAILED`。
 
+#### 0.2.2 Eligibility、Guardian Consent 與公開暱稱垂直接縫
+
+| Method | Path | Auth | 成功結果 |
+|---|---|---|---|
+| `GET` | `/api/v1/auth/eligibility-policy` | Public | `200 ELIGIBILITY_POLICY_AVAILABLE`，回台灣地區、13／18 歲邊界及目前文件版本／HTTPS URL |
+| `POST` | `/api/v1/auth/eligibility-completions` | `Authorization: Continuation <credential>` | 成人 `200 ELIGIBILITY_COMPLETED`；13–17 歲 `202 GUARDIAN_CONSENT_PENDING`；非台灣／未滿 13 歲 `200 ELIGIBILITY_RESTRICTED` |
+| `POST` | `/api/v1/auth/guardian-consent-actions` | Public token body | `200 GUARDIAN_CONSENT_ACTION_AVAILABLE`，只回文件版本／URL與動作，不回會員資料 |
+| `POST` | `/api/v1/auth/guardian-consents` | Public token body | `200 GUARDIAN_CONSENT_GRANTED`；Guardian 只建立特定版本同意，不取得會員 Session |
+| `POST` | `/api/v1/auth/guardian-consent-withdrawal-requests` | Public | 永遠 `202 GUARDIAN_CONSENT_WITHDRAWAL_REQUEST_ACCEPTED`，不得揭露 consent reference／Email 是否匹配 |
+| `POST` | `/api/v1/auth/guardian-consent-withdrawals` | Public token body | `200 GUARDIAN_CONSENT_WITHDRAWN`，立即停止會員一般功能並撤銷資格相關憑證 |
+
+`POST /eligibility-completions` request：
+
+```json
+{
+  "serviceRegion": "TW",
+  "birthday": "2010-08-01",
+  "publicNickname": "小貘 ✨",
+  "guardianEmail": "guardian@example.com",
+  "acceptedMinorNoticeVersion": "minor-notice-2026-01",
+  "guardianConsentVersion": "guardian-consent-2026-01",
+  "confirmPublicNicknameDisclosure": false,
+  "publicNicknameDisclosureVersion": "public-nickname-2026-01"
+}
+```
+
+- Backend 以 `Asia/Taipei` 當日計算完整年齡；Client 計算只供畫面分流，不具授權效果。
+- 非台灣或未滿 13 歲只保存地區、生日與受限狀態，不保存 `publicNickname`、Guardian Email 或公開確認。
+- 成年會員必須提供合規公開暱稱；是否先確認公開揭露不影響私人核心，但未確認時 Community Eligibility 維持 `PENDING_NICKNAME_CONFIRMATION`。
+- 13–17 歲必須提供 Guardian Email、目前 Minor Notice／Guardian Consent 版本；Guardian 完成同意前維持 `PENDING_ELIGIBILITY`，不得取得一般 Session或存取私人 API。
+- 公開暱稱儲存前 NFC、移除首尾空白，長度 2–30 Unicode code points；拒絕控制字元、換行、雙向控制、純空白、不可見字元與官方冒充名稱。暱稱不唯一，不可登入或作 owner key。
+- Guardian 核准 Token 有效 24 小時；撤回 Token 有效 15 分鐘。兩者皆為 32-byte、單次使用且 Server 只保存 SHA-256 hash；新要求撤銷同用途舊 Token。
+- Guardian 撤回要求使用 opaque `consentReference` 加 Guardian Email，公開回應一律相同；Email、生日、Token、Guardian資料不得進入 Log、Audit、Outbox payload或錯誤訊息。
+- 同意 Email 只含安全文件連結與 opaque action link，不含生日、公開暱稱、會員 Email、私人內容或會員 UUID。
+- `ELIGIBILITY_CONTINUATION_INVALID`、`GUARDIAN_CONSENT_TOKEN_INVALID` 與 `GUARDIAN_CONSENT_TOKEN_EXPIRED` 使用穩定錯誤碼；欄位錯誤使用 `VALIDATION_FAILED` 與安全 `fieldErrors`。
+- Task 07 尚未導入 Session Family 前，成人完成或 Guardian 核准後回 `nextAction = SIGN_IN`，由會員重新登入取得現行遷移期 Session，不在本 endpoint 新增 legacy Refresh 依賴。
+
 ### 0.3 核心資源契約
 
 | 資源 | v1 行為 |

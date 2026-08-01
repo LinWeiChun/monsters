@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import com.monsters.service.eligibility.EligibilityValidationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -174,6 +175,19 @@ public class GlobalExceptionHandler {
                 "REQUEST_PARAMETER_INVALID",
                 "Request parameter is invalid",
                 Map.of()
+        );
+    }
+
+    @ExceptionHandler(EligibilityValidationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleEligibilityValidationException(
+            EligibilityValidationException exception
+    ) {
+        log.warn("Eligibility validation failed: field={}", exception.getField());
+        return buildErrorResponse(
+                exception.getStatus(),
+                exception.getCode(),
+                exception.getMessage(),
+                Map.of(exception.getField(), exception.getFieldError())
         );
     }
 

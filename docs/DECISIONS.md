@@ -34,6 +34,7 @@ Phase 4.5 已核准決策的可交付規格與測試接縫整理於 [`PHASE4_5_F
 |---|---|
 | `account` | 移除使用者可見 account；Email／密碼以 verified Email 登入 |
 | Email 驗證 | 驗證前不得建立私人內容；七天未驗證空帳號清除 |
+| Email Delivery | 正式 SMTP 供應商選定 Resend；Backend 保持 Spring Boot Mail provider-neutral Adapter，使用 `smtp.resend.com:587` STARTTLS、帳號 `resend`，API Key 僅由環境 Secret 注入，寄件網域需先驗證 |
 | Member State | 七態狀態機：Email 待驗證、資格待完成、啟用、本人停用、管理停權、刪除等待、已刪除；Community Eligibility／Restriction 分離 |
 | State Priority | `DELETED > DELETION_PENDING > ADMIN_SUSPENDED > USER_DEACTIVATED > pending > ACTIVE`；`DELETED` terminal，恢復使用專用 Command |
 | State Command | 不提供泛用 `targetState` API；Email 驗證、資格、停用、停權與刪除由分離 Command 經內部狀態機處理 |
@@ -223,14 +224,13 @@ Phase 4.5 已核准決策的可交付規格與測試接縫整理於 [`PHASE4_5_F
 | ORM | Spring Data JPA |
 | Validation | Jakarta Validation |
 | Security | Spring Security + JWT |
-| Email Adapter | Spring Boot Mail Starter + provider-neutral SMTP |
+| Email Adapter | Spring Boot Mail Starter + provider-neutral SMTP Adapter；正式 provider 為 Resend |
 | Build Tool | Gradle |
 
 ## 三、待細化事項
 
 | 項目 | 目前狀態 |
 |------|----------|
-| SMTP 供應商與設定 | Backend 固定使用 Spring Boot Mail Starter 的 provider-neutral SMTP Adapter；實際 provider、host、port、TLS 與寄件網域由各 Railway 環境選型並以 Secret 注入 |
 | Web 管理後台 UI | 權限模型已由 0.4 定案；實際路由、畫面與 provider 待管理後台 Task 細化 |
 | 舊 API 對照表 | 待建立：需依 `system_data/` 舊後端與舊前端呼叫整理完整對照 |
 | 舊 Flutter UI 對照清單 | 待建立：需依 `system_data/` 舊 Flutter 頁面整理流程、元件、狀態與素材 |

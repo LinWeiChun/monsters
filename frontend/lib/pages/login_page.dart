@@ -9,6 +9,7 @@ import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/auth/google_sign_in_web_button.dart';
+import '../models/eligibility_policy.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -47,6 +48,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       final nextResult = next.loginResult;
       if (nextResult?.isAuthenticated == true && previousResult != nextResult) {
         context.goNamed(AppRoute.home);
+      } else if (nextResult?.nextAction == 'COMPLETE_ELIGIBILITY' &&
+          nextResult?.continuationCredential != null &&
+          previousResult != nextResult) {
+        context.goNamed(
+          AppRoute.eligibility,
+          extra: EligibilityRouteData(nextResult!.continuationCredential!),
+        );
       }
     });
 

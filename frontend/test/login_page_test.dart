@@ -112,29 +112,28 @@ void main() {
     expect(find.text('首頁'), findsWidgets);
   });
 
-  testWidgets(
-    'continuation login stays on login page and shows the required next step',
-    (tester) async {
-      await _setMobileSurface(tester);
-      final repository = _FakeAuthRepository(
-        loginResult: _continuationLoginResult,
-      );
-      await tester.pumpWidget(_loginApp(repository));
-      await tester.pumpAndSettle();
+  testWidgets('continuation login routes to the eligibility step', (
+    tester,
+  ) async {
+    await _setMobileSurface(tester);
+    final repository = _FakeAuthRepository(
+      loginResult: _continuationLoginResult,
+    );
+    await tester.pumpWidget(_loginApp(repository));
+    await tester.pumpAndSettle();
 
-      await tester.enterText(
-        find.byKey(const Key('loginEmailField')),
-        'pending.member@example.test',
-      );
-      await tester.enterText(find.byKey(const Key('loginPasswordField')), 'p');
-      await tester.tap(find.byKey(const Key('loginSubmitButton')));
-      await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('loginEmailField')),
+      'pending.member@example.test',
+    );
+    await tester.enterText(find.byKey(const Key('loginPasswordField')), 'p');
+    await tester.tap(find.byKey(const Key('loginSubmitButton')));
+    await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
-      expect(find.text('首頁'), findsNothing);
-      expect(find.text('請完成會員資格資料後再繼續'), findsOneWidget);
-    },
-  );
+    expect(find.byKey(const Key('loginEmailField')), findsNothing);
+    expect(find.text('首頁'), findsNothing);
+    expect(find.text('無法繼續'), findsOneWidget);
+  });
 
   testWidgets('submits Google ID token and navigates to home on success', (
     tester,

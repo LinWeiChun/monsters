@@ -84,4 +84,14 @@ public class MemberContinuationCredential extends BaseEntity {
     public LocalDateTime getRevokedAt() {
         return revokedAt;
     }
+
+    public boolean isUsableAt(LocalDateTime now) {
+        return revokedAt == null && expiresAt.isAfter(now)
+                && user.getMemberState() == issuedForState;
+    }
+
+    public void consume(LocalDateTime now) {
+        if (!isUsableAt(now)) throw new IllegalStateException("Continuation credential unavailable");
+        revokedAt = now;
+    }
 }

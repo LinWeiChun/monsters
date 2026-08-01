@@ -1,0 +1,11 @@
+package com.monsters.entity.user;
+
+public enum EligibilityStatus {
+    PENDING_PROFILE,
+    GUARDIAN_CONSENT_PENDING,
+    ELIGIBLE_PRIVATE_ONLY,
+    ELIGIBLE_ADULT,
+    INELIGIBLE_UNDERAGE,
+    INELIGIBLE_REGION,
+    GUARDIAN_CONSENT_WITHDRAWN
+}

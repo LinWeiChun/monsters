@@ -12,6 +12,9 @@ import '../pages/password_lock_page.dart';
 import '../pages/profile_page.dart';
 import '../pages/register_page.dart';
 import '../pages/splash_page.dart';
+import '../pages/eligibility_page.dart';
+import '../pages/guardian_consent_page.dart';
+import '../models/eligibility_policy.dart';
 import 'app_routes.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -61,6 +64,33 @@ GoRouter createAppRouter({String initialLocation = AppPath.splash}) {
             (context, state) => _appPage(
               state,
               EmailVerificationPage(
+                token: state.uri.queryParameters['token'] ?? '',
+              ),
+            ),
+      ),
+      GoRoute(
+        path: AppPath.eligibility,
+        name: AppRoute.eligibility,
+        pageBuilder: (context, state) {
+          final data = state.extra;
+          return _appPage(
+            state,
+            EligibilityPage(
+              continuationCredential:
+                  data is EligibilityRouteData
+                      ? data.continuationCredential
+                      : '',
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: AppPath.guardianConsent,
+        name: AppRoute.guardianConsent,
+        pageBuilder:
+            (context, state) => _appPage(
+              state,
+              GuardianConsentPage(
                 token: state.uri.queryParameters['token'] ?? '',
               ),
             ),

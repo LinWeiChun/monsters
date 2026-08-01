@@ -85,6 +85,13 @@ class AuthMemberHttpIntegrationTest {
                 "app.registration.rate-limit.hash-key",
                 () -> "synthetic-registration-rate-limit-key"
         );
+        registry.add("app.registration.eligibility.minor-notice-version", () -> "minor-v1");
+        registry.add("app.registration.eligibility.minor-notice-url", () -> "https://example.test/minor-v1");
+        registry.add("app.registration.eligibility.guardian-consent-version", () -> "guardian-v1");
+        registry.add("app.registration.eligibility.guardian-consent-url", () -> "https://example.test/guardian-v1");
+        registry.add("app.registration.eligibility.public-nickname-disclosure-version", () -> "nickname-v1");
+        registry.add("app.registration.eligibility.public-nickname-disclosure-url", () -> "https://example.test/nickname-v1");
+        registry.add("app.registration.eligibility.guardian-action-public-url", () -> "https://example.test/guardian-action");
     }
 
     private final MockMvc mockMvc;
@@ -584,6 +591,54 @@ class AuthMemberHttpIntegrationTest {
                 memberId
         )).doesNotContain(continuationCredential);
         assertThat(output.getAll()).doesNotContain(syntheticEmail, rawToken, continuationCredential);
+    }
+
+    @Test
+    void adultEligibilityShouldUseContinuationFilterAndCommitAtomicallyToMySql() throws Exception {
+        String syntheticEmail = "eligibility.adult@example.test";
+        registerAndDeliverVerification(syntheticEmail);
+        String verificationResponse = mockMvc.perform(post("/api/v1/auth/email-verifications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "token", verificationTokenFor(syntheticEmail)
+                        ))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String continuation = objectMapper.readTree(verificationResponse)
+                .path("data").path("continuationCredential").asText();
+
+        mockMvc.perform(post("/api/v1/auth/eligibility-completions")
+                        .header("Authorization", "Continuation " + continuation)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "serviceRegion", "TW",
+                                "birthday", "2000-01-01",
+                                "publicNickname", "  é貘  ",
+                                "confirmPublicNicknameDisclosure", true,
+                                "publicNicknameDisclosureVersion", "nickname-v1"
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.eligibilityStatus").value("ELIGIBLE_ADULT"))
+                .andExpect(jsonPath("$.data.communityEligibilityStatus").value("ELIGIBLE"))
+                .andExpect(jsonPath("$.data.nextAction").value("SIGN_IN"));
+
+        assertThat(jdbcTemplate.queryForMap("""
+                SELECT member_state, service_region, birthday, user_name,
+                       eligibility_status, community_eligibility_status,
+                       nickname_disclosure_version
+                FROM users WHERE email = ?
+                """, syntheticEmail))
+                .containsEntry("member_state", "ACTIVE")
+                .containsEntry("service_region", "TW")
+                .containsEntry("user_name", "é貘")
+                .containsEntry("eligibility_status", "ELIGIBLE_ADULT")
+                .containsEntry("community_eligibility_status", "ELIGIBLE")
+                .containsEntry("nickname_disclosure_version", "nickname-v1");
+        assertThat(jdbcTemplate.queryForObject("""
+                SELECT COUNT(*) FROM member_continuation_credentials credential
+                JOIN users member ON member.id = credential.user_id
+                WHERE member.email = ? AND credential.revoked_at IS NOT NULL
+                """, Integer.class, syntheticEmail)).isEqualTo(1);
     }
 
     @Test

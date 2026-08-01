@@ -23,7 +23,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             SecurityExceptionHandler securityExceptionHandler,
-            JwtAuthenticationFilter jwtAuthenticationFilter
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            ContinuationAuthenticationFilter continuationAuthenticationFilter
     ) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -38,6 +39,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/email-verifications").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/email-verification-requests").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/eligibility-policy").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/eligibility-completions")
+                                .hasAuthority("CONTINUATION_COMPLETE_ELIGIBILITY")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/guardian-consent-actions").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/guardian-consents").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/guardian-consent-withdrawal-requests").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/guardian-consent-withdrawals").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/google-login").permitAll()
@@ -46,7 +54,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/reset-password").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().denyAll())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(continuationAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(jwtAuthenticationFilter, ContinuationAuthenticationFilter.class)
                 .build();
     }
 

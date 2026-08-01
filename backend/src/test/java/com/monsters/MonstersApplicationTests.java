@@ -16,11 +16,15 @@ import com.monsters.repository.user.PasswordResetTokenRepository;
 import com.monsters.repository.user.RevokedTokenRepository;
 import com.monsters.repository.user.UserCredentialRepository;
 import com.monsters.repository.user.UserOAuthAccountRepository;
+import com.monsters.repository.user.GuardianConsentRepository;
+import com.monsters.repository.user.GuardianConsentTokenRepository;
 import com.monsters.repository.user.UserPasswordLockRepository;
 import com.monsters.repository.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.autoconfigure.mail.MailProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @SpringBootTest(properties = {
@@ -29,6 +33,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
                 + "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration"
 })
 class MonstersApplicationTests {
+
+    @Autowired
+    private MailProperties mailProperties;
 
     @MockBean
     private UserRepository userRepository;
@@ -64,6 +71,12 @@ class MonstersApplicationTests {
     private EmailVerificationTokenRepository emailVerificationTokenRepository;
 
     @MockBean
+    private GuardianConsentRepository guardianConsentRepository;
+
+    @MockBean
+    private GuardianConsentTokenRepository guardianConsentTokenRepository;
+
+    @MockBean
     private RegistrationRateLimitBucketRepository registrationRateLimitBucketRepository;
 
     @MockBean
@@ -89,5 +102,13 @@ class MonstersApplicationTests {
 
     @Test
     void contextLoads() {
+    }
+
+    @Test
+    void usesResendAsTheDefaultSmtpProvider() {
+        org.assertj.core.api.Assertions.assertThat(mailProperties.getHost())
+                .isEqualTo("smtp.resend.com");
+        org.assertj.core.api.Assertions.assertThat(mailProperties.getPort()).isEqualTo(587);
+        org.assertj.core.api.Assertions.assertThat(mailProperties.getUsername()).isEqualTo("resend");
     }
 }
