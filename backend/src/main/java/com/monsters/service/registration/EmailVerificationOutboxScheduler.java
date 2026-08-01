@@ -13,9 +13,12 @@ import org.springframework.stereotype.Component;
 public class EmailVerificationOutboxScheduler {
 
     private final EmailVerificationOutboxWorker worker;
+    private final com.monsters.service.eligibility.GuardianConsentOutboxWorker guardianWorker;
 
-    public EmailVerificationOutboxScheduler(EmailVerificationOutboxWorker worker) {
+    public EmailVerificationOutboxScheduler(EmailVerificationOutboxWorker worker,
+            com.monsters.service.eligibility.GuardianConsentOutboxWorker guardianWorker) {
         this.worker = worker;
+        this.guardianWorker = guardianWorker;
     }
 
     @Scheduled(
@@ -24,5 +27,6 @@ public class EmailVerificationOutboxScheduler {
     )
     public void processPending() {
         worker.processPending();
+        guardianWorker.processPending();
     }
 }

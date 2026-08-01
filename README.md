@@ -421,12 +421,18 @@ docker compose down
 | `REGISTRATION_PRIVACY_URL` | 目前隱私權政策 HTTPS URL | 空字串，註冊前必須提供 |
 | `REGISTRATION_RATE_LIMIT_HASH_KEY` | 註冊／重寄 HMAC 限流 secret | 空字串，註冊前必須提供 |
 | `EMAIL_VERIFICATION_PUBLIC_URL` | Flutter Web `/verify-email` 完整 HTTPS URL | 空字串，寄信前必須提供 |
-| `SMTP_HOST`、`SMTP_PORT` | 通用 SMTP 連線 | 空字串、`587` |
-| `SMTP_USERNAME`、`SMTP_PASSWORD` | SMTP secret | 空字串 |
-| `REGISTRATION_SMTP_FROM` | Email 驗證寄件者 | 空字串 |
+| `SMTP_HOST`、`SMTP_PORT` | Resend SMTP STARTTLS 連線 | `smtp.resend.com`、`587` |
+| `SMTP_USERNAME` | Resend SMTP 帳號 | `resend` |
+| `RESEND_API_KEY` | Resend API Key，作為 SMTP password | 空字串，僅由環境 Secret 提供 |
+| `SMTP_PASSWORD` | 舊版 SMTP password 相容備援 | 空字串 |
+| `REGISTRATION_SMTP_FROM` | 已在 Resend 驗證網域的 Email 寄件者 | 空字串 |
 | `REGISTRATION_SMTP_ENABLED` | 啟用 SMTP Adapter | `false` |
 | `EMAIL_VERIFICATION_WORKER_ENABLED` | 啟用 Email Outbox Worker | `false` |
 | `UNVERIFIED_MEMBER_CLEANUP_ENABLED` | 啟用七日空會員清理 | `false` |
+| `MINOR_NOTICE_VERSION`、`MINOR_NOTICE_URL` | 未成年人說明版本與 HTTPS URL | 空字串 |
+| `GUARDIAN_CONSENT_VERSION`、`GUARDIAN_CONSENT_URL` | 監護人同意文件版本與 HTTPS URL | 空字串 |
+| `PUBLIC_NICKNAME_DISCLOSURE_VERSION`、`PUBLIC_NICKNAME_DISCLOSURE_URL` | 公開暱稱揭露版本與 HTTPS URL | 空字串 |
+| `GUARDIAN_ACTION_PUBLIC_URL` | 監護人短效單次連結頁 HTTPS URL | 空字串 |
 | `R2_ACCOUNT_ID` | Cloudflare R2 Account ID | 空字串，使用 R2 前必須提供 |
 | `R2_ACCESS_KEY_ID` | R2 S3 Access Key ID | 空字串，使用 R2 前必須提供 |
 | `R2_SECRET_ACCESS_KEY` | R2 S3 Secret Access Key | 空字串，使用 R2 前必須提供 |

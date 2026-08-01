@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Monsters Registration and Login Contract
-  version: 0.3.0
+  version: 0.4.0
 paths:
   /api/v1/auth/registration-policy:
     get:
@@ -160,6 +160,100 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiEnvelope"
+  /api/v1/auth/eligibility-policy:
+    get:
+      summary: Read the Taiwan eligibility and guardian document policy
+      operationId: getEligibilityPolicy
+      responses:
+        "200":
+          description: Current eligibility policy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+  /api/v1/auth/eligibility-completions:
+    post:
+      summary: Complete eligibility with a purpose-limited continuation credential
+      operationId: completeEligibility
+      security:
+        - continuationCredential: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EligibilityCompletionRequest"
+      responses:
+        "200":
+          description: Eligibility classified or guardian consent requested
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "400":
+          description: Stable field validation failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "401":
+          description: Continuation credential invalid or expired
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+  /api/v1/auth/guardian-consent-actions:
+    post:
+      summary: Inspect a short-lived single-use guardian action link
+      operationId: inspectGuardianConsentAction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GuardianConsentTokenRequest"
+      responses:
+        "200": {description: Guardian action is valid}
+        "400": {description: Link invalid, used, revoked, or expired}
+  /api/v1/auth/guardian-consents:
+    post:
+      summary: Grant guardian consent using a 24-hour single-use link
+      operationId: grantGuardianConsent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GuardianConsentTokenRequest"
+      responses:
+        "200": {description: Guardian consent granted}
+        "400": {description: Link invalid, used, revoked, or expired}
+  /api/v1/auth/guardian-consent-withdrawal-requests:
+    post:
+      summary: Safely request a 15-minute guardian withdrawal link
+      operationId: requestGuardianConsentWithdrawal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GuardianWithdrawalRequest"
+      responses:
+        "202": {description: Same response for matching and non-matching requests}
+        "400": {description: Request shape invalid}
+  /api/v1/auth/guardian-consent-withdrawals:
+    post:
+      summary: Withdraw guardian consent using a 15-minute single-use link
+      operationId: withdrawGuardianConsent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GuardianConsentTokenRequest"
+      responses:
+        "200": {description: Consent withdrawn and existing member access blocked}
+        "400": {description: Link invalid, used, revoked, or expired}
   /api/auth/login:
     post:
       deprecated: true
@@ -193,6 +287,12 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiEnvelope"
 components:
+  securitySchemes:
+    continuationCredential:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: "Authorization: Continuation <opaque credential>"
   schemas:
     ApiEnvelope:
       type: object
@@ -498,3 +598,32 @@ components:
               const: AUTHENTICATED
             data:
               $ref: "#/components/schemas/LegacyAuthenticatedLoginData"
+    EligibilityCompletionRequest:
+      type: object
+      additionalProperties: false
+      required: [serviceRegion, birthday, confirmPublicNicknameDisclosure]
+      properties:
+        serviceRegion: {type: string, pattern: "^[A-Za-z]{2}$"}
+        birthday: {type: string, format: date}
+        publicNickname:
+          type: [string, "null"]
+          maxLength: 120
+          description: Normalized to NFC and validated as 2-30 Unicode code points by the server.
+        guardianEmail: {type: [string, "null"], format: email, maxLength: 255}
+        acceptedMinorNoticeVersion: {type: [string, "null"], maxLength: 80}
+        guardianConsentVersion: {type: [string, "null"], maxLength: 80}
+        confirmPublicNicknameDisclosure: {type: boolean}
+        publicNicknameDisclosureVersion: {type: [string, "null"], maxLength: 80}
+    GuardianConsentTokenRequest:
+      type: object
+      additionalProperties: false
+      required: [token]
+      properties:
+        token: {type: string, minLength: 1, maxLength: 512, writeOnly: true}
+    GuardianWithdrawalRequest:
+      type: object
+      additionalProperties: false
+      required: [consentReference, guardianEmail]
+      properties:
+        consentReference: {type: string, format: uuid, maxLength: 36}
+        guardianEmail: {type: string, format: email, maxLength: 255, writeOnly: true}

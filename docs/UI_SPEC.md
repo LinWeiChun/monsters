@@ -532,6 +532,20 @@ REST API
 - 重寄按鈕顯示 60 秒倒數；Backend 的 `429 RATE_LIMITED` 與 `retryAfter` 仍是安全強制來源。
 - `/verify-email?token=...` 只在記憶體消耗 Token；成功顯示 Eligibility 下一步，過期或無效時提供重新開始，不保存 Continuation Credential。
 - 13 至 17 歲使用者完成 Email 驗證後仍處於 `PENDING_ELIGIBILITY`，以 `nextAction` 進入監護人同意等待頁；未滿 13 歲或非台灣服務地區不得進入 App。
+
+## Flutter Eligibility Onboarding 實作規範
+
+設計來源為 Penpot `Account / Web / 09–12` 與 `Account / Mobile / 09–12`：資格資料、等待監護人、Guardian 同意與資格受限。
+
+- Web 使用 1440×900 左品牌／右表單，Mobile 使用 390×844 單欄；Tablet 使用 compact flow。所有主畫面必須直接完整顯示且不得垂直捲動。
+- Minor Notice、Guardian Consent與公開暱稱說明使用彈跳視窗；只有彈窗內容區可顯示 scrollbar。
+- Email 驗證或登入回 `COMPLETE_ELIGIBILITY` 時，Continuation Credential 只保存在記憶體並以 route `extra` 傳遞，不放 URL、SharedPreferences或Log。
+- 畫面先取得 Eligibility Policy，再依序選擇台灣服務地區、內建日曆生日、公開暱稱；Client 年齡只控制顯示，Backend 為唯一資格判定來源。
+- 未滿 13 歲或非台灣結果顯示受限說明與申訴／匯出／刪除保留入口，不顯示或送出公開暱稱與 Guardian Email。
+- 13–17 歲顯示 Guardian Email與 Minor Notice；送出後顯示等待同意。Guardian 畫面不顯示會員 Email、生日、暱稱、UUID或私人內容。
+- 成年會員可預覽「公開暱稱會跨貼文顯示」並主動確認；拒絕確認仍可使用私人核心，但不得取得 Community Eligibility。
+- 公開暱稱錯誤依穩定 field key 顯示：必填、過短、過長、不可見／控制字元與官方冒充。
+- Guardian 同意、Token 過期、無效、撤回與重新取得皆有明確狀態；撤回後既有 App 必須在 Backend 拒絕一般 API 時回到 Eligibility 流程。
 ## Flutter Profile Page 實作規範
 
 個人資料頁位置：

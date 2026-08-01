@@ -11,6 +11,8 @@ class AppRoute {
   static const emailVerification = 'emailVerification';
   static const profile = 'profile';
   static const passwordLock = 'passwordLock';
+  static const eligibility = 'eligibility';
+  static const guardianConsent = 'guardianConsent';
 }
 
 class AppPath {
@@ -26,4 +28,6 @@ class AppPath {
   static const emailVerification = '/verify-email';
   static const profile = '/profile';
   static const passwordLock = '/password-lock';
+  static const eligibility = '/complete-eligibility';
+  static const guardianConsent = '/guardian-consent';
 }

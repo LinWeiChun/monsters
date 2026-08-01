@@ -17,10 +17,10 @@ spring:
       max-file-size: ${MULTIPART_MAX_FILE_SIZE:50MB}
       max-request-size: ${MULTIPART_MAX_REQUEST_SIZE:60MB}
   mail:
-    host: ${SMTP_HOST:}
+    host: ${SMTP_HOST:smtp.resend.com}
     port: ${SMTP_PORT:587}
-    username: ${SMTP_USERNAME:}
-    password: ${SMTP_PASSWORD:}
+    username: ${SMTP_USERNAME:resend}
+    password: ${RESEND_API_KEY:${SMTP_PASSWORD:}}
     properties:
       mail:
         smtp:
@@ -51,6 +51,17 @@ app:
       cleanup-batch-size: ${UNVERIFIED_MEMBER_CLEANUP_BATCH_SIZE:100}
       cleanup-enabled: ${UNVERIFIED_MEMBER_CLEANUP_ENABLED:false}
       cleanup-cron: "${UNVERIFIED_MEMBER_CLEANUP_CRON:0 45 3 * * *}"
+    eligibility:
+      service-region: ${ELIGIBILITY_SERVICE_REGION:TW}
+      minor-notice-version: ${MINOR_NOTICE_VERSION:}
+      minor-notice-url: ${MINOR_NOTICE_URL:}
+      guardian-consent-version: ${GUARDIAN_CONSENT_VERSION:}
+      guardian-consent-url: ${GUARDIAN_CONSENT_URL:}
+      public-nickname-disclosure-version: ${PUBLIC_NICKNAME_DISCLOSURE_VERSION:}
+      public-nickname-disclosure-url: ${PUBLIC_NICKNAME_DISCLOSURE_URL:}
+      guardian-action-public-url: ${GUARDIAN_ACTION_PUBLIC_URL:}
+      grant-token-ttl-hours: ${GUARDIAN_GRANT_TOKEN_TTL_HOURS:24}
+      withdrawal-token-ttl-minutes: ${GUARDIAN_WITHDRAW_TOKEN_TTL_MINUTES:15}
     rate-limit:
       hash-key: ${REGISTRATION_RATE_LIMIT_HASH_KEY:}
       email-cooldown-seconds: ${REGISTRATION_EMAIL_COOLDOWN_SECONDS:60}
@@ -62,6 +73,8 @@ app:
         enabled: ${REGISTRATION_SMTP_ENABLED:false}
         from: ${REGISTRATION_SMTP_FROM:}
         subject: ${REGISTRATION_SMTP_SUBJECT:Verify your Monsters email}
+        guardian-grant-subject: ${GUARDIAN_GRANT_SMTP_SUBJECT:貘nsters 監護人同意確認}
+        guardian-withdraw-subject: ${GUARDIAN_WITHDRAW_SMTP_SUBJECT:貘nsters 監護人同意撤回確認}
   entry-draft:
     retention-days: ${ENTRY_DRAFT_RETENTION_DAYS:30}
     cleanup-cron: "${ENTRY_DRAFT_CLEANUP_CRON:0 30 3 * * *}"

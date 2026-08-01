@@ -15,6 +15,9 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.HexFormat;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.monsters.exception.common.BusinessException;
+import org.springframework.http.HttpStatus;
 
 @Service
 public class ContinuationCredentialService {
@@ -53,6 +56,33 @@ public class ContinuationCredentialService {
                 nextAction,
                 CREDENTIAL_TTL.toSeconds()
         );
+    }
+
+    @Transactional
+    public User authenticateEligibility(String rawCredential) {
+        if (rawCredential == null || rawCredential.isBlank() || rawCredential.length() > 512) {
+            throw invalidCredential();
+        }
+        LocalDateTime now = LocalDateTime.now(clock);
+        MemberContinuationCredential credential = credentialRepository.findByTokenHash(hash(rawCredential))
+                .orElseThrow(this::invalidCredential);
+        if (credential.getNextAction() != ContinuationNextAction.COMPLETE_ELIGIBILITY
+                || !credential.isUsableAt(now)) {
+            throw invalidCredential();
+        }
+        return credential.getUser();
+    }
+
+    @Transactional
+    public void consumeEligibilityCredential(String rawCredential) {
+        MemberContinuationCredential credential = credentialRepository.findByTokenHash(hash(rawCredential))
+                .orElseThrow(this::invalidCredential);
+        credential.consume(LocalDateTime.now(clock));
+    }
+
+    private BusinessException invalidCredential() {
+        return new BusinessException(HttpStatus.UNAUTHORIZED, "ELIGIBILITY_CONTINUATION_INVALID",
+                "Eligibility continuation is invalid or expired");
     }
 
     private ContinuationNextAction nextActionFor(MemberState memberState) {

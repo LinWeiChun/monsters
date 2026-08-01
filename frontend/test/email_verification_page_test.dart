@@ -70,11 +70,7 @@ void main() {
 
     expect(find.text('Email 驗證完成'), findsOneWidget);
     expect(find.textContaining('服務地區、生日與公開暱稱'), findsOneWidget);
-    expect(find.text('資格資料流程將在後續步驟開放'), findsOneWidget);
-    expect(
-      find.byKey(const Key('emailVerificationContinueButton')),
-      findsNothing,
-    );
+    expect(find.byKey(const Key('continueEligibilityButton')), findsOneWidget);
   });
 
   testWidgets('expired token presents a safe restart flow', (tester) async {

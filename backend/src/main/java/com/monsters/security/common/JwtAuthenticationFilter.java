@@ -1,6 +1,8 @@
 package com.monsters.security.common;
 
 import com.monsters.repository.user.RevokedTokenRepository;
+import com.monsters.repository.user.UserRepository;
+import com.monsters.entity.user.MemberState;
 import com.monsters.exception.common.UnauthorizedException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -12,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
@@ -22,13 +25,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenService jwtTokenService;
     private final RevokedTokenRepository revokedTokenRepository;
+    private final ObjectProvider<UserRepository> userRepositoryProvider;
 
     public JwtAuthenticationFilter(
             JwtTokenService jwtTokenService,
-            RevokedTokenRepository revokedTokenRepository
+            RevokedTokenRepository revokedTokenRepository,
+            ObjectProvider<UserRepository> userRepositoryProvider
     ) {
         this.jwtTokenService = jwtTokenService;
         this.revokedTokenRepository = revokedTokenRepository;
+        this.userRepositoryProvider = userRepositoryProvider;
     }
 
     @Override
@@ -43,6 +49,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String tokenHash = jwtTokenService.hashToken(token);
                 if (!revokedTokenRepository.existsByTokenHash(tokenHash)) {
                     JwtTokenPayload payload = jwtTokenService.verifyAccessToken(token);
+                    UserRepository userRepository = userRepositoryProvider.getIfAvailable();
+                    boolean active = userRepository == null || userRepository.findByIdAndDeletedFalse(payload.userId())
+                            .map(user -> user.getMemberState() == MemberState.ACTIVE).orElse(false);
+                    if (!active) {
+                        SecurityContextHolder.clearContext();
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
                     AuthenticatedUser principal = new AuthenticatedUser(payload.userId(), payload.email());
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             principal,

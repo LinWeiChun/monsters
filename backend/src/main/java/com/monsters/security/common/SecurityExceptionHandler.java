@@ -31,6 +31,12 @@ public class SecurityExceptionHandler implements AuthenticationEntryPoint, Acces
             HttpServletResponse response,
             AuthenticationException authException
     ) throws IOException {
+        Object continuationError = request.getAttribute(ContinuationAuthenticationFilter.ERROR_CODE_ATTRIBUTE);
+        if (continuationError != null) {
+            writeErrorResponse(response, HttpStatus.UNAUTHORIZED, continuationError.toString(),
+                    "Eligibility continuation is invalid or expired");
+            return;
+        }
         writeErrorResponse(response, HttpStatus.UNAUTHORIZED, "AUTHENTICATION_REQUIRED", UNAUTHORIZED_MESSAGE);
     }
 

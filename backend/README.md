@@ -113,15 +113,25 @@ Task 03 不提供程式內正式預設值；Railway `develop` 與 `main` service
 | `REGISTRATION_PRIVACY_URL` | 目前隱私權政策 HTTPS URL |
 | `REGISTRATION_RATE_LIMIT_HASH_KEY` | Email／IP 限流 HMAC secret |
 | `EMAIL_VERIFICATION_PUBLIC_URL` | 對應環境 Flutter Web `/verify-email` 完整 HTTPS URL |
-| `SMTP_HOST`、`SMTP_PORT` | SMTP 連線主機與 port |
-| `SMTP_USERNAME`、`SMTP_PASSWORD` | SMTP secret |
+| `SMTP_HOST`、`SMTP_PORT` | Resend SMTP 主機與 STARTTLS port；預設 `smtp.resend.com`、`587` |
+| `SMTP_USERNAME` | Resend SMTP 帳號；預設 `resend` |
+| `RESEND_API_KEY` | Resend API Key，作為 SMTP password；不得提交至 Repository |
+| `SMTP_PASSWORD` | 舊版相容備援；未設定 `RESEND_API_KEY` 時才讀取 |
 | `SMTP_AUTH`、`SMTP_STARTTLS_ENABLED` | SMTP 驗證與 STARTTLS 開關 |
-| `REGISTRATION_SMTP_FROM` | 已驗證寄件者 |
+| `REGISTRATION_SMTP_FROM` | 已在 Resend 驗證網域的寄件者 |
 | `REGISTRATION_SMTP_ENABLED` | 完成上述設定後才設為 `true` |
 | `EMAIL_VERIFICATION_WORKER_ENABLED` | SMTP 可用後設為 `true` |
 | `UNVERIFIED_MEMBER_CLEANUP_ENABLED` | 確認 V3 migration 後設為 `true` |
+| `MINOR_NOTICE_VERSION`、`MINOR_NOTICE_URL` | 未成年人說明版本與 HTTPS URL |
+| `GUARDIAN_CONSENT_VERSION`、`GUARDIAN_CONSENT_URL` | 監護人同意文件版本與 HTTPS URL |
+| `PUBLIC_NICKNAME_DISCLOSURE_VERSION`、`PUBLIC_NICKNAME_DISCLOSURE_URL` | 公開暱稱揭露版本與 HTTPS URL |
+| `GUARDIAN_ACTION_PUBLIC_URL` | Flutter Web 監護人單次連結頁的 HTTPS URL |
+| `GUARDIAN_GRANT_TOKEN_TTL_HOURS` | 同意連結有效小時，預設 `24` |
+| `GUARDIAN_WITHDRAW_TOKEN_TTL_MINUTES` | 撤回連結有效分鐘，預設 `15` |
 
 SMTP 寄送最多重試五次；七日空會員清理預設每日 03:45 執行。正式環境不得把 Email、IP、密碼或 Token 寫入設定、Log 或 Outbox payload。
+
+SMTP 供應商固定為 Resend。啟用前須在 Resend 完成寄件網域驗證並建立權限最小化的 API Key；正式環境以 Secret 管理 `RESEND_API_KEY`，不得使用 `onboarding@resend.dev` 作為正式寄件者。
 
 ## 專案規範
 

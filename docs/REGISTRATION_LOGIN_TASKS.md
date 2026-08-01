@@ -128,9 +128,9 @@
 
 **Blocked by:** 02 — 建立會員狀態機與 Continuation Credential；03 — 完成註冊與 Email 驗證流程；04 — 導入新密碼政策與 BCrypt 漸進遷移。
 
-**Status:** REVIEW
+**Status:** DONE
 
-**Evidence:** v1 Email-only、legacy account expand 共存、Penpot／Flutter 無主畫面捲動、301 項 Backend 單元測試、28 項 MySQL 整合測試與 184 項 Flutter 測試已通過；待 PR 合併後轉 `DONE`。
+**Evidence:** PR #93 已合併至 `feature/phase4.5`；v1 Email-only、legacy account expand 共存、Penpot／Flutter 無主畫面捲動，且 Backend unit、MySQL integration、Flutter 與 OpenAPI CI 全部通過。
 
 - [x] v1登入欄位與正式契約只接受verified Email。
 - [x] 不存在、密碼錯誤或不可揭露狀態統一回`401 AUTH_INVALID_CREDENTIALS`。
@@ -148,16 +148,18 @@
 
 **Blocked by:** 03 — 完成註冊與 Email 驗證流程。
 
-**Status:** ready-for-agent
+**Status:** REVIEW
 
-- [ ] Email驗證後才收地區、生日、公開暱稱與必要Guardian Email。
-- [ ] 未滿13歲不能取得一般功能，只保留必要申訴、匯出與刪除入口。
-- [ ] 13至17歲需完成特定條款版本的Guardian Consent，且不得使用社群。
-- [ ] Guardian Consent不授予查看會員私人內容的權限，並可撤回及重新取得。
-- [ ] 公開暱稱為2–30 Unicode code points、NFC、非唯一且不可用於登入或owner判斷。
-- [ ] 禁止控制字元、雙向控制、純空白、不可見字元及官方冒充名稱。
-- [ ] 首次社群公開前需預覽並明確確認暱稱；未確認不得發布或留言。
-- [ ] 12／13／17／18歲及時區日期邊界皆有Backend與Flutter測試。
+**Evidence:** Draft PR #94；2026-08-01 使用者選定方案 1：Guardian 同意、撤回與重新取得皆使用短效單次 Email 連結；REST Security Filter、Service age／nickname、MySQL 8.4 原子交易與 Flutter Repository／Widget／Router 已依 TDD 完成，Penpot Web／Mobile design-first 畫板與無主畫面捲動實作已驗收，SMTP 供應商固定為 Resend。Backend 311 項 unit／OpenAPI、29 項 MySQL integration、Flutter 185 項測試、Analyze、Web release 與 Android debug build 均通過。
+
+- [x] Email驗證後才收地區、生日、公開暱稱與必要Guardian Email。
+- [x] 未滿13歲不能取得一般功能，只保留必要申訴、匯出與刪除入口。
+- [x] 13至17歲需完成特定條款版本的Guardian Consent，且不得使用社群。
+- [x] Guardian Consent不授予查看會員私人內容的權限，並可撤回及重新取得。
+- [x] 公開暱稱為2–30 Unicode code points、NFC、非唯一且不可用於登入或owner判斷。
+- [x] 禁止控制字元、雙向控制、純空白、不可見字元及官方冒充名稱。
+- [x] 首次社群公開前需預覽並明確確認暱稱；未確認不得發布或留言。
+- [x] 12／13／17／18歲及時區日期邊界皆有Backend與Flutter測試。
 
 ---
 

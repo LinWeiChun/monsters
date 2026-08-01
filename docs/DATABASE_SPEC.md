@@ -257,6 +257,50 @@ Index：`user_id, revoked_at, expires_at`。
 
 Task 02 建立共用 Transactional Outbox 基礎，保存 `event_id`、aggregate type／UUID、event type、最小 payload、狀態、嘗試次數與可執行時間。會員狀態、version、Credential 撤銷、Audit 與 Outbox 必須在同一交易提交。
 
+### 3.2.6 Task 06 Eligibility expand 欄位
+
+V4 以 expand 方式在 `users` 新增：
+
+| 欄位 | 型別 | 約束 | 說明 |
+|---|---|---|---|
+| `service_region` | VARCHAR(2) | NULL | 第一版完成 Eligibility 時只允許 `TW`；受限判定仍保存送出地區 |
+| `eligibility_status` | VARCHAR(40) | NOT NULL DEFAULT `PENDING_PROFILE` | `PENDING_PROFILE`、`GUARDIAN_CONSENT_PENDING`、`ELIGIBLE_PRIVATE_ONLY`、`ELIGIBLE_ADULT`、`INELIGIBLE_UNDERAGE`、`INELIGIBLE_REGION`、`GUARDIAN_CONSENT_WITHDRAWN` |
+| `community_eligibility_status` | VARCHAR(40) | NOT NULL DEFAULT `INELIGIBLE` | `INELIGIBLE`、`PENDING_NICKNAME_CONFIRMATION`、`ELIGIBLE`；不是 Role |
+| `nickname_disclosure_version` | VARCHAR(80) | NULL | 會員明確預覽並確認的公開暱稱揭露版本 |
+| `nickname_disclosure_confirmed_at` | DATETIME | NULL | 首次公開確認時間；未確認不得發布或留言 |
+
+- 非台灣／未滿 13 歲不得寫入 `user_name`、公開確認或 Guardian Email。
+- `user_name` 不建立唯一索引；owner 仍使用內部 user relation／公開 UUID。
+- 既有 `ACTIVE` 會員安全回填為 `ELIGIBLE_ADULT`；社群治理 Gate 尚未完成，`community_eligibility_status` 預設仍為 `INELIGIBLE`。
+
+### 3.2.7 guardian_consents
+
+每次 Guardian 同意週期建立獨立資料列，以保留撤回與重新取得歷程：
+
+| 欄位 | 約束 |
+|---|---|
+| `public_id` | UUID string，UNIQUE NOT NULL；作 opaque `consentReference` |
+| `user_id` | FK NOT NULL；不得回傳給 Guardian |
+| `guardian_email` | VARCHAR(255) NOT NULL；只供寄送／精確驗證，不進 Log、Audit或Outbox payload |
+| `document_version` | VARCHAR(80) NOT NULL |
+| `status` | `PENDING`、`GRANTED`、`WITHDRAWN`、`SUPERSEDED` |
+| `granted_at`、`withdrawn_at` | DATETIME NULL |
+| `created_at`、`updated_at` | DATETIME NOT NULL |
+
+Index：`user_id, status`、`public_id` unique。重新取得同意時將舊 active request 標記 `SUPERSEDED`，不得覆寫已撤回歷程。
+
+### 3.2.8 guardian_consent_tokens
+
+| 欄位 | 約束 |
+|---|---|
+| `guardian_consent_id` | FK NOT NULL |
+| `purpose` | `GRANT` 或 `WITHDRAW` |
+| `token_hash` | CHAR(64) UNIQUE NOT NULL；不得保存 raw Token |
+| `expires_at` | DATETIME NOT NULL；GRANT 24 小時、WITHDRAW 15 分鐘 |
+| `used_at`、`revoked_at` | DATETIME NULL |
+
+Index：`guardian_consent_id, purpose, used_at, revoked_at`。新 Token 產生前撤銷同 consent／purpose 的未使用 Token。
+
 ### 3.3 user_oauth_accounts
 
 第三方登入帳號。

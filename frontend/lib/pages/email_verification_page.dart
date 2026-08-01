@@ -6,6 +6,7 @@ import '../providers/auth_provider.dart';
 import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
+import '../models/eligibility_policy.dart';
 
 class EmailVerificationPage extends ConsumerStatefulWidget {
   const EmailVerificationPage({super.key, required this.token});
@@ -82,7 +83,22 @@ class _EmailVerificationPageState extends ConsumerState<EmailVerificationPage> {
                     ),
                   const SizedBox(height: AppSpacing.xl),
                   if (verified)
-                    const Text('資格資料流程將在後續步驟開放', textAlign: TextAlign.center)
+                    FilledButton(
+                      key: const Key('continueEligibilityButton'),
+                      onPressed:
+                          state.verificationResult?.continuationCredential ==
+                                  null
+                              ? null
+                              : () => context.goNamed(
+                                AppRoute.eligibility,
+                                extra: EligibilityRouteData(
+                                  state
+                                      .verificationResult!
+                                      .continuationCredential!,
+                                ),
+                              ),
+                      child: const Text('繼續填寫資格資料'),
+                    )
                   else if (!state.isLoading)
                     FilledButton(
                       key: const Key('emailVerificationRestartButton'),

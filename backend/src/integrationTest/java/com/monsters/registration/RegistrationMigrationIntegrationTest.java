@@ -24,12 +24,12 @@ class RegistrationMigrationIntegrationTest {
             .withPassword("synthetic-password");
 
     @Test
-    void emptySchemaShouldMigrateDirectlyToRegistrationVersion() throws Exception {
+    void emptySchemaShouldMigrateDirectlyToEligibilityVersion() throws Exception {
         Flyway flyway = flyway(null);
         flyway.clean();
 
         assertThat(flyway.migrate().success).isTrue();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("3");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("4");
         assertRegistrationTablesAndNullableOnboardingColumns();
     }
 
@@ -68,15 +68,18 @@ class RegistrationMigrationIntegrationTest {
 
         Flyway latest = flyway(null);
         assertThat(latest.migrate().success).isTrue();
-        assertThat(latest.info().current().getVersion().getVersion()).isEqualTo("3");
+        assertThat(latest.info().current().getVersion().getVersion()).isEqualTo("4");
         assertRegistrationTablesAndNullableOnboardingColumns();
         try (Connection connection = connection();
                 Statement statement = connection.createStatement();
                 ResultSet result = statement.executeQuery(
-                        "SELECT member_state FROM users WHERE account = 'legacy_member'"
+                        "SELECT member_state, eligibility_status, community_eligibility_status "
+                                + "FROM users WHERE account = 'legacy_member'"
                 )) {
             assertThat(result.next()).isTrue();
             assertThat(result.getString("member_state")).isEqualTo("ACTIVE");
+            assertThat(result.getString("eligibility_status")).isEqualTo("ELIGIBLE_ADULT");
+            assertThat(result.getString("community_eligibility_status")).isEqualTo("INELIGIBLE");
         }
     }
 
@@ -98,6 +101,8 @@ class RegistrationMigrationIntegrationTest {
             assertThat(tableExists(metadata, "member_document_acceptances")).isTrue();
             assertThat(tableExists(metadata, "email_verification_tokens")).isTrue();
             assertThat(tableExists(metadata, "registration_rate_limit_buckets")).isTrue();
+            assertThat(tableExists(metadata, "guardian_consents")).isTrue();
+            assertThat(tableExists(metadata, "guardian_consent_tokens")).isTrue();
             assertThat(columnNullable(metadata, "users", "account")).isTrue();
             assertThat(columnNullable(metadata, "users", "user_name")).isTrue();
         }

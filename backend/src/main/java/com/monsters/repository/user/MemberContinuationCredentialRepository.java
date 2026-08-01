@@ -3,6 +3,7 @@ package com.monsters.repository.user;
 import com.monsters.entity.user.MemberContinuationCredential;
 import com.monsters.entity.user.User;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,6 +11,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface MemberContinuationCredentialRepository
         extends JpaRepository<MemberContinuationCredential, Long> {
+
+    Optional<MemberContinuationCredential> findByTokenHash(String tokenHash);
 
     @Modifying
     @Query("""

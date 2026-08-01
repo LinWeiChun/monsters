@@ -30,6 +30,23 @@ public class User extends BaseEntity {
     @Column(name = "birthday")
     private LocalDate birthday;
 
+    @Column(name = "service_region", length = 2)
+    private String serviceRegion;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "eligibility_status", nullable = false, length = 40)
+    private EligibilityStatus eligibilityStatus = EligibilityStatus.PENDING_PROFILE;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "community_eligibility_status", nullable = false, length = 40)
+    private CommunityEligibilityStatus communityEligibilityStatus = CommunityEligibilityStatus.INELIGIBLE;
+
+    @Column(name = "nickname_disclosure_version", length = 80)
+    private String nicknameDisclosureVersion;
+
+    @Column(name = "nickname_disclosure_confirmed_at")
+    private LocalDateTime nicknameDisclosureConfirmedAt;
+
     @Column(name = "avatar_url", length = 500)
     private String avatarUrl;
 
@@ -65,6 +82,8 @@ public class User extends BaseEntity {
         user.email = email;
         user.deleted = false;
         user.memberState = MemberState.PENDING_EMAIL_VERIFICATION;
+        user.eligibilityStatus = EligibilityStatus.PENDING_PROFILE;
+        user.communityEligibilityStatus = CommunityEligibilityStatus.INELIGIBLE;
         return user;
     }
 
@@ -82,6 +101,46 @@ public class User extends BaseEntity {
             throw new IllegalStateException("Member is not pending eligibility");
         }
         memberState = MemberState.ACTIVE;
+    }
+
+    public void restrictEligibility(String region, LocalDate birthday, EligibilityStatus status) {
+        this.serviceRegion = region;
+        this.birthday = birthday;
+        this.userName = null;
+        this.eligibilityStatus = status;
+        this.communityEligibilityStatus = CommunityEligibilityStatus.INELIGIBLE;
+        this.nicknameDisclosureVersion = null;
+        this.nicknameDisclosureConfirmedAt = null;
+    }
+
+    public void awaitGuardianConsent(String region, LocalDate birthday, String nickname) {
+        this.serviceRegion = region; this.birthday = birthday; this.userName = nickname;
+        this.eligibilityStatus = EligibilityStatus.GUARDIAN_CONSENT_PENDING;
+        this.communityEligibilityStatus = CommunityEligibilityStatus.INELIGIBLE;
+    }
+
+    public void grantMinorEligibility() {
+        this.eligibilityStatus = EligibilityStatus.ELIGIBLE_PRIVATE_ONLY;
+        this.communityEligibilityStatus = CommunityEligibilityStatus.INELIGIBLE;
+        completeEligibility();
+    }
+
+    public void grantAdultEligibility(String region, LocalDate birthday, String nickname,
+            boolean disclosureConfirmed, String disclosureVersion, LocalDateTime now) {
+        this.serviceRegion = region; this.birthday = birthday; this.userName = nickname;
+        this.eligibilityStatus = EligibilityStatus.ELIGIBLE_ADULT;
+        this.communityEligibilityStatus = disclosureConfirmed
+                ? CommunityEligibilityStatus.ELIGIBLE
+                : CommunityEligibilityStatus.PENDING_NICKNAME_CONFIRMATION;
+        this.nicknameDisclosureVersion = disclosureConfirmed ? disclosureVersion : null;
+        this.nicknameDisclosureConfirmedAt = disclosureConfirmed ? now : null;
+        completeEligibility();
+    }
+
+    public void withdrawGuardianEligibility() {
+        this.eligibilityStatus = EligibilityStatus.GUARDIAN_CONSENT_WITHDRAWN;
+        this.communityEligibilityStatus = CommunityEligibilityStatus.INELIGIBLE;
+        this.memberState = MemberState.PENDING_ELIGIBILITY;
     }
 
     public void completeEmailVerification() {
@@ -110,6 +169,10 @@ public class User extends BaseEntity {
     public LocalDate getBirthday() {
         return birthday;
     }
+
+    public String getServiceRegion() { return serviceRegion; }
+    public EligibilityStatus getEligibilityStatus() { return eligibilityStatus; }
+    public CommunityEligibilityStatus getCommunityEligibilityStatus() { return communityEligibilityStatus; }
 
     public String getAvatarUrl() {
         return avatarUrl;
