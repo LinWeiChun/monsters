@@ -1,4 +1,7 @@
 日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
+2026-08-01,19:48,REGISTRATION-LOGIN-06-CI,Frontend,frontend/lib/pages/eligibility_page.dart,修改,改用Flutter 3.29.2支援的DropdownButtonFormField value,Codex,否,否,否,否,行為不變且新版Analyze使用範圍化棄用說明
+2026-08-01,19:48,REGISTRATION-LOGIN-06-CI,Test,frontend test與analyze,驗證,Eligibility targeted與Flutter完整回歸測試及Analyze,Codex,否,否,是,否,185項測試通過且Analyze無問題
+2026-08-01,19:48,REGISTRATION-LOGIN-06-CI,Documentation,REGISTRATION_LOGIN_TASKS.md與Log,修改,記錄PR94 Flutter 3.29.2失敗根因與相容修正,Codex,否,否,否,否,Task06維持REVIEW等待修復PR CI
 2026-08-01,18:19,REGISTRATION-LOGIN-06,Backend,backend/src/main/java/com/monsters/service/eligibility與security,新增與修改,建立Eligibility Guardian單次連結與即時會員狀態限制,Codex,是,是,否,是,Token只存SHA-256且Outbox不含PII
 2026-08-01,18:19,REGISTRATION-LOGIN-06,Database,backend/src/main/resources/db/migration/V4__add_eligibility_and_guardian_consent.sql,新增,建立資格社群資格Guardian同意與Token資料結構,Codex,否,是,否,是,既有ACTIVE安全回填且社群維持INELIGIBLE
 2026-08-01,18:19,REGISTRATION-LOGIN-06,Email,application.yml與SmtpEmailDeliveryAdapter,修改,指定Resend SMTP並加入Guardian同意撤回信件,Codex,否,否,否,否,587 STARTTLS且API Key僅由Secret注入

@@ -138,7 +138,9 @@ class _EligibilityPageState extends ConsumerState<EligibilityPage> {
           const SizedBox(height: 18),
           DropdownButtonFormField<String>(
             key: const Key('eligibilityRegionField'),
-            initialValue: _region,
+            // Flutter 3.29.2 compatibility; use initialValue after the CI baseline advances.
+            // ignore: deprecated_member_use
+            value: _region,
             decoration: const InputDecoration(labelText: '服務地區'),
             items: const [
               DropdownMenuItem(value: 'TW', child: Text('台灣')),
