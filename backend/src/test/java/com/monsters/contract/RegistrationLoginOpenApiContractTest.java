@@ -161,6 +161,44 @@ class RegistrationLoginOpenApiContractTest {
         )).containsKeys("200", "400");
     }
 
+    @Test
+    void sessionContractShouldDefineOpaqueRotationAndStableErrors() throws IOException {
+        Map<String, Object> document;
+        try (var reader = Files.newBufferedReader(CONTRACT_PATH)) {
+            document = new Yaml().load(reader);
+        }
+
+        Map<String, Object> refreshOperation = mapAt(
+                document,
+                "paths",
+                "/api/v1/auth/session-refreshes",
+                "post"
+        );
+        assertThat(mapAt(refreshOperation, "responses")).containsKeys("200", "400", "401");
+        Map<String, Object> request = mapAt(
+                document,
+                "components",
+                "schemas",
+                "SessionRefreshRequest"
+        );
+        assertThat(request).containsEntry("additionalProperties", false);
+        assertThat(listAt(request, "required")).containsExactly("refreshCredential");
+        assertThat(mapAt(request, "properties", "refreshCredential"))
+                .containsEntry("writeOnly", true)
+                .containsEntry("minLength", 1);
+
+        Map<String, Object> errorCode = mapAt(
+                document,
+                "components",
+                "schemas",
+                "AuthSessionErrorCode"
+        );
+        assertThat(listAt(errorCode, "enum")).containsExactlyInAnyOrder(
+                "AUTH_SESSION_INVALID",
+                "AUTH_REFRESH_REUSE_DETECTED"
+        );
+    }
+
     @SuppressWarnings("unchecked")
     private Map<String, Object> mapAt(Map<String, Object> source, String... path) {
         Object current = source;

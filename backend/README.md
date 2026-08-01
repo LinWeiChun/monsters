@@ -71,6 +71,7 @@ Docker Compose 會使用 `mysql` 作為 MySQL service hostname。
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 - `POST /api/v1/auth/login`
+- `POST /api/v1/auth/session-refreshes`
 - `POST /api/auth/google-login`
 - `POST /api/auth/refresh`
 - `POST /api/auth/forgot-password`
@@ -88,10 +89,14 @@ JWT 基礎環境變數：
 |----------|--------|
 | `JWT_ISSUER` | `monsters` |
 | `JWT_SECRET` | 空字串，正式環境必須提供 |
-| `JWT_ACCESS_TOKEN_EXPIRATION_SECONDS` | `3600` |
+| `JWT_ACCESS_TOKEN_EXPIRATION_SECONDS` | `600` |
 | `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` | `2592000` |
+| `SESSION_IDLE_EXPIRATION_SECONDS` | `2592000` |
+| `SESSION_ABSOLUTE_EXPIRATION_SECONDS` | `7776000` |
+| `SESSION_REFRESH_CONCURRENCY_GRACE_SECONDS` | `10` |
+| `SESSION_REFRESH_DERIVATION_KEY` | 空字串；v1完整登入前須提供至少32-byte獨立Secret |
 
-Refresh token 採 rotation：每次成功換發後，舊 refresh token hash 會寫入 `revoked_tokens` 並立即失效；重複使用、過期、type 錯誤或使用者已刪除皆回傳 401。預設有效期為 rolling 30 天。
+v1 Refresh Credential採opaque Session Family rotation，Backend只保存SHA-256 hash。每次成功換發都建立下一個sequence；同一舊Credential在10秒內回相同結果，逾期reuse撤銷該family。一般Session閒置30天、絕對90天。Legacy JWT Refresh與`revoked_tokens`僅供舊API Migration相容。
 
 Google 登入環境變數：
 

@@ -24,12 +24,12 @@ class RegistrationMigrationIntegrationTest {
             .withPassword("synthetic-password");
 
     @Test
-    void emptySchemaShouldMigrateDirectlyToEligibilityVersion() throws Exception {
+    void emptySchemaShouldMigrateDirectlyToSessionFamilyVersion() throws Exception {
         Flyway flyway = flyway(null);
         flyway.clean();
 
         assertThat(flyway.migrate().success).isTrue();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("4");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("5");
         assertRegistrationTablesAndNullableOnboardingColumns();
     }
 
@@ -68,7 +68,7 @@ class RegistrationMigrationIntegrationTest {
 
         Flyway latest = flyway(null);
         assertThat(latest.migrate().success).isTrue();
-        assertThat(latest.info().current().getVersion().getVersion()).isEqualTo("4");
+        assertThat(latest.info().current().getVersion().getVersion()).isEqualTo("5");
         assertRegistrationTablesAndNullableOnboardingColumns();
         try (Connection connection = connection();
                 Statement statement = connection.createStatement();
@@ -103,6 +103,9 @@ class RegistrationMigrationIntegrationTest {
             assertThat(tableExists(metadata, "registration_rate_limit_buckets")).isTrue();
             assertThat(tableExists(metadata, "guardian_consents")).isTrue();
             assertThat(tableExists(metadata, "guardian_consent_tokens")).isTrue();
+            assertThat(tableExists(metadata, "user_sessions")).isTrue();
+            assertThat(tableExists(metadata, "refresh_session_credentials")).isTrue();
+            assertThat(tableExists(metadata, "session_security_audits")).isTrue();
             assertThat(columnNullable(metadata, "users", "account")).isTrue();
             assertThat(columnNullable(metadata, "users", "user_name")).isTrue();
         }

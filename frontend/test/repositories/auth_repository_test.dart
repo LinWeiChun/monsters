@@ -23,9 +23,9 @@ void main() {
       const store = AuthSessionStore();
       await store.saveSession(_oldLoginResult);
       final dio = Dio();
-      Object? requestData;
+      RequestOptions? refreshRequest;
       dio.httpClientAdapter = _CallbackAdapter((options) {
-        requestData = options.data;
+        refreshRequest = options;
         return _jsonResponse({
           'success': true,
           'message': 'Token refresh success',
@@ -42,7 +42,10 @@ void main() {
 
       final restored = await repository.restoreSession();
 
-      expect(requestData, {'refreshToken': 'old-refresh-token'});
+      expect(refreshRequest?.uri.path, '/api/v1/auth/session-refreshes');
+      expect(refreshRequest?.data, {
+        'refreshCredential': 'old-refresh-token',
+      });
       expect(restored?.accessToken, 'new-access-token');
       expect(
         client.dio.options.headers['Authorization'],

@@ -27,6 +27,8 @@ import com.monsters.security.common.JwtTokenService;
 import com.monsters.security.common.PasswordResetTokenService;
 import com.monsters.security.password.PasswordHashService;
 import com.monsters.security.password.PasswordPolicy;
+import com.monsters.service.session.SessionAuthenticationResult;
+import com.monsters.service.session.SessionFamilyService;
 import com.monsters.entity.user.PasswordResetToken;
 import com.monsters.entity.user.User;
 import com.monsters.entity.user.UserCredential;
@@ -86,6 +88,9 @@ class AuthServiceTest {
     @Mock
     private MemberContinuationCredentialRepository memberContinuationCredentialRepository;
 
+    @Mock
+    private SessionFamilyService sessionFamilyService;
+
     private AuthService authService;
 
     @BeforeEach
@@ -106,6 +111,7 @@ class AuthServiceTest {
                         memberContinuationCredentialRepository,
                         Clock.systemDefaultZone()
                 ),
+                sessionFamilyService,
                 Clock.systemDefaultZone()
         );
     }
@@ -260,9 +266,17 @@ class AuthServiceTest {
                 .thenReturn(Optional.of(user));
         when(userCredentialRepository.findByUser(user)).thenReturn(Optional.of(credential));
         when(passwordHashService.matches("password123", "encoded-password")).thenReturn(true);
-        when(jwtTokenService.createAccessToken(user)).thenReturn("access-token");
-        when(jwtTokenService.createRefreshToken(user)).thenReturn("refresh-token");
-        when(jwtProperties.accessTokenExpirationSeconds()).thenReturn(3600L);
+        when(sessionFamilyService.create(user)).thenReturn(new SessionAuthenticationResult(
+                "access-token",
+                "refresh-token",
+                "Bearer",
+                600,
+                new com.monsters.dto.auth.AuthenticatedMemberResponse(
+                        user.getPublicId(),
+                        user.getEmail(),
+                        user.getUserName()
+                )
+        ));
 
         VerifiedEmailLoginResponse response = authService.loginVerifiedEmail(request);
 

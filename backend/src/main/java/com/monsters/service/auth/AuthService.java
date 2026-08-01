@@ -42,6 +42,8 @@ import com.monsters.security.common.JwtTokenService;
 import com.monsters.security.common.PasswordResetTokenService;
 import com.monsters.security.password.PasswordHashService;
 import com.monsters.security.password.PasswordPolicy;
+import com.monsters.service.session.SessionAuthenticationResult;
+import com.monsters.service.session.SessionFamilyService;
 
 @Service
 public class AuthService {
@@ -62,6 +64,7 @@ public class AuthService {
 	private final PasswordResetTokenService passwordResetTokenService;
 	private final TokenRevocationService tokenRevocationService;
 	private final ContinuationCredentialService continuationCredentialService;
+	private final SessionFamilyService sessionFamilyService;
 	private final Clock clock;
 
 	@Autowired
@@ -71,7 +74,8 @@ public class AuthService {
 			PasswordHashService passwordHashService,
 			JwtTokenService jwtTokenService, JwtProperties jwtProperties, GoogleIdTokenVerifier googleIdTokenVerifier,
 			PasswordResetTokenService passwordResetTokenService, TokenRevocationService tokenRevocationService,
-			ContinuationCredentialService continuationCredentialService, Clock clock) {
+			ContinuationCredentialService continuationCredentialService,
+			SessionFamilyService sessionFamilyService, Clock clock) {
 		this.userRepository = userRepository;
 		this.userCredentialRepository = userCredentialRepository;
 		this.userOAuthAccountRepository = userOAuthAccountRepository;
@@ -84,6 +88,7 @@ public class AuthService {
 		this.passwordResetTokenService = passwordResetTokenService;
 		this.tokenRevocationService = tokenRevocationService;
 		this.continuationCredentialService = continuationCredentialService;
+		this.sessionFamilyService = sessionFamilyService;
 		this.clock = clock;
 	}
 
@@ -230,16 +235,13 @@ public class AuthService {
 					credential.expiresIn()
 			);
 		}
+		SessionAuthenticationResult session = sessionFamilyService.create(user);
 		return VerifiedEmailLoginResponse.authenticated(
-				jwtTokenService.createAccessToken(user),
-				jwtTokenService.createRefreshToken(user),
-				"Bearer",
-				jwtProperties.accessTokenExpirationSeconds(),
-				new AuthenticatedMemberResponse(
-						user.getPublicId(),
-						user.getEmail(),
-						user.getUserName()
-				)
+				session.accessToken(),
+				session.refreshCredential(),
+				session.tokenType(),
+				session.expiresIn(),
+				session.user()
 		);
 	}
 

@@ -160,6 +160,35 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiEnvelope"
+  /api/v1/auth/session-refreshes:
+    post:
+      summary: Rotate an opaque refresh credential within its device session family
+      operationId: rotateMemberSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionRefreshRequest"
+      responses:
+        "200":
+          description: Credential rotated or the same result replayed within the ten-second grace window
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticatedLoginEnvelope"
+        "400":
+          description: Request validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "401":
+          description: Session invalid or refresh reuse detected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
   /api/v1/auth/eligibility-policy:
     get:
       summary: Read the Taiwan eligibility and guardian document policy
@@ -520,6 +549,23 @@ components:
           minimum: 1
         user:
           $ref: "#/components/schemas/AuthenticatedMember"
+    SessionRefreshRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - refreshCredential
+      properties:
+        refreshCredential:
+          type: string
+          minLength: 1
+          maxLength: 512
+          writeOnly: true
+          description: High-entropy opaque credential; the server persists only its SHA-256 hash.
+    AuthSessionErrorCode:
+      type: string
+      enum:
+        - AUTH_SESSION_INVALID
+        - AUTH_REFRESH_REUSE_DETECTED
     LegacyAuthenticatedLoginData:
       type: object
       required:
