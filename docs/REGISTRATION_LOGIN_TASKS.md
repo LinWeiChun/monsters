@@ -150,7 +150,7 @@
 
 **Status:** REVIEW
 
-**Evidence:** PR #94 已合併至 `feature/phase4.5`；Backend、MySQL integration 與 OpenAPI CI 通過，但 Flutter 3.29.2 CI 發現 Eligibility 地區下拉欄位使用較新版 `initialValue` API。2026-08-01 使用者選定相容修正方案 1，改用 3.29.2 支援的 `value` 並保留新版 Analyze 的範圍化棄用說明；本機 Flutter 185 項測試與 Analyze 已通過，Task 維持 `REVIEW` 等待修復 PR CI。
+**Evidence:** PR #94 已合併至 `feature/phase4.5`；Backend、MySQL integration 與 OpenAPI CI 通過，但 Flutter 3.29.2 CI 發現 Eligibility 地區下拉欄位使用較新版 `initialValue` API。2026-08-01 使用者選定相容修正方案 1，改用 3.29.2 支援的 `value` 並保留新版 Analyze 的範圍化棄用說明；Draft PR #95 的 Flutter 3.29.2、Backend、MySQL integration 與 OpenAPI 四個 CI job 已全部通過，Task 維持 `REVIEW` 等待修復 PR 合併。
 
 - [x] Email驗證後才收地區、生日、公開暱稱與必要Guardian Email。
 - [x] 未滿13歲不能取得一般功能，只保留必要申訴、匯出與刪除入口。

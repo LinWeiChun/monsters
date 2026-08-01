@@ -45,7 +45,7 @@ Codex
 
 - Eligibility targeted test 1 項通過。
 - Flutter 完整 185 項測試通過。
-- Flutter 3.35.5 Analyze 無問題；Flutter 3.29.2 將由 GitHub Actions 修復 PR 再驗證。
+- Flutter 3.35.5 Analyze 無問題；Draft PR #95 的 Flutter 3.29.2、Backend、MySQL integration 與 OpenAPI 四個 CI job 全部通過。
 - `git diff --check` 通過。
 
 ### Log Retention
@@ -55,7 +55,7 @@ Codex
 
 ### Pending
 
-- Task 06 維持 `REVIEW`；待 Flutter 3.29.2 CI 修復 PR 通過並合併後，才能轉 `DONE`。
+- Draft PR #95 已建立且四個 CI job 全綠；Task 06 維持 `REVIEW`，待修復 PR 合併後才能轉 `DONE`。
 
 ---
 
