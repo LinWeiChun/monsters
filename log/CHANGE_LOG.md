@@ -64,7 +64,7 @@ Codex
 
 ### Pending
 
-- Task 06 進入 `REVIEW`；待 PR CI 通過並合併至 `feature/phase4.5` 後轉 `DONE`。
+- Draft PR #94 已建立；Task 06 維持 `REVIEW`，待 CI 通過並合併至 `feature/phase4.5` 後轉 `DONE`。
 - Resend 正式啟用前，Railway 各環境仍需設定 `RESEND_API_KEY`、已驗證寄件者、文件版本／URL與 Guardian action URL。
 
 ---

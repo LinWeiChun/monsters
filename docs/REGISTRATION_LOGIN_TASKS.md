@@ -150,7 +150,7 @@
 
 **Status:** REVIEW
 
-**Evidence:** 2026-08-01 使用者選定方案 1：Guardian 同意、撤回與重新取得皆使用短效單次 Email 連結；REST Security Filter、Service age／nickname、MySQL 8.4 原子交易與 Flutter Repository／Widget／Router 已依 TDD 完成，Penpot Web／Mobile design-first 畫板與無主畫面捲動實作已驗收，SMTP 供應商固定為 Resend。Backend 311 項 unit／OpenAPI、29 項 MySQL integration、Flutter 185 項測試、Analyze、Web release 與 Android debug build 均通過。
+**Evidence:** Draft PR #94；2026-08-01 使用者選定方案 1：Guardian 同意、撤回與重新取得皆使用短效單次 Email 連結；REST Security Filter、Service age／nickname、MySQL 8.4 原子交易與 Flutter Repository／Widget／Router 已依 TDD 完成，Penpot Web／Mobile design-first 畫板與無主畫面捲動實作已驗收，SMTP 供應商固定為 Resend。Backend 311 項 unit／OpenAPI、29 項 MySQL integration、Flutter 185 項測試、Analyze、Web release 與 Android debug build 均通過。
 
 - [x] Email驗證後才收地區、生日、公開暱稱與必要Guardian Email。
 - [x] 未滿13歲不能取得一般功能，只保留必要申訴、匯出與刪除入口。

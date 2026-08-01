@@ -4,7 +4,7 @@
 2026-08-01,18:19,REGISTRATION-LOGIN-06,Email,application.yml與SmtpEmailDeliveryAdapter,修改,指定Resend SMTP並加入Guardian同意撤回信件,Codex,否,否,否,否,587 STARTTLS且API Key僅由Secret注入
 2026-08-01,18:19,REGISTRATION-LOGIN-06,Frontend,frontend/lib/pages與repositories routes,新增與修改,完成Eligibility Guardian同意撤回與無主畫面捲動導流,Codex,是,否,是,否,文件只在彈窗內容區捲動
 2026-08-01,18:19,REGISTRATION-LOGIN-06,Test,backend與frontend測試,新增與修改,驗證年齡暱稱Security Filter MySQL交易Guardian與三平台畫面,Codex,是,是,是,否,Backend311加29且Flutter185與雙平台build通過
-2026-08-01,18:19,REGISTRATION-LOGIN-06,Documentation,README docs與OpenAPI,修改,同步Eligibility Guardian Resend契約與Task狀態,Codex,是,是,是,是,Task06進入REVIEW
+2026-08-01,18:19,REGISTRATION-LOGIN-06,Documentation,README docs與OpenAPI,修改,同步Eligibility Guardian Resend契約與Task狀態,Codex,是,是,是,是,Draft PR #94且Task06進入REVIEW
 2026-08-01,18:19,REGISTRATION-LOGIN-06,Documentation,log/CHANGE_LOG.md與log/CHANGE_HISTORY.csv,修改,新增工作報告並清除一個月前紀錄,Codex,否,否,否,否,刪除9個Markdown區段與65筆CSV且XLSX無資料
 2026-07-31,16:32,REGISTRATION-LOGIN-05-CI,Frontend,frontend/lib/pages/login_page.dart,修改,縮減平板viewport垂直留白以保留Linux CI下48px按鈕高度,Codex,否,否,是,否,主畫面維持無捲動且完整直接顯示
 2026-07-31,16:32,REGISTRATION-LOGIN-05-CI,Test,frontend/test/login_page_test.dart,驗證,登入頁20項responsive與靜態檢查通過,Codex,否,否,是,否,涵蓋CI失敗的900x700尺寸
