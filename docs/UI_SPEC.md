@@ -460,7 +460,7 @@ REST API
 - `AUTH_CONTINUATION_REQUIRED` 不視為已登入；`LoginPage` 不導向首頁，`AuthRepository` 不設定 Authorization、不保存 continuation credential，並清除可能殘留的一般 Session。
 - `nextAction` 只用於選擇 Email 驗證、資格、帳號恢復、停權處理或刪除處理畫面；第一個對應流程尚未完成時顯示安全提示，不顯示 credential。
 - `AuthSessionStore` 必須改為平台 `SessionCredentialStore`：Web Refresh Cookie 由 Backend 管理，App Refresh Token 進 Keychain／Keystore；Access Token 只放記憶體，不得序列化完整 `LoginResult`。
-- `SessionCredentialStore`固定提供Web Cookie、Android Keystore與iOS Keychain三個Adapter；Web不讀寫Refresh Credential，Android最低API 23，iOS Keychain項目不啟用iCloud同步且不遷移至其他裝置。
+- `SessionCredentialStore`固定提供Web Cookie、Android Keystore與iOS Keychain三個Adapter；Web不讀寫Refresh Credential，Android最低API 24並以compileSdk 36及NDK 27.0.12077973建置，iOS Keychain項目不啟用iCloud同步且不遷移至其他裝置。
 - Web登入與refresh必須送`X-Session-Transport: COOKIE`、`X-CSRF-Protection: 1`並啟用瀏覽器credentials；App維持request body的`refreshCredential`契約。
 - App 啟動時由 `SplashPage` 透過 `AuthController.restoreSession()` 判斷登入狀態；若本地session有效，必須呼叫`POST /api/v1/auth/session-refreshes`並送出`refreshCredential`換發新Credential、覆蓋舊session，再套用新access token並導向`home` route。
 - 受保護 API 回傳 401 時，並行 request 必須共用單一 refresh request；換發成功後每個原 request 最多重試一次，refresh request 本身不得遞迴重試。
