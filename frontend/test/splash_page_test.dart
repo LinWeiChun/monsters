@@ -6,9 +6,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monsters/config/app_config.dart';
 import 'package:monsters/core/network/api_client.dart';
+import 'package:monsters/core/network/api_error_type.dart';
+import 'package:monsters/core/network/api_exception.dart';
 import 'package:monsters/models/login_result.dart';
 import 'package:monsters/providers/auth_provider.dart';
 import 'package:monsters/repositories/auth_repository.dart';
+import 'package:monsters/repositories/auth_session_store.dart';
 import 'package:monsters/routes/app_router.dart';
 import 'package:monsters/routes/app_routes.dart';
 
@@ -123,6 +126,19 @@ void main() {
     expect(find.byKey(const Key('splashLoginButton')), findsNothing);
     expect(find.byKey(const Key('splashRegisterButton')), findsNothing);
   });
+
+  testWidgets('temporary restore failure stays on splash and offers retry', (
+    tester,
+  ) async {
+    await _setMobileSurface(tester);
+    await tester.pumpWidget(_splashApp(_TemporaryFailureAuthRepository()));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('splashLogo')), findsOneWidget);
+    expect(find.byKey(const Key('loginEmailField')), findsNothing);
+    expect(find.text('連線中斷，登入狀態已保留，請重試。'), findsOneWidget);
+    expect(find.text('重試'), findsOneWidget);
+  });
 }
 
 Future<void> _setMobileSurface(WidgetTester tester) async {
@@ -184,7 +200,11 @@ void _expectFullyVisible(
 }
 
 class _FakeAuthRepository extends AuthRepository {
-  _FakeAuthRepository() : super(_dummyClient());
+  _FakeAuthRepository()
+    : super(
+        _dummyClient(),
+        sessionStore: const WebCookieSessionCredentialStore(),
+      );
 
   @override
   Future<LoginResult?> restoreSession({DateTime? now}) async {
@@ -193,13 +213,33 @@ class _FakeAuthRepository extends AuthRepository {
 }
 
 class _PendingAuthRepository extends AuthRepository {
-  _PendingAuthRepository() : super(_dummyClient());
+  _PendingAuthRepository()
+    : super(
+        _dummyClient(),
+        sessionStore: const WebCookieSessionCredentialStore(),
+      );
 
   final Completer<LoginResult?> _sessionCompleter = Completer<LoginResult?>();
 
   @override
   Future<LoginResult?> restoreSession({DateTime? now}) {
     return _sessionCompleter.future;
+  }
+}
+
+class _TemporaryFailureAuthRepository extends AuthRepository {
+  _TemporaryFailureAuthRepository()
+    : super(
+        _dummyClient(),
+        sessionStore: const WebCookieSessionCredentialStore(),
+      );
+
+  @override
+  Future<LoginResult?> restoreSession({DateTime? now}) {
+    throw const ApiException(
+      type: ApiErrorType.network,
+      message: 'Network unavailable',
+    );
   }
 }
 

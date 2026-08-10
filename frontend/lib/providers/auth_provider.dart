@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/network/api_exception.dart';
+import '../core/network/api_error_type.dart';
 import '../models/login_result.dart';
 import '../models/registration_policy.dart';
 import '../repositories/auth_repository.dart';
+import '../repositories/auth_session_store.dart';
 import '../services/google_sign_in_service.dart';
 import 'api_client_provider.dart';
 
@@ -13,6 +15,7 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final apiClient = ref.watch(apiClientProvider);
   final repository = AuthRepository(
     apiClient,
+    sessionStore: ref.watch(sessionCredentialStoreProvider),
     onAuthenticationChanged: (isAuthenticated) {
       ref.read(authSessionExpiredProvider.notifier).state = !isAuthenticated;
     },
@@ -20,6 +23,10 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   apiClient.setAccessTokenRefresher(repository.refreshAccessToken);
   ref.onDispose(() => apiClient.setAccessTokenRefresher(null));
   return repository;
+});
+
+final sessionCredentialStoreProvider = Provider<SessionCredentialStore>((ref) {
+  return createSessionCredentialStore();
 });
 
 final authSessionExpiredProvider = StateProvider<bool>((ref) => false);
@@ -132,6 +139,13 @@ class AuthController extends StateNotifier<AuthState> {
 
       state = AuthState(loginResult: result);
       return true;
+    } on ApiException catch (error) {
+      if (error.type == ApiErrorType.unauthorized) {
+        state = const AuthState();
+        return false;
+      }
+      state = const AuthState(errorMessage: '連線中斷，登入狀態已保留，請重試。');
+      return false;
     } on Object {
       state = const AuthState();
       return false;

@@ -24,6 +24,7 @@ import com.monsters.service.registration.UnverifiedMemberCleanupService;
 import com.monsters.support.AuthMemberControlledDependencies;
 import com.monsters.support.AuthMemberControlledDependencies.RecordingAsyncJobDispatcher;
 import com.monsters.support.AuthMemberControlledDependencies.RecordingEmailDelivery;
+import jakarta.servlet.http.Cookie;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -78,6 +79,11 @@ class AuthMemberHttpIntegrationTest {
                 "app.security.session.refresh-derivation-key",
                 () -> "synthetic-refresh-derivation-key-for-integration-tests"
         );
+        registry.add(
+                "app.security.web-session.trusted-origin-patterns",
+                () -> "https://app.example.test"
+        );
+        registry.add("app.cors.allowed-origin-patterns", () -> "https://*.example.test");
         registry.add("app.security.google.client-ids", () -> "synthetic-google-client");
         registry.add("app.registration.documents.terms.version", () -> "terms-synthetic-v1");
         registry.add("app.registration.documents.terms.url", () -> "https://example.test/terms/v1");
@@ -364,6 +370,179 @@ class AuthMemberHttpIntegrationTest {
                 Integer.class,
                 firstSession.get("public_id")
         )).isEqualTo(3);
+    }
+
+    @Test
+    void webLoginShouldIssueHostCookieWithoutExposingRefreshCredential()
+            throws Exception {
+        String syntheticEmail = "web.cookie.login@example.test";
+        String syntheticPassword = "synthetic-password";
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "account", "web_cookie_login_member",
+                                "email", syntheticEmail,
+                                "password", syntheticPassword,
+                                "userName", "Web Cookie Login Member"
+                        ))))
+                .andExpect(status().isCreated());
+
+        var result = mockMvc.perform(post("/api/v1/auth/login")
+                        .header("Origin", "https://app.example.test")
+                        .header("X-Session-Transport", "COOKIE")
+                        .header("X-CSRF-Protection", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", syntheticEmail,
+                                "password", syntheticPassword
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("AUTHENTICATED"))
+                .andReturn();
+
+        String setCookie = result.getResponse().getHeader("Set-Cookie");
+        assertThat(setCookie)
+                .startsWith("__Host-monsters-refresh=")
+                .contains("Path=/", "Secure", "HttpOnly", "SameSite=Strict");
+        JsonNode data = responseData(result.getResponse().getContentAsString());
+        assertThat(data.path("accessToken").asText()).isNotBlank();
+        assertThat(data.has("refreshToken")).isFalse();
+    }
+
+    @Test
+    void webLoginShouldRejectUntrustedOriginOrMissingCsrfBeforeCreatingSession()
+            throws Exception {
+        String syntheticEmail = "web.cookie.rejected@example.test";
+        String syntheticPassword = "synthetic-password";
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "account", "web_cookie_rejected_member",
+                                "email", syntheticEmail,
+                                "password", syntheticPassword,
+                                "userName", "Web Cookie Rejected Member"
+                        ))))
+                .andExpect(status().isCreated());
+
+        String loginBody = objectMapper.writeValueAsString(Map.of(
+                "email", syntheticEmail,
+                "password", syntheticPassword
+        ));
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .header("Origin", "https://untrusted.example.test")
+                        .header("X-Session-Transport", "COOKIE")
+                        .header("X-CSRF-Protection", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginBody))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("WEB_SESSION_REQUEST_REJECTED"));
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .header("Origin", "https://app.example.test")
+                        .header("X-Session-Transport", "COOKIE")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginBody))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("WEB_SESSION_REQUEST_REJECTED"));
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM user_sessions WHERE user_id = "
+                        + "(SELECT id FROM users WHERE email = ?)",
+                Integer.class,
+                syntheticEmail
+        )).isZero();
+    }
+
+    @Test
+    void webContinuationLoginShouldExpireAnyExistingSessionCookie() throws Exception {
+        String syntheticEmail = "web.cookie.continuation@example.test";
+        registerWithoutDelivery(syntheticEmail);
+
+        var result = mockMvc.perform(post("/api/v1/auth/login")
+                        .header("Origin", "https://app.example.test")
+                        .header("X-Session-Transport", "COOKIE")
+                        .header("X-CSRF-Protection", "1")
+                        .cookie(new Cookie(
+                                "__Host-monsters-refresh",
+                                "previous-member-refresh-credential"
+                        ))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", syntheticEmail,
+                                "password", "synthetic-password"
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("AUTH_CONTINUATION_REQUIRED"))
+                .andReturn();
+
+        assertThat(result.getResponse().getHeader("Set-Cookie"))
+                .startsWith("__Host-monsters-refresh=;")
+                .contains("Path=/", "Max-Age=0", "Secure", "HttpOnly", "SameSite=Strict");
+    }
+
+    @Test
+    void webRefreshShouldRotateCookieWithoutExposingRefreshCredential()
+            throws Exception {
+        String syntheticEmail = "web.cookie.refresh@example.test";
+        String syntheticPassword = "synthetic-password";
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "account", "web_cookie_refresh_member",
+                                "email", syntheticEmail,
+                                "password", syntheticPassword,
+                                "userName", "Web Cookie Refresh Member"
+                        ))))
+                .andExpect(status().isCreated());
+
+        var loginResult = mockMvc.perform(post("/api/v1/auth/login")
+                        .header("Origin", "https://app.example.test")
+                        .header("X-Session-Transport", "COOKIE")
+                        .header("X-CSRF-Protection", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", syntheticEmail,
+                                "password", syntheticPassword
+                        ))))
+                .andExpect(status().isOk())
+                .andReturn();
+        Cookie firstCookie = loginResult.getResponse().getCookie("__Host-monsters-refresh");
+        assertThat(firstCookie).isNotNull();
+
+        var refreshResult = mockMvc.perform(post("/api/v1/auth/session-refreshes")
+                        .header("Origin", "https://app.example.test")
+                        .header("X-Session-Transport", "COOKIE")
+                        .header("X-CSRF-Protection", "1")
+                        .cookie(firstCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("AUTHENTICATED"))
+                .andReturn();
+
+        Cookie rotatedCookie = refreshResult.getResponse().getCookie("__Host-monsters-refresh");
+        assertThat(rotatedCookie).isNotNull();
+        assertThat(rotatedCookie.getValue()).isNotEqualTo(firstCookie.getValue());
+        JsonNode data = responseData(refreshResult.getResponse().getContentAsString());
+        assertThat(data.path("accessToken").asText()).isNotBlank();
+        assertThat(data.has("refreshToken")).isFalse();
+    }
+
+    @Test
+    void webRefreshShouldExpireCookieWhenCredentialIsInvalid() throws Exception {
+        var result = mockMvc.perform(post("/api/v1/auth/session-refreshes")
+                        .header("Origin", "https://app.example.test")
+                        .header("X-Session-Transport", "COOKIE")
+                        .header("X-CSRF-Protection", "1")
+                        .cookie(new Cookie(
+                                "__Host-monsters-refresh",
+                                "unknown-refresh-credential"
+                        )))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTH_SESSION_INVALID"))
+                .andReturn();
+
+        assertThat(result.getResponse().getHeader("Set-Cookie"))
+                .startsWith("__Host-monsters-refresh=;")
+                .contains("Path=/", "Max-Age=0", "Secure", "HttpOnly", "SameSite=Strict");
     }
 
     @Test

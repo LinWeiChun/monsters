@@ -15,6 +15,7 @@ import com.monsters.exception.common.GlobalExceptionHandler;
 import com.monsters.exception.common.UnauthorizedException;
 import com.monsters.repository.user.RevokedTokenRepository;
 import com.monsters.security.common.JwtTokenService;
+import com.monsters.security.session.WebSessionCookieService;
 import com.monsters.service.auth.AuthService;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,9 @@ class VerifiedEmailLoginControllerTest {
 
     @MockBean
     private RevokedTokenRepository revokedTokenRepository;
+
+    @MockBean
+    private WebSessionCookieService webSessionCookieService;
 
     @Test
     void loginShouldExposeOnlyTheV1MemberContract() throws Exception {

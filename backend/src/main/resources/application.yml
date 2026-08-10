@@ -81,7 +81,7 @@ app:
   cors:
     allowed-origin-patterns: ${CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*,http://127.0.0.1:*}
     allowed-methods: ${CORS_ALLOWED_METHODS:GET,POST,PUT,PATCH,DELETE,OPTIONS}
-    allowed-headers: ${CORS_ALLOWED_HEADERS:Authorization,Content-Type,Range}
+    allowed-headers: ${CORS_ALLOWED_HEADERS:Authorization,Content-Type,Range,X-Session-Transport,X-CSRF-Protection}
     exposed-headers: ${CORS_EXPOSED_HEADERS:Authorization,Accept-Ranges,Content-Length,Content-Range}
     allow-credentials: ${CORS_ALLOW_CREDENTIALS:true}
     max-age: ${CORS_MAX_AGE:3600}
@@ -96,6 +96,9 @@ app:
       absolute-expiration-seconds: ${SESSION_ABSOLUTE_EXPIRATION_SECONDS:7776000}
       refresh-concurrency-grace-seconds: ${SESSION_REFRESH_CONCURRENCY_GRACE_SECONDS:10}
       refresh-derivation-key: ${SESSION_REFRESH_DERIVATION_KEY:}
+    web-session:
+      trusted-origin-patterns: ${WEB_SESSION_TRUSTED_ORIGIN_PATTERNS:http://localhost:*,http://127.0.0.1:*}
+      cookie-max-age-seconds: ${WEB_SESSION_COOKIE_MAX_AGE_SECONDS:7776000}
     google:
       client-ids: ${GOOGLE_CLIENT_IDS:}
   storage:

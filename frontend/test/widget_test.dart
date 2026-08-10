@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monsters/app.dart';
 import 'package:monsters/providers/auth_provider.dart';
+import 'package:monsters/repositories/auth_session_store.dart';
 import 'package:monsters/routes/app_router.dart';
 import 'package:monsters/routes/app_routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,7 +14,12 @@ void main() {
   });
 
   testWidgets('shows login after the startup session check', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: MonstersApp()));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [_emptySessionStoreOverride()],
+        child: const MonstersApp(),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
@@ -25,7 +31,10 @@ void main() {
   ) async {
     final router = createAppRouter(initialLocation: AppPath.home);
     final container = ProviderContainer(
-      overrides: [appRouterProvider.overrideWithValue(router)],
+      overrides: [
+        appRouterProvider.overrideWithValue(router),
+        _emptySessionStoreOverride(),
+      ],
     );
     addTearDown(container.dispose);
     await tester.pumpWidget(
@@ -44,7 +53,12 @@ void main() {
   });
 
   testWidgets('navigates from login to register route', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: MonstersApp()));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [_emptySessionStoreOverride()],
+        child: const MonstersApp(),
+      ),
+    );
     await tester.pumpAndSettle();
 
     final registerLink = find.text('建立新帳號');
@@ -55,4 +69,21 @@ void main() {
     expect(find.byKey(const Key('registerAccountField')), findsNothing);
     expect(find.byKey(const Key('registerEmailField')), findsOneWidget);
   });
+}
+
+Override _emptySessionStoreOverride() {
+  return sessionCredentialStoreProvider.overrideWithValue(
+    AndroidSessionCredentialStore(_EmptySecureCredentialAdapter()),
+  );
+}
+
+class _EmptySecureCredentialAdapter implements SecureCredentialAdapter {
+  @override
+  Future<void> delete({required String key}) async {}
+
+  @override
+  Future<String?> read({required String key}) async => null;
+
+  @override
+  Future<void> write({required String key, required String value}) async {}
 }

@@ -9,6 +9,7 @@ import 'package:monsters/core/network/api_exception.dart';
 import 'package:monsters/models/registration_policy.dart';
 import 'package:monsters/providers/auth_provider.dart';
 import 'package:monsters/repositories/auth_repository.dart';
+import 'package:monsters/repositories/auth_session_store.dart';
 import 'package:monsters/routes/app_router.dart';
 import 'package:monsters/routes/app_routes.dart';
 
@@ -306,7 +307,10 @@ class _FakeAuthRepository extends AuthRepository {
   _FakeAuthRepository({
     this.registerException,
     this.enforceSyntheticPasswordPolicy = false,
-  }) : super(_dummyClient());
+  }) : super(
+         _dummyClient(),
+         sessionStore: const WebCookieSessionCredentialStore(),
+       );
 
   final ApiException? registerException;
   final bool enforceSyntheticPasswordPolicy;

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Monsters Registration and Login Contract
-  version: 0.4.0
+  version: 0.5.0
 paths:
   /api/v1/auth/registration-policy:
     get:
@@ -133,6 +133,9 @@ paths:
     post:
       summary: Authenticate by verified Email or continue an incomplete member flow
       operationId: loginMemberByVerifiedEmail
+      parameters:
+        - $ref: "#/components/parameters/SessionTransportHeader"
+        - $ref: "#/components/parameters/CsrfProtectionHeader"
       requestBody:
         required: true
         content:
@@ -142,6 +145,11 @@ paths:
       responses:
         "200":
           description: Authenticated session or purpose-limited continuation
+          headers:
+            Set-Cookie:
+              description: Web Cookie transport only; sets the __Host-monsters-refresh HttpOnly session cookie.
+              schema:
+                type: string
           content:
             application/json:
               schema:
@@ -160,12 +168,22 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiEnvelope"
+        "403":
+          description: Web Cookie transport Origin or CSRF proof was rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
   /api/v1/auth/session-refreshes:
     post:
       summary: Rotate an opaque refresh credential within its device session family
       operationId: rotateMemberSession
+      parameters:
+        - $ref: "#/components/parameters/SessionTransportHeader"
+        - $ref: "#/components/parameters/CsrfProtectionHeader"
       requestBody:
-        required: true
+        required: false
+        description: Required for App transport; omitted for Web Cookie transport.
         content:
           application/json:
             schema:
@@ -173,6 +191,11 @@ paths:
       responses:
         "200":
           description: Credential rotated or the same result replayed within the ten-second grace window
+          headers:
+            Set-Cookie:
+              description: Web Cookie transport only; rotates the __Host-monsters-refresh HttpOnly session cookie.
+              schema:
+                type: string
           content:
             application/json:
               schema:
@@ -185,6 +208,12 @@ paths:
                 $ref: "#/components/schemas/ApiEnvelope"
         "401":
           description: Session invalid or refresh reuse detected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "403":
+          description: Web Cookie transport Origin or CSRF proof was rejected
           content:
             application/json:
               schema:
@@ -322,6 +351,23 @@ components:
       in: header
       name: Authorization
       description: "Authorization: Continuation <opaque credential>"
+  parameters:
+    SessionTransportHeader:
+      name: X-Session-Transport
+      in: header
+      required: false
+      description: Set to COOKIE for Web; when present, a trusted Origin and X-CSRF-Protection are mandatory.
+      schema:
+        type: string
+        const: COOKIE
+    CsrfProtectionHeader:
+      name: X-CSRF-Protection
+      in: header
+      required: false
+      description: Web Cookie transport proof; must equal 1 and is validated together with Origin.
+      schema:
+        type: string
+        const: "1"
   schemas:
     ApiEnvelope:
       type: object
@@ -529,7 +575,6 @@ components:
       type: object
       required:
         - accessToken
-        - refreshToken
         - tokenType
         - expiresIn
         - user
@@ -540,6 +585,7 @@ components:
         refreshToken:
           type: string
           readOnly: true
+          description: App transport only; omitted for Web Cookie transport.
         tokenType:
           type: string
           const: Bearer

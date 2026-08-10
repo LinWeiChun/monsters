@@ -1,73 +1,122 @@
-import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import 'package:shared_preferences/shared_preferences.dart';
+abstract interface class SessionCredentialStore {
+  bool get usesCookieTransport;
 
-import '../models/login_result.dart';
+  Future<void> saveRefreshCredential(String refreshCredential);
 
-class AuthSessionStore {
-  const AuthSessionStore();
+  Future<String?> readRefreshCredential();
 
-  static const Duration sessionTimeout = Duration(days: 30);
-  static const String _loginResultKey = 'auth.loginResult';
-  static const String _lastOpenedAtKey = 'auth.lastOpenedAt';
+  Future<void> clearRefreshCredential();
+}
 
-  Future<void> saveSession(LoginResult loginResult, {DateTime? now}) async {
-    if (!loginResult.isAuthenticated) {
-      throw ArgumentError.value(
-        loginResult,
-        'loginResult',
-        'Only authenticated sessions can be saved',
-      );
-    }
-    final preferences = await SharedPreferences.getInstance();
-    final openedAt = now ?? DateTime.now();
+abstract interface class SecureCredentialAdapter {
+  Future<void> write({required String key, required String value});
 
-    await preferences.setString(
-      _loginResultKey,
-      jsonEncode(loginResult.toJson()),
-    );
-    await preferences.setString(_lastOpenedAtKey, openedAt.toIso8601String());
+  Future<String?> read({required String key});
+
+  Future<void> delete({required String key});
+}
+
+class FlutterSecureCredentialAdapter implements SecureCredentialAdapter {
+  const FlutterSecureCredentialAdapter({
+    FlutterSecureStorage storage = const FlutterSecureStorage(
+      aOptions: AndroidOptions(
+        storageNamespace: 'monsters.auth.session',
+        migrateWithBackup: false,
+      ),
+      iOptions: IOSOptions(
+        accessibility: KeychainAccessibility.first_unlock_this_device,
+        synchronizable: false,
+      ),
+    ),
+  }) : _storage = storage;
+
+  final FlutterSecureStorage _storage;
+
+  @override
+  Future<void> write({required String key, required String value}) {
+    return _storage.write(key: key, value: value);
   }
 
-  Future<LoginResult?> restoreValidSession({DateTime? now}) async {
-    final preferences = await SharedPreferences.getInstance();
-    final loginResultJson = preferences.getString(_loginResultKey);
-    final lastOpenedAtValue = preferences.getString(_lastOpenedAtKey);
-
-    if (loginResultJson == null || lastOpenedAtValue == null) {
-      return null;
-    }
-
-    final currentTime = now ?? DateTime.now();
-    final lastOpenedAt = DateTime.tryParse(lastOpenedAtValue);
-    if (lastOpenedAt == null ||
-        currentTime.difference(lastOpenedAt) > sessionTimeout) {
-      await clearSession();
-      return null;
-    }
-
-    try {
-      final decoded = jsonDecode(loginResultJson);
-      if (decoded is! Map<String, dynamic>) {
-        await clearSession();
-        return null;
-      }
-
-      final loginResult = LoginResult.fromJson(decoded);
-      await preferences.setString(
-        _lastOpenedAtKey,
-        currentTime.toIso8601String(),
-      );
-      return loginResult;
-    } on Object {
-      await clearSession();
-      return null;
-    }
+  @override
+  Future<String?> read({required String key}) {
+    return _storage.read(key: key);
   }
 
-  Future<void> clearSession() async {
-    final preferences = await SharedPreferences.getInstance();
-    await preferences.remove(_loginResultKey);
-    await preferences.remove(_lastOpenedAtKey);
+  @override
+  Future<void> delete({required String key}) {
+    return _storage.delete(key: key);
   }
+}
+
+class WebCookieSessionCredentialStore implements SessionCredentialStore {
+  const WebCookieSessionCredentialStore();
+
+  @override
+  bool get usesCookieTransport => true;
+
+  @override
+  Future<void> saveRefreshCredential(String refreshCredential) async {}
+
+  @override
+  Future<String?> readRefreshCredential() async => null;
+
+  @override
+  Future<void> clearRefreshCredential() async {}
+}
+
+abstract class _SecureSessionCredentialStore implements SessionCredentialStore {
+  const _SecureSessionCredentialStore(this._adapter);
+
+  static const String _refreshCredentialKey = 'auth.refreshCredential';
+
+  final SecureCredentialAdapter _adapter;
+
+  @override
+  bool get usesCookieTransport => false;
+
+  @override
+  Future<void> saveRefreshCredential(String refreshCredential) {
+    return _adapter.write(key: _refreshCredentialKey, value: refreshCredential);
+  }
+
+  @override
+  Future<String?> readRefreshCredential() {
+    return _adapter.read(key: _refreshCredentialKey);
+  }
+
+  @override
+  Future<void> clearRefreshCredential() {
+    return _adapter.delete(key: _refreshCredentialKey);
+  }
+}
+
+class AndroidSessionCredentialStore extends _SecureSessionCredentialStore {
+  const AndroidSessionCredentialStore(super.adapter);
+}
+
+class IosSessionCredentialStore extends _SecureSessionCredentialStore {
+  const IosSessionCredentialStore(super.adapter);
+}
+
+SessionCredentialStore createSessionCredentialStore({
+  bool isWeb = kIsWeb,
+  TargetPlatform? targetPlatform,
+  SecureCredentialAdapter secureAdapter =
+      const FlutterSecureCredentialAdapter(),
+}) {
+  if (isWeb) {
+    return const WebCookieSessionCredentialStore();
+  }
+
+  return switch (targetPlatform ?? defaultTargetPlatform) {
+    TargetPlatform.android => AndroidSessionCredentialStore(secureAdapter),
+    TargetPlatform.iOS => IosSessionCredentialStore(secureAdapter),
+    final platform =>
+      throw UnsupportedError(
+        'Session credential storage is unsupported on ${platform.name}',
+      ),
+  };
 }

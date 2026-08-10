@@ -48,6 +48,8 @@ Phase 4.5 已核准決策的可交付規格與測試接縫整理於 [`PHASE4_5_F
 | Refresh Token | 不透明隨機值、Server 只存 hash；rotation、family 與 reuse detection |
 | Web Credential | Refresh 使用 `__Host-` HttpOnly／Secure／SameSite Cookie；Access 只放記憶體 |
 | App Credential | Refresh 存 Keychain／Keystore；Access 只放記憶體；SharedPreferences 不得保存敏感憑證 |
+| Web Session Transport | 採方案1：沿用`/api/v1/auth/login`與`/api/v1/auth/session-refreshes`；`X-Session-Transport: COOKIE`搭配可信Origin及`X-CSRF-Protection: 1`，Backend設定`__Host-monsters-refresh`且Web response不回Refresh值 |
+| App Credential Store | 採方案1：`flutter_secure_storage 10.3.1`；Android最低API 24、compileSdk 36及NDK 27.0.12077973，使用Keystore預設RSA-OAEP＋AES-GCM；iOS使用不可同步且不可跨裝置遷移的Keychain項目，敏感資料不進備份。API 24門檻由PR #97的Flutter 3.29.2 Android Build驗證揭露，避免對API 23強制覆寫Plugin造成執行期風險 |
 | Session Expiry | 一般閒置 30 天／絕對 90 天；特權後台閒置 30 分鐘／絕對 8 小時 |
 | Device Management | 顯示裝置類型與約略資訊，可撤銷單一或全部其他工作階段 |
 | Sensitive Reauth | 刪除、匯出、密碼／Email／登入方式／本機鎖重設等需五分鐘用途受限 reauth |
@@ -211,6 +213,7 @@ Phase 4.5 已核准決策的可交付規格與測試接縫整理於 [`PHASE4_5_F
 | JSON | json_serializable |
 | Routing | go_router |
 | 非敏感 Local Storage | SharedPreferences；Credential、Login Result 與私人內容依 0.2 禁止保存 |
+| 敏感 Credential Storage | flutter_secure_storage 10.3.1；只限Android Refresh Credential與iOS Refresh Credential |
 | Google Sign-In | google_sign_in、google_sign_in_web |
 | 媒體選取 | image_picker；Android 實作固定 image_picker_android 0.8.12+24 以相容 AGP 8.7 |
 | 錄音 | record |

@@ -13,11 +13,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import com.monsters.security.session.SessionProperties;
+import com.monsters.security.session.WebSessionProperties;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-@EnableConfigurationProperties({JwtProperties.class, GoogleProperties.class, SessionProperties.class})
+@EnableConfigurationProperties({
+        JwtProperties.class,
+        GoogleProperties.class,
+        SessionProperties.class,
+        WebSessionProperties.class
+})
 public class SecurityConfig {
 
     @Bean

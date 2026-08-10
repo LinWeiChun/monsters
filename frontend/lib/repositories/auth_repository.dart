@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+
 import '../core/network/api_client.dart';
 import '../core/network/api_error_type.dart';
 import '../core/network/api_exception.dart';
@@ -6,15 +8,15 @@ import '../models/registration_policy.dart';
 import 'auth_session_store.dart';
 
 class AuthRepository {
-  const AuthRepository(
+  AuthRepository(
     this._apiClient, {
-    AuthSessionStore sessionStore = const AuthSessionStore(),
+    required SessionCredentialStore sessionStore,
     void Function(bool isAuthenticated)? onAuthenticationChanged,
   }) : _sessionStore = sessionStore,
        _onAuthenticationChanged = onAuthenticationChanged;
 
   final ApiClient _apiClient;
-  final AuthSessionStore _sessionStore;
+  final SessionCredentialStore _sessionStore;
   final void Function(bool isAuthenticated)? _onAuthenticationChanged;
 
   Future<LoginResult> login({
@@ -24,6 +26,7 @@ class AuthRepository {
     final response = await _apiClient.post<LoginResult>(
       '/v1/auth/login',
       data: {'email': email, 'password': password},
+      options: _sessionTransportOptions,
       fromJsonT: (json) => LoginResult.fromJson(json! as Map<String, dynamic>),
       retryOnUnauthorized: false,
     );
@@ -53,24 +56,24 @@ class AuthRepository {
   }
 
   Future<LoginResult?> restoreSession({DateTime? now}) async {
-    final loginResult = await _sessionStore.restoreValidSession(now: now);
-    if (loginResult == null) {
+    final refreshCredential = await _sessionStore.readRefreshCredential();
+    if (!_sessionStore.usesCookieTransport && refreshCredential == null) {
       _apiClient.setAccessToken(null);
       return null;
     }
 
-    return _exchangeRefreshToken(loginResult.refreshToken!);
+    return _exchangeRefreshToken(refreshCredential);
   }
 
   Future<String?> refreshAccessToken() async {
-    final loginResult = await _sessionStore.restoreValidSession();
-    if (loginResult == null) {
+    final refreshCredential = await _sessionStore.readRefreshCredential();
+    if (!_sessionStore.usesCookieTransport && refreshCredential == null) {
       await _invalidateSession();
       return null;
     }
 
     try {
-      final refreshed = await _exchangeRefreshToken(loginResult.refreshToken!);
+      final refreshed = await _exchangeRefreshToken(refreshCredential);
       return refreshed.accessToken;
     } on ApiException catch (error) {
       if (error.type == ApiErrorType.unauthorized) {
@@ -83,13 +86,13 @@ class AuthRepository {
 
   Future<void> logout() async {
     try {
-      final loginResult = await _sessionStore.restoreValidSession();
+      final refreshCredential = await _sessionStore.readRefreshCredential();
       await _apiClient.post<void>(
         '/auth/logout',
         data:
-            loginResult == null
+            refreshCredential == null
                 ? null
-                : {'refreshToken': loginResult.refreshToken},
+                : {'refreshToken': refreshCredential},
         fromJsonT: (_) {},
         retryOnUnauthorized: false,
       );
@@ -175,11 +178,15 @@ class AuthRepository {
     return response.data;
   }
 
-  Future<LoginResult> _exchangeRefreshToken(String refreshToken) async {
+  Future<LoginResult> _exchangeRefreshToken(String? refreshCredential) async {
     try {
       final response = await _apiClient.post<LoginResult>(
         '/v1/auth/session-refreshes',
-        data: {'refreshCredential': refreshToken},
+        data:
+            _sessionStore.usesCookieTransport
+                ? null
+                : {'refreshCredential': refreshCredential},
+        options: _sessionTransportOptions,
         fromJsonT:
             (json) => LoginResult.fromJson(json! as Map<String, dynamic>),
         retryOnUnauthorized: false,
@@ -211,7 +218,7 @@ class AuthRepository {
 
   Future<void> _invalidateSession() async {
     _apiClient.setAccessToken(null);
-    await _sessionStore.clearSession();
+    await _sessionStore.clearRefreshCredential();
     _onAuthenticationChanged?.call(false);
   }
 
@@ -221,8 +228,31 @@ class AuthRepository {
       return;
     }
 
+    if (!_sessionStore.usesCookieTransport) {
+      final refreshCredential = result.refreshToken;
+      if (refreshCredential == null || refreshCredential.isEmpty) {
+        await _invalidateSession();
+        throw const ApiException(
+          type: ApiErrorType.unauthorized,
+          message: 'Authenticated app response omitted refresh credential',
+        );
+      }
+      await _sessionStore.saveRefreshCredential(refreshCredential);
+    }
     _apiClient.setAccessToken(result.accessToken);
-    await _sessionStore.saveSession(result);
     _onAuthenticationChanged?.call(true);
+  }
+
+  Options? get _sessionTransportOptions {
+    if (!_sessionStore.usesCookieTransport) {
+      return null;
+    }
+    return Options(
+      headers: const {
+        'X-Session-Transport': 'COOKIE',
+        'X-CSRF-Protection': '1',
+      },
+      extra: const {'withCredentials': true},
+    );
   }
 }
