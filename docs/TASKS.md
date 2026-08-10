@@ -26,6 +26,21 @@ Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封�
 - 哪些舊寫法未沿用
 - 是否有發現需要更新的正式文件
 
+## 插隊任務：已完成 UI 純 HTML／RWD 靜態展示（2026-08-10）
+
+- [x] TODO：核對正式 UI 規格、已完成 Task、現有 Flutter 頁面、舊系統手冊與可重用品牌素材。
+- [x] IN PROGRESS：建立單一 HTML 靜態展示，將 CSS、Mobile／Tablet／Desktop RWD 與所有頁面連結直接寫入 HTML，不加入 API、JavaScript、邏輯判斷或動畫。
+- [x] REVIEW：驗證 HTML 結構、120 個連結、29 個唯一錨點、30 張既有圖片、三組 RWD 規則與未完成畫面排除範圍；禁止項目與失效連結皆為 0。
+- [ ] DONE：同步 UI 規格、Log、Git Commit／Push 與 PR 證據。
+
+限制：
+
+- 只展示目前已有 Flutter 頁面：啟動、登入、註冊、Email 驗證、資格、監護人同意、首頁、個人資料、密碼鎖、煩惱與日記。
+- 不展示尚未完成的歷史記錄、社群、圖鑑與互動區；不串接 API、Database 或真實會員資料。
+- 所有按鈕使用 HTML 連結；RWD 必須直接寫於同一份 HTML，不新增外部 CSS 或 JavaScript。
+
+---
+
 ## DOC-013：Grilling 決策與領域模型文件化（2026-07-26）
 
 - [x] TODO：唯讀檢查 AGENTS、README、system_data、正式文件、Git 狀態／diff／log、目錄、TODO／FIXME、測試與 Phase 完成狀態。

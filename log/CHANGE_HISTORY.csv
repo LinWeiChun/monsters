@@ -1,4 +1,6 @@
 日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
+2026-08-10,10:16,UI-SHOWCASE-HTML,Frontend,docs/ui-showcase/index.html,新增與驗證,建立純HTML已完成畫面展示並內嵌Mobile Tablet Desktop RWD與頁面錨點連結,Codex,否,否,是,否,無API JavaScript邏輯判斷動畫或真實會員資料；120個連結均有效
+2026-08-10,10:16,UI-SHOWCASE-HTML,Documentation,docs/UI_SPEC.md、docs/TASKS.md與log三種歷史紀錄,修改,同步靜態展示範圍RWD限制驗證證據與一個月Log保存期限檢查,Codex,否,否,是,否,截止2026-07-10無過期紀錄；未修改system_data
 2026-08-10,09:40,REGISTRATION-LOGIN-08-REVIEW,CI,.github/workflows/registration-login-ci.yml與frontend/android/app/build.gradle.kts,修改與驗證,加入Flutter 3.29.2 Android APK Build並依Plugin需求調整Android平台門檻,Codex,否,否,否,否,PR #97四項CI全綠；最低API24 compileSdk36 NDK27且本機APK通過
 2026-08-10,09:40,REGISTRATION-LOGIN-08-REVIEW,Documentation,docs規格Task與log三種歷史紀錄,修改,同步方案A平台決策PR與CI證據並執行一個月Log保存期限清理,Codex,否,否,是,否,移除7月10日前22個Markdown區段與278筆CSV；Task08維持REVIEW
 2026-08-03,16:57,REGISTRATION-LOGIN-08,Backend,WebSessionCookieService與Auth Controllers,新增與修改,建立Web Cookie transport並驗證可信Origin與CSRF proof,Codex,是,否,否,否,Web response不暴露Refresh且無效401清除Cookie
