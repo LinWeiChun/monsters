@@ -57,6 +57,7 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: flutter test
+      - run: flutter build apk --debug --no-pub
 
   openapi-contract:
     runs-on: ubuntu-latest
