@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -30,6 +32,22 @@ class _SplashPageState extends ConsumerState<SplashPage> {
 
     if (restored) {
       context.goNamed(AppRoute.home);
+      return;
+    }
+
+    final restoreError = ref.read(authControllerProvider).errorMessage;
+    if (restoreError != null) {
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(restoreError),
+          action: SnackBarAction(
+            label: '重試',
+            onPressed: () => unawaited(_restoreSession()),
+          ),
+        ),
+      );
       return;
     }
 

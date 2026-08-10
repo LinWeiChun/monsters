@@ -20,8 +20,7 @@ void main() {
   test(
     'restore session rotates saved refresh token before returning',
     () async {
-      const store = AuthSessionStore();
-      await store.saveSession(_oldLoginResult);
+      final store = _MemorySessionCredentialStore('old-refresh-token');
       final dio = Dio();
       RequestOptions? refreshRequest;
       dio.httpClientAdapter = _CallbackAdapter((options) {
@@ -43,23 +42,19 @@ void main() {
       final restored = await repository.restoreSession();
 
       expect(refreshRequest?.uri.path, '/api/v1/auth/session-refreshes');
-      expect(refreshRequest?.data, {
-        'refreshCredential': 'old-refresh-token',
-      });
+      expect(refreshRequest?.data, {'refreshCredential': 'old-refresh-token'});
       expect(restored?.accessToken, 'new-access-token');
       expect(
         client.dio.options.headers['Authorization'],
         'Bearer new-access-token',
       );
       expect(authStates, [true]);
-      final saved = await store.restoreValidSession();
-      expect(saved?.refreshToken, 'new-refresh-token');
+      expect(await store.readRefreshCredential(), 'new-refresh-token');
     },
   );
 
   test('invalid refresh token clears session and reports expiration', () async {
-    const store = AuthSessionStore();
-    await store.saveSession(_oldLoginResult);
+    final store = _MemorySessionCredentialStore('old-refresh-token');
     final dio = Dio();
     dio.httpClientAdapter = _CallbackAdapter(
       (_) => _jsonResponse({
@@ -83,13 +78,12 @@ void main() {
     );
 
     expect(client.dio.options.headers.containsKey('Authorization'), isFalse);
-    expect(await store.restoreValidSession(), isNull);
+    expect(await store.readRefreshCredential(), isNull);
     expect(authStates, contains(false));
   });
 
   test('temporary refresh failure keeps the local session', () async {
-    const store = AuthSessionStore();
-    await store.saveSession(_oldLoginResult);
+    final store = _MemorySessionCredentialStore('old-refresh-token');
     final dio = Dio();
     dio.httpClientAdapter = _CallbackAdapter(
       (_) => _jsonResponse({
@@ -111,18 +105,98 @@ void main() {
       throwsA(isA<ApiException>()),
     );
 
-    expect(
-      (await store.restoreValidSession())?.refreshToken,
-      'old-refresh-token',
-    );
+    expect(await store.readRefreshCredential(), 'old-refresh-token');
     expect(authStates, isEmpty);
   });
+
+  test(
+    'app login does not expose access token when secure storage write fails',
+    () async {
+      final dio = Dio();
+      dio.httpClientAdapter = _CallbackAdapter(
+        (_) => _jsonResponse({
+          'success': true,
+          'code': 'AUTHENTICATED',
+          'message': 'Authentication success',
+          'data': _newLoginResult.toJson(),
+        }),
+      );
+      final client = ApiClient(config: _config, dio: dio);
+      final authStates = <bool>[];
+      final repository = AuthRepository(
+        client,
+        sessionStore: _FailingWriteSessionCredentialStore(),
+        onAuthenticationChanged: authStates.add,
+      );
+
+      await expectLater(
+        repository.login(
+          email: 'member@example.test',
+          password: 'synthetic-password',
+        ),
+        throwsA(isA<StateError>()),
+      );
+
+      expect(client.dio.options.headers.containsKey('Authorization'), isFalse);
+      expect(authStates, isEmpty);
+    },
+  );
+
+  test(
+    'web auth uses cookie transport headers and never sends refresh body',
+    () async {
+      final requests = <RequestOptions>[];
+      final dio = Dio();
+      dio.httpClientAdapter = _CallbackAdapter((options) {
+        requests.add(options);
+        return _jsonResponse({
+          'success': true,
+          'code': 'AUTHENTICATED',
+          'message': 'Authentication success',
+          'data': {
+            'accessToken': 'web-access-token-${requests.length}',
+            'tokenType': 'Bearer',
+            'expiresIn': 600,
+            'user': {
+              'publicId': '00000000-0000-0000-0000-000000000001',
+              'email': 'web.member@example.test',
+              'userName': 'Web Member',
+            },
+          },
+        });
+      });
+      final client = ApiClient(config: _config, dio: dio);
+      final repository = AuthRepository(
+        client,
+        sessionStore: const WebCookieSessionCredentialStore(),
+      );
+
+      final loginResult = await repository.login(
+        email: 'web.member@example.test',
+        password: 'synthetic-password',
+      );
+      final restored = await repository.restoreSession();
+
+      expect(loginResult.isAuthenticated, isTrue);
+      expect(restored?.isAuthenticated, isTrue);
+      expect(requests.map((request) => request.uri.path), [
+        '/api/v1/auth/login',
+        '/api/v1/auth/session-refreshes',
+      ]);
+      for (final request in requests) {
+        expect(request.headers['X-Session-Transport'], 'COOKIE');
+        expect(request.headers['X-CSRF-Protection'], '1');
+        expect(request.extra['withCredentials'], isTrue);
+      }
+      expect(requests[1].data, isNull);
+    },
+  );
 
   test(
     'continuation response does not create an authenticated session',
     () async {
       const continuationCredential = 'synthetic-continuation-credential';
-      const store = AuthSessionStore();
+      final store = _MemorySessionCredentialStore();
       final dio = Dio();
       dio.httpClientAdapter = _CallbackAdapter(
         (_) => _jsonResponse({
@@ -152,7 +226,7 @@ void main() {
       expect(result.requiresContinuation, isTrue);
       expect(result.nextAction, 'COMPLETE_ELIGIBILITY');
       expect(client.dio.options.headers.containsKey('Authorization'), isFalse);
-      expect(await store.restoreValidSession(), isNull);
+      expect(await store.readRefreshCredential(), isNull);
       final preferences = await SharedPreferences.getInstance();
       for (final key in preferences.getKeys()) {
         expect(
@@ -186,7 +260,10 @@ void main() {
         },
       });
     });
-    final repository = AuthRepository(ApiClient(config: _config, dio: dio));
+    final repository = AuthRepository(
+      ApiClient(config: _config, dio: dio),
+      sessionStore: _MemorySessionCredentialStore(),
+    );
 
     final result = await repository.login(
       email: 'member@example.test',
@@ -254,7 +331,10 @@ void main() {
             ),
         };
       });
-      final repository = AuthRepository(ApiClient(config: _config, dio: dio));
+      final repository = AuthRepository(
+        ApiClient(config: _config, dio: dio),
+        sessionStore: _MemorySessionCredentialStore(),
+      );
 
       final policy = await repository.registrationPolicy();
       await repository.register(
@@ -303,14 +383,6 @@ const _config = AppConfig(
   sendTimeout: Duration(seconds: 1),
 );
 
-const _oldLoginResult = LoginResult(
-  accessToken: 'old-access-token',
-  refreshToken: 'old-refresh-token',
-  tokenType: 'Bearer',
-  expiresIn: 3600,
-  user: _user,
-);
-
 const _newLoginResult = LoginResult(
   accessToken: 'new-access-token',
   refreshToken: 'new-refresh-token',
@@ -343,6 +415,36 @@ class _CallbackAdapter implements HttpClientAdapter {
 
   @override
   void close({bool force = false}) {}
+}
+
+class _MemorySessionCredentialStore implements SessionCredentialStore {
+  _MemorySessionCredentialStore([this.refreshCredential]);
+
+  String? refreshCredential;
+
+  @override
+  bool get usesCookieTransport => false;
+
+  @override
+  Future<void> saveRefreshCredential(String refreshCredential) async {
+    this.refreshCredential = refreshCredential;
+  }
+
+  @override
+  Future<String?> readRefreshCredential() async => refreshCredential;
+
+  @override
+  Future<void> clearRefreshCredential() async {
+    refreshCredential = null;
+  }
+}
+
+class _FailingWriteSessionCredentialStore
+    extends _MemorySessionCredentialStore {
+  @override
+  Future<void> saveRefreshCredential(String refreshCredential) {
+    throw StateError('Secure storage is unavailable');
+  }
 }
 
 ResponseBody _jsonResponse(Map<String, Object?> body, {int statusCode = 200}) {

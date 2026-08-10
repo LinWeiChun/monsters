@@ -28,10 +28,7 @@ class LoginResult {
   final String? continuationCredential;
 
   bool get isAuthenticated =>
-      accessToken != null &&
-      refreshToken != null &&
-      tokenType != null &&
-      user != null;
+      accessToken != null && tokenType != null && user != null;
 
   bool get requiresContinuation =>
       continuationCredential != null && nextAction != null && !isAuthenticated;

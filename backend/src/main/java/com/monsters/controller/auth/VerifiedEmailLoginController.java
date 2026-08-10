@@ -3,8 +3,11 @@ package com.monsters.controller.auth;
 import com.monsters.dto.auth.VerifiedEmailLoginRequest;
 import com.monsters.dto.auth.VerifiedEmailLoginResponse;
 import com.monsters.dto.common.ApiResponse;
+import com.monsters.security.session.WebSessionCookieService;
 import com.monsters.service.auth.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,27 +19,48 @@ import org.springframework.web.bind.annotation.RestController;
 public class VerifiedEmailLoginController {
 
     private final AuthService authService;
+    private final WebSessionCookieService webSessionCookieService;
 
-    public VerifiedEmailLoginController(AuthService authService) {
+    public VerifiedEmailLoginController(
+            AuthService authService,
+            WebSessionCookieService webSessionCookieService
+    ) {
         this.authService = authService;
+        this.webSessionCookieService = webSessionCookieService;
     }
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<VerifiedEmailLoginResponse>> login(
-            @Valid @RequestBody VerifiedEmailLoginRequest request
+            @Valid @RequestBody VerifiedEmailLoginRequest request,
+            HttpServletRequest httpRequest
     ) {
+        boolean cookieTransport = webSessionCookieService.usesCookieTransport(httpRequest);
+        if (cookieTransport) {
+            webSessionCookieService.requireTrustedRequest(httpRequest);
+        }
         VerifiedEmailLoginResponse response = authService.loginVerifiedEmail(request);
         if (response.requiresContinuation()) {
-            return ResponseEntity.ok(ApiResponse.success(
+            ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.ok();
+            if (cookieTransport) {
+                responseBuilder.header(
+                        HttpHeaders.SET_COOKIE,
+                        webSessionCookieService.expire().toString()
+                );
+            }
+            return responseBuilder.body(ApiResponse.success(
                     "AUTH_CONTINUATION_REQUIRED",
                     "Additional member verification is required",
                     response
             ));
         }
-        return ResponseEntity.ok(ApiResponse.success(
-                "AUTHENTICATED",
-                "Login success",
-                response
-        ));
+        ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.ok();
+        if (cookieTransport) {
+            responseBuilder.header(
+                    HttpHeaders.SET_COOKIE,
+                    webSessionCookieService.issue(response.refreshToken()).toString()
+            );
+            response = response.withoutRefreshCredential();
+        }
+        return responseBuilder.body(ApiResponse.success("AUTHENTICATED", "Login success", response));
     }
 }

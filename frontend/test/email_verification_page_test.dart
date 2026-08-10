@@ -11,6 +11,7 @@ import 'package:monsters/pages/email_verification_page.dart';
 import 'package:monsters/pages/email_verification_pending_page.dart';
 import 'package:monsters/providers/auth_provider.dart';
 import 'package:monsters/repositories/auth_repository.dart';
+import 'package:monsters/repositories/auth_session_store.dart';
 
 void main() {
   testWidgets('waiting page starts a 60 second resend cooldown', (
@@ -105,7 +106,11 @@ Widget _app(Widget child, AuthRepository repository) {
 }
 
 class _FakeAuthRepository extends AuthRepository {
-  _FakeAuthRepository({this.verifyException}) : super(_dummyClient());
+  _FakeAuthRepository({this.verifyException})
+    : super(
+        _dummyClient(),
+        sessionStore: const WebCookieSessionCredentialStore(),
+      );
 
   final ApiException? verifyException;
   String? resendEmail;

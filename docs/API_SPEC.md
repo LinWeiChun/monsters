@@ -98,16 +98,19 @@ Web 使用 Cookie 的 Auth endpoint 必須驗證可信任 Origin／CSRF 防護�
 
 | Method | Path | Auth | 成功結果 |
 |---|---|---|---|
-| `POST` | `/api/v1/auth/login` | Public credential body | `200 AUTHENTICATED`，建立獨立 `user_sessions` family並回10分鐘Access JWT與opaque Refresh Credential |
-| `POST` | `/api/v1/auth/session-refreshes` | Public opaque credential body | `200 AUTHENTICATED`，輪替Credential；同一輪替10秒內回相同結果 |
+| `POST` | `/api/v1/auth/login` | Public credential body；Web Cookie transport需額外Header與可信Origin | `200 AUTHENTICATED`，建立獨立 `user_sessions` family；App回opaque Refresh Credential，Web改設HttpOnly Cookie |
+| `POST` | `/api/v1/auth/session-refreshes` | App使用opaque credential body；Web使用Cookie transport | `200 AUTHENTICATED`，輪替Credential；同一輪替10秒內回相同結果 |
 
-- Request只接受`refreshCredential`；Credential為32-byte高強度opaque值，Backend只保存SHA-256 hash，不保存明文或可還原密文。
+- App refresh request只接受`refreshCredential`；Credential為32-byte高強度opaque值，Backend只保存SHA-256 hash，不保存明文或可還原密文。
+- Web在登入與refresh時送`X-Session-Transport: COOKIE`、`X-CSRF-Protection: 1`及瀏覽器`Origin`；Backend只接受`WEB_SESSION_TRUSTED_ORIGIN_PATTERNS`白名單，且SameSite不得取代Origin與CSRF檢查。
+- Web Refresh Credential只由Backend以`__Host-monsters-refresh` Cookie設定；屬性固定`Path=/`、`HttpOnly`、`Secure`、`SameSite=Strict`，最長90天。Web成功回應不含`refreshToken`欄位，無效或reuse的`401`回應會清除Cookie。
+- Android／iOS以`flutter_secure_storage 10.3.1`保存Refresh Credential至Keystore／Keychain；Access Token只保存在Dio記憶體Header，SharedPreferences不得保存Token或完整`LoginResult`。
 - 初始Credential使用CSPRNG；後續Credential以獨立`SESSION_REFRESH_DERIVATION_KEY`、上一Credential、Session UUID及sequence透過HMAC-SHA256推導，使Server在不保存明文下可於10秒內重建完全相同的輪替結果。
 - 一般Session閒置期限30天、絕對期限90天；每次有效輪替只延長idle期限且不得超過absolute期限。
 - 10秒後再次提交已輪替Credential視為reuse，於同一交易撤銷該family並寫入安全Audit與Outbox；其他裝置family不受影響。
 - 無效、過期或已撤銷回`401 AUTH_SESSION_INVALID`；reuse回`401 AUTH_REFRESH_REUSE_DETECTED`。
 - Access JWT只包含`iss`、`sub`、`sid`、`iat`、`exp`；不得包含Email、Refresh值或會員私人資料。Security Filter每次以`sid`確認Session及會員仍可用。
-- Task 08完成前Flutter仍暫用既有Credential Store；Web Cookie、App Keychain／Keystore及移除SharedPreferences不得在本Task宣告完成。
+- 並行Access `401`由`ApiClient`共用單一refresh future；成功後每個原request最多重試一次。暫時性網路錯誤保留Credential並在Splash顯示重試，不導向登入或撤銷server session。
 
 ### 0.3 核心資源契約
 
@@ -317,7 +320,7 @@ CORS 僅套用於：
 |---|---|---|
 | app.cors.allowed-origin-patterns | CORS_ALLOWED_ORIGIN_PATTERNS | http://localhost:*,http://127.0.0.1:* |
 | app.cors.allowed-methods | CORS_ALLOWED_METHODS | GET,POST,PUT,PATCH,DELETE,OPTIONS |
-| app.cors.allowed-headers | CORS_ALLOWED_HEADERS | Authorization,Content-Type,Range |
+| app.cors.allowed-headers | CORS_ALLOWED_HEADERS | Authorization,Content-Type,Range,X-Session-Transport,X-CSRF-Protection |
 | app.cors.exposed-headers | CORS_EXPOSED_HEADERS | Authorization,Accept-Ranges,Content-Length,Content-Range |
 | app.cors.allow-credentials | CORS_ALLOW_CREDENTIALS | true |
 | app.cors.max-age | CORS_MAX_AGE | 3600 |
@@ -360,6 +363,8 @@ JWT 基礎設定：
 | app.security.session.absolute-expiration-seconds | SESSION_ABSOLUTE_EXPIRATION_SECONDS | 7776000 |
 | app.security.session.refresh-concurrency-grace-seconds | SESSION_REFRESH_CONCURRENCY_GRACE_SECONDS | 10 |
 | app.security.session.refresh-derivation-key | SESSION_REFRESH_DERIVATION_KEY | 空字串；啟用v1完整Session前必須提供至少32-byte獨立Secret |
+| app.security.web-session.trusted-origin-patterns | WEB_SESSION_TRUSTED_ORIGIN_PATTERNS | http://localhost:*,http://127.0.0.1:*；正式環境只列Web前端Origin |
+| app.security.web-session.cookie-max-age-seconds | WEB_SESSION_COOKIE_MAX_AGE_SECONDS | 7776000 |
 
 Google 登入設定：
 

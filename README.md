@@ -407,7 +407,7 @@ docker compose down
 | `BACKEND_PORT` | 對外 Backend port | `8080` |
 | `CORS_ALLOWED_ORIGIN_PATTERNS` | 後端允許的前端來源 pattern | `http://localhost:*,http://127.0.0.1:*` |
 | `CORS_ALLOWED_METHODS` | 後端允許的 HTTP method | `GET,POST,PUT,PATCH,DELETE,OPTIONS` |
-| `CORS_ALLOWED_HEADERS` | 後端允許的 request header | `Authorization,Content-Type,Range` |
+| `CORS_ALLOWED_HEADERS` | 後端允許的 request header | `Authorization,Content-Type,Range,X-Session-Transport,X-CSRF-Protection` |
 | `CORS_EXPOSED_HEADERS` | 後端回傳可被前端讀取的 header | `Authorization,Accept-Ranges,Content-Length,Content-Range` |
 | `CORS_ALLOW_CREDENTIALS` | 是否允許 credentials | `true` |
 | `CORS_MAX_AGE` | preflight cache 秒數 | `3600` |
@@ -419,6 +419,8 @@ docker compose down
 | `SESSION_ABSOLUTE_EXPIRATION_SECONDS` | 一般Session絕對期限 | `7776000`（90天） |
 | `SESSION_REFRESH_CONCURRENCY_GRACE_SECONDS` | 相同輪替結果並行容忍 | `10` |
 | `SESSION_REFRESH_DERIVATION_KEY` | opaque Refresh輪替獨立Secret | 空字串；正式環境至少32-byte |
+| `WEB_SESSION_TRUSTED_ORIGIN_PATTERNS` | Web Cookie Session可信Origin pattern | `http://localhost:*,http://127.0.0.1:*`；正式環境只列前端網域 |
+| `WEB_SESSION_COOKIE_MAX_AGE_SECONDS` | Web `__Host-monsters-refresh`最長保存秒數 | `7776000`（90天） |
 | `REGISTRATION_TERMS_VERSION` | 目前服務條款版本 | 空字串，註冊前必須提供 |
 | `REGISTRATION_TERMS_URL` | 目前服務條款 HTTPS URL | 空字串，註冊前必須提供 |
 | `REGISTRATION_PRIVACY_VERSION` | 目前隱私權政策版本 | 空字串，註冊前必須提供 |

@@ -1,60 +1,95 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:monsters/models/auth_user.dart';
-import 'package:monsters/models/login_result.dart';
+import 'package:flutter/foundation.dart';
 import 'package:monsters/repositories/auth_session_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  late AuthSessionStore store;
-
   setUp(() {
     SharedPreferences.setMockInitialValues({});
-    store = const AuthSessionStore();
   });
 
   test(
-    'restores session within thirty days and updates last opened time',
+    'web cookie store never persists or exposes refresh credential',
     () async {
-      final savedAt = DateTime(2026, 7, 1);
-      final openedAt = DateTime(2026, 7, 10);
+      const store = WebCookieSessionCredentialStore();
 
-      await store.saveSession(_loginResult, now: savedAt);
+      await store.saveRefreshCredential('web-refresh-credential');
 
-      final restored = await store.restoreValidSession(now: openedAt);
-
-      expect(restored?.accessToken, _loginResult.accessToken);
-      final preferences = await SharedPreferences.getInstance();
-      expect(
-        preferences.getString('auth.lastOpenedAt'),
-        openedAt.toIso8601String(),
-      );
+      expect(store.usesCookieTransport, isTrue);
+      expect(await store.readRefreshCredential(), isNull);
+      await store.clearRefreshCredential();
     },
   );
 
-  test('clears and ignores session after more than thirty days', () async {
-    await store.saveSession(_loginResult, now: DateTime(2026, 5, 1));
+  test('platform factory selects web, Android, and iOS adapters', () {
+    final adapter = _MemorySecureCredentialAdapter();
 
-    final restored = await store.restoreValidSession(
-      now: DateTime(2026, 7, 10),
+    expect(
+      createSessionCredentialStore(isWeb: true, secureAdapter: adapter),
+      isA<WebCookieSessionCredentialStore>(),
     );
-
-    expect(restored, isNull);
-    final preferences = await SharedPreferences.getInstance();
-    expect(preferences.getString('auth.loginResult'), isNull);
-    expect(preferences.getString('auth.lastOpenedAt'), isNull);
+    expect(
+      createSessionCredentialStore(
+        isWeb: false,
+        targetPlatform: TargetPlatform.android,
+        secureAdapter: adapter,
+      ),
+      isA<AndroidSessionCredentialStore>(),
+    );
+    expect(
+      createSessionCredentialStore(
+        isWeb: false,
+        targetPlatform: TargetPlatform.iOS,
+        secureAdapter: adapter,
+      ),
+      isA<IosSessionCredentialStore>(),
+    );
   });
+
+  for (final testCase
+      in <(String, SessionCredentialStore Function(SecureCredentialAdapter))>[
+        (
+          'Android Keystore adapter',
+          (adapter) => AndroidSessionCredentialStore(adapter),
+        ),
+        (
+          'iOS Keychain adapter',
+          (adapter) => IosSessionCredentialStore(adapter),
+        ),
+      ]) {
+    test('${testCase.$1} persists only the refresh credential', () async {
+      final adapter = _MemorySecureCredentialAdapter();
+      final store = testCase.$2(adapter);
+
+      await store.saveRefreshCredential('app-refresh-credential');
+
+      expect(store.usesCookieTransport, isFalse);
+      expect(await store.readRefreshCredential(), 'app-refresh-credential');
+      expect(adapter.values, {
+        'auth.refreshCredential': 'app-refresh-credential',
+      });
+      final preferences = await SharedPreferences.getInstance();
+      expect(preferences.getKeys(), isEmpty);
+
+      await store.clearRefreshCredential();
+      expect(await store.readRefreshCredential(), isNull);
+    });
+  }
 }
 
-const _loginResult = LoginResult(
-  accessToken: 'access-token',
-  refreshToken: 'refresh-token',
-  tokenType: 'Bearer',
-  expiresIn: 3600,
-  user: AuthUser(
-    publicId: '00000000-0000-0000-0000-000000000001',
-    userId: 1,
-    email: 'user@example.com',
-    userName: 'Wei',
-    avatarUrl: null,
-  ),
-);
+class _MemorySecureCredentialAdapter implements SecureCredentialAdapter {
+  final Map<String, String> values = <String, String>{};
+
+  @override
+  Future<void> delete({required String key}) async {
+    values.remove(key);
+  }
+
+  @override
+  Future<String?> read({required String key}) async => values[key];
+
+  @override
+  Future<void> write({required String key, required String value}) async {
+    values[key] = value;
+  }
+}

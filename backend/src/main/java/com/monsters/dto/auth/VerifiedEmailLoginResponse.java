@@ -52,4 +52,16 @@ public record VerifiedEmailLoginResponse(
     public boolean requiresContinuation() {
         return continuationCredential != null;
     }
+
+    public VerifiedEmailLoginResponse withoutRefreshCredential() {
+        return new VerifiedEmailLoginResponse(
+                accessToken,
+                null,
+                tokenType,
+                expiresIn,
+                user,
+                nextAction,
+                continuationCredential
+        );
+    }
 }

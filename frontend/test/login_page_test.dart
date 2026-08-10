@@ -12,6 +12,7 @@ import 'package:monsters/models/auth_user.dart';
 import 'package:monsters/models/login_result.dart';
 import 'package:monsters/providers/auth_provider.dart';
 import 'package:monsters/repositories/auth_repository.dart';
+import 'package:monsters/repositories/auth_session_store.dart';
 import 'package:monsters/routes/app_router.dart';
 import 'package:monsters/routes/app_routes.dart';
 import 'package:monsters/services/google_sign_in_service.dart';
@@ -363,7 +364,10 @@ class _FakeAuthRepository extends AuthRepository {
     this.googleException,
     this.restoredSession,
     this.loginResult = _loginResult,
-  }) : super(_dummyClient());
+  }) : super(
+         _dummyClient(),
+         sessionStore: const WebCookieSessionCredentialStore(),
+       );
 
   final ApiException? exception;
   final ApiException? googleException;

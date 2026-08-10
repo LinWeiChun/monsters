@@ -169,9 +169,9 @@
 
 **Blocked by:** 05 — 改為 Verified Email 登入並展開 Account Migration。
 
-**Status:** REVIEW
+**Status:** DONE
 
-**Evidence:** 方案1以獨立HMAC Secret重建10秒內相同輪替結果，Backend只保存SHA-256 hash；Flyway V5、v1 Refresh API、期限、reuse containment與Audit／Outbox已完成。Draft PR #96 的 Backend unit、MySQL integration、Flutter 與 OpenAPI 四個CI job均通過；本機Backend 316項單元／契約、31項真實MySQL整合、Flutter Analyze、185項完整測試及Web Build亦通過。
+**Evidence:** 方案1以獨立HMAC Secret重建10秒內相同輪替結果，Backend只保存SHA-256 hash；Flyway V5、v1 Refresh API、期限、reuse containment與Audit／Outbox已完成。PR #96已於2026-08-01合併至`feature/phase4.5`；Backend unit、MySQL integration、Flutter與OpenAPI四個CI job均通過，對應GitHub Actions `Registration and login checks` conclusion為`success`。
 
 - [x] Access Token為10分鐘JWT，只包含最少聲明及Session識別。
 - [x] Refresh Credential為高強度opaque值，Server只保存hash。
@@ -190,16 +190,18 @@
 
 **Blocked by:** 07 — 建立 Opaque Refresh Session Family。
 
-**Status:** ready-for-agent
+**Status:** REVIEW
 
-- [ ] Web Refresh Credential由`__Host-` HttpOnly／Secure／SameSite Cookie管理，Access Token只存記憶體。
-- [ ] Web Cookie Auth具可信Origin與CSRF防護，不能只依賴SameSite。
-- [ ] Android／iOS Refresh Credential存於Keychain／Keystore，Access Token只存記憶體。
-- [ ] SharedPreferences不再保存Token或完整Login Result。
-- [ ] 並行401共用single-flight Refresh，成功後每個原request最多重試一次。
-- [ ] 暫時網路錯誤不得誤清Session；確定失效才清除Credential並導向登入。
-- [ ] 三平台Adapter通過同一Credential Store contract test。
-- [ ] Flutter Widget／Repository／Router測試涵蓋恢復、失效與重試。
+**Evidence:** Backend完整316項單元／契約與36項MySQL整合測試、Flutter Analyze與190項測試、Web release build均通過；Android debug APK已由本機Flutter 3.44.6驗證，正式API 23設定待PR使用釘選Flutter 3.29.2的CI確認；iOS Keychain以同一Credential Store contract test驗證，實機／macOS build留待Review環境。
+
+- [x] Web Refresh Credential由`__Host-` HttpOnly／Secure／SameSite Cookie管理，Access Token只存記憶體。
+- [x] Web Cookie Auth具可信Origin與CSRF防護，不能只依賴SameSite。
+- [x] Android／iOS Refresh Credential存於Keychain／Keystore，Access Token只存記憶體。
+- [x] SharedPreferences不再保存Token或完整Login Result。
+- [x] 並行401共用single-flight Refresh，成功後每個原request最多重試一次。
+- [x] 暫時網路錯誤不得誤清Session；確定失效才清除Credential並導向登入。
+- [x] 三平台Adapter通過同一Credential Store contract test。
+- [x] Flutter Widget／Repository／Router測試涵蓋恢復、失效與重試。
 
 ---
 

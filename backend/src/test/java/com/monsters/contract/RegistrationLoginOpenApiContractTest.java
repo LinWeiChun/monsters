@@ -58,11 +58,11 @@ class RegistrationLoginOpenApiContractTest {
         );
         assertThat(listAt(authenticated, "required")).contains(
                 "accessToken",
-                "refreshToken",
                 "tokenType",
                 "expiresIn",
                 "user"
         );
+        assertThat(mapAt(authenticated, "properties")).containsKey("refreshToken");
 
         Map<String, Object> continuation = mapAt(
                 document,
@@ -174,7 +174,10 @@ class RegistrationLoginOpenApiContractTest {
                 "/api/v1/auth/session-refreshes",
                 "post"
         );
-        assertThat(mapAt(refreshOperation, "responses")).containsKeys("200", "400", "401");
+        assertThat(mapAt(refreshOperation, "responses"))
+                .containsKeys("200", "400", "401", "403");
+        assertThat(mapAt(refreshOperation, "requestBody")).containsEntry("required", false);
+        assertThat(listAt(refreshOperation, "parameters")).hasSize(2);
         Map<String, Object> request = mapAt(
                 document,
                 "components",
@@ -186,6 +189,20 @@ class RegistrationLoginOpenApiContractTest {
         assertThat(mapAt(request, "properties", "refreshCredential"))
                 .containsEntry("writeOnly", true)
                 .containsEntry("minLength", 1);
+        assertThat(mapAt(
+                document,
+                "components",
+                "parameters",
+                "SessionTransportHeader",
+                "schema"
+        )).containsEntry("const", "COOKIE");
+        assertThat(mapAt(
+                document,
+                "components",
+                "parameters",
+                "CsrfProtectionHeader",
+                "schema"
+        )).containsEntry("const", "1");
 
         Map<String, Object> errorCode = mapAt(
                 document,
