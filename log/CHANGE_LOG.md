@@ -8,6 +8,64 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-08-10 10:16
+
+Task
+已完成 UI 純 HTML／RWD 靜態展示（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 新增單一 `docs/ui-showcase/index.html`，展示啟動、登入、註冊、Email 驗證、Eligibility、Guardian Consent、首頁、個人資料、密碼鎖、新增煩惱與新增日記畫面。
+- 全部色票、元件樣式與 Mobile／Tablet／Desktop RWD 直接寫入 HTML `<style>`；未建立外部 CSS 或 JavaScript。
+- 所有按鈕與導覽使用頁面內 `<a href="#...">` 連結；不串接 API、Database、登入判斷、本機儲存或動畫。
+- 排除尚未完成的歷史記錄、心的軌跡、社群、圖鑑與互動區，不以靜態畫面假裝功能已可用。
+
+### Modified / Added / Deleted
+
+- 新增 `docs/ui-showcase/index.html`。
+- 修改 `docs/UI_SPEC.md` 與 `docs/TASKS.md`。
+- 更新 `log/CHANGE_LOG.md`、`log/CHANGE_HISTORY.csv` 及 `log/CHANGE_HISTORY.xlsx`。
+- 未刪除產品檔案；僅使用工作區外的檢查暫存檔。
+
+### system_data Reference
+
+- 閱讀舊系統手冊的登入、註冊、首頁、個人資料、密碼鎖、煩惱與日記流程，並檢查舊 Flutter 頁面及素材；只參考資訊架構與陪伴視覺。
+- 未沿用舊 account 登入、使用者上傳頭貼、隨機怪獸獎勵、未治理社群、固定手機座標或直接資料存取；未修改、搬移或刪除 `system_data/`。
+
+### API
+
+- 無 Endpoint、request、response、錯誤碼或 API 呼叫異動。
+
+### Database
+
+- 無 Schema、欄位、SQL 或 Migration 異動。
+
+### Documentation
+
+- `UI_SPEC.md` 新增純 HTML 靜態展示範圍、RWD、連結、隱私與禁止項目規格。
+- `TASKS.md` 新增本插隊任務，完成至 `REVIEW`；Git Push／PR 未授權，因此不標記 `DONE`。
+
+### Tests
+
+- HTML parser 驗證 120 個連結、29 個唯一錨點與 30 張圖片；失效內部連結、缺少圖片、重複 ID 均為 0。
+- 確認 `script`、`button`、`form`、`onclick` 與 `fetch` 均為 0；三組 RWD `@media` 規則及 viewport meta 存在。
+- `CHANGE_HISTORY.xlsx` A17:M20 檢查通過，公式錯誤掃描為 0，新增兩列後完整表格視覺檢查通過。
+
+### Log Retention
+
+- 2026-08-10 保存期限截止日為 2026-07-10；`CHANGE_LOG.md` 與 `CHANGE_HISTORY.csv` 均無早於截止日的紀錄，未刪除 Log。
+- `CHANGE_HISTORY.xlsx` 原有資料最早為 2026-08-01，無過期資料；新增 Frontend 與 Documentation 兩列並保留既有 13 欄表格樣式。
+
+### Pending
+
+- Task 維持 `REVIEW`，等待使用者確認是否提交、推送並建立 PR。
+- 本次未執行瀏覽器視覺 QA；依網站技能規則，使用者未明確要求瀏覽器測試時不進行截圖、點擊或 viewport resize。
+
+---
+
 ## 2026-08-10 09:40
 
 Task

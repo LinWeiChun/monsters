@@ -299,6 +299,18 @@ Desktop 以共用 Navbar 與 1200px 內容區呈現雙欄流程；Tablet `600px 
 - 顯示紓壓方法列表
 - 查看詳細資料
 
+### 2.19 已完成畫面純 HTML 靜態展示
+
+展示檔案為 `docs/ui-showcase/index.html`，供設計、需求與 Review 直接瀏覽目前已有 Flutter 畫面，不取代正式 Flutter UI、Penpot 畫板或任何 API 契約。
+
+- 使用單一 HTML；全部色票、元件樣式及 Mobile／Tablet／Desktop RWD 規則寫在同一份 `<style>`，不載入外部 CSS 或 JavaScript。
+- 只展示目前已有頁面：啟動、登入、註冊、Email 驗證等待／完成、Eligibility、Guardian Consent、陪伴首頁、個人資料、密碼鎖、新增煩惱及新增日記。
+- 歷史記錄、心的軌跡、社群、圖鑑與互動區尚未完成，不得在展示中假裝為可用畫面。
+- 所有按鈕與導覽使用 `<a href="#...">` 連至展示頁內對應畫面；不使用 JavaScript click handler、表單 submit、API、Database、登入判斷、本機儲存或動畫。
+- RWD 直接使用 HTML 內的 `@media` 規則：Desktop `>= 1200px`、Tablet `600px–1199px`、Mobile `< 600px`；身份流程由雙欄轉單欄，Home／Profile／Entry 由多欄轉 flow layout，Mobile 顯示底部導覽。
+- 圖片只重用 `frontend/assets/images/` 的既有品牌與情緒分數素材，不複製或修改 `system_data/`。
+- 靜態展示使用合成暱稱及遮罩 Email，不得放入真實會員 Email、生日、Token、Guardian 資料或私人內容。
+
 ## 三、Responsive Web 規範
 
 Web 版規則：
