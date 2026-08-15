@@ -49,7 +49,7 @@ public class WebSessionCookieService {
         return ResponseCookie.from(COOKIE_NAME, refreshCredential)
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("Strict")
+                .sameSite("None")
                 .path("/")
                 .maxAge(Duration.ofSeconds(properties.cookieMaxAgeSeconds()))
                 .build();
@@ -59,7 +59,7 @@ public class WebSessionCookieService {
         return ResponseCookie.from(COOKIE_NAME, "")
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("Strict")
+                .sameSite("None")
                 .path("/")
                 .maxAge(Duration.ZERO)
                 .build();

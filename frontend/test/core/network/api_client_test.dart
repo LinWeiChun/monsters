@@ -158,6 +158,33 @@ void main() {
       expect(refreshCount, 0);
     });
 
+    test('retries each unauthorized request at most once', () async {
+      final dio = Dio();
+      var requestCount = 0;
+      var refreshCount = 0;
+      dio.httpClientAdapter = _CallbackAdapter((options) {
+        requestCount++;
+        return _jsonResponse({
+          'success': false,
+          'message': 'Session remains invalid',
+          'data': null,
+        }, statusCode: 401);
+      });
+      final client = ApiClient(config: _config(), dio: dio);
+      client.setAccessTokenRefresher(() async {
+        refreshCount++;
+        return 'new-token';
+      });
+
+      await expectLater(
+        client.get<void>('/users/me'),
+        throwsA(isA<ApiException>()),
+      );
+
+      expect(refreshCount, 1);
+      expect(requestCount, 2);
+    });
+
     test(
       'shares one refresh request across concurrent 401 responses',
       () async {
