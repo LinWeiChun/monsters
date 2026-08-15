@@ -1,6 +1,6 @@
 日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
 2026-08-16,07:43,REGISTRATION-LOGIN-08-CROSS-SITE,Backend,WebSessionCookieService與AuthMemberHttpIntegrationTest,修改,將Web Refresh Cookie改為SameSite None Secure支援Pages至Railway跨站HTTPS,Codex,是,否,否,否,仍強制可信Origin CORS與CSRF custom header
-2026-08-16,07:43,REGISTRATION-LOGIN-08-CROSS-SITE,Test,frontend/test/core/network/api_client_test.dart,修改,明確驗證每個401原Request換發後最多重試一次,Codex,否,否,否,否,Backend316 MySQL36 Flutter191項及Analyze通過
+2026-08-16,07:43,REGISTRATION-LOGIN-08-CROSS-SITE,Test,frontend/test/core/network/api_client_test.dart,修改,明確驗證每個401原Request換發後最多重試一次,Codex,否,否,否,否,PR99 Backend MySQL Flutter加Android及OpenAPI四項CI全綠
 2026-08-16,07:43,REGISTRATION-LOGIN-08-CROSS-SITE,Git,feature/phase4.5-secure-session-store,同步,快轉至已含PR97與PR98的最新feature phase4.5並保留遠端成果,Codex,否,否,是,否,未以舊基底覆蓋真實整合測試Android設定或UI展示頁
 2026-08-16,07:43,REGISTRATION-LOGIN-08-CROSS-SITE,Documentation,README docs Task與Log,修改,同步跨站Cookie決策Task08 DONE及一個月Log保存期限,Codex,是,否,否,否,刪除39個Markdown區段與479筆CSV且XLSX無過期資料
 2026-08-10,10:16,UI-SHOWCASE-HTML,Frontend,docs/ui-showcase/index.html,新增與驗證,建立純HTML已完成畫面展示並內嵌Mobile Tablet Desktop RWD與頁面錨點連結,Codex,否,否,是,否,無API JavaScript邏輯判斷動畫或真實會員資料；120個連結均有效

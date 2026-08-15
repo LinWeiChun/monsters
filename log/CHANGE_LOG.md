@@ -49,7 +49,7 @@ Codex
 - TDD先以真實HTTP/MySQL assertion確認`Strict`為Red，再改為`None`轉Green。
 - Backend 316項unit／contract與36項真實MySQL integration通過。
 - Flutter ApiClient 9項定向及191項完整測試通過，Analyze無問題，涵蓋single-flight及每個原Request最多重試一次。
-- PR #97既有Web／Android Build及OpenAPI CI證據保持有效；本修正未改正式Flutter runtime。
+- Draft PR #99的Backend unit、MySQL integration、Flutter test＋Android Build及OpenAPI四項CI全部通過；本修正未改正式Flutter runtime。
 
 ### Log Retention
 
@@ -58,7 +58,7 @@ Codex
 
 ### Pending
 
-- 建立本跨站Cookie修正的Draft PR並等待GitHub CI；不自動合併。
+- Draft PR #99已建立且四項CI全綠，等待使用者審查與合併；不自動合併。
 - Railway正式環境需將`WEB_SESSION_TRUSTED_ORIGIN_PATTERNS`與`CORS_ALLOWED_ORIGIN_PATTERNS`設為實際Cloudflare Pages HTTPS Origin。
 
 ---

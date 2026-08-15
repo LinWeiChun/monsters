@@ -192,7 +192,7 @@
 
 **Status:** DONE
 
-**Evidence:** PR #97已合併至`feature/phase4.5`，其Backend 316項單元／契約、36項MySQL整合、Flutter 190項測試、Analyze、Web／Android Build及OpenAPI CI均通過；Android採最低API 24、compileSdk 36及NDK 27.0.12077973。2026-08-16後續修正將Cookie改為`SameSite=None; Secure`以支援Cloudflare Pages至Railway跨站HTTPS，新增原Request最多重試一次測試，Backend 316項、36項MySQL、Flutter 191項完整測試與Analyze通過。iOS Keychain已通過共用contract test，原生實機驗證留待macOS Review環境。
+**Evidence:** PR #97已合併至`feature/phase4.5`，其Backend 316項單元／契約、36項MySQL整合、Flutter 190項測試、Analyze、Web／Android Build及OpenAPI CI均通過；Android採最低API 24、compileSdk 36及NDK 27.0.12077973。2026-08-16後續修正將Cookie改為`SameSite=None; Secure`以支援Cloudflare Pages至Railway跨站HTTPS，新增原Request最多重試一次測試；Draft PR #99的Backend unit、MySQL integration、Flutter test＋Android Build及OpenAPI四項CI均通過。iOS Keychain已通過共用contract test，原生實機驗證留待macOS Review環境。
 
 - [x] Web Refresh Credential由`__Host-` HttpOnly／Secure／SameSite Cookie管理，Access Token只存記憶體。
 - [x] Web Cookie Auth具可信Origin與CSRF防護，不能只依賴SameSite。
