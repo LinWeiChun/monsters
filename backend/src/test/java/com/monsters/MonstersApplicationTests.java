@@ -11,6 +11,7 @@ import com.monsters.repository.outbox.OutboxEventRepository;
 import com.monsters.repository.registration.RegistrationRateLimitBucketRepository;
 import com.monsters.repository.session.RefreshSessionCredentialRepository;
 import com.monsters.repository.session.UserSessionRepository;
+import com.monsters.repository.session.SessionReauthenticationCredentialRepository;
 import com.monsters.repository.audit.SessionSecurityAuditRepository;
 import com.monsters.repository.user.EmailVerificationTokenRepository;
 import com.monsters.repository.user.MemberDocumentAcceptanceRepository;
@@ -75,6 +76,9 @@ class MonstersApplicationTests {
 
     @MockBean
     private SessionSecurityAuditRepository sessionSecurityAuditRepository;
+
+    @MockBean
+    private SessionReauthenticationCredentialRepository sessionReauthenticationCredentialRepository;
 
     @MockBean
     private MemberDocumentAcceptanceRepository memberDocumentAcceptanceRepository;

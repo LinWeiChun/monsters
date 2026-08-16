@@ -121,6 +121,15 @@
 - 使用回饋
 - 登出
 
+登入裝置管理 route 固定為`/profile/sessions`，由個人資料頁「登入裝置」入口進入。Web／Tablet／Mobile主畫面不得出現捲動容器或Scrollbar；每頁最多3台裝置並以分頁切換，直接顯示裝置類型、約略摘要、最後活動、目前裝置標記與可用操作。密碼reauth與確認內容使用彈跳視窗；只有彈窗內容確實超出viewport時才可在彈窗內捲動。
+
+Task 09 Penpot設計來源：
+
+- Web預設：`Session Management / Web / 01 登入裝置`（`f7ed8c2b-0377-802d-8008-7d4714428f8c`）
+- Web reauth：`Session Management / Web / 02 重新驗證`（`f7ed8c2b-0377-802d-8008-7d47172caf68`）
+- Mobile預設：`Session Management / Mobile / 01 登入裝置`（`f7ed8c2b-0377-802d-8008-7d475b43fdbc`）
+- Mobile reauth：`Session Management / Mobile / 02 重新驗證`（`f7ed8c2b-0377-802d-8008-7d475ca335bd`）
+
 ### 2.7 新增煩惱聊天室
 
 下列聊天式結構與媒體能力可沿用 Phase 3，但分類與情緒負荷必須增加「略過」，分享必須改為建立獨立 Community Post 的明確預覽；既有 `isShared` boolean 只作 Migration 參考。
@@ -474,10 +483,12 @@ REST API
 - `AuthSessionStore` 必須改為平台 `SessionCredentialStore`：Web Refresh Cookie 由 Backend 管理，App Refresh Token 進 Keychain／Keystore；Access Token 只放記憶體，不得序列化完整 `LoginResult`。
 - `SessionCredentialStore`固定提供Web Cookie、Android Keystore與iOS Keychain三個Adapter；Web不讀寫Refresh Credential，Android最低API 24並以compileSdk 36及NDK 27.0.12077973建置，iOS Keychain項目不啟用iCloud同步且不遷移至其他裝置。
 - Web登入與refresh必須送`X-Session-Transport: COOKIE`、`X-CSRF-Protection: 1`並啟用瀏覽器credentials；App維持request body的`refreshCredential`契約。
+- Email完整登入送`X-Client-Platform`白名單平台；裝置管理Repository不得讀取或傳送Refresh Credential。單一／其他／全部撤銷只把五分鐘reauth credential放在`X-Reauthentication-Credential`，且只保存在記憶體。
+- `SessionManagementPage`固定每頁3筆且無`SingleChildScrollView`／`ListView`；390、600、1199、1200與1440寬度必須無overflow並直接顯示目前頁操作。密碼錯誤、reauth逾時、重複操作與網路失敗須保留現有登入狀態並允許重試；目前／全部撤銷成功才清除本地Credential並導向登入。
 - App 啟動時由 `SplashPage` 透過 `AuthController.restoreSession()` 判斷登入狀態；若本地session有效，必須呼叫`POST /api/v1/auth/session-refreshes`並送出`refreshCredential`換發新Credential、覆蓋舊session，再套用新access token並導向`home` route。
 - 受保護 API 回傳 401 時，並行 request 必須共用單一 refresh request；換發成功後每個原 request 最多重試一次，refresh request 本身不得遞迴重試。
 - 若 refresh token 無效／過期／已 rotation／reuse、session 到達 idle／absolute expiry 或使用者登出，必須清除 Credential Store 並導向登入頁；暫時性網路錯誤只顯示連線錯誤，不得誤撤銷 server session。
-- 登出需呼叫 `AuthController.logout()`，由 Repository 呼叫登出 API、清除 `ApiClient` Authorization header 與本地 session。
+- 一般登出需呼叫 `AuthController.logout()`，由Repository呼叫`POST /api/v1/auth/logout`且不傳Refresh Credential，再清除`ApiClient` Authorization header與本地session。
 - 密碼、Token、完整 Login Result 與私人會員資料不得保存至 SharedPreferences。
 - Google 登入不得假造 Google ID Token、不得沿用舊系統空密碼登入流程、不得在前端自行驗證後傳入 Google 使用者資料。
 - Google 登入成功後需呼叫 `POST /api/auth/google-login`，由後端驗證 Google ID Token 並回傳本系統 `LoginResult`。

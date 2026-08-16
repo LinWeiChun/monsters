@@ -14,6 +14,7 @@ import '../pages/register_page.dart';
 import '../pages/splash_page.dart';
 import '../pages/eligibility_page.dart';
 import '../pages/guardian_consent_page.dart';
+import '../pages/session_management_page.dart';
 import '../models/eligibility_policy.dart';
 import 'app_routes.dart';
 
@@ -99,6 +100,12 @@ GoRouter createAppRouter({String initialLocation = AppPath.splash}) {
         path: AppPath.profile,
         name: AppRoute.profile,
         pageBuilder: (context, state) => _appPage(state, const ProfilePage()),
+      ),
+      GoRoute(
+        path: AppPath.sessions,
+        name: AppRoute.sessions,
+        pageBuilder:
+            (context, state) => _appPage(state, const SessionManagementPage()),
       ),
       GoRoute(
         path: AppPath.passwordLock,

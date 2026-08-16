@@ -2,6 +2,7 @@ package com.monsters.entity.session;
 
 import com.monsters.entity.common.BaseEntity;
 import com.monsters.entity.user.User;
+import com.monsters.security.session.SessionDeviceContext;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -25,6 +26,12 @@ public class UserSession extends BaseEntity {
     @Column(name = "session_type", nullable = false, length = 20)
     private String sessionType;
 
+    @Column(name = "device_type", nullable = false, length = 16)
+    private String deviceType;
+
+    @Column(name = "device_summary", nullable = false, length = 120)
+    private String deviceSummary;
+
     @Column(name = "last_activity_at", nullable = false)
     private LocalDateTime lastActivityAt;
 
@@ -44,9 +51,21 @@ public class UserSession extends BaseEntity {
     }
 
     public UserSession(User user, LocalDateTime now, long idleSeconds, long absoluteSeconds) {
+        this(user, now, idleSeconds, absoluteSeconds, SessionDeviceContext.unknown());
+    }
+
+    public UserSession(
+            User user,
+            LocalDateTime now,
+            long idleSeconds,
+            long absoluteSeconds,
+            SessionDeviceContext deviceContext
+    ) {
         this.publicId = UUID.randomUUID().toString();
         this.user = user;
         this.sessionType = "MEMBER";
+        this.deviceType = deviceContext.type().name();
+        this.deviceSummary = deviceContext.summary();
         this.lastActivityAt = now;
         this.idleExpiresAt = now.plusSeconds(idleSeconds);
         this.absoluteExpiresAt = now.plusSeconds(absoluteSeconds);
@@ -83,6 +102,14 @@ public class UserSession extends BaseEntity {
 
     public User getUser() {
         return user;
+    }
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public String getDeviceSummary() {
+        return deviceSummary;
     }
 
     public LocalDateTime getLastActivityAt() {

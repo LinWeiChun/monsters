@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Monsters Registration and Login Contract
-  version: 0.5.0
+  version: 0.6.0
 paths:
   /api/v1/auth/registration-policy:
     get:
@@ -218,6 +218,92 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiEnvelope"
+  /api/v1/auth/sessions:
+    get:
+      summary: List the authenticated member's active device sessions
+      operationId: listDeviceSessions
+      security: [{bearerAuth: []}]
+      parameters:
+        - {name: page, in: query, schema: {type: integer, minimum: 0, default: 0}}
+        - {name: size, in: query, schema: {type: integer, minimum: 1, maximum: 5, default: 3}}
+      responses:
+        "200":
+          description: Owner-scoped safe device session page
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/DeviceSessionPageEnvelope"}
+        "401": {description: Access session invalid or revoked}
+  /api/v1/auth/reauthentications/password:
+    post:
+      summary: Reauthenticate for device session management
+      operationId: reauthenticateSessionManagement
+      security: [{bearerAuth: []}]
+      parameters:
+        - {$ref: "#/components/parameters/SessionTransportHeader"}
+        - {$ref: "#/components/parameters/CsrfProtectionHeader"}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/SessionReauthenticationRequest"}
+      responses:
+        "200":
+          description: Five-minute purpose-limited credential issued once
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/SessionReauthenticationEnvelope"}
+        "401": {description: Password verification failed}
+        "403": {description: Web Cookie transport Origin or CSRF proof was rejected}
+  /api/v1/auth/logout:
+    post:
+      summary: Revoke only the current session family
+      operationId: revokeCurrentSession
+      security: [{bearerAuth: []}]
+      parameters:
+        - {$ref: "#/components/parameters/SessionTransportHeader"}
+        - {$ref: "#/components/parameters/CsrfProtectionHeader"}
+      responses:
+        "200": {description: CURRENT_SESSION_REVOKED}
+        "401": {description: Access session invalid or revoked}
+        "403": {description: Web Cookie transport Origin or CSRF proof was rejected}
+  /api/v1/auth/sessions/{sessionId}/revocations:
+    post:
+      summary: Revoke one owner-scoped other device session
+      operationId: revokeDeviceSession
+      security: [{bearerAuth: []}]
+      parameters:
+        - {name: sessionId, in: path, required: true, schema: {type: string, format: uuid}}
+        - {$ref: "#/components/parameters/ReauthenticationCredentialHeader"}
+        - {$ref: "#/components/parameters/SessionTransportHeader"}
+        - {$ref: "#/components/parameters/CsrfProtectionHeader"}
+      responses:
+        "200": {description: DEVICE_SESSION_REVOKED}
+        "401": {description: Reauthentication invalid, expired, or session revoked}
+        "404": {description: Owner-scoped device session not found}
+  /api/v1/auth/session-revocations/others:
+    post:
+      summary: Revoke every other session while preserving the current session
+      operationId: revokeOtherSessions
+      security: [{bearerAuth: []}]
+      parameters:
+        - {$ref: "#/components/parameters/ReauthenticationCredentialHeader"}
+        - {$ref: "#/components/parameters/SessionTransportHeader"}
+        - {$ref: "#/components/parameters/CsrfProtectionHeader"}
+      responses:
+        "200": {description: OTHER_SESSIONS_REVOKED}
+        "401": {description: Reauthentication invalid or expired}
+  /api/v1/auth/session-revocations/all:
+    post:
+      summary: Revoke all sessions including the current session
+      operationId: revokeAllSessions
+      security: [{bearerAuth: []}]
+      parameters:
+        - {$ref: "#/components/parameters/ReauthenticationCredentialHeader"}
+        - {$ref: "#/components/parameters/SessionTransportHeader"}
+        - {$ref: "#/components/parameters/CsrfProtectionHeader"}
+      responses:
+        "200": {description: ALL_SESSIONS_REVOKED}
+        "401": {description: Reauthentication invalid or expired}
   /api/v1/auth/eligibility-policy:
     get:
       summary: Read the Taiwan eligibility and guardian document policy
@@ -346,6 +432,10 @@ paths:
                 $ref: "#/components/schemas/ApiEnvelope"
 components:
   securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
     continuationCredential:
       type: apiKey
       in: header
@@ -368,6 +458,15 @@ components:
       schema:
         type: string
         const: "1"
+    ReauthenticationCredentialHeader:
+      name: X-Reauthentication-Credential
+      in: header
+      required: true
+      description: Five-minute opaque proof bound to the current session and SESSION_MANAGEMENT purpose.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 512
   schemas:
     ApiEnvelope:
       type: object
@@ -607,6 +706,54 @@ components:
           maxLength: 512
           writeOnly: true
           description: High-entropy opaque credential; the server persists only its SHA-256 hash.
+    DeviceSession:
+      type: object
+      additionalProperties: false
+      required: [sessionId, deviceType, deviceSummary, lastActivityAt, current]
+      properties:
+        sessionId: {type: string, format: uuid}
+        deviceType: {type: string, enum: [WEB, ANDROID, IOS, UNKNOWN]}
+        deviceSummary: {type: string, maxLength: 120}
+        lastActivityAt: {type: string, format: date-time}
+        current: {type: boolean}
+    DeviceSessionPage:
+      type: object
+      additionalProperties: false
+      required: [items, page, size, totalItems, totalPages]
+      properties:
+        items: {type: array, maxItems: 5, items: {$ref: "#/components/schemas/DeviceSession"}}
+        page: {type: integer, minimum: 0}
+        size: {type: integer, minimum: 1, maximum: 5}
+        totalItems: {type: integer, format: int64, minimum: 0}
+        totalPages: {type: integer, minimum: 0}
+    DeviceSessionPageEnvelope:
+      allOf:
+        - {$ref: "#/components/schemas/ApiEnvelope"}
+        - type: object
+          properties:
+            code: {const: DEVICE_SESSIONS_RETRIEVED}
+            data: {$ref: "#/components/schemas/DeviceSessionPage"}
+    SessionReauthenticationRequest:
+      type: object
+      additionalProperties: false
+      required: [password]
+      properties:
+        password: {type: string, format: password, writeOnly: true, maxLength: 1024}
+    SessionReauthenticationData:
+      type: object
+      additionalProperties: false
+      required: [credential, purpose, expiresIn]
+      properties:
+        credential: {type: string, readOnly: true}
+        purpose: {type: string, const: SESSION_MANAGEMENT}
+        expiresIn: {type: integer, const: 300}
+    SessionReauthenticationEnvelope:
+      allOf:
+        - {$ref: "#/components/schemas/ApiEnvelope"}
+        - type: object
+          properties:
+            code: {const: SESSION_REAUTHENTICATED}
+            data: {$ref: "#/components/schemas/SessionReauthenticationData"}
     AuthSessionErrorCode:
       type: string
       enum:

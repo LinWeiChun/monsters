@@ -53,7 +53,8 @@
 - Refresh Token 為可輪替的不透明 Token；Web 存於 HttpOnly Cookie，Android／iOS 存於 Keychain／Keystore
 - 每次完整登入建立獨立Session Family；Backend只保存Refresh Credential hash，10秒內合理並行回相同輪替結果，逾期reuse只撤銷該family
 - 受保護 API 遇到 access token 401 時，前端只允許執行一次共用 refresh request 並重試原 request 一次；refresh token 驗證失敗需清除 session 並回登入頁，暫時性網路錯誤不得誤清使用者 session
-- 提供裝置工作階段清單、撤銷單一裝置與登出其他裝置
+- 提供分頁裝置工作階段清單、撤銷單一裝置、只登出目前裝置、登出其他裝置與全部登出；其他／全部撤銷需五分鐘、用途限定的密碼 reauth
+- 裝置資訊只保存平台類型與白名單化的約略摘要，不保存 IP、完整 User-Agent、硬體識別碼或持久裝置指紋
 - 忘記密碼使用 15 分鐘、一次性、只保存雜湊的 Email 重設連結；正式 API 不回傳 Token
 - 修改密碼、Email、登入方式、匯出、刪除或重設本機隱私鎖前，需於五分鐘內完成用途受限的重新驗證
 - 密碼採 15 至 128 個 Unicode 字元、弱密碼封鎖、無固定字元組成規則；新雜湊使用 Argon2id，既有 BCrypt 於成功登入時漸進遷移

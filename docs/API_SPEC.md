@@ -112,6 +112,24 @@ Web 使用 Cookie 的 Auth endpoint 必須驗證可信任 Origin／CSRF 防護�
 - Access JWT只包含`iss`、`sub`、`sid`、`iat`、`exp`；不得包含Email、Refresh值或會員私人資料。Security Filter每次以`sid`確認Session及會員仍可用。
 - 並行Access `401`由`ApiClient`共用單一refresh future；成功後每個原request最多重試一次。暫時性網路錯誤保留Credential並在Splash顯示重試，不導向登入或撤銷server session。
 
+#### 0.2.4 裝置工作階段管理
+
+| Method | Path | Auth／Header | 成功結果 |
+|---|---|---|---|
+| `GET` | `/api/v1/auth/sessions?page=0&size=3` | Bearer Access | `200 DEVICE_SESSIONS_RETRIEVED`，只回owner仍有效的裝置類型、約略摘要、最後活動與目前標記 |
+| `POST` | `/api/v1/auth/reauthentications/password` | Bearer Access＋密碼body | `200 SESSION_REAUTHENTICATED`，回一次性傳輸的`SESSION_MANAGEMENT` opaque credential，固定300秒 |
+| `POST` | `/api/v1/auth/logout` | Bearer Access；Web另帶Cookie transport防護 | `200 CURRENT_SESSION_REVOKED`，只撤銷目前family |
+| `POST` | `/api/v1/auth/sessions/{sessionId}/revocations` | Bearer Access＋`X-Reauthentication-Credential` | `200 DEVICE_SESSION_REVOKED`，只撤銷owner指定的其他family |
+| `POST` | `/api/v1/auth/session-revocations/others` | Bearer Access＋`X-Reauthentication-Credential` | `200 OTHER_SESSIONS_REVOKED`，保留目前family |
+| `POST` | `/api/v1/auth/session-revocations/all` | Bearer Access＋`X-Reauthentication-Credential` | `200 ALL_SESSIONS_REVOKED`，包含目前family |
+
+- 完整登入以`X-Client-Platform: WEB|ANDROID|IOS`傳平台白名單；Backend只從白名單平台與User-Agent推導粗略摘要，不保存IP、完整User-Agent、裝置型號或持久指紋。無效值降級為`UNKNOWN`。
+- 清單固定`page >= 0`、`size = 1..5`；Client預設每頁3筆，以分頁直接顯示全部目前頁內容，不以主畫面捲動承載裝置數量。
+- reauth credential使用32-byte CSPRNG opaque值，Backend只保存SHA-256 hash，綁定目前Session與`SESSION_MANAGEMENT`用途，300秒後失效；密碼、credential、hash、Email不得進Log／Audit／Outbox。
+- 單一、其他及全部撤銷都以owner與目前`sid`強制界定；不得接受Client傳入`userId`或Refresh Credential。重複撤銷不新增副作用或重複安全事件。
+- 撤銷在同一交易更新Session並寫`SESSION_REVOKED` Audit／Outbox；後續Access由Security Filter拒絕，Refresh由rotation服務拒絕。Web目前／全部登出成功時清除`__Host-monsters-refresh` Cookie。
+- Web所有裝置管理mutation須沿用可信Origin、`X-Session-Transport: COOKIE`與`X-CSRF-Protection: 1`；CORS另允許`X-Client-Platform`與`X-Reauthentication-Credential`。
+
 ### 0.3 核心資源契約
 
 | 資源 | v1 行為 |
@@ -320,7 +338,7 @@ CORS 僅套用於：
 |---|---|---|
 | app.cors.allowed-origin-patterns | CORS_ALLOWED_ORIGIN_PATTERNS | http://localhost:*,http://127.0.0.1:* |
 | app.cors.allowed-methods | CORS_ALLOWED_METHODS | GET,POST,PUT,PATCH,DELETE,OPTIONS |
-| app.cors.allowed-headers | CORS_ALLOWED_HEADERS | Authorization,Content-Type,Range,X-Session-Transport,X-CSRF-Protection |
+| app.cors.allowed-headers | CORS_ALLOWED_HEADERS | Authorization,Content-Type,Range,X-Session-Transport,X-CSRF-Protection,X-Client-Platform,X-Reauthentication-Credential |
 | app.cors.exposed-headers | CORS_EXPOSED_HEADERS | Authorization,Accept-Ranges,Content-Length,Content-Range |
 | app.cors.allow-credentials | CORS_ALLOW_CREDENTIALS | true |
 | app.cors.max-age | CORS_MAX_AGE | 3600 |

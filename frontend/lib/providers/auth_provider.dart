@@ -329,6 +329,16 @@ class AuthController extends StateNotifier<AuthState> {
     }
   }
 
+  Future<void> completeRemoteLogout() async {
+    await _authRepository.clearLocalSession();
+    try {
+      await _googleSignInService.signOut();
+    } on Object {
+      // The server session is already revoked; local completion must continue.
+    }
+    state = const AuthState();
+  }
+
   @override
   void dispose() {
     _googleIdTokenSubscription?.cancel();
