@@ -221,7 +221,7 @@
 - [x] 被撤銷裝置的Access與Refresh後續請求皆被拒絕。
 - [x] Flutter完整處理成功、重複操作、網路失敗及目前Session被撤銷。
 
-Review證據：方案1採分離清單／reauth／撤銷API；同意的測試接縫已由真實MySQL驗證owner範圍、Access／Refresh撤銷、重複登出其他裝置與Web Cookie清除。Flutter以Repository／Provider／Widget接縫驗證無Refresh值、網路失敗不清本地Session、操作去重、全域401導向登入，以及390／600／1199／1200／1440寬度無主畫面捲動或overflow。Penpot Web／Mobile預設與reauth共四個畫板已完成並驗證containment。Task依流程轉`REVIEW`，等待PR CI與使用者審查後才可轉`DONE`。
+Review證據：方案1採分離清單／reauth／撤銷API；同意的測試接縫已由真實MySQL驗證owner範圍、Access／Refresh撤銷、重複登出其他裝置與Web Cookie清除。Flutter以Repository／Provider／Widget接縫驗證無Refresh值、網路失敗不清本地Session、操作去重、全域401導向登入，以及390／600／1199／1200／1440寬度無主畫面捲動或overflow。Penpot Web／Mobile預設與reauth共四個畫板已完成並驗證containment。Draft PR #100指向`feature/phase4.5`；Task依流程轉`REVIEW`，等待CI與使用者審查後才可轉`DONE`。
 
 ---
 

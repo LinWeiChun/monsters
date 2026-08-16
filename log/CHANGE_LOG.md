@@ -62,7 +62,7 @@ Codex
 
 ### Pending
 
-- 分支`feature/phase4.5-device-session-management`待提交、推送及建立指向`feature/phase4.5`的Draft PR；CI全綠與使用者審查前不合併、不轉`DONE`。
+- Commit `a221ff9`已推送，Draft PR #100已建立並指向`feature/phase4.5`；CI全綠與使用者審查前不合併、不轉`DONE`。
 - 特權Session期限及其他敏感操作用途的reauth仍依後續Task處理，本Task credential不得跨用途使用。
 
 ---
