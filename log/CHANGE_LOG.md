@@ -8,6 +8,65 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-08-16 09:19
+
+Task
+Registration Login 09 裝置工作階段管理（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 完成owner限定的分頁裝置清單、五分鐘密碼reauth，以及目前、單一、其他與全部Session Family撤銷；所有Command不接收Refresh Credential。
+- 裝置資料只保存`WEB`／`ANDROID`／`IOS`／`UNKNOWN`與白名單化粗略摘要，不保存IP、完整User-Agent、型號或持久裝置指紋。
+- Flutter新增`/profile/sessions`、個人資料入口、每頁3筆、密碼彈窗、成功／錯誤／網路重試與本地Session清理；主畫面不使用捲動容器。
+- Penpot完成Web／Mobile預設與reauth四個畫板並通過containment；Task由`IN PROGRESS`轉為`REVIEW`。
+
+### Modified / Added / Deleted
+
+- Backend新增裝置metadata、reauth entity／repository／service、清單與撤銷controllers／DTOs，以及Flyway V6／V7；修改登入metadata傳遞、CORS與測試。
+- Flutter新增device session model、repository、provider、page與測試；修改Auth登出、platform header、Profile入口與route。
+- 更新PROJECT／API／DATABASE／UI／DECISIONS／OpenAPI／Registration Task與三種Log；未刪除產品檔案，未修改`system_data/`。
+
+### system_data Reference
+
+- 舊手冊只提供清除目前App本地資料的單一登出，沒有多裝置、opaque family、reauth或owner撤銷契約；只保留其「登出後回登入」意圖，未沿用舊Token與SharedPreferences作法。
+- `system_data/`全程唯讀，沒有可安全直接重用的多裝置程式。
+
+### API
+
+- 新增`GET /api/v1/auth/sessions`、`POST /api/v1/auth/reauthentications/password`、`POST /api/v1/auth/logout`、單一／其他／全部撤銷端點及穩定成功／錯誤碼。
+- 新增`X-Client-Platform`與`X-Reauthentication-Credential`；Web mutation沿用可信Origin、Cookie transport與CSRF proof。
+
+### Database
+
+- V6為`user_sessions`新增非敏感`device_type`與`device_summary`。
+- V7新增只存SHA-256 hash、綁定Session與`SESSION_MANAGEMENT`用途、300秒到期的reauth資料表，並擴充`SESSION_REAUTHENTICATED`／`SESSION_REVOKED`安全事件。
+
+### Documentation
+
+- 正式文件同步方案1的分離API、資料最小化、五分鐘reauth、Penpot畫板ID、每頁3筆及無主畫面捲動規格。
+- OpenAPI升至0.6.0；Task 09驗收項目完成並轉`REVIEW`，等待PR CI與使用者審查才轉`DONE`。
+
+### Tests
+
+- TDD先確認裝置清單與reauth／撤銷端點為Red，再完成Green；Backend 316項unit及38項真實MySQL integration通過。
+- Flutter 200項完整測試、Analyze、Web release build及Android debug APK通過；390／600／1199／1200／1440寬度無主畫面捲動或overflow。
+- 驗證被撤銷Access／Refresh皆拒絕、重複登出其他裝置仍成功且不產生新副作用、Web目前登出清除HttpOnly Cookie。
+
+### Log Retention
+
+- 保存期限截止日為2026-07-16；Markdown與CSV最早紀錄皆為2026-07-16，沒有早於截止日的過期紀錄，未刪除Log。
+- XLSX最早資料為2026-08-01；新增7筆、公式錯誤掃描為0，並完成全表值與視覺檢查。
+
+### Pending
+
+- 分支`feature/phase4.5-device-session-management`待提交、推送及建立指向`feature/phase4.5`的Draft PR；CI全綠與使用者審查前不合併、不轉`DONE`。
+- 特權Session期限及其他敏感操作用途的reauth仍依後續Task處理，本Task credential不得跨用途使用。
+
+---
+
 ## 2026-08-16 07:43
 
 Task

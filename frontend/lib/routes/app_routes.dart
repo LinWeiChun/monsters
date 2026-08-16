@@ -13,6 +13,7 @@ class AppRoute {
   static const passwordLock = 'passwordLock';
   static const eligibility = 'eligibility';
   static const guardianConsent = 'guardianConsent';
+  static const sessions = 'sessions';
 }
 
 class AppPath {
@@ -30,4 +31,5 @@ class AppPath {
   static const passwordLock = '/password-lock';
   static const eligibility = '/complete-eligibility';
   static const guardianConsent = '/guardian-consent';
+  static const sessions = '/profile/sessions';
 }

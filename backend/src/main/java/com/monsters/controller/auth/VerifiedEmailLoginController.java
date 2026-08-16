@@ -4,6 +4,7 @@ import com.monsters.dto.auth.VerifiedEmailLoginRequest;
 import com.monsters.dto.auth.VerifiedEmailLoginResponse;
 import com.monsters.dto.common.ApiResponse;
 import com.monsters.security.session.WebSessionCookieService;
+import com.monsters.security.session.SessionDeviceContext;
 import com.monsters.service.auth.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -38,7 +39,16 @@ public class VerifiedEmailLoginController {
         if (cookieTransport) {
             webSessionCookieService.requireTrustedRequest(httpRequest);
         }
-        VerifiedEmailLoginResponse response = authService.loginVerifiedEmail(request);
+        String clientPlatform = httpRequest.getHeader("X-Client-Platform");
+        VerifiedEmailLoginResponse response = clientPlatform == null
+                ? authService.loginVerifiedEmail(request)
+                : authService.loginVerifiedEmail(
+                        request,
+                        SessionDeviceContext.resolve(
+                                clientPlatform,
+                                httpRequest.getHeader(HttpHeaders.USER_AGENT)
+                        )
+                );
         if (response.requiresContinuation()) {
             ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.ok();
             if (cookieTransport) {

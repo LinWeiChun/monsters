@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../core/network/api_client.dart';
 import '../core/network/api_error_type.dart';
@@ -26,7 +27,7 @@ class AuthRepository {
     final response = await _apiClient.post<LoginResult>(
       '/v1/auth/login',
       data: {'email': email, 'password': password},
-      options: _sessionTransportOptions,
+      options: _loginOptions,
       fromJsonT: (json) => LoginResult.fromJson(json! as Map<String, dynamic>),
       retryOnUnauthorized: false,
     );
@@ -86,13 +87,9 @@ class AuthRepository {
 
   Future<void> logout() async {
     try {
-      final refreshCredential = await _sessionStore.readRefreshCredential();
       await _apiClient.post<void>(
-        '/auth/logout',
-        data:
-            refreshCredential == null
-                ? null
-                : {'refreshToken': refreshCredential},
+        '/v1/auth/logout',
+        options: _sessionTransportOptions,
         fromJsonT: (_) {},
         retryOnUnauthorized: false,
       );
@@ -100,6 +97,8 @@ class AuthRepository {
       await _invalidateSession();
     }
   }
+
+  Future<void> clearLocalSession() => _invalidateSession();
 
   Future<RegistrationPolicy> registrationPolicy() async {
     final response = await _apiClient.get<RegistrationPolicy>(
@@ -254,5 +253,26 @@ class AuthRepository {
       },
       extra: const {'withCredentials': true},
     );
+  }
+
+  Options get _loginOptions {
+    final platform =
+        kIsWeb
+            ? 'WEB'
+            : switch (defaultTargetPlatform) {
+              TargetPlatform.android => 'ANDROID',
+              TargetPlatform.iOS => 'IOS',
+              _ => 'UNKNOWN',
+            };
+    final headers = <String, Object?>{'X-Client-Platform': platform};
+    final extra = <String, Object?>{};
+    if (_sessionStore.usesCookieTransport) {
+      headers.addAll(const {
+        'X-Session-Transport': 'COOKIE',
+        'X-CSRF-Protection': '1',
+      });
+      extra['withCredentials'] = true;
+    }
+    return Options(headers: headers, extra: extra);
   }
 }

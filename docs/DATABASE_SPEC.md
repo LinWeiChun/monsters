@@ -122,7 +122,7 @@ Spring Boot 只能透過 JPA / Repository 存取資料庫；Flutter 不得直接
 
 ## 三、目前 `develop` 資料表設計（Phase 4.5 逐步 Flyway Migration）
 
-本章描述現有基線與已完成的 expand 欄位，供 Migration 與相容測試使用。Task 02 已導入 Flyway V1 baseline 與 V2 會員狀態結構；Task 03以V3導入Email-only註冊、文件同意、Email Token與限流桶；Task 06以V4加入Eligibility／Guardian Consent；Task 07以V5加入Opaque Refresh Session Family。凡與第二章衝突者仍以第二章為目標規格，不得再新增對 `account`、公開 `avatar_url`、JWT Refresh Token、伺服器 PIN、`entries.is_shared`、`entry_likes` 或 `entry_comments` 的新依賴。
+本章描述現有基線與已完成的 expand 欄位，供 Migration 與相容測試使用。Task 02 已導入 Flyway V1 baseline 與 V2 會員狀態結構；Task 03以V3導入Email-only註冊、文件同意、Email Token與限流桶；Task 06以V4加入Eligibility／Guardian Consent；Task 07以V5加入Opaque Refresh Session Family；Task 09以V6加入安全裝置摘要、以V7加入五分鐘用途限定reauth credential及撤銷安全事件。凡與第二章衝突者仍以第二章為目標規格，不得再新增對 `account`、公開 `avatar_url`、JWT Refresh Token、伺服器 PIN、`entries.is_shared`、`entry_likes` 或 `entry_comments` 的新依賴。
 
 ### 3.1 users
 
@@ -242,6 +242,8 @@ Index：
 | public_id | VARCHAR(36) | UNIQUE NOT NULL | Session UUID |
 | user_id | BIGINT | FK NOT NULL | owner會員 |
 | session_type | VARCHAR(20) | NOT NULL | Task 07固定`MEMBER` |
+| device_type | VARCHAR(16) | NOT NULL | `WEB`／`ANDROID`／`IOS`／`UNKNOWN`白名單 |
+| device_summary | VARCHAR(120) | NOT NULL | 粗略安全摘要，不含完整User-Agent、IP、型號或指紋 |
 | last_activity_at | DATETIME | NOT NULL | 最近成功輪替時間 |
 | idle_expires_at | DATETIME | NOT NULL | 一般會員30天閒置期限 |
 | absolute_expires_at | DATETIME | NOT NULL | 一般會員90天絕對期限 |
@@ -264,7 +266,20 @@ Index：
 
 ### 3.2.8 session_security_audits
 
-只保存`SESSION_CREATED`、`SESSION_REFRESH_ROTATED`與`SESSION_REFRESH_REUSE_DETECTED`安全事件、Session FK、opaque event UUID及發生時間；不得保存Token、hash、Email或會員私人資料。相同event UUID同時作為Outbox防重鍵。
+只保存`SESSION_CREATED`、`SESSION_REFRESH_ROTATED`、`SESSION_REFRESH_REUSE_DETECTED`、`SESSION_REAUTHENTICATED`與`SESSION_REVOKED`安全事件、Session FK、opaque event UUID及發生時間；不得保存Token、hash、Email、裝置摘要或會員私人資料。相同event UUID同時作為Outbox防重鍵。
+
+### 3.2.9 session_reauthentication_credentials
+
+| 欄位 | 型別 | 約束 | 說明 |
+|---|---|---|---|
+| session_id | BIGINT | FK NOT NULL | 綁定發起驗證的目前Session |
+| token_hash | VARCHAR(64) | UNIQUE NOT NULL | 32-byte opaque credential的SHA-256 hex；唯一保存形式 |
+| purpose | VARCHAR(40) | NOT NULL | Task 09固定`SESSION_MANAGEMENT` |
+| issued_at | DATETIME | NOT NULL | 核發時間 |
+| expires_at | DATETIME | NOT NULL | 核發後300秒 |
+| revoked_at | DATETIME | NULL | 預留提早失效時間 |
+
+規則：原始credential只在成功response傳輸一次，不寫入Database、Log、Audit或Outbox；使用時必須同時核對hash、用途、目前Session、owner、Session有效性與期限。
 
 ### 3.2.3 member_continuation_credentials
 

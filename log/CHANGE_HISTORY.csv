@@ -1,4 +1,11 @@
 日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
+2026-08-16,09:19,REGISTRATION-LOGIN-09,Backend,DeviceSession controllers/service/security,新增與修改,建立安全裝置清單五分鐘密碼reauth及目前單一其他全部Session撤銷,Codex,是,是,否,是,owner與sid強制界定且不接受Refresh值
+2026-08-16,09:19,REGISTRATION-LOGIN-09,Database,V6與V7 Flyway migrations,新增,加入白名單裝置摘要只存hash的SESSION_MANAGEMENT reauth credential與安全事件,Codex,否,是,否,是,空庫及V2升級至V7測試通過
+2026-08-16,09:19,REGISTRATION-LOGIN-09,API,registration-login.yaml與API_SPEC,新增與修改,新增裝置清單reauth目前單一其他全部撤銷六組v1契約,Codex,是,否,否,否,CORS允許平台與reauth header且Web沿用Origin CSRF Cookie防護
+2026-08-16,09:19,REGISTRATION-LOGIN-09,Frontend,SessionManagement page provider repository與route,新增與修改,建立每頁三筆無主畫面捲動裝置管理密碼彈窗及個人資料入口,Codex,是,否,是,否,390 600 1199 1200 1440寬度無overflow
+2026-08-16,09:19,REGISTRATION-LOGIN-09,Design,Penpot Session Management Web與Mobile,新增與驗證,建立Web Mobile預設與reauth四畫板並通過containment,Codex,否,否,是,否,主畫面無scrollbar且必要捲動只允許彈窗內
+2026-08-16,09:19,REGISTRATION-LOGIN-09,Test,Backend與Flutter測試及Build,新增與驗證,TDD驗證owner撤銷Access Refresh冪等Cookie及五寬度UI與無Refresh請求,Codex,是,是,是,是,Backend316 unit與38 MySQL Flutter200 Analyze Web release Android APK通過
+2026-08-16,09:19,REGISTRATION-LOGIN-09,Documentation,正式規格Task與三種Log,修改,同步方案1 API Database UI Penpot決策與Task09 REVIEW,Codex,是,是,是,是,截止2026-07-16無過期Log且system_data唯讀
 2026-08-16,07:43,REGISTRATION-LOGIN-08-CROSS-SITE,Backend,WebSessionCookieService與AuthMemberHttpIntegrationTest,修改,將Web Refresh Cookie改為SameSite None Secure支援Pages至Railway跨站HTTPS,Codex,是,否,否,否,仍強制可信Origin CORS與CSRF custom header
 2026-08-16,07:43,REGISTRATION-LOGIN-08-CROSS-SITE,Test,frontend/test/core/network/api_client_test.dart,修改,明確驗證每個401原Request換發後最多重試一次,Codex,否,否,否,否,PR99 Backend MySQL Flutter加Android及OpenAPI四項CI全綠
 2026-08-16,07:43,REGISTRATION-LOGIN-08-CROSS-SITE,Git,feature/phase4.5-secure-session-store,同步,快轉至已含PR97與PR98的最新feature phase4.5並保留遠端成果,Codex,否,否,是,否,未以舊基底覆蓋真實整合測試Android設定或UI展示頁

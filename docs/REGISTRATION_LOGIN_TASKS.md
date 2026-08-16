@@ -211,15 +211,17 @@
 
 **Blocked by:** 07 — 建立 Opaque Refresh Session Family；08 — 遷移三平台 Credential Store與Single-flight Refresh。
 
-**Status:** ready-for-agent
+**Status:** REVIEW
 
-- [ ] 裝置清單只顯示安全的裝置類型、約略資訊、最後活動與目前裝置標記。
-- [ ] 一般登出只撤銷目前Session Family。
-- [ ] 登出其他裝置保留目前Session，且需要五分鐘內reauth。
-- [ ] 全部登出包含目前Session，且需要五分鐘內reauth。
-- [ ] 登出Command為idempotent，不依賴Client傳入Refresh Token。
-- [ ] 被撤銷裝置的Access與Refresh後續請求皆被拒絕。
-- [ ] Flutter完整處理成功、重複操作、網路失敗及目前Session被撤銷。
+- [x] 裝置清單只顯示安全的裝置類型、約略資訊、最後活動與目前裝置標記。
+- [x] 一般登出只撤銷目前Session Family。
+- [x] 登出其他裝置保留目前Session，且需要五分鐘內reauth。
+- [x] 全部登出包含目前Session，且需要五分鐘內reauth。
+- [x] 登出Command為idempotent，不依賴Client傳入Refresh Token。
+- [x] 被撤銷裝置的Access與Refresh後續請求皆被拒絕。
+- [x] Flutter完整處理成功、重複操作、網路失敗及目前Session被撤銷。
+
+Review證據：方案1採分離清單／reauth／撤銷API；同意的測試接縫已由真實MySQL驗證owner範圍、Access／Refresh撤銷、重複登出其他裝置與Web Cookie清除。Flutter以Repository／Provider／Widget接縫驗證無Refresh值、網路失敗不清本地Session、操作去重、全域401導向登入，以及390／600／1199／1200／1440寬度無主畫面捲動或overflow。Penpot Web／Mobile預設與reauth共四個畫板已完成並驗證containment。Task依流程轉`REVIEW`，等待PR CI與使用者審查後才可轉`DONE`。
 
 ---
 

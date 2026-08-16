@@ -13,6 +13,7 @@ class _ResponsiveProfileCanvas extends StatelessWidget {
     required this.onLogout,
     required this.onHome,
     required this.onAddAnnoyance,
+    required this.onSessions,
     required this.onUnavailable,
     this.compact = false,
   });
@@ -28,6 +29,7 @@ class _ResponsiveProfileCanvas extends StatelessWidget {
   final VoidCallback onLogout;
   final VoidCallback onHome;
   final VoidCallback onAddAnnoyance;
+  final VoidCallback onSessions;
   final VoidCallback onUnavailable;
   final bool compact;
 
@@ -47,6 +49,7 @@ class _ResponsiveProfileCanvas extends StatelessWidget {
               onSave: onSave,
               onLogout: onLogout,
               onBack: onHome,
+              onSessions: onSessions,
               onUnavailable: onUnavailable,
             )
           else ...[
@@ -64,6 +67,7 @@ class _ResponsiveProfileCanvas extends StatelessWidget {
               isLoggingOut: isLoggingOut,
               onSave: onSave,
               onLogout: onLogout,
+              onSessions: onSessions,
             ),
           ],
           Expanded(
@@ -101,6 +105,7 @@ class _ResponsiveProfileHeader extends StatelessWidget {
     required this.onSave,
     required this.onLogout,
     required this.onBack,
+    required this.onSessions,
     required this.onUnavailable,
   });
 
@@ -110,6 +115,7 @@ class _ResponsiveProfileHeader extends StatelessWidget {
   final VoidCallback onSave;
   final VoidCallback onLogout;
   final VoidCallback onBack;
+  final VoidCallback onSessions;
   final VoidCallback onUnavailable;
 
   @override
@@ -155,6 +161,12 @@ class _ResponsiveProfileHeader extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: AppSpacing.lg),
+                IconButton(
+                  key: const Key('profileSessionsButton'),
+                  tooltip: '登入裝置',
+                  onPressed: onSessions,
+                  icon: const Icon(Icons.devices_outlined),
+                ),
                 OutlinedButton.icon(
                   key: const Key('profileLogoutButton'),
                   onPressed: isLoggingOut ? null : onLogout,
@@ -190,12 +202,14 @@ class _ProfileActionBar extends StatelessWidget {
     required this.isLoggingOut,
     required this.onSave,
     required this.onLogout,
+    required this.onSessions,
   });
 
   final bool isSaving;
   final bool isLoggingOut;
   final VoidCallback onSave;
   final VoidCallback onLogout;
+  final VoidCallback onSessions;
 
   @override
   Widget build(BuildContext context) {
@@ -217,6 +231,13 @@ class _ProfileActionBar extends StatelessWidget {
                 ),
               ),
               const Spacer(),
+              TextButton.icon(
+                key: const Key('profileSessionsButton'),
+                onPressed: onSessions,
+                icon: const Icon(Icons.devices_outlined, size: 18),
+                label: const Text('登入裝置'),
+              ),
+              const SizedBox(width: AppSpacing.md),
               OutlinedButton.icon(
                 key: const Key('profileLogoutButton'),
                 onPressed: isLoggingOut ? null : onLogout,
@@ -701,6 +722,7 @@ class _MobileProfileCanvas extends StatelessWidget {
     required this.onLogout,
     required this.onHome,
     required this.onBack,
+    required this.onSessions,
     required this.onUnavailable,
   });
 
@@ -715,6 +737,7 @@ class _MobileProfileCanvas extends StatelessWidget {
   final VoidCallback onLogout;
   final VoidCallback onHome;
   final VoidCallback onBack;
+  final VoidCallback onSessions;
   final VoidCallback onUnavailable;
 
   @override
@@ -762,6 +785,19 @@ class _MobileProfileCanvas extends StatelessWidget {
           fontWeight: FontWeight.w800,
         ),
         _SaveButton.mobile(isSaving: isSaving, onTap: onSave),
+        Positioned(
+          left: 188,
+          top: 15,
+          width: 42,
+          height: 40,
+          child: IconButton(
+            key: const Key('profileSessionsButton'),
+            tooltip: '登入裝置',
+            onPressed: onSessions,
+            padding: EdgeInsets.zero,
+            icon: const Icon(Icons.devices_outlined, size: 20),
+          ),
+        ),
         Positioned(
           left: 230,
           top: 15,

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -373,6 +374,156 @@ class AuthMemberHttpIntegrationTest {
     }
 
     @Test
+    void deviceSessionListShouldExposeOnlySafeOwnerScopedMetadata() throws Exception {
+        String syntheticEmail = "device.sessions@example.test";
+        String syntheticPassword = "synthetic-password";
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "account", "device_session_member",
+                                "email", syntheticEmail,
+                                "password", syntheticPassword,
+                                "userName", "Device Session Member"
+                        ))))
+                .andExpect(status().isCreated());
+
+        JsonNode webSession = responseData(mockMvc.perform(post("/api/v1/auth/login")
+                        .header("X-Client-Platform", "WEB")
+                        .header("User-Agent", "Mozilla/5.0 (Macintosh) Chrome/126.0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", syntheticEmail,
+                                "password", syntheticPassword
+                        ))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString());
+        JsonNode androidSession = responseData(mockMvc.perform(post("/api/v1/auth/login")
+                        .header("X-Client-Platform", "ANDROID")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", syntheticEmail,
+                                "password", syntheticPassword
+                        ))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString());
+
+        String androidAccessToken = androidSession.path("accessToken").asText();
+        String androidSessionId = accessSessionId(androidAccessToken);
+        String webSessionId = accessSessionId(webSession.path("accessToken").asText());
+
+        mockMvc.perform(get("/api/v1/auth/sessions")
+                        .header("Authorization", "Bearer " + androidAccessToken)
+                        .queryParam("page", "0")
+                        .queryParam("size", "3"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("DEVICE_SESSIONS_RETRIEVED"))
+                .andExpect(jsonPath("$.data.items.length()").value(2))
+                .andExpect(jsonPath("$.data.items[0].sessionId").value(androidSessionId))
+                .andExpect(jsonPath("$.data.items[0].deviceType").value("ANDROID"))
+                .andExpect(jsonPath("$.data.items[0].deviceSummary").value("Android App"))
+                .andExpect(jsonPath("$.data.items[0].current").value(true))
+                .andExpect(jsonPath("$.data.items[0].lastActivityAt").isString())
+                .andExpect(jsonPath("$.data.items[0].refreshToken").doesNotExist())
+                .andExpect(jsonPath("$.data.items[0].tokenHash").doesNotExist())
+                .andExpect(jsonPath("$.data.items[1].sessionId").value(webSessionId))
+                .andExpect(jsonPath("$.data.items[1].deviceType").value("WEB"))
+                .andExpect(jsonPath("$.data.items[1].deviceSummary").value("Chrome on macOS"))
+                .andExpect(jsonPath("$.data.items[1].current").value(false))
+                .andExpect(jsonPath("$.data.page").value(0))
+                .andExpect(jsonPath("$.data.size").value(3))
+                .andExpect(jsonPath("$.data.totalItems").value(2))
+                .andExpect(jsonPath("$.data.totalPages").value(1));
+    }
+
+    @Test
+    void reauthenticationAndSessionRevocationShouldPreserveOnlyTheSelectedFamilies()
+            throws Exception {
+        String syntheticEmail = "session.commands@example.test";
+        String syntheticPassword = "synthetic-password";
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "account", "session_commands_member",
+                                "email", syntheticEmail,
+                                "password", syntheticPassword,
+                                "userName", "Session Commands Member"
+                        ))))
+                .andExpect(status().isCreated());
+
+        JsonNode firstSession = responseData(mockMvc.perform(post("/api/v1/auth/login")
+                        .header("X-Client-Platform", "WEB")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", syntheticEmail,
+                                "password", syntheticPassword
+                        ))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString());
+        JsonNode currentSession = responseData(mockMvc.perform(post("/api/v1/auth/login")
+                        .header("X-Client-Platform", "ANDROID")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", syntheticEmail,
+                                "password", syntheticPassword
+                        ))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString());
+
+        String currentAccessToken = currentSession.path("accessToken").asText();
+        JsonNode reauthentication = responseData(mockMvc.perform(
+                        post("/api/v1/auth/reauthentications/password")
+                                .header("Authorization", "Bearer " + currentAccessToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(Map.of(
+                                        "password", syntheticPassword
+                                ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("SESSION_REAUTHENTICATED"))
+                .andExpect(jsonPath("$.data.expiresIn").value(300))
+                .andReturn().getResponse().getContentAsString());
+        String reauthenticationCredential = reauthentication.path("credential").asText();
+
+        mockMvc.perform(post("/api/v1/auth/session-revocations/others")
+                        .header("Authorization", "Bearer " + currentAccessToken)
+                        .header("X-Reauthentication-Credential", reauthenticationCredential))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("OTHER_SESSIONS_REVOKED"));
+        mockMvc.perform(post("/api/v1/auth/session-revocations/others")
+                        .header("Authorization", "Bearer " + currentAccessToken)
+                        .header("X-Reauthentication-Credential", reauthenticationCredential))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("OTHER_SESSIONS_REVOKED"));
+
+        mockMvc.perform(get("/api/v1/auth/sessions")
+                        .header("Authorization", "Bearer " + currentAccessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.totalItems").value(1))
+                .andExpect(jsonPath("$.data.items[0].current").value(true));
+
+        mockMvc.perform(post("/api/v1/auth/session-refreshes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "refreshCredential", firstSession.path("refreshToken").asText()
+                        ))))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(post("/api/v1/auth/logout")
+                        .header("Authorization", "Bearer " + currentAccessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("CURRENT_SESSION_REVOKED"));
+
+        mockMvc.perform(get("/api/v1/auth/sessions")
+                        .header("Authorization", "Bearer " + currentAccessToken))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(post("/api/v1/auth/session-refreshes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "refreshCredential", currentSession.path("refreshToken").asText()
+                        ))))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void webLoginShouldIssueHostCookieWithoutExposingRefreshCredential()
             throws Exception {
         String syntheticEmail = "web.cookie.login@example.test";
@@ -407,6 +558,18 @@ class AuthMemberHttpIntegrationTest {
         JsonNode data = responseData(result.getResponse().getContentAsString());
         assertThat(data.path("accessToken").asText()).isNotBlank();
         assertThat(data.has("refreshToken")).isFalse();
+
+        mockMvc.perform(post("/api/v1/auth/logout")
+                        .header("Authorization", "Bearer " + data.path("accessToken").asText())
+                        .header("Origin", "https://app.example.test")
+                        .header("X-Session-Transport", "COOKIE")
+                        .header("X-CSRF-Protection", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("CURRENT_SESSION_REVOKED"))
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.allOf(
+                        org.hamcrest.Matchers.containsString("__Host-monsters-refresh="),
+                        org.hamcrest.Matchers.containsString("Max-Age=0")
+                )));
     }
 
     @Test

@@ -44,6 +44,7 @@ import com.monsters.security.password.PasswordHashService;
 import com.monsters.security.password.PasswordPolicy;
 import com.monsters.service.session.SessionAuthenticationResult;
 import com.monsters.service.session.SessionFamilyService;
+import com.monsters.security.session.SessionDeviceContext;
 
 @Service
 public class AuthService {
@@ -137,6 +138,19 @@ public class AuthService {
 	}
 
 	@Transactional
+	public VerifiedEmailLoginResponse loginVerifiedEmail(
+			VerifiedEmailLoginRequest request,
+			SessionDeviceContext deviceContext
+	) {
+		String email = normalizeEmail(request.email());
+		User user = userRepository.findByEmailAndDeletedFalse(email)
+				.orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
+
+		verifyPassword(user, request.password());
+		return createVerifiedEmailAuthenticationResponse(user, deviceContext);
+	}
+
+	@Transactional
 	public LoginResponse googleLogin(GoogleLoginRequest request) {
 		GoogleUserInfo googleUser = googleIdTokenVerifier.verify(request.idToken());
 		Optional<UserOAuthAccount> oauthAccount = userOAuthAccountRepository
@@ -221,6 +235,31 @@ public class AuthService {
 			);
 		}
 		return createAuthenticatedResponse(user);
+	}
+
+	private VerifiedEmailLoginResponse createVerifiedEmailAuthenticationResponse(
+			User user,
+			SessionDeviceContext deviceContext
+	) {
+		if (user.getMemberState() == MemberState.DELETED) {
+			throw new UnauthorizedException("Invalid email or password");
+		}
+		if (user.getMemberState() != MemberState.ACTIVE) {
+			IssuedContinuationCredential credential = continuationCredentialService.issueFor(user);
+			return VerifiedEmailLoginResponse.continuation(
+					credential.credential(),
+					credential.nextAction(),
+					credential.expiresIn()
+			);
+		}
+		SessionAuthenticationResult session = sessionFamilyService.create(user, deviceContext);
+		return VerifiedEmailLoginResponse.authenticated(
+				session.accessToken(),
+				session.refreshCredential(),
+				session.tokenType(),
+				session.expiresIn(),
+				session.user()
+		);
 	}
 
 	private VerifiedEmailLoginResponse createVerifiedEmailAuthenticationResponse(User user) {

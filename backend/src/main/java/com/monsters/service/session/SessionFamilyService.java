@@ -17,6 +17,7 @@ import com.monsters.security.common.JwtProperties;
 import com.monsters.security.common.JwtTokenService;
 import com.monsters.security.session.RefreshCredentialGenerator;
 import com.monsters.security.session.SessionProperties;
+import com.monsters.security.session.SessionDeviceContext;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -65,13 +66,19 @@ public class SessionFamilyService {
 
     @Transactional
     public SessionAuthenticationResult create(User user) {
+        return create(user, SessionDeviceContext.unknown());
+    }
+
+    @Transactional
+    public SessionAuthenticationResult create(User user, SessionDeviceContext deviceContext) {
         credentialGenerator.requireDerivationKey(sessionProperties.refreshDerivationKey());
         LocalDateTime now = now();
         UserSession session = sessionRepository.save(new UserSession(
                 user,
                 now,
                 sessionProperties.idleExpirationSeconds(),
-                sessionProperties.absoluteExpirationSeconds()
+                sessionProperties.absoluteExpirationSeconds(),
+                deviceContext
         ));
         String refreshCredential = credentialGenerator.initialCredential();
         credentialRepository.save(new RefreshSessionCredential(

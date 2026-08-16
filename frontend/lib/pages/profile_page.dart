@@ -108,6 +108,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               onLogout: () => _confirmLogout(context),
               onHome: () => context.goNamed(AppRoute.home),
               onAddAnnoyance: () => context.pushNamed(AppRoute.annoyanceChat),
+              onSessions: () => context.pushNamed(AppRoute.sessions),
               onUnavailable: () => _showUnavailableMessage(context),
             ),
         tablet:
@@ -123,6 +124,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               onLogout: () => _confirmLogout(context),
               onHome: () => context.goNamed(AppRoute.home),
               onAddAnnoyance: () => context.pushNamed(AppRoute.annoyanceChat),
+              onSessions: () => context.pushNamed(AppRoute.sessions),
               onUnavailable: () => _showUnavailableMessage(context),
               compact: true,
             ),
@@ -143,6 +145,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 onLogout: () => _confirmLogout(context),
                 onHome: () => context.goNamed(AppRoute.home),
                 onBack: () => _returnToHome(context),
+                onSessions: () => context.pushNamed(AppRoute.sessions),
                 onUnavailable: () => _showUnavailableMessage(context),
               ),
             ),

@@ -24,12 +24,12 @@ class RegistrationMigrationIntegrationTest {
             .withPassword("synthetic-password");
 
     @Test
-    void emptySchemaShouldMigrateDirectlyToSessionFamilyVersion() throws Exception {
+    void emptySchemaShouldMigrateDirectlyToDeviceSessionVersion() throws Exception {
         Flyway flyway = flyway(null);
         flyway.clean();
 
         assertThat(flyway.migrate().success).isTrue();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("5");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("7");
         assertRegistrationTablesAndNullableOnboardingColumns();
     }
 
@@ -68,7 +68,7 @@ class RegistrationMigrationIntegrationTest {
 
         Flyway latest = flyway(null);
         assertThat(latest.migrate().success).isTrue();
-        assertThat(latest.info().current().getVersion().getVersion()).isEqualTo("5");
+        assertThat(latest.info().current().getVersion().getVersion()).isEqualTo("7");
         assertRegistrationTablesAndNullableOnboardingColumns();
         try (Connection connection = connection();
                 Statement statement = connection.createStatement();
@@ -106,6 +106,9 @@ class RegistrationMigrationIntegrationTest {
             assertThat(tableExists(metadata, "user_sessions")).isTrue();
             assertThat(tableExists(metadata, "refresh_session_credentials")).isTrue();
             assertThat(tableExists(metadata, "session_security_audits")).isTrue();
+            assertThat(tableExists(metadata, "session_reauthentication_credentials")).isTrue();
+            assertThat(columnNullable(metadata, "user_sessions", "device_type")).isFalse();
+            assertThat(columnNullable(metadata, "user_sessions", "device_summary")).isFalse();
             assertThat(columnNullable(metadata, "users", "account")).isTrue();
             assertThat(columnNullable(metadata, "users", "user_name")).isTrue();
         }
