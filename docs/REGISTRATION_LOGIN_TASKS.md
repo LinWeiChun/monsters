@@ -190,9 +190,9 @@
 
 **Blocked by:** 07 — 建立 Opaque Refresh Session Family。
 
-**Status:** REVIEW
+**Status:** DONE
 
-**Evidence:** Backend完整316項單元／契約與36項MySQL整合測試、Flutter Analyze與190項測試、Web release build均通過；Android debug APK已由本機Flutter 3.44.6以API 24驗證。PR #97的Flutter 3.29.2 Android Build確認現有Plugin不支援API 23，依使用者核准方案A調整為最低API 24、compileSdk 36及NDK 27.0.12077973；修正後本機APK與PR #97的Backend unit、MySQL integration、Flutter test＋Android Build及OpenAPI四項CI均通過。iOS Keychain以同一Credential Store contract test驗證，實機／macOS build留待Review環境。
+**Evidence:** PR #97已合併至`feature/phase4.5`，其Backend 316項單元／契約、36項MySQL整合、Flutter 190項測試、Analyze、Web／Android Build及OpenAPI CI均通過；Android採最低API 24、compileSdk 36及NDK 27.0.12077973。2026-08-16後續修正將Cookie改為`SameSite=None; Secure`以支援Cloudflare Pages至Railway跨站HTTPS，新增原Request最多重試一次測試；Draft PR #99的Backend unit、MySQL integration、Flutter test＋Android Build及OpenAPI四項CI均通過。iOS Keychain已通過共用contract test，原生實機驗證留待macOS Review環境。
 
 - [x] Web Refresh Credential由`__Host-` HttpOnly／Secure／SameSite Cookie管理，Access Token只存記憶體。
 - [x] Web Cookie Auth具可信Origin與CSRF防護，不能只依賴SameSite。

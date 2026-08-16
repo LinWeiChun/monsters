@@ -103,7 +103,7 @@ Web 使用 Cookie 的 Auth endpoint 必須驗證可信任 Origin／CSRF 防護�
 
 - App refresh request只接受`refreshCredential`；Credential為32-byte高強度opaque值，Backend只保存SHA-256 hash，不保存明文或可還原密文。
 - Web在登入與refresh時送`X-Session-Transport: COOKIE`、`X-CSRF-Protection: 1`及瀏覽器`Origin`；Backend只接受`WEB_SESSION_TRUSTED_ORIGIN_PATTERNS`白名單，且SameSite不得取代Origin與CSRF檢查。
-- Web Refresh Credential只由Backend以`__Host-monsters-refresh` Cookie設定；屬性固定`Path=/`、`HttpOnly`、`Secure`、`SameSite=Strict`，最長90天。Web成功回應不含`refreshToken`欄位，無效或reuse的`401`回應會清除Cookie。
+- Web Refresh Credential只由Backend以`__Host-monsters-refresh` Cookie設定；屬性固定`Path=/`、`HttpOnly`、`Secure`、`SameSite=None`，最長90天。`None`用於Cloudflare Pages至Railway的跨站HTTPS Request，不能取代可信Origin、CORS及`X-CSRF-Protection`檢查。Web成功回應不含`refreshToken`欄位，無效或reuse的`401`回應會清除Cookie。
 - Android／iOS以`flutter_secure_storage 10.3.1`保存Refresh Credential至Keystore／Keychain；Access Token只保存在Dio記憶體Header，SharedPreferences不得保存Token或完整`LoginResult`。
 - 初始Credential使用CSPRNG；後續Credential以獨立`SESSION_REFRESH_DERIVATION_KEY`、上一Credential、Session UUID及sequence透過HMAC-SHA256推導，使Server在不保存明文下可於10秒內重建完全相同的輪替結果。
 - 一般Session閒置期限30天、絕對期限90天；每次有效輪替只延長idle期限且不得超過absolute期限。

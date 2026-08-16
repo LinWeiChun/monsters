@@ -403,7 +403,7 @@ class AuthMemberHttpIntegrationTest {
         String setCookie = result.getResponse().getHeader("Set-Cookie");
         assertThat(setCookie)
                 .startsWith("__Host-monsters-refresh=")
-                .contains("Path=/", "Secure", "HttpOnly", "SameSite=Strict");
+                .contains("Path=/", "Secure", "HttpOnly", "SameSite=None");
         JsonNode data = responseData(result.getResponse().getContentAsString());
         assertThat(data.path("accessToken").asText()).isNotBlank();
         assertThat(data.has("refreshToken")).isFalse();
@@ -477,7 +477,7 @@ class AuthMemberHttpIntegrationTest {
 
         assertThat(result.getResponse().getHeader("Set-Cookie"))
                 .startsWith("__Host-monsters-refresh=;")
-                .contains("Path=/", "Max-Age=0", "Secure", "HttpOnly", "SameSite=Strict");
+                .contains("Path=/", "Max-Age=0", "Secure", "HttpOnly", "SameSite=None");
     }
 
     @Test
@@ -542,7 +542,7 @@ class AuthMemberHttpIntegrationTest {
 
         assertThat(result.getResponse().getHeader("Set-Cookie"))
                 .startsWith("__Host-monsters-refresh=;")
-                .contains("Path=/", "Max-Age=0", "Secure", "HttpOnly", "SameSite=Strict");
+                .contains("Path=/", "Max-Age=0", "Secure", "HttpOnly", "SameSite=None");
     }
 
     @Test

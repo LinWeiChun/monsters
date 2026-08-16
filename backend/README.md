@@ -98,7 +98,7 @@ JWT 基礎環境變數：
 | `WEB_SESSION_TRUSTED_ORIGIN_PATTERNS` | `http://localhost:*,http://127.0.0.1:*`；正式環境只允許Web前端Origin |
 | `WEB_SESSION_COOKIE_MAX_AGE_SECONDS` | `7776000`（90天） |
 
-v1 Refresh Credential採opaque Session Family rotation，Backend只保存SHA-256 hash。每次成功換發都建立下一個sequence；同一舊Credential在10秒內回相同結果，逾期reuse撤銷該family。一般Session閒置30天、絕對90天。Web使用`__Host-monsters-refresh` HttpOnly Cookie，且Cookie Auth endpoint另驗證可信Origin與`X-CSRF-Protection: 1`；App仍使用request body Credential。Legacy JWT Refresh與`revoked_tokens`僅供舊API Migration相容。
+v1 Refresh Credential採opaque Session Family rotation，Backend只保存SHA-256 hash。每次成功換發都建立下一個sequence；同一舊Credential在10秒內回相同結果，逾期reuse撤銷該family。一般Session閒置30天、絕對90天。Web使用`__Host-monsters-refresh` HttpOnly／Secure／SameSite=None Cookie支援Cloudflare Pages至Railway跨站HTTPS請求，且Cookie Auth endpoint另驗證可信Origin與`X-CSRF-Protection: 1`；App仍使用request body Credential。Legacy JWT Refresh與`revoked_tokens`僅供舊API Migration相容。
 
 Google 登入環境變數：
 
