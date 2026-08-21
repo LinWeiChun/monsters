@@ -379,7 +379,7 @@ Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封�
 
 - [ ] 移除 `account` 註冊／登入依賴，完成 Email verification 狀態流程
 - [ ] 建立服務地區、生日鎖定、13–17 Guardian Consent 與成年重新同意
-- [x] 修正 Google 同 Email 自動連結，加入明確 reauth linking（REVIEW：Registration Login Task 10）
+- [x] 修正 Google 同 Email 自動連結，加入明確 reauth linking（REVIEW：Registration Login Task 10；Draft PR #101 四項 CI 全綠）
 - [ ] 將 Access Token 改為 10 分鐘 JWT，Refresh Token 改為 opaque family rotation
 - [ ] 建立 Web Cookie／CSRF 與 App Keychain／Keystore `SessionCredentialStore`
 - [ ] 移除 SharedPreferences 中 Token 與完整 Login Result

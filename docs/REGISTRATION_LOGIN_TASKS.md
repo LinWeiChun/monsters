@@ -241,7 +241,7 @@ DONE證據：方案1採分離清單／reauth／撤銷API；同意的測試接縫
 - [x] Google ID Token、Email及驗證細節不得進入Log。
 - [x] Flutter呈現已連結、需驗證既有方式、衝突及取消流程。
 
-Review證據：採方案1 Session-first明確連結；匿名Google登入只有已連結`provider + sub`可取得Session，相同Email只回`GOOGLE_ACCOUNT_LINK_REQUIRED`。既有會員以Email／密碼登入後取得綁定目前Session、`LOGIN_METHOD_LINK`用途及300秒期限的reauth credential，再以新ID Token及`confirmed: true`建立關聯；成功保留目前Session、撤銷其他Session並寫不含PII的`LOGIN_METHOD_LINKED` Audit／Outbox。Flutter完成需連結、重新驗證、確認、成功、衝突及取消，Web／Mobile共10個Penpot畫板通過containment。Backend完整321項單元／契約與39項真實MySQL 8.4整合測試、Flutter完整209項測試、Analyze、Web release build及Android debug APK build均通過；等待PR CI與使用者審查，因此維持`REVIEW`。
+Review證據：採方案1 Session-first明確連結；匿名Google登入只有已連結`provider + sub`可取得Session，相同Email只回`GOOGLE_ACCOUNT_LINK_REQUIRED`。既有會員以Email／密碼登入後取得綁定目前Session、`LOGIN_METHOD_LINK`用途及300秒期限的reauth credential，再以新ID Token及`confirmed: true`建立關聯；成功保留目前Session、撤銷其他Session並寫不含PII的`LOGIN_METHOD_LINKED` Audit／Outbox。Flutter完成需連結、重新驗證、確認、成功、衝突及取消，Web／Mobile共10個Penpot畫板通過containment。Backend完整321項單元／契約與39項真實MySQL 8.4整合測試、Flutter完整209項測試、Analyze、Web release build及Android debug APK build均通過；Draft PR #101的Backend unit、MySQL integration、Flutter及OpenAPI四項CI全綠，等待使用者審查，因此維持`REVIEW`。
 
 ---
 

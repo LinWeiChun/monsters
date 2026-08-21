@@ -4,8 +4,8 @@
 2026-08-21,11:54,REGISTRATION-LOGIN-10,API,registration-login.yaml與API_SPEC,新增與修改,新增Google登入與明確連結兩組v1契約,Codex,是,否,否,否,Token Email與驗證細節不進Log Audit或Outbox
 2026-08-21,11:54,REGISTRATION-LOGIN-10,Frontend,GoogleAccountLink page與Auth repository provider route,新增與修改,完成既有帳號登入重新驗證確認成功衝突與取消流程,Codex,是,否,是,否,Web使用Google官方按鈕且App重新取得ID Token
 2026-08-21,11:54,REGISTRATION-LOGIN-10,Design,Penpot Account Web與Mobile Google Link 13至17,新增與驗證,建立需連結重新驗證確認成功與衝突十個畫板,Codex,否,否,是,否,十個畫板containment全部通過
-2026-08-21,11:54,REGISTRATION-LOGIN-10,Test,Backend Flutter與OpenAPI測試,新增與驗證,驗證禁止自動合併用途隔離Session處理衝突取消與RWD,Codex,是,是,是,是,Backend 321項與MySQL 39項；Flutter 209項 Analyze Web及Android build通過
-2026-08-21,11:54,REGISTRATION-LOGIN-10,Documentation,正式規格Task與三種Log,修改,同步方案1 API Database UI Penpot決策與Task10 REVIEW,Codex,是,是,是,是,刪除2026-07-16至07-19過期Markdown與CSV Log；XLSX無過期列
+2026-08-21,11:54,REGISTRATION-LOGIN-10,Test,Backend Flutter與OpenAPI測試,新增與驗證,驗證禁止自動合併用途隔離Session處理衝突取消與RWD,Codex,是,是,是,是,Backend 321與MySQL 39；Flutter 209 Analyze Web Android及PR101四項CI通過
+2026-08-21,11:54,REGISTRATION-LOGIN-10,Documentation,正式規格Task與三種Log,修改,同步方案1 API Database UI Penpot決策與Task10 REVIEW,Codex,是,是,是,是,Draft PR101四項CI全綠；已清除過期Markdown與CSV且XLSX無過期列
 2026-08-16,09:19,REGISTRATION-LOGIN-09,Backend,DeviceSession controllers/service/security,新增與修改,建立安全裝置清單五分鐘密碼reauth及目前單一其他全部Session撤銷,Codex,是,是,否,是,owner與sid強制界定且不接受Refresh值
 2026-08-16,09:19,REGISTRATION-LOGIN-09,Database,V6與V7 Flyway migrations,新增,加入白名單裝置摘要只存hash的SESSION_MANAGEMENT reauth credential與安全事件,Codex,否,是,否,是,空庫及V2升級至V7測試通過
 2026-08-16,09:19,REGISTRATION-LOGIN-09,API,registration-login.yaml與API_SPEC,新增與修改,新增裝置清單reauth目前單一其他全部撤銷六組v1契約,Codex,是,否,否,否,CORS允許平台與reauth header且Web沿用Origin CSRF Cookie防護

@@ -54,13 +54,14 @@ Codex
 
 - OpenAPI升至0.7.0，新增Google登入、需明確連結、連結Command與用途限定reauth契約。
 - 正式API、Database、UI與Decision同步方案1的Session-first明確連結、安全Session處理與Penpot畫板ID。
-- Task09依已合併PR #100及四項CI全綠由`REVIEW`轉`DONE`；Task10完成實作並轉`REVIEW`，等待PR CI與使用者審查。
+- Task09依已合併PR #100及四項CI全綠由`REVIEW`轉`DONE`；Task10完成實作並轉`REVIEW`，Draft PR #101四項CI全綠，等待使用者審查。
 
 ### Tests
 
 - Backend完整321項單元／契約測試通過；Google verifier涵蓋issuer、audience、expiration、RS256 signature與verified Email。
 - Backend完整39項真實HTTP／MySQL 8.4整合測試通過，驗證不自動連結、不核發Session、reauth用途隔離、目前Session保留、其他Session撤銷、`provider + sub`登入及敏感值不進Log；Flyway空庫與V2升級皆到V8。
 - Flutter完整209項測試、Analyze、Web release build與Android debug APK build通過，涵蓋完整連結、衝突、取消、v1路徑／Header及390／600／1199／1440寬度。
+- Draft PR #101的Backend unit、MySQL integration、Flutter及OpenAPI四項GitHub CI全部通過。
 
 ### Log Retention
 
@@ -69,7 +70,7 @@ Codex
 
 ### Pending
 
-- PR CI通過與使用者審查前Task10維持`REVIEW`。
+- Draft PR #101已建立且四項CI全綠；使用者審查與合併前Task10維持`REVIEW`。
 - Task11 Forgot／Reset Password在Task10審查完成後再接續，不在本次範圍。
 
 ---
