@@ -39,7 +39,7 @@ Phase 4.5 已核准決策的可交付規格與測試接縫整理於 [`PHASE4_5_F
 | State Priority | `DELETED > DELETION_PENDING > ADMIN_SUSPENDED > USER_DEACTIVATED > pending > ACTIVE`；`DELETED` terminal，恢復使用專用 Command |
 | State Command | 不提供泛用 `targetState` API；Email 驗證、資格、停用、停權與刪除由分離 Command 經內部狀態機處理 |
 | Continuation Credential | 32-byte 隨機不透明值、10 分鐘、只回傳一次、Server 只存 SHA-256 hash；狀態或 version 改變即撤銷，不能存取一般 API |
-| Google Linking | 相同 Email 不自動合併；需先驗證既有登入方式並明確連結 |
+| Google Linking | 採方案1 Session-first明確連結：相同Email不自動合併或核發Session；會員先以Email／密碼建立目前Session，再取得綁定Session、`LOGIN_METHOD_LINK`用途及300秒期限的reauth credential，以新Google ID Token及`confirmed: true`連結。成功保留目前Session、撤銷其他Session並寫無PII的`LOGIN_METHOD_LINKED` Audit／Outbox；衝突回通用409，取消不建立關聯 |
 | 忘記密碼 | 正式 Email reset link，15 分鐘單次 hash Token、統一對外回應、成功後撤銷全部工作階段 |
 | Email 變更 | reauth、新 Email 驗證、新舊 Email 通知、撤銷其他工作階段 |
 | Password Policy | 15–128 Unicode、弱密碼 blocklist、無固定 composition、無定期強制更換；參考 [NIST SP 800-63B](https://pages.nist.gov/800-63-4/sp800-63b.html) |

@@ -1,4 +1,11 @@
 日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
+2026-08-21,11:54,REGISTRATION-LOGIN-10,Backend,GoogleAccount controller/service與session reauth,新增與修改,建立provider與sub精確Google登入及既有會員明確連結,Codex,是,是,否,是,同Email未連結只回需連結狀態且不核發Session
+2026-08-21,11:54,REGISTRATION-LOGIN-10,Database,V8__add_google_account_linking.sql,新增,加入LOGIN_METHOD_LINK用途與LOGIN_METHOD_LINKED安全事件,Codex,否,是,否,是,只擴充約束且舊Migration維持不可變
+2026-08-21,11:54,REGISTRATION-LOGIN-10,API,registration-login.yaml與API_SPEC,新增與修改,新增Google登入與明確連結兩組v1契約,Codex,是,否,否,否,Token Email與驗證細節不進Log Audit或Outbox
+2026-08-21,11:54,REGISTRATION-LOGIN-10,Frontend,GoogleAccountLink page與Auth repository provider route,新增與修改,完成既有帳號登入重新驗證確認成功衝突與取消流程,Codex,是,否,是,否,Web使用Google官方按鈕且App重新取得ID Token
+2026-08-21,11:54,REGISTRATION-LOGIN-10,Design,Penpot Account Web與Mobile Google Link 13至17,新增與驗證,建立需連結重新驗證確認成功與衝突十個畫板,Codex,否,否,是,否,十個畫板containment全部通過
+2026-08-21,11:54,REGISTRATION-LOGIN-10,Test,Backend Flutter與OpenAPI測試,新增與驗證,驗證禁止自動合併用途隔離Session處理衝突取消與RWD,Codex,是,是,是,是,Backend 321與MySQL 39；Flutter 209 Analyze Web Android及PR101四項CI通過
+2026-08-21,11:54,REGISTRATION-LOGIN-10,Documentation,正式規格Task與三種Log,修改,同步方案1 API Database UI Penpot決策與Task10 REVIEW,Codex,是,是,是,是,Draft PR101四項CI全綠；已清除過期Markdown與CSV且XLSX無過期列
 2026-08-16,09:19,REGISTRATION-LOGIN-09,Backend,DeviceSession controllers/service/security,新增與修改,建立安全裝置清單五分鐘密碼reauth及目前單一其他全部Session撤銷,Codex,是,是,否,是,owner與sid強制界定且不接受Refresh值
 2026-08-16,09:19,REGISTRATION-LOGIN-09,Database,V6與V7 Flyway migrations,新增,加入白名單裝置摘要只存hash的SESSION_MANAGEMENT reauth credential與安全事件,Codex,否,是,否,是,空庫及V2升級至V7測試通過
 2026-08-16,09:19,REGISTRATION-LOGIN-09,API,registration-login.yaml與API_SPEC,新增與修改,新增裝置清單reauth目前單一其他全部撤銷六組v1契約,Codex,是,否,否,否,CORS允許平台與reauth header且Web沿用Origin CSRF Cookie防護
@@ -108,161 +115,6 @@
 2026-07-26,10:57,DOC-013,Documentation,docs historical references,修改,標示 Phase2 Phase3 與 system_data 為 historical reference,Codex,否,否,否,否,避免舊規格反向覆蓋
 2026-07-26,10:57,DOC-013,Documentation,log/CHANGE_LOG.md,修改,新增 grilling 文件化工作紀錄,Codex,是,是,是,是,已檢查一個月保存期限無過期 log
 2026-07-26,10:57,DOC-013,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-013 文件異動歷程,Codex,是,是,是,是,文件 only 無 code test
-2026-07-16,10:56,TASK-068,Backend,backend/src/main/java/com/monsters/dto/auth/LoginRequest.java,修改,移除 Email-only 驗證並允許登入識別值為 Account 或 Email,Codex,是,否,否,否,保留 email request key
-2026-07-16,10:56,TASK-068,Test,backend/src/test/java/com/monsters/controller/auth/AuthControllerTest.java,修改,新增 Account 登入 request validation 測試,Codex,是,否,否,否,登入相關測試通過
-2026-07-16,10:56,TASK-068,Test,backend/src/test/java/com/monsters/service/auth/AuthServiceTest.java,修改,同步 Account 或 Email repository 查詢並新增 Account 正規化測試,Codex,是,否,否,否,後端完整測試通過
-2026-07-16,10:56,TASK-068,Documentation,docs/API_SPEC.md,修改,登入規格改為 Account 或 Email 並保留 email 欄位名稱,Codex,是,否,否,否,
-2026-07-16,10:56,TASK-068,Documentation,docs/UI_SPEC.md,修改,登入輸入規格改為帳號或 Email,Codex,否,否,是,否,
-2026-07-16,10:56,TASK-068,Documentation,docs/TASKS.md,修改,新增插隊登入驗證修正任務並更新為 REVIEW,Codex,否,否,否,否,
-2026-07-16,10:56,TASK-068,Documentation,log/CHANGE_LOG.md,修改,新增登入驗證修正與測試紀錄,Codex,否,否,否,否,已檢查一個月保存期限且無過期 Log
-2026-07-16,10:56,TASK-068,Documentation,log/CHANGE_HISTORY.csv,修改,新增 TASK-068 history 紀錄,Codex,否,否,否,否,Flutter 登入頁測試逾時待重跑
-2026-07-16,15:49,PENPOT-WEB-REGISTER,Frontend,frontend/lib/pages/register_page.dart,修改,依 Penpot Web Register board 修正雙欄座標 表單寬度 規則卡與完成註冊按鈕,Codex,,,,,flutter analyze --no-pub passed; flutter test --no-pub test/register_page_test.dart passed
-2026-07-16,15:49,PENPOT-WEB-REGISTER,Frontend,frontend/lib/theme/app_colors.dart,修改,新增 register field rule onPrimary error theme token,Codex,,,,,頁面未新增硬編碼 Color token
-2026-07-16,15:49,PENPOT-WEB-REGISTER,Test,frontend/test/register_page_test.dart,修改,新增 Web 註冊頁文字與主要元素 widget test,Codex,,,,,7 tests passed
-2026-07-16,15:49,PENPOT-WEB-REGISTER,Documentation,docs/UI_SPEC.md,修改,新增 Penpot Web Register 精準尺寸與實作說明,Codex,,,,,文件已更新
-2026-07-16,15:49,PENPOT-WEB-REGISTER,Documentation,docs/TASKS.md,修改,新增插隊任務完成狀態,Codex,,,,,任務已標記完成
-2026-07-16,15:49,PENPOT-WEB-REGISTER,Documentation,log/CHANGE_LOG.md,修改,新增本次工作紀錄並記錄 Log 保存期限檢查,Codex,,,,,未發現超過一個月紀錄
-2026-07-16,15:49,PENPOT-WEB-REGISTER,Documentation,log/CHANGE_HISTORY.csv,修改,新增本次 history 紀錄,Codex,,,,,CHANGE_HISTORY.csv 已更新
-2026-07-16,16:12,PENPOT-SPLASH,Frontend,frontend/lib/pages/splash_page.dart,修改,依 Penpot Web / Mobile Splash board 建立 responsive layout 並保留 session restore 導向,Codex,,,,,flutter analyze --no-pub passed; flutter test --no-pub test/splash_page_test.dart passed
-2026-07-16,16:12,PENPOT-SPLASH,Frontend,frontend/lib/theme/app_colors.dart,修改,新增 splash theme token 避免 page 直接宣告色碼,Codex,,,,,Theme token synchronized
-2026-07-16,16:12,PENPOT-SPLASH,Test,frontend/test/splash_page_test.dart,新增,新增 SplashPage Web / Mobile 尺寸與導向 widget tests,Codex,,,,,4 tests passed
-2026-07-16,16:12,PENPOT-SPLASH,Documentation,docs/UI_SPEC.md,修改,新增 Penpot SplashPage Web / App 畫面規格,Codex,,,,,文件已同步
-2026-07-16,16:12,PENPOT-SPLASH,Documentation,docs/TASKS.md,修改,新增並完成 SplashPage 插隊任務狀態,Codex,,,,,Task status DONE
-2026-07-16,16:12,PENPOT-SPLASH,Documentation,log/CHANGE_LOG.md,修改,新增 SplashPage 工作紀錄並完成 Log 保存期限檢查,Codex,,,,,無過期 Log 需刪除
-2026-07-16,16:12,PENPOT-SPLASH,Documentation,log/CHANGE_HISTORY.csv,修改,新增 SplashPage history rows,Codex,,,,,CHANGE_HISTORY.csv 已同步
-2026-07-16,16:22,PENPOT-SPLASH-REDIRECT,Frontend,frontend/lib/pages/splash_page.dart,修改,session restore false 時直接導向 login route 並移除 Splash 登入註冊按鈕,Codex,,,,,flutter analyze --no-pub passed; flutter test --no-pub test/splash_page_test.dart passed
-2026-07-16,16:22,PENPOT-SPLASH-REDIRECT,Test,frontend/test/splash_page_test.dart,修改,更新 SplashPage 測試為檢查中對齊 Penpot 且失敗後自動導向 LoginPage,Codex,,,,,3 tests passed
-2026-07-16,16:22,PENPOT-SPLASH-REDIRECT,Documentation,docs/UI_SPEC.md,修改,補充 SplashPage session 失敗自動導向 LoginPage 規格,Codex,,,,,文件已同步
-2026-07-16,16:22,PENPOT-SPLASH-REDIRECT,Documentation,docs/TASKS.md,修改,新增並完成 SplashPage redirect 插隊任務,Codex,,,,,Task status DONE
-2026-07-16,16:22,PENPOT-SPLASH-REDIRECT,Documentation,log/CHANGE_LOG.md,修改,新增 SplashPage redirect 工作紀錄與 Log 保存期限檢查,Codex,,,,,無過期 Log 需刪除
-2026-07-16,16:22,PENPOT-SPLASH-REDIRECT,Documentation,log/CHANGE_HISTORY.csv,修改,新增 SplashPage redirect history rows,Codex,,,,,CHANGE_HISTORY.csv 已同步
-2026-07-16,16:29,PENPOT-SPLASH-EXACT,Frontend,frontend/lib/pages/splash_page.dart,修改,修正 SplashPage logo fill 文字對齊 status card 方角與內部元素絕對座標,Codex,,,,,flutter analyze --no-pub passed; flutter test --no-pub test/splash_page_test.dart passed
-2026-07-16,16:29,PENPOT-SPLASH-EXACT,Test,frontend/test/splash_page_test.dart,修改,新增 status dot text hint Web Mobile 座標驗證,Codex,,,,,3 tests passed
-2026-07-16,16:29,PENPOT-SPLASH-EXACT,Documentation,docs/UI_SPEC.md,修改,補充 SplashPage 精準 Penpot 修正細節,Codex,,,,,文件已同步
-2026-07-16,16:29,PENPOT-SPLASH-EXACT,Documentation,docs/TASKS.md,修改,新增並完成 SplashPage 精準修正插隊任務,Codex,,,,,Task status DONE
-2026-07-16,16:29,PENPOT-SPLASH-EXACT,Documentation,log/CHANGE_LOG.md,修改,新增 SplashPage exact 工作紀錄與 Log 保存期限檢查,Codex,,,,,無過期 Log 需刪除
-2026-07-16,16:29,PENPOT-SPLASH-EXACT,Documentation,log/CHANGE_HISTORY.csv,修改,新增 SplashPage exact history rows,Codex,,,,,CHANGE_HISTORY.csv 已同步
-2026-07-16,16:46,PENPOT-HOME,Frontend,frontend/lib/pages/home_page.dart,修改,重寫 HomePage 為 Penpot Web Companion Home 與 Mobile Companion Home responsive canvas,Codex,,,,,flutter analyze --no-pub passed; flutter test --no-pub test/home_page_test.dart passed
-2026-07-16,16:46,PENPOT-HOME,Frontend,frontend/lib/theme/app_colors.dart,修改,新增 home theme token 避免 page 直接宣告色碼,Codex,,,,,Theme token synchronized
-2026-07-16,16:46,PENPOT-HOME,Test,frontend/test/home_page_test.dart,修改,更新 HomePage 測試為 Penpot 結構與互動驗證,Codex,,,,,5 tests passed
-2026-07-16,16:46,PENPOT-HOME,Documentation,docs/UI_SPEC.md,修改,新增 Penpot HomePage Web App 畫面規格,Codex,,,,,文件已同步
-2026-07-16,16:46,PENPOT-HOME,Documentation,docs/TASKS.md,修改,新增並完成 HomePage 插隊任務狀態,Codex,,,,,Task status DONE
-2026-07-16,16:46,PENPOT-HOME,Documentation,log/CHANGE_LOG.md,修改,新增 HomePage 工作紀錄並完成 Log 保存期限檢查,Codex,,,,,無過期 Log 需刪除
-2026-07-16,16:46,PENPOT-HOME,Documentation,log/CHANGE_HISTORY.csv,修改,新增 HomePage history rows,Codex,,,,,CHANGE_HISTORY.csv 已同步
-2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Frontend,frontend/lib/pages/profile_page.dart,修改,改為 Penpot Profile Web Mobile responsive canvas 並保留既有 UserProfile 流程,Codex,,,,,flutter analyze --no-pub passed; profile_page_test passed
-2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Frontend,frontend/lib/widgets/profile/profile_penpot_canvas.dart,新增,拆出 Profile Penpot canvas widgets 與 Profile 專用畫面元件,Codex,,,,,profile_page_test passed
-2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Frontend,frontend/lib/pages/home_page.dart,修改,將 Web Companion Home canvas 外層縮放改為 BoxFit.cover 修正寬螢幕非滿版,Codex,,,,,home_page_test passed
-2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Frontend,frontend/lib/theme/app_colors.dart,修改,新增 profile theme tokens 集中管理 ProfilePage 顏色,Codex,,,,,Theme token synchronized
-2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Documentation,docs/UI_SPEC.md,修改,新增 Penpot ProfilePage 規格與 HomePage full-bleed 修正說明,Codex,,,,,文件已更新
-2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Documentation,docs/TASKS.md,修改,新增插隊任務並標記 TODO IN PROGRESS REVIEW DONE,Codex,,,,,Task status DONE
-2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Documentation,log/CHANGE_LOG.md,修改,新增本次工作紀錄與 Log 保存期限檢查結果,Codex,,,,,未刪除過期 Log
-2026-07-16,17:26,PENPOT-PROFILE-HOME-FULL,Documentation,log/CHANGE_HISTORY.csv,修改,新增本次 change history rows,Codex,,,,,CHANGE_HISTORY.csv 已更新
-2026-07-18,13:53,WEB-FIRST-RWD,Frontend,frontend/lib/layout/responsive_layout.dart,新增,建立 Mobile Tablet Desktop 共用 breakpoint 與 responsive content shell,Codex,否,否,是,否,Web-first RWD 核心設定
-2026-07-18,13:53,WEB-FIRST-RWD,Frontend,frontend/lib/pages/splash_page.dart,修改,保留 Mobile Penpot canvas 並將 Tablet Desktop 改為 flow layout,Codex,否,否,是,否,不縮放完整 Web canvas
-2026-07-18,13:53,WEB-FIRST-RWD,Frontend,frontend/lib/pages/login_page.dart,修改,登入頁依共用 breakpoint 切換 Mobile Tablet Desktop 版型,Codex,否,否,是,否,Web desktop 雙欄
-2026-07-18,13:53,WEB-FIRST-RWD,Frontend,frontend/lib/pages/register_page.dart,修改,註冊頁品牌與表單改為響應式 flow layout,Codex,否,否,是,否,Tablet compact form
-2026-07-18,13:53,WEB-FIRST-RWD,Frontend,frontend/lib/pages/home_page.dart,修改,新增 Tablet flow layout 並修正 900 950 1024px overflow,Codex,否,否,是,否,Desktop 從 1200px 啟用
-2026-07-18,13:53,WEB-FIRST-RWD,Frontend,frontend/lib/pages/profile_page.dart,修改,Profile Tablet Desktop 改用可捲動相對版面,Codex,否,否,是,否,Mobile 保留 Penpot canvas
-2026-07-18,13:53,WEB-FIRST-RWD,Frontend,frontend/lib/widgets/profile/profile_penpot_canvas.dart,修改,新增 Profile Web flow card 與響應式單雙欄欄位,Codex,否,否,是,否,移除 Web 整頁固定 canvas
-2026-07-18,13:53,WEB-FIRST-RWD,Test,frontend/test,修改,新增動態 resize 與 390 至 1920px viewport 測試並更新舊路由測試,Codex,否,否,是,否,完整 107 tests passed
-2026-07-18,13:53,WEB-FIRST-RWD,Documentation,README.md,修改,補上 Web-first 本機開發與 RWD 驗收設定,Codex,否,否,是,否,固定 localhost 5050
-2026-07-18,13:53,WEB-FIRST-RWD,Documentation,docs/PROJECT_SPEC.md,修改,定義 Web-first 優先順序與三平台相容原則,Codex,否,否,是,否,無需求擴張
-2026-07-18,13:53,WEB-FIRST-RWD,Documentation,docs/UI_SPEC.md,修改,同步共用 breakpoint Penpot 定位盤點與相對 layout 規範,Codex,否,否,是,否,取代舊 900px 規格
-2026-07-18,13:53,WEB-FIRST-RWD,Documentation,docs/CODING_STANDARD.md,修改,補上 ResponsiveLayout 使用與 Web 主版面禁止固定座標規範,Codex,否,否,是,否,Web resize 即時 reflow
-2026-07-18,13:53,WEB-FIRST-RWD,Documentation,docs/TASKS.md,修改,新增 Web-first RWD Task 並完成狀態流轉,Codex,否,否,否,否,TODO IN PROGRESS REVIEW DONE
-2026-07-18,13:53,WEB-FIRST-RWD,Documentation,log/CHANGE_LOG.md,修改,新增工作報告與一個月 Log 保存期限檢查,Codex,否,否,否,否,無過期 Log
-2026-07-18,13:53,WEB-FIRST-RWD,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Web-first RWD 異動歷史,Codex,否,否,否,否,Analyze Test Web build 通過
-2026-07-18,14:17,AUTH-REFRESH,Backend,backend/src/main/java/com/monsters/dto/auth/RefreshTokenRequest.java,新增,建立 refresh token request contract,Codex,是,否,否,否,refreshToken 必填
-2026-07-18,14:17,AUTH-REFRESH,Backend,backend/src/main/java/com/monsters/controller/auth/AuthController.java,修改,新增 refresh API 並讓 logout optional 撤銷 refresh token,Codex,是,否,否,否,相容無 body logout
-2026-07-18,14:17,AUTH-REFRESH,Backend,backend/src/main/java/com/monsters/service/auth/AuthService.java,修改,驗證並 rotation refresh token 後換發 LoginResponse,Codex,是,否,否,否,無效使用者回 401
-2026-07-18,14:17,AUTH-REFRESH,Backend,backend/src/main/java/com/monsters/service/auth/TokenRevocationService.java,修改,以 revoked_tokens 防止 refresh token 重複使用,Codex,是,否,否,否,保存 token hash
-2026-07-18,14:17,AUTH-REFRESH,Backend,backend/src/main/java/com/monsters/security/common/JwtTokenService.java,修改,新增 refresh token type 驗證,Codex,是,否,否,否,拒絕 access token
-2026-07-18,14:17,AUTH-REFRESH,Backend,backend/src/main/resources/application.yml,修改,refresh token 預設期限改為 2592000 秒,Codex,否,否,否,否,rolling 30 天
-2026-07-18,14:17,AUTH-REFRESH,Frontend,frontend/lib/core/network/api_client.dart,修改,401 時 single-flight refresh 並單次重試原 request,Codex,是,否,否,否,refresh request 不遞迴
-2026-07-18,14:17,AUTH-REFRESH,Frontend,frontend/lib/repositories/auth_repository.dart,修改,啟動先 rotation 並在失效時清除 session,Codex,是,否,否,否,修正 Profile 401
-2026-07-18,14:17,AUTH-REFRESH,Frontend,frontend/lib/providers/auth_provider.dart,修改,註冊 token refresher 與 session expired state,Codex,否,否,是,否,失效導頁 signal
-2026-07-18,14:17,AUTH-REFRESH,Frontend,frontend/lib/app.dart,修改,監聽 session expired 並導向登入頁,Codex,否,否,是,否,全域受保護流程
-2026-07-18,14:17,AUTH-REFRESH,Test,backend/src/test,修改,補齊 refresh rotation replay security controller 與 service 測試,Codex,是,否,否,否,Gradle test passed
-2026-07-18,14:17,AUTH-REFRESH,Test,frontend/test,修改,補齊 session rotation 401 retry concurrent single-flight 與失效導頁測試,Codex,是,否,是,否,86 tests passed
-2026-07-18,14:17,AUTH-REFRESH,Documentation,docs,修改,同步 API Database UI Project Decision Task 與環境設定,Codex,是,否,是,否,無 Migration
-2026-07-18,14:17,AUTH-REFRESH,Documentation,log/CHANGE_LOG.md,修改,新增 Token Refresh 工作報告與 Log 保存期限檢查,Codex,否,否,否,否,無過期 Log
-2026-07-18,14:17,AUTH-REFRESH,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Token Refresh 異動歷史,Codex,否,否,否,否,Backend Frontend Web build 通過
-2026-07-18,14:28,MERGE-PR59-PR60,Test,frontend/test/login_page_test.dart,修改,合併 RWD 帳號入口與 Auth 登出 session 測試,Codex,否,否,否,否,兩側測試皆保留
-2026-07-18,14:28,MERGE-PR59-PR60,Test,frontend/test/widget_test.dart,修改,合併啟動導頁 Auth 失效導頁與註冊路由測試,Codex,否,否,否,否,Flutter 115 tests passed
-2026-07-18,14:28,MERGE-PR59-PR60,Documentation,docs/TASKS.md,修改,整合 RWD 與 Token Refresh 任務並新增合併衝突處理狀態,Codex,否,否,否,否,TODO IN PROGRESS REVIEW DONE
-2026-07-18,14:28,MERGE-PR59-PR60,Documentation,log/CHANGE_LOG.md,修改,整合兩側工作報告並新增合併驗證紀錄,Codex,否,否,否,否,無過期 Log
-2026-07-18,14:28,MERGE-PR59-PR60,Documentation,log/CHANGE_HISTORY.csv,修改,保留兩側歷史並新增衝突處理紀錄,Codex,否,否,否,否,Analyze Test Web Backend build 通過
-2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Frontend,frontend/lib/pages/profile_page.dart,修改,使用內建日曆選擇生日並加入登出確認流程,Codex,否,否,是,否,方案 A 無新增套件
-2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Frontend,frontend/lib/widgets/profile/profile_penpot_canvas.dart,修改,Profile 三種斷點加入生日日期選擇與登出入口,Codex,否,否,是,否,根節點滿寬 stretch
-2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Frontend,frontend/lib/pages/home_page.dart,修改,修正 Tablet Desktop 外層未撐滿 viewport 的右側留白,Codex,否,否,是,否,背景與導覽滿寬
-2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Frontend,frontend/lib/pages/annoyance_chat_page.dart,修改,串接 Penpot 響應式 Annoyance shell 並保留狀態機,Codex,否,否,是,否,Phase 3 無獎勵
-2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Frontend,frontend/lib/widgets/annoyance/annoyance_penpot_shell.dart,新增,建立 Mobile Tablet Desktop Annoyance Penpot shell,Codex,否,否,是,否,滿寬相對 layout
-2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Frontend,frontend/lib/theme/app_colors.dart,修改,新增 Annoyance Penpot 色票 token,Codex,否,否,是,否,頁面不硬編碼色票
-2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Test,frontend/test,修改,補齊日曆登出滿寬與 390 至 1920px RWD 測試,Codex,否,否,是,否,完整 124 tests passed
-2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Documentation,docs/PROJECT_SPEC.md,修改,補上生日內建日曆與個人資料頁登出需求,Codex,否,否,是,否,功能規格同步
-2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Documentation,docs/UI_SPEC.md,修改,同步 Profile Annoyance Penpot 與滿寬 RWD 規範,Codex,否,否,是,否,含 viewport 測試矩陣
-2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Documentation,docs/DECISIONS.md,修改,記錄方案 A 使用 Flutter 內建日期選擇器,Codex,否,否,是,否,不新增第三方套件
-2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Documentation,docs/TASKS.md,修改,記錄任務 TODO 至 DONE 狀態,Codex,否,否,是,否,DoR DoD 已檢查
-2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Documentation,log/CHANGE_LOG.md,修改,新增工作報告與 Log 保存期限檢查,Codex,否,否,否,否,無過期 Log
-2026-07-18,15:03,PROFILE-ANNOYANCE-PENPOT-RWD,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Profile Annoyance Penpot RWD 異動歷史,Codex,否,否,否,否,Analyze Test Web build 通過
-2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Frontend,frontend/lib/layout/responsive_layout.dart,修改,新增固定 Penpot canvas 等比例滿寬與垂直捲動容器,Codex,否,否,是,否,修正 391 至 599px 右側留白
-2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Frontend,frontend/lib/pages/home_page.dart,修改,Home Mobile 套用滿寬 ResponsiveFixedCanvas,Codex,否,否,是,否,500px 瀏覽器實測通過
-2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Frontend,frontend/lib/pages/profile_page.dart,修改,Profile Mobile 套用滿寬 ResponsiveFixedCanvas,Codex,否,否,是,否,500 與 599px 測試通過
-2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Frontend,frontend/lib/widgets/annoyance/mood_score_selector.dart,修改,分數選擇改為 1 至 5 分圖片卡片,Codex,否,否,是,否,保留整數 API contract
-2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Asset,frontend/assets/images,新增,加入五張 moodPoint 分數圖片,Codex,否,否,是,否,156 x 156 RGBA PNG
-2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Database,database/migrations/20260711_01_add_annoyance_type_codes_and_seed.sql,修改,annoyance type seed 明確寫入 timestamp,Codex,否,是,否,否,使用 CURRENT_TIMESTAMP
-2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Database,database/migrations/20260711_03_make_mood_score_unique.sql,修改,mood score seed 明確寫入 timestamp,Codex,否,是,否,否,使用 CURRENT_TIMESTAMP
-2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Test,frontend/test,修改,補齊 500 599px 滿寬與 320px 分數圖片測試,Codex,否,否,是,否,完整 129 tests passed
-2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Documentation,docs,修改,同步 Project UI Database Decision 與 Task 規格,Codex,否,是,是,否,API 無異動
-2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Documentation,log/CHANGE_LOG.md,修改,新增工作報告與 Log 保存期限檢查,Codex,否,否,否,否,無過期 Log
-2026-07-18,15:29,MOBILE-FULL-WIDTH-MOOD-SCORE,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Mobile 滿寬與分數圖片異動歷史,Codex,否,否,否,否,Analyze Test Web build 通過
-2026-07-18,18:31,SHARED-NAVIGATION-TRANSITION,Frontend,frontend/lib/widgets/navigation/app_navigation.dart,新增,建立 Desktop 共用完整 Navbar 與 Mobile 共用底部選單,Codex,否,否,是,否,Web 方案 A 與 Mobile 方案 1改通知
-2026-07-18,18:31,SHARED-NAVIGATION-TRANSITION,Frontend,frontend/lib/pages,修改,Home Profile Annoyance 串接共用導覽且 Mobile 右上角改通知,Codex,否,否,是,否,我的為正式 Profile 入口
-2026-07-18,18:31,SHARED-NAVIGATION-TRANSITION,Frontend,frontend/lib/routes/app_router.dart,修改,一般前進直接換頁且返回按鈕向右退出,Codex,否,否,是,否,reverse transition 220ms
-2026-07-18,18:31,SHARED-NAVIGATION-TRANSITION,Test,frontend/test,修改,補齊通知共用 Navbar 導頁 RWD 與返回方向測試,Codex,否,否,是,否,完整 131 tests passed
-2026-07-18,18:31,SHARED-NAVIGATION-TRANSITION,Documentation,docs,修改,同步 Project UI Decision 與 Task 導覽切換規格,Codex,否,否,是,否,API Database 無異動
-2026-07-18,18:31,SHARED-NAVIGATION-TRANSITION,Documentation,log/CHANGE_LOG.md,修改,新增工作報告與 Log 保存期限檢查,Codex,否,否,否,否,無過期 Log
-2026-07-18,18:31,SHARED-NAVIGATION-TRANSITION,Documentation,log/CHANGE_HISTORY.csv,修改,新增共用導覽與頁面切換異動歷史,Codex,否,否,否,否,Analyze Test Web build 通過
-2026-07-18,18:38,PROFILE-ACTION-BACKGROUND,Frontend,frontend/lib/theme/app_colors.dart,修改,新增 Profile 操作列淡黃色背景 token,Codex,否,否,是,否,與 Annoyance #FFFDD2 一致
-2026-07-18,18:38,PROFILE-ACTION-BACKGROUND,Frontend,frontend/lib/widgets/profile/profile_penpot_canvas.dart,修改,個人資料操作列套用新增煩惱相同底色,Codex,否,否,是,否,Navbar 與內容卡片不變
-2026-07-18,18:38,PROFILE-ACTION-BACKGROUND,Test,frontend/test/profile_page_test.dart,修改,驗證 Profile 與 Annoyance 背景色一致,Codex,否,否,是,否,完整 132 tests passed
-2026-07-18,18:38,PROFILE-ACTION-BACKGROUND,Documentation,docs,修改,同步 UI Task 與 Log,Codex,否,否,是,否,API Database 無異動
-2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Design,Penpot WEB Diary Flow,修改,確認頁改為儲存日記且完成頁移除假獎勵並標示 Future Reward 為 Phase 6,Codex,否,否,是,否,Web-first 第一驗收來源且參考已完成頁面樣式
-2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Design,Penpot APP Diary Flow,修改,同步 Mobile 儲存按鈕完成頁與未來獎勵 Phase 邊界,Codex,否,否,是,否,Mobile 畫板保留供 Web 驗收後適配
-2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Documentation,docs/PROJECT_SPEC.md,修改,補齊 Diary 流程 reward 邊界與 Penpot Web-first 原則,Codex,是,否,是,否,後續 UI Phase 均採 Penpot design-first
-2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Documentation,docs/API_SPEC.md,修改,補齊 Diary multipart 分頁更新分享媒體與錯誤 contract,Codex,是,否,否,否,Backend 尚未實作
-2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Documentation,docs/UI_SPEC.md,修改,補齊 Diary Penpot 畫板狀態機共用樣式與 RWD 驗收,Codex,否,否,是,否,Web 先於 Mobile
-2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Documentation,docs/DECISIONS.md,修改,記錄全部方案 A 與 Penpot design-first Web-first 決策,Codex,是,否,是,否,繪圖 optional 且 reward null
-2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Documentation,docs/TASKS.md,修改,更新 Phase 4 contract 任務與後續 Phase Penpot 檢查,Codex,否,否,是,否,TODO IN PROGRESS REVIEW DONE
-2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Documentation,log/CHANGE_LOG.md,修改,新增 Phase 4 準備工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
-2026-07-18,22:21,PHASE4-DIARY-CONTRACT,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Phase 4 contract 與 Penpot 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改
-2026-07-19,07:48,PHASE4-DIARY-CORE,Backend,backend/src/main/java/com/monsters/entity/entry/Entry.java,修改,新增 Diary factory update 與 Entry type invariant,Codex,否,否,否,否,共用 Entry 不新增 Diary Entity
-2026-07-19,07:48,PHASE4-DIARY-CORE,Backend,backend/src/main/java/com/monsters/dto/diary,新增,建立 Diary response media 與 record method DTO,Codex,是,否,否,否,Phase 4 reward 固定 null
-2026-07-19,07:48,PHASE4-DIARY-CORE,Backend,backend/src/main/java/com/monsters/mapper/diary/DiaryMapper.java,新增,建立 Diary response 與 active media mapping,Codex,是,否,否,否,不輸出 private R2 object key
-2026-07-19,07:48,PHASE4-DIARY-CORE,Backend,backend/src/main/java/com/monsters/service/diary/DiaryService.java,新增,建立 owner lookup Mood lookup response 與主要內容驗證,Codex,是,否,否,否,沿用共用 Entry repositories
-2026-07-19,07:48,PHASE4-DIARY-CORE,Backend,backend/src/main/java/com/monsters/controller/diary/DiaryController.java,新增,建立 api diaries Controller 骨架,Codex,是,否,否,否,尚無 endpoint
-2026-07-19,07:48,PHASE4-DIARY-CORE,Test,backend/src/test/java/com/monsters,新增,新增 Diary Controller Mapper Service 單元測試,Codex,是,否,否,否,targeted tests 通過
-2026-07-19,07:48,PHASE4-DIARY-CORE,Test,backend/src/test/java/com/monsters/entity/entry/EntryTest.java,修改,驗證 Diary safe defaults update 與 type invariant,Codex,否,否,否,否,
-2026-07-19,07:48,PHASE4-DIARY-CORE,Test,backend/src/test/java/com/monsters/entity/entry/MoodSchemaTest.java,修改,同步既有 migration timestamp seed assertion,Codex,否,否,否,否,未修改 SQL 行為
-2026-07-19,07:48,PHASE4-DIARY-CORE,Documentation,docs/DATABASE_SPEC.md,修改,補充 Diary Entry media 與 Mood lookup 規則,Codex,否,否,否,否,無 schema 或 Migration 異動
-2026-07-19,07:48,PHASE4-DIARY-CORE,Documentation,docs/TASKS.md,修改,記錄 Diary Core Task 狀態與完成範圍,Codex,否,否,否,否,TODO IN PROGRESS REVIEW DONE
-2026-07-19,07:48,PHASE4-DIARY-CORE,Documentation,log/CHANGE_LOG.md,修改,新增 Diary Core 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
-2026-07-19,07:48,PHASE4-DIARY-CORE,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Diary Core 異動歷史,Codex,否,否,否,否,Backend 216 tests passed
-2026-07-19,08:14,PHASE4-DIARY-CREATE,Backend,backend/src/main/java/com/monsters/dto/diary/CreateDiaryRequest.java,新增,建立 Diary create request validation 與分享預設,Codex,是,否,否,否,score 1 至 5
-2026-07-19,08:14,PHASE4-DIARY-CREATE,Backend,backend/src/main/java/com/monsters/service/diary,新增與修改,建立 Diary multipart orchestration transaction persistence 與 R2 cleanup,Codex,是,否,否,否,沿用 private entry media storage
-2026-07-19,08:14,PHASE4-DIARY-CREATE,Backend,backend/src/main/java/com/monsters/controller/diary/DiaryController.java,修改,實作 POST api diaries endpoint,Codex,是,否,否,否,成功回傳 HTTP 201
-2026-07-19,08:14,PHASE4-DIARY-CREATE,Test,backend/src/test/java/com/monsters,新增與修改,驗證 request controller service transaction media 與 cleanup,Codex,是,否,否,否,Backend 225 tests passed
-2026-07-19,08:14,PHASE4-DIARY-CREATE,Documentation,docs/TASKS.md,修改,記錄新增日記 API TODO 至 DONE 狀態,Codex,否,否,否,否,下一個 Task 為查詢日記 API
-2026-07-19,08:14,PHASE4-DIARY-CREATE,Documentation,log/CHANGE_LOG.md,修改,新增 Diary create 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
-2026-07-19,08:14,PHASE4-DIARY-CREATE,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Diary create 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改
-2026-07-19,08:31,PHASE4-DIARY-QUERY,Backend,backend/src/main/java/com/monsters/controller/diary/DiaryController.java,修改,實作 Diary 列表與單筆 GET endpoints,Codex,是,否,否,否,成功回傳 HTTP 200
-2026-07-19,08:31,PHASE4-DIARY-QUERY,Backend,backend/src/main/java/com/monsters/service/diary/DiaryService.java,修改,建立 owner scoped 分頁篩選排序與批次 response mapping,Codex,是,否,否,否,空列表不執行 lookup 查詢
-2026-07-19,08:31,PHASE4-DIARY-QUERY,Backend,backend/src/main/java/com/monsters/repository/entry/EntryRepository.java,修改,將共用分頁方法更名為 findEntryPage,Codex,是,否,否,否,Annoyance 與 Diary 共用 JPQL
-2026-07-19,08:31,PHASE4-DIARY-QUERY,Test,backend/src/test/java/com/monsters,修改,驗證 Repository Service Controller 與 Annoyance regression,Codex,是,否,否,否,Backend 232 tests passed
-2026-07-19,08:31,PHASE4-DIARY-QUERY,Documentation,docs/DATABASE_SPEC.md,修改,補充 Entry 分頁與穩定次排序規則,Codex,否,否,否,否,無 schema 或 Migration 異動
-2026-07-19,08:31,PHASE4-DIARY-QUERY,Documentation,docs/TASKS.md,修改,記錄查詢日記 API TODO 至 DONE 狀態,Codex,否,否,否,否,下一個 Task 為修改日記 API
-2026-07-19,08:31,PHASE4-DIARY-QUERY,Documentation,log/CHANGE_LOG.md,修改,新增 Diary query 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
-2026-07-19,08:31,PHASE4-DIARY-QUERY,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Diary query 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改
 2026-07-22,09:05,PHASE4-DIARY-UPDATE,Backend,backend/src/main/java/com/monsters/controller/diary/DiaryController.java,修改,實作 PUT api diaries multipart 更新 endpoint,Codex,是,否,否,否,成功回傳 HTTP 200
 2026-07-22,09:05,PHASE4-DIARY-UPDATE,Backend,backend/src/main/java/com/monsters/dto/diary/UpdateDiaryRequest.java,新增,建立 Diary 完整修改 request 與既有媒體 ID 欄位,Codex,是,否,否,否,score 1 至 5
 2026-07-22,09:05,PHASE4-DIARY-UPDATE,Backend,backend/src/main/java/com/monsters/service/diary,新增與修改,建立 Diary 媒體保留替換軟刪除與 R2 清理流程,Codex,是,否,否,否,交易成功後才清理舊物件

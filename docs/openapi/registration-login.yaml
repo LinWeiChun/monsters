@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Monsters Registration and Login Contract
-  version: 0.6.0
+  version: 0.7.0
 paths:
   /api/v1/auth/registration-policy:
     get:
@@ -218,6 +218,36 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiEnvelope"
+  /api/v1/auth/google-logins:
+    post:
+      summary: Authenticate by an exactly linked Google subject or require explicit linking
+      operationId: loginMemberByGoogle
+      parameters:
+        - $ref: "#/components/parameters/SessionTransportHeader"
+        - $ref: "#/components/parameters/CsrfProtectionHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoogleLoginRequest"
+      responses:
+        "200":
+          description: Authenticated session, eligibility continuation, or explicit-link requirement
+          headers:
+            Set-Cookie:
+              description: Web Cookie transport only; sets or clears the HttpOnly refresh cookie.
+              schema: {type: string}
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/AuthenticatedLoginEnvelope"
+                  - $ref: "#/components/schemas/ContinuationLoginEnvelope"
+                  - $ref: "#/components/schemas/GoogleAccountLinkRequiredEnvelope"
+        "400": {description: Request validation failed}
+        "401": {description: Google ID Token invalid or linked member unavailable}
+        "403": {description: Web Cookie transport Origin or CSRF proof was rejected}
   /api/v1/auth/sessions:
     get:
       summary: List the authenticated member's active device sessions
@@ -254,6 +284,30 @@ paths:
               schema: {$ref: "#/components/schemas/SessionReauthenticationEnvelope"}
         "401": {description: Password verification failed}
         "403": {description: Web Cookie transport Origin or CSRF proof was rejected}
+  /api/v1/auth/google-account-links:
+    post:
+      summary: Explicitly link Google after purpose-bound existing-method reauthentication
+      operationId: linkGoogleAccount
+      security: [{bearerAuth: []}]
+      parameters:
+        - {$ref: "#/components/parameters/ReauthenticationCredentialHeader"}
+        - {$ref: "#/components/parameters/SessionTransportHeader"}
+        - {$ref: "#/components/parameters/CsrfProtectionHeader"}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/GoogleAccountLinkRequest"}
+      responses:
+        "200":
+          description: Google linked; current session preserved and other sessions revoked
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/GoogleAccountLinkedEnvelope"}
+        "400": {description: Explicit confirmation or request validation failed}
+        "401": {description: Google token or LOGIN_METHOD_LINK reauthentication invalid}
+        "403": {description: Web Cookie transport Origin or CSRF proof was rejected}
+        "409": {description: Google subject, provider, or verified Email conflicts}
   /api/v1/auth/logout:
     post:
       summary: Revoke only the current session family
@@ -637,6 +691,59 @@ components:
           type: string
           format: password
           writeOnly: true
+    GoogleLoginRequest:
+      type: object
+      additionalProperties: false
+      required: [idToken]
+      properties:
+        idToken:
+          type: string
+          minLength: 1
+          maxLength: 8192
+          writeOnly: true
+          description: Google ID Token verified only by the Backend; never logged or persisted.
+    GoogleAccountLinkRequiredData:
+      type: object
+      additionalProperties: false
+      required: [nextAction, expiresIn]
+      properties:
+        nextAction: {type: string, const: LINK_GOOGLE_ACCOUNT}
+        expiresIn: {type: integer, const: 0}
+    GoogleAccountLinkRequiredEnvelope:
+      allOf:
+        - {$ref: "#/components/schemas/ApiEnvelope"}
+        - type: object
+          properties:
+            code: {const: GOOGLE_ACCOUNT_LINK_REQUIRED}
+            data: {$ref: "#/components/schemas/GoogleAccountLinkRequiredData"}
+    GoogleAccountLinkRequest:
+      type: object
+      additionalProperties: false
+      required: [idToken, confirmed]
+      properties:
+        idToken:
+          type: string
+          minLength: 1
+          maxLength: 8192
+          writeOnly: true
+        confirmed:
+          type: boolean
+          const: true
+    GoogleAccountLinkData:
+      type: object
+      additionalProperties: false
+      required: [linked, currentSessionPreserved, otherSessionsRevoked]
+      properties:
+        linked: {type: boolean, const: true}
+        currentSessionPreserved: {type: boolean, const: true}
+        otherSessionsRevoked: {type: boolean}
+    GoogleAccountLinkedEnvelope:
+      allOf:
+        - {$ref: "#/components/schemas/ApiEnvelope"}
+        - type: object
+          properties:
+            code: {const: GOOGLE_ACCOUNT_LINKED}
+            data: {$ref: "#/components/schemas/GoogleAccountLinkData"}
     LegacyLoginRequest:
       type: object
       additionalProperties: false
@@ -739,13 +846,17 @@ components:
       required: [password]
       properties:
         password: {type: string, format: password, writeOnly: true, maxLength: 1024}
+        purpose:
+          type: string
+          enum: [SESSION_MANAGEMENT, LOGIN_METHOD_LINK]
+          default: SESSION_MANAGEMENT
     SessionReauthenticationData:
       type: object
       additionalProperties: false
       required: [credential, purpose, expiresIn]
       properties:
         credential: {type: string, readOnly: true}
-        purpose: {type: string, const: SESSION_MANAGEMENT}
+        purpose: {type: string, enum: [SESSION_MANAGEMENT, LOGIN_METHOD_LINK]}
         expiresIn: {type: integer, const: 300}
     SessionReauthenticationEnvelope:
       allOf:

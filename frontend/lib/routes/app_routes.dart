@@ -14,6 +14,7 @@ class AppRoute {
   static const eligibility = 'eligibility';
   static const guardianConsent = 'guardianConsent';
   static const sessions = 'sessions';
+  static const googleAccountLink = 'googleAccountLink';
 }
 
 class AppPath {
@@ -32,4 +33,5 @@ class AppPath {
   static const eligibility = '/complete-eligibility';
   static const guardianConsent = '/guardian-consent';
   static const sessions = '/profile/sessions';
+  static const googleAccountLink = '/link-google-account';
 }

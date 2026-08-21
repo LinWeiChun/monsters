@@ -468,6 +468,7 @@ REST API
 | Repository | `frontend/lib/repositories/auth_repository.dart` |
 | Google Sign-In Service | `frontend/lib/services/google_sign_in_service.dart` |
 | Web Google Sign-In Button | `frontend/lib/widgets/auth/google_sign_in_web_button.dart` |
+| Google Account Link Page | `frontend/lib/pages/google_account_link_page.dart` |
 | Session Store | `frontend/lib/repositories/auth_session_store.dart` |
 | Model | `frontend/lib/models/auth_user.dart`、`frontend/lib/models/auth_user.g.dart`、`frontend/lib/models/login_result.dart`、`frontend/lib/models/login_result.g.dart` |
 
@@ -479,7 +480,7 @@ REST API
 - 登入頁不得直接呼叫 Dio。
 - 登入頁不得直接保存 JWT、Refresh Token 或密碼至 SharedPreferences；登入狀態保存必須集中由 `AuthRepository` 與 `SessionCredentialStore` 管理。
 - `AUTH_CONTINUATION_REQUIRED` 不視為已登入；`LoginPage` 不導向首頁，`AuthRepository` 不設定 Authorization、不保存 continuation credential，並清除可能殘留的一般 Session。
-- `nextAction` 只用於選擇 Email 驗證、資格、帳號恢復、停權處理或刪除處理畫面；第一個對應流程尚未完成時顯示安全提示，不顯示 credential。
+- `nextAction` 用於選擇 Email 驗證、資格、Google明確連結、帳號恢復、停權處理或刪除處理畫面；`LINK_GOOGLE_ACCOUNT`不含continuation credential，必須導向`/link-google-account`。
 - `AuthSessionStore` 必須改為平台 `SessionCredentialStore`：Web Refresh Cookie 由 Backend 管理，App Refresh Token 進 Keychain／Keystore；Access Token 只放記憶體，不得序列化完整 `LoginResult`。
 - `SessionCredentialStore`固定提供Web Cookie、Android Keystore與iOS Keychain三個Adapter；Web不讀寫Refresh Credential，Android最低API 24並以compileSdk 36及NDK 27.0.12077973建置，iOS Keychain項目不啟用iCloud同步且不遷移至其他裝置。
 - Web登入與refresh必須送`X-Session-Transport: COOKIE`、`X-CSRF-Protection: 1`並啟用瀏覽器credentials；App維持request body的`refreshCredential`契約。
@@ -491,11 +492,24 @@ REST API
 - 一般登出需呼叫 `AuthController.logout()`，由Repository呼叫`POST /api/v1/auth/logout`且不傳Refresh Credential，再清除`ApiClient` Authorization header與本地session。
 - 密碼、Token、完整 Login Result 與私人會員資料不得保存至 SharedPreferences。
 - Google 登入不得假造 Google ID Token、不得沿用舊系統空密碼登入流程、不得在前端自行驗證後傳入 Google 使用者資料。
-- Google 登入成功後需呼叫 `POST /api/auth/google-login`，由後端驗證 Google ID Token 並回傳本系統 `LoginResult`。
+- Google登入一律呼叫`POST /api/v1/auth/google-logins`，不得再呼叫deprecated `/api/auth/google-login`；由Backend驗證Google ID Token並回傳本系統`LoginResult`或`GOOGLE_ACCOUNT_LINK_REQUIRED`。
 - Web 版需使用 Google Identity Services 官方按鈕；Android / iOS 可使用共用 Flutter 按鈕觸發 Google SDK。
 - Web 版 Google SDK 初始化只傳 `GOOGLE_CLIENT_ID`，不得傳 `serverClientId`，避免官方按鈕停留在 `Getting ready` 狀態。
 - Web 本機測試需使用固定 origin `http://localhost:5050`，並透過 `frontend/tool/run_web_local.sh` 或 Windows `frontend/tool/run_web_local.ps1` 啟動，避免每次重啟隨機 port 造成 Google OAuth origin mismatch。
 - Google 登入成功後使用相同 server session 與 `SessionCredentialStore`；同 Email 既有會員必須先明確連結，登出時撤銷 server session、清除本機 Credential 並嘗試執行 Google SDK sign-out。
+
+Google既有會員明確連結流程：
+
+- `/link-google-account`只在`nextAction = LINK_GOOGLE_ACCOUNT`時進入；直接開啟且沒有流程狀態時只顯示既有帳號登入，不保存或回顯Google Email。
+- 流程固定為「登入既有Email／密碼帳號 → 再次輸入目前密碼取得`LOGIN_METHOD_LINK` reauth → 重新選擇Google帳號並明確確認 → 成功或通用衝突」。登入與reauth欄位不得共用或保存密碼。
+- App確認步驟呼叫Google SDK重新取得ID Token；Web使用Google Identity Services官方按鈕與authentication event完成確認，不得以自製按鈕模擬官方流程。
+- Flutter只在記憶體短暫持有reauth credential；Google ID Token取得後立即送出，不寫入Provider State、SharedPreferences、Log、錯誤訊息或畫面。
+- `GOOGLE_ACCOUNT_LINK_CONFLICT`只顯示「無法連結，沒有變更任何登入方式」，不得揭露`sub`、Email是否屬其他會員或衝突會員資料。重新開始必須重新輸入密碼取得新credential。
+- 取消在未登入前回登入頁；既有帳號登入後取消則保留目前Session並回首頁。兩者都嘗試Google SDK sign-out，且不呼叫link API、不建立OAuth關聯。
+- 成功畫面明示目前裝置保持登入、其他裝置依安全規則登出；按鈕只導向首頁，不在Client自行撤銷Session。
+- RWD使用單欄、最大寬度560px；390、600、1199與1440寬度必須無overflow。小高度可由頁面安全捲動承載表單，表單與按鈕最小高度54px。
+- Penpot Web畫板：`Account / Web / 13 Google Link Required / 需連結`（`e1ebae12-46fb-80ec-8008-83cfeaadd62b`）、14 Reauth（`e1ebae12-46fb-80ec-8008-83d05bae1967`）、15 Confirm（`e1ebae12-46fb-80ec-8008-83d05c0ccbce`）、16 Success（`e1ebae12-46fb-80ec-8008-83d05c7d113c`）、17 Conflict（`e1ebae12-46fb-80ec-8008-83d05cca393c`）。
+- Penpot Mobile畫板：`Account / Mobile / 13 Google Link Required / 需連結`（`e1ebae12-46fb-80ec-8008-83d100ff4cf8`）、14 Reauth（`e1ebae12-46fb-80ec-8008-83d101253e62`）、15 Confirm（`e1ebae12-46fb-80ec-8008-83d1014399f7`）、16 Success（`e1ebae12-46fb-80ec-8008-83d10167f41d`）、17 Conflict（`e1ebae12-46fb-80ec-8008-83d1018bf9d2`）；10個畫板均已通過parent與visible descendant containment檢查。
 
 ## Flutter Register Page 實作規範
 

@@ -3,6 +3,7 @@ package com.monsters.service.session;
 import com.monsters.dto.auth.SessionReauthenticationResponse;
 import com.monsters.entity.audit.SessionSecurityAudit;
 import com.monsters.entity.outbox.OutboxEvent;
+import com.monsters.entity.session.ReauthenticationPurpose;
 import com.monsters.entity.session.SessionReauthenticationCredential;
 import com.monsters.entity.session.UserSession;
 import com.monsters.exception.common.BusinessException;
@@ -26,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class DeviceSessionCommandService {
 
     public static final String REAUTHENTICATION_HEADER = "X-Reauthentication-Credential";
-    private static final String PURPOSE = "SESSION_MANAGEMENT";
     private static final long REAUTHENTICATION_SECONDS = 300;
     private static final String SESSION_REAUTHENTICATED = "SESSION_REAUTHENTICATED";
     private static final String SESSION_REVOKED = "SESSION_REVOKED";
@@ -69,6 +69,21 @@ public class DeviceSessionCommandService {
             String currentSessionId,
             String password
     ) {
+        return reauthenticate(
+                userId,
+                currentSessionId,
+                password,
+                ReauthenticationPurpose.SESSION_MANAGEMENT
+        );
+    }
+
+    @Transactional
+    public SessionReauthenticationResponse reauthenticate(
+            Long userId,
+            String currentSessionId,
+            String password,
+            ReauthenticationPurpose purpose
+    ) {
         var user = userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(this::invalidReauthentication);
         var passwordCredential = userCredentialRepository.findByUser(user)
@@ -82,14 +97,14 @@ public class DeviceSessionCommandService {
         reauthenticationRepository.save(new SessionReauthenticationCredential(
                 session,
                 credentialGenerator.hash(credential),
-                PURPOSE,
+                purpose.name(),
                 now,
                 now.plusSeconds(REAUTHENTICATION_SECONDS)
         ));
         recordEvent(session, SESSION_REAUTHENTICATED, now);
         return new SessionReauthenticationResponse(
                 credential,
-                PURPOSE,
+                purpose.name(),
                 REAUTHENTICATION_SECONDS
         );
     }
@@ -106,7 +121,12 @@ public class DeviceSessionCommandService {
             String targetSessionId,
             String reauthenticationCredential
     ) {
-        requireReauthentication(userId, currentSessionId, reauthenticationCredential);
+        requireReauthentication(
+                userId,
+                currentSessionId,
+                reauthenticationCredential,
+                ReauthenticationPurpose.SESSION_MANAGEMENT
+        );
         if (currentSessionId.equals(targetSessionId)) {
             throw new BusinessException(
                     HttpStatus.BAD_REQUEST,
@@ -129,7 +149,12 @@ public class DeviceSessionCommandService {
             String currentSessionId,
             String reauthenticationCredential
     ) {
-        requireReauthentication(userId, currentSessionId, reauthenticationCredential);
+        requireReauthentication(
+                userId,
+                currentSessionId,
+                reauthenticationCredential,
+                ReauthenticationPurpose.SESSION_MANAGEMENT
+        );
         revokeAll(
                 sessionRepository.findAllByUser_IdAndRevokedAtIsNullAndPublicIdNot(
                         userId,
@@ -145,31 +170,80 @@ public class DeviceSessionCommandService {
             String currentSessionId,
             String reauthenticationCredential
     ) {
-        requireReauthentication(userId, currentSessionId, reauthenticationCredential);
+        requireReauthentication(
+                userId,
+                currentSessionId,
+                reauthenticationCredential,
+                ReauthenticationPurpose.SESSION_MANAGEMENT
+        );
         revokeAll(
                 sessionRepository.findAllByUser_IdAndRevokedAtIsNull(userId),
                 "ALL_SESSIONS_LOGOUT"
         );
     }
 
+    @Transactional
+    public UserSession consumeReauthentication(
+            Long userId,
+            String currentSessionId,
+            String presentedCredential,
+            ReauthenticationPurpose purpose
+    ) {
+        SessionReauthenticationCredential credential = validatedReauthentication(
+                userId,
+                currentSessionId,
+                presentedCredential,
+                purpose,
+                true
+        );
+        credential.revoke(now());
+        return credential.getSession();
+    }
+
+    @Transactional
+    public boolean revokeOthersAfterLoginMethodChange(Long userId, String currentSessionId) {
+        List<UserSession> sessions = sessionRepository
+                .findAllByUser_IdAndRevokedAtIsNullAndPublicIdNot(userId, currentSessionId);
+        revokeAll(sessions, "LOGIN_METHOD_CHANGED");
+        return !sessions.isEmpty();
+    }
+
     private void requireReauthentication(
             Long userId,
             String currentSessionId,
-            String presentedCredential
+            String presentedCredential,
+            ReauthenticationPurpose purpose
+    ) {
+        validatedReauthentication(userId, currentSessionId, presentedCredential, purpose, false);
+    }
+
+    private SessionReauthenticationCredential validatedReauthentication(
+            Long userId,
+            String currentSessionId,
+            String presentedCredential,
+            ReauthenticationPurpose purpose,
+            boolean lockForUpdate
     ) {
         if (presentedCredential == null || presentedCredential.isBlank()) {
             throw reauthenticationRequired();
         }
-        SessionReauthenticationCredential credential = reauthenticationRepository
-                .findByTokenHashAndPurpose(credentialGenerator.hash(presentedCredential), PURPOSE)
+        String tokenHash = credentialGenerator.hash(presentedCredential);
+        SessionReauthenticationCredential credential = (lockForUpdate
+                ? reauthenticationRepository.findForUpdateByTokenHashAndPurpose(
+                        tokenHash,
+                        purpose.name()
+                )
+                : reauthenticationRepository.findByTokenHashAndPurpose(tokenHash, purpose.name()))
                 .orElseThrow(this::reauthenticationRequired);
         UserSession session = credential.getSession();
-        if (!credential.isUsableAt(now())
+        LocalDateTime now = now();
+        if (!credential.isUsableAt(now)
                 || !session.getPublicId().equals(currentSessionId)
                 || !session.getUser().getId().equals(userId)
-                || !session.isActiveAt(now())) {
+                || !session.isActiveAt(now)) {
             throw reauthenticationRequired();
         }
+        return credential;
     }
 
     private UserSession activeOwnedSession(Long userId, String sessionId) {
@@ -219,7 +293,7 @@ public class DeviceSessionCommandService {
         return new BusinessException(
                 HttpStatus.UNAUTHORIZED,
                 "SESSION_REAUTHENTICATION_REQUIRED",
-                "A recent session-management reauthentication is required"
+                "A recent purpose-limited reauthentication is required"
         );
     }
 

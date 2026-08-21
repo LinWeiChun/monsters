@@ -48,6 +48,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       final nextResult = next.loginResult;
       if (nextResult?.isAuthenticated == true && previousResult != nextResult) {
         context.goNamed(AppRoute.home);
+      } else if (nextResult?.requiresGoogleAccountLink == true &&
+          previousResult != nextResult) {
+        context.goNamed(AppRoute.googleAccountLink);
       } else if (nextResult?.nextAction == 'COMPLETE_ELIGIBILITY' &&
           nextResult?.continuationCredential != null &&
           previousResult != nextResult) {

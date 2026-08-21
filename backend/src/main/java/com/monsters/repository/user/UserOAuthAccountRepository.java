@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface UserOAuthAccountRepository extends JpaRepository<UserOAuthAccount, Long> {
 
     Optional<UserOAuthAccount> findByProviderAndProviderUserId(String provider, String providerUserId);
+
+    Optional<UserOAuthAccount> findByUser_IdAndProvider(Long userId, String provider);
 }

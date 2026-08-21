@@ -19,6 +19,7 @@ import com.monsters.dto.auth.ResetPasswordRequest;
 import com.monsters.dto.auth.VerifiedEmailLoginRequest;
 import com.monsters.dto.auth.VerifiedEmailLoginResponse;
 import com.monsters.exception.common.ConflictException;
+import com.monsters.exception.common.BusinessException;
 import com.monsters.exception.common.UnauthorizedException;
 import com.monsters.security.common.GoogleIdTokenVerifier;
 import com.monsters.security.common.GoogleUserInfo;
@@ -409,7 +410,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void googleLoginShouldLinkExistingEmailUser() {
+    void googleLoginShouldRequireExplicitLinkForExistingEmailUser() {
         GoogleLoginRequest request = new GoogleLoginRequest("google-id-token");
         GoogleUserInfo googleUser = new GoogleUserInfo("google-sub", "user@example.com", "Wei", null);
         User user = new User("wei_account", "user@example.com", "Wei");
@@ -419,14 +420,10 @@ class AuthServiceTest {
         when(userOAuthAccountRepository.findByProviderAndProviderUserId("google", "google-sub"))
                 .thenReturn(Optional.empty());
         when(userRepository.findByEmailAndDeletedFalse("user@example.com")).thenReturn(Optional.of(user));
-        when(jwtTokenService.createAccessToken(user)).thenReturn("access-token");
-        when(jwtTokenService.createRefreshToken(user)).thenReturn("refresh-token");
-        when(jwtProperties.accessTokenExpirationSeconds()).thenReturn(3600L);
-
-        LoginResponse response = authService.googleLogin(request);
-
-        assertThat(response.user().email()).isEqualTo("user@example.com");
-        verify(userOAuthAccountRepository).save(any(UserOAuthAccount.class));
+        assertThatThrownBy(() -> authService.googleLogin(request))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage("Sign in with the existing account before linking Google");
+        verify(userOAuthAccountRepository, never()).save(any(UserOAuthAccount.class));
     }
 
     @Test

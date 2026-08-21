@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/email-verifications").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/email-verification-requests").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/google-logins").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/session-refreshes").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/eligibility-policy").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/eligibility-completions")

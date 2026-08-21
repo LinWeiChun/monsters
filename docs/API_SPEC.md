@@ -130,6 +130,23 @@ Web 使用 Cookie 的 Auth endpoint 必須驗證可信任 Origin／CSRF 防護�
 - 撤銷在同一交易更新Session並寫`SESSION_REVOKED` Audit／Outbox；後續Access由Security Filter拒絕，Refresh由rotation服務拒絕。Web目前／全部登出成功時清除`__Host-monsters-refresh` Cookie。
 - Web所有裝置管理mutation須沿用可信Origin、`X-Session-Transport: COOKIE`與`X-CSRF-Protection: 1`；CORS另允許`X-Client-Platform`與`X-Reauthentication-Credential`。
 
+#### 0.2.5 Google 登入與既有會員明確連結
+
+| Method | Path | Auth／Header | 成功結果 |
+|---|---|---|---|
+| `POST` | `/api/v1/auth/google-logins` | 匿名；Web Cookie transport另帶可信Origin與CSRF proof | 已連結`provider + sub`回`200 AUTHENTICATED`；新會員回`AUTH_CONTINUATION_REQUIRED`；相同Email既有會員回`GOOGLE_ACCOUNT_LINK_REQUIRED`且不核發Session |
+| `POST` | `/api/v1/auth/reauthentications/password` | Bearer Access；body含密碼與`purpose: LOGIN_METHOD_LINK` | `200 SESSION_REAUTHENTICATED`，回綁定目前Session、用途與300秒期限的opaque credential |
+| `POST` | `/api/v1/auth/google-account-links` | Bearer Access＋`X-Reauthentication-Credential` | body含新Google ID Token與`confirmed: true`；成功回`200 GOOGLE_ACCOUNT_LINKED` |
+
+- Backend必須驗證Google ID Token的RS256 signature、`kid`、Google issuer、設定中的audience、expiration、`email_verified = true`、`sub`與Email；Client不得傳入自行驗證的Google profile取代Token。
+- 已連結帳號只以`provider = google`與Google `sub`精確查找會員；Email不能作登入對應鍵，也不能作owner判斷。
+- Google `sub`尚未連結但verified Email對應既有未刪除會員時，只回`GOOGLE_ACCOUNT_LINK_REQUIRED`與`nextAction: LINK_GOOGLE_ACCOUNT`；不得建立OAuth關聯、Access／Refresh Session、continuation credential或其他登入狀態。
+- Google verified Email尚未註冊時，建立不含`account`的`PENDING_ELIGIBILITY`會員與OAuth關聯，回Eligibility continuation；完成資格前不建立一般Session。
+- 明確連結必須由既有會員先完整登入Email／密碼，重新輸入密碼取得`LOGIN_METHOD_LINK` credential，再重新取得Google ID Token並送`confirmed: true`。`SESSION_MANAGEMENT`與`LOGIN_METHOD_LINK`credential不可互換。
+- 連結時Google verified Email必須等於目前會員Email；Google `sub`已屬其他會員、目前會員已有不同Google關聯或Email不符，一律回`409 GOOGLE_ACCOUNT_LINK_CONFLICT`，不得揭露衝突對象。
+- 連結成功保留目前Session、撤銷其他Session Family，寫入`LOGIN_METHOD_LINKED` Audit與Transactional Outbox；事件payload固定空物件，不包含Token、hash、Email、`sub`或驗證細節。
+- 取消流程不呼叫link Command；不得建立OAuth關聯或意外Session。Flutter與Backend Log不得記錄Google ID Token、Email、JWT、reauth credential、hash或Google公鑰response。
+
 ### 0.3 核心資源契約
 
 | 資源 | v1 行為 |
@@ -356,7 +373,7 @@ com.monsters.security.common.SecurityConfig
 | /api/v1/auth/register | POST | 允許匿名 |
 | /api/v1/auth/login | POST | 允許匿名 |
 | /api/v1/auth/session-refreshes | POST | 允許匿名 |
-| /api/v1/auth/google-login | POST | 允許匿名 |
+| /api/v1/auth/google-logins | POST | 允許匿名 |
 | /api/v1/auth/forgot-password | POST | 允許匿名 |
 | /api/v1/auth/reset-password | POST | 允許匿名 |
 | /api/v1/auth/logout | POST | 需驗證 |
@@ -620,7 +637,7 @@ Response：
 - `aud` 必須存在於 `GOOGLE_CLIENT_IDS` 設定，可用逗號設定多組 Web / App Client ID。
 - 驗證成功後，以 Google `sub` 對應 `user_oauth_accounts.provider_user_id`。
 - 若 OAuth 帳號已存在，使用既有使用者產生 JWT。
-- 若 OAuth 帳號不存在但 email 已有未刪除使用者，建立 OAuth 連結後產生 JWT。
+- 若 OAuth 帳號不存在但 email 已有未刪除使用者，現在回`409 GOOGLE_ACCOUNT_LINK_REQUIRED`，不得由舊端點自動建立OAuth關聯。
 - 若 OAuth 帳號不存在且 email 尚未註冊，由 email 前綴產生唯一 `account`，建立 `users` 與 `user_oauth_accounts` 後產生 JWT。
 - ID Token 無效、email 未驗證、對應使用者已刪除或 `GOOGLE_CLIENT_IDS` 未設定時，回傳 401。
 - 不得將 Google ID Token、JWT、Google 公鑰 response 或敏感驗證細節寫入 log。

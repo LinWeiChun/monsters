@@ -283,6 +283,86 @@ void main() {
     );
   });
 
+  test('Google linking uses v1 endpoints and a purpose-bound proof', () async {
+    final requests = <RequestOptions>[];
+    final dio = Dio();
+    dio.httpClientAdapter = _CallbackAdapter((options) {
+      requests.add(options);
+      return switch (options.uri.path) {
+        '/api/v1/auth/google-logins' => _jsonResponse({
+          'success': true,
+          'code': 'GOOGLE_ACCOUNT_LINK_REQUIRED',
+          'message': 'Explicit link required',
+          'data': {'nextAction': 'LINK_GOOGLE_ACCOUNT', 'expiresIn': 0},
+        }),
+        '/api/v1/auth/reauthentications/password' => _jsonResponse({
+          'success': true,
+          'code': 'SESSION_REAUTHENTICATED',
+          'message': 'Reauthentication success',
+          'data': {
+            'credential': 'synthetic-link-proof',
+            'purpose': 'LOGIN_METHOD_LINK',
+            'expiresIn': 300,
+          },
+        }),
+        '/api/v1/auth/google-account-links' => _jsonResponse({
+          'success': true,
+          'code': 'GOOGLE_ACCOUNT_LINKED',
+          'message': 'Google account linked',
+          'data': {
+            'linked': true,
+            'currentSessionPreserved': true,
+            'otherSessionsRevoked': true,
+          },
+        }),
+        _ => throw StateError('Unexpected request: ${options.uri.path}'),
+      };
+    });
+    final client = ApiClient(config: _config, dio: dio);
+    client.setAccessToken('current-access-token');
+    final repository = AuthRepository(
+      client,
+      sessionStore: const WebCookieSessionCredentialStore(),
+    );
+
+    final login = await repository.googleLogin(
+      idToken: 'initial-google-id-token',
+    );
+    client.setAccessToken('current-access-token');
+    final proof = await repository.reauthenticateForGoogleLink(
+      password: 'synthetic-password',
+    );
+    await repository.linkGoogleAccount(
+      idToken: 'fresh-google-id-token',
+      reauthenticationCredential: proof.credential,
+    );
+
+    expect(login.requiresGoogleAccountLink, isTrue);
+    expect(requests.map((request) => request.uri.path), [
+      '/api/v1/auth/google-logins',
+      '/api/v1/auth/reauthentications/password',
+      '/api/v1/auth/google-account-links',
+    ]);
+    expect(requests[0].data, {'idToken': 'initial-google-id-token'});
+    expect(requests[1].data, {
+      'password': 'synthetic-password',
+      'purpose': 'LOGIN_METHOD_LINK',
+    });
+    expect(requests[2].data, {
+      'idToken': 'fresh-google-id-token',
+      'confirmed': true,
+    });
+    expect(
+      requests[2].headers['X-Reauthentication-Credential'],
+      'synthetic-link-proof',
+    );
+    for (final request in requests) {
+      expect(request.headers['X-Session-Transport'], 'COOKIE');
+      expect(request.headers['X-CSRF-Protection'], '1');
+      expect(request.extra['withCredentials'], isTrue);
+    }
+  });
+
   test(
     'registration lifecycle uses only the v1 email verification contract',
     () async {

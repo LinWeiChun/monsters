@@ -33,5 +33,8 @@ class LoginResult {
   bool get requiresContinuation =>
       continuationCredential != null && nextAction != null && !isAuthenticated;
 
+  bool get requiresGoogleAccountLink =>
+      nextAction == 'LINK_GOOGLE_ACCOUNT' && !isAuthenticated;
+
   Map<String, dynamic> toJson() => _$LoginResultToJson(this);
 }

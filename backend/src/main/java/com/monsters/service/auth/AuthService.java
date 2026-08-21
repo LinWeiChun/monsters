@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,7 @@ import com.monsters.entity.user.User;
 import com.monsters.entity.user.UserCredential;
 import com.monsters.entity.user.UserOAuthAccount;
 import com.monsters.exception.common.ConflictException;
+import com.monsters.exception.common.BusinessException;
 import com.monsters.exception.common.UnauthorizedException;
 import com.monsters.repository.user.PasswordResetTokenRepository;
 import com.monsters.repository.user.UserCredentialRepository;
@@ -213,8 +215,18 @@ public class AuthService {
 
 	private User findOrCreateGoogleUser(GoogleUserInfo googleUser) {
 		String email = normalizeEmail(googleUser.email());
-		User user = userRepository.findByEmailAndDeletedFalse(email).orElseGet(
-				() -> userRepository.save(new User(uniqueGoogleAccount(email), email, displayName(googleUser))));
+		if (userRepository.findByEmailAndDeletedFalse(email).isPresent()) {
+			throw new BusinessException(
+					HttpStatus.CONFLICT,
+					"GOOGLE_ACCOUNT_LINK_REQUIRED",
+					"Sign in with the existing account before linking Google"
+			);
+		}
+		User user = userRepository.save(new User(
+				uniqueGoogleAccount(email),
+				email,
+				displayName(googleUser)
+		));
 
 		userOAuthAccountRepository
 				.save(new UserOAuthAccount(user, UserOAuthAccount.PROVIDER_GOOGLE, googleUser.providerUserId()));

@@ -216,6 +216,47 @@ class RegistrationLoginOpenApiContractTest {
         );
     }
 
+    @Test
+    void googleContractShouldRequireExplicitLinkingAndPurposeBoundReauthentication()
+            throws IOException {
+        Map<String, Object> document;
+        try (var reader = Files.newBufferedReader(CONTRACT_PATH)) {
+            document = new Yaml().load(reader);
+        }
+
+        Map<String, Object> paths = mapAt(document, "paths");
+        assertThat(paths.keySet()).contains(
+                "/api/v1/auth/google-logins",
+                "/api/v1/auth/google-account-links"
+        );
+        Map<String, Object> linkRequest = mapAt(
+                document,
+                "components",
+                "schemas",
+                "GoogleAccountLinkRequest"
+        );
+        assertThat(listAt(linkRequest, "required"))
+                .containsExactlyInAnyOrder("idToken", "confirmed");
+        assertThat(mapAt(linkRequest, "properties", "confirmed"))
+                .containsEntry("const", true);
+        Map<String, Object> reauthenticationRequest = mapAt(
+                document,
+                "components",
+                "schemas",
+                "SessionReauthenticationRequest"
+        );
+        assertThat(listAt(mapAt(reauthenticationRequest, "properties", "purpose"), "enum"))
+                .containsExactlyInAnyOrder("SESSION_MANAGEMENT", "LOGIN_METHOD_LINK");
+        assertThat(mapAt(
+                document,
+                "components",
+                "schemas",
+                "GoogleAccountLinkRequiredData",
+                "properties",
+                "nextAction"
+        )).containsEntry("const", "LINK_GOOGLE_ACCOUNT");
+    }
+
     @SuppressWarnings("unchecked")
     private Map<String, Object> mapAt(Map<String, Object> source, String... path) {
         Object current = source;

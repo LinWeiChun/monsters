@@ -53,6 +53,7 @@ class AuthState {
     this.registrationAccepted = false,
     this.verificationResult,
     this.retryAfter,
+    this.googleLinkStage,
   });
 
   final bool isLoading;
@@ -62,6 +63,7 @@ class AuthState {
   final bool registrationAccepted;
   final LoginResult? verificationResult;
   final int? retryAfter;
+  final GoogleLinkStage? googleLinkStage;
 
   String? get continuationMessage {
     if (loginResult?.requiresContinuation != true) {
@@ -87,6 +89,7 @@ class AuthState {
     bool? registrationAccepted,
     LoginResult? verificationResult,
     int? retryAfter,
+    GoogleLinkStage? googleLinkStage,
   }) {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
@@ -97,8 +100,17 @@ class AuthState {
       registrationAccepted: registrationAccepted ?? this.registrationAccepted,
       verificationResult: verificationResult ?? this.verificationResult,
       retryAfter: retryAfter ?? this.retryAfter,
+      googleLinkStage: googleLinkStage ?? this.googleLinkStage,
     );
   }
+}
+
+enum GoogleLinkStage {
+  required,
+  reauthentication,
+  confirmation,
+  linked,
+  conflict,
 }
 
 class AuthController extends StateNotifier<AuthState> {
@@ -108,6 +120,8 @@ class AuthController extends StateNotifier<AuthState> {
   final AuthRepository _authRepository;
   final GoogleSignInService _googleSignInService;
   StreamSubscription<String>? _googleIdTokenSubscription;
+  String? _googleLinkReauthenticationCredential;
+  bool _ignoreGoogleAuthenticationEvents = false;
 
   Future<void> initializeGoogleSignIn() async {
     if (_googleIdTokenSubscription != null) {
@@ -117,7 +131,18 @@ class AuthController extends StateNotifier<AuthState> {
     try {
       await _googleSignInService.initialize();
       _googleIdTokenSubscription = _googleSignInService.idTokenEvents.listen(
-        (idToken) => unawaited(_loginWithGoogleIdToken(idToken)),
+        (idToken) {
+          if (_ignoreGoogleAuthenticationEvents) {
+            return;
+          }
+          if (state.googleLinkStage == GoogleLinkStage.confirmation) {
+            if (!state.isLoading) {
+              unawaited(_confirmGoogleLinkWithIdToken(idToken));
+            }
+            return;
+          }
+          unawaited(_loginWithGoogleIdToken(idToken));
+        },
         onError: (_) {
           state = const AuthState(errorMessage: 'Google 登入失敗，請稍後再試');
         },
@@ -180,6 +205,7 @@ class AuthController extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, clearErrorMessage: true);
 
     try {
+      _ignoreGoogleAuthenticationEvents = true;
       final idToken = await _googleSignInService.signInAndGetIdToken();
       return _loginWithGoogleIdToken(idToken);
     } on GoogleSignInUnsupportedException {
@@ -194,6 +220,8 @@ class AuthController extends StateNotifier<AuthState> {
     } on Object {
       state = const AuthState(errorMessage: 'Google 登入失敗，請稍後再試');
       return false;
+    } finally {
+      _ignoreGoogleAuthenticationEvents = false;
     }
   }
 
@@ -202,7 +230,13 @@ class AuthController extends StateNotifier<AuthState> {
 
     try {
       final result = await _authRepository.googleLogin(idToken: idToken);
-      state = AuthState(loginResult: result);
+      state = AuthState(
+        loginResult: result,
+        googleLinkStage:
+            result.nextAction == 'LINK_GOOGLE_ACCOUNT'
+                ? GoogleLinkStage.required
+                : null,
+      );
       return true;
     } on ApiException catch (error) {
       state = AuthState(errorMessage: error.message);
@@ -211,6 +245,202 @@ class AuthController extends StateNotifier<AuthState> {
       state = const AuthState(errorMessage: 'Google 登入失敗，請稍後再試');
       return false;
     }
+  }
+
+  Future<bool> loginExistingAccountForGoogleLink({
+    required String email,
+    required String password,
+  }) async {
+    state = AuthState(
+      isLoading: true,
+      loginResult: state.loginResult,
+      googleLinkStage: GoogleLinkStage.required,
+    );
+    try {
+      final result = await _authRepository.login(
+        email: email.trim(),
+        password: password,
+      );
+      if (!result.isAuthenticated) {
+        state = AuthState(
+          loginResult: result,
+          googleLinkStage: GoogleLinkStage.required,
+          errorMessage: '請先完成會員必要步驟，再重新連結 Google 帳號',
+        );
+        return false;
+      }
+      state = AuthState(
+        loginResult: result,
+        googleLinkStage: GoogleLinkStage.reauthentication,
+      );
+      return true;
+    } on ApiException catch (error) {
+      state = AuthState(
+        googleLinkStage: GoogleLinkStage.required,
+        errorMessage:
+            error.code == 'AUTH_INVALID_CREDENTIALS'
+                ? 'Email 或密碼不正確'
+                : error.message,
+      );
+      return false;
+    } on Object {
+      state = const AuthState(
+        googleLinkStage: GoogleLinkStage.required,
+        errorMessage: '系統忙碌，請稍後再試',
+      );
+      return false;
+    }
+  }
+
+  Future<bool> reauthenticateGoogleLink({required String password}) async {
+    state = AuthState(
+      isLoading: true,
+      loginResult: state.loginResult,
+      googleLinkStage: GoogleLinkStage.reauthentication,
+    );
+    try {
+      final proof = await _authRepository.reauthenticateForGoogleLink(
+        password: password,
+      );
+      _googleLinkReauthenticationCredential = proof.credential;
+      state = AuthState(
+        loginResult: state.loginResult,
+        googleLinkStage: GoogleLinkStage.confirmation,
+      );
+      return true;
+    } on ApiException catch (error) {
+      state = AuthState(
+        loginResult: state.loginResult,
+        googleLinkStage: GoogleLinkStage.reauthentication,
+        errorMessage:
+            error.code == 'SESSION_REAUTHENTICATION_FAILED'
+                ? '密碼不正確，請重新輸入'
+                : error.message,
+      );
+      return false;
+    } on Object {
+      state = AuthState(
+        loginResult: state.loginResult,
+        googleLinkStage: GoogleLinkStage.reauthentication,
+        errorMessage: '連線中斷，尚未連結 Google 帳號',
+      );
+      return false;
+    }
+  }
+
+  Future<bool> confirmGoogleAccountLink() async {
+    state = AuthState(
+      isLoading: true,
+      loginResult: state.loginResult,
+      googleLinkStage: GoogleLinkStage.confirmation,
+    );
+    try {
+      _ignoreGoogleAuthenticationEvents = true;
+      final idToken = await _googleSignInService.signInAndGetIdToken();
+      return _confirmGoogleLinkWithIdToken(idToken);
+    } on GoogleSignInUnsupportedException {
+      state = AuthState(
+        loginResult: state.loginResult,
+        googleLinkStage: GoogleLinkStage.confirmation,
+        errorMessage: '請使用 Google 官方按鈕完成確認',
+      );
+      return false;
+    } on GoogleIdTokenUnavailableException {
+      state = AuthState(
+        loginResult: state.loginResult,
+        googleLinkStage: GoogleLinkStage.confirmation,
+        errorMessage: '無法取得 Google 登入憑證，請重新嘗試',
+      );
+      return false;
+    } on Object {
+      state = AuthState(
+        loginResult: state.loginResult,
+        googleLinkStage: GoogleLinkStage.confirmation,
+        errorMessage: 'Google 確認失敗，尚未建立連結',
+      );
+      return false;
+    } finally {
+      _ignoreGoogleAuthenticationEvents = false;
+    }
+  }
+
+  Future<bool> _confirmGoogleLinkWithIdToken(String idToken) async {
+    final credential = _googleLinkReauthenticationCredential;
+    if (credential == null) {
+      state = AuthState(
+        loginResult: state.loginResult,
+        googleLinkStage: GoogleLinkStage.reauthentication,
+        errorMessage: '驗證已逾時，請重新輸入密碼',
+      );
+      return false;
+    }
+    state = AuthState(
+      isLoading: true,
+      loginResult: state.loginResult,
+      googleLinkStage: GoogleLinkStage.confirmation,
+    );
+    try {
+      await _authRepository.linkGoogleAccount(
+        idToken: idToken,
+        reauthenticationCredential: credential,
+      );
+      _googleLinkReauthenticationCredential = null;
+      state = AuthState(
+        loginResult: state.loginResult,
+        googleLinkStage: GoogleLinkStage.linked,
+      );
+      return true;
+    } on ApiException catch (error) {
+      _googleLinkReauthenticationCredential = null;
+      if (error.code == 'GOOGLE_ACCOUNT_LINK_CONFLICT') {
+        state = AuthState(
+          loginResult: state.loginResult,
+          googleLinkStage: GoogleLinkStage.conflict,
+          errorMessage: '這個 Google 帳號無法連結，沒有變更任何登入方式',
+        );
+      } else if (error.code == 'SESSION_REAUTHENTICATION_REQUIRED') {
+        state = AuthState(
+          loginResult: state.loginResult,
+          googleLinkStage: GoogleLinkStage.reauthentication,
+          errorMessage: '驗證已逾時，請重新輸入密碼',
+        );
+      } else {
+        state = AuthState(
+          loginResult: state.loginResult,
+          googleLinkStage: GoogleLinkStage.confirmation,
+          errorMessage: error.message,
+        );
+      }
+      return false;
+    } on Object {
+      state = AuthState(
+        loginResult: state.loginResult,
+        googleLinkStage: GoogleLinkStage.confirmation,
+        errorMessage: '連線中斷，無法確認連結結果，請重新驗證後再試',
+      );
+      return false;
+    }
+  }
+
+  Future<bool> cancelGoogleAccountLink() async {
+    _googleLinkReauthenticationCredential = null;
+    try {
+      await _googleSignInService.signOut();
+    } on Object {
+      // Cancellation must complete even if Google SDK sign-out fails.
+    }
+    final authenticatedResult =
+        state.loginResult?.isAuthenticated == true ? state.loginResult : null;
+    state = AuthState(loginResult: authenticatedResult);
+    return authenticatedResult != null;
+  }
+
+  void restartGoogleAccountLink() {
+    _googleLinkReauthenticationCredential = null;
+    state = AuthState(
+      loginResult: state.loginResult,
+      googleLinkStage: GoogleLinkStage.reauthentication,
+    );
   }
 
   Future<bool> loadRegistrationPolicy() async {
@@ -341,6 +571,7 @@ class AuthController extends StateNotifier<AuthState> {
 
   @override
   void dispose() {
+    _googleLinkReauthenticationCredential = null;
     _googleIdTokenSubscription?.cancel();
     super.dispose();
   }

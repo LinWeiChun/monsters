@@ -1554,6 +1554,155 @@ class AuthMemberHttpIntegrationTest {
     }
 
     @Test
+    void googleExistingMemberLinkingShouldRequireExplicitPurposeBoundReauthentication(
+            CapturedOutput output
+    ) throws Exception {
+        String syntheticEmail = "google.link.member@example.test";
+        String syntheticPassword = "synthetic-password";
+        String syntheticGoogleToken = "synthetic-google-link-token";
+        String syntheticGoogleSubject = "synthetic-google-link-subject";
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "account", "google_link_member",
+                                "email", syntheticEmail,
+                                "password", syntheticPassword,
+                                "userName", "Synthetic Google Link Member"
+                        ))))
+                .andExpect(status().isCreated());
+        when(googleIdTokenVerifier.verify(syntheticGoogleToken))
+                .thenReturn(new GoogleUserInfo(
+                        syntheticGoogleSubject,
+                        syntheticEmail,
+                        "Synthetic Google Link Member",
+                        null
+                ));
+
+        mockMvc.perform(post("/api/v1/auth/google-logins")
+                        .header("X-Client-Platform", "ANDROID")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "idToken", syntheticGoogleToken
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("GOOGLE_ACCOUNT_LINK_REQUIRED"))
+                .andExpect(jsonPath("$.data.nextAction").value("LINK_GOOGLE_ACCOUNT"))
+                .andExpect(jsonPath("$.data.accessToken").doesNotExist())
+                .andExpect(jsonPath("$.data.refreshToken").doesNotExist());
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM user_oauth_accounts WHERE provider_user_id = ?",
+                Integer.class,
+                syntheticGoogleSubject
+        )).isZero();
+
+        JsonNode otherSession = responseData(mockMvc.perform(post("/api/v1/auth/login")
+                        .header("X-Client-Platform", "WEB")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", syntheticEmail,
+                                "password", syntheticPassword
+                        ))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString());
+        JsonNode currentSession = responseData(mockMvc.perform(post("/api/v1/auth/login")
+                        .header("X-Client-Platform", "ANDROID")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", syntheticEmail,
+                                "password", syntheticPassword
+                        ))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString());
+        String otherAccessToken = otherSession.path("accessToken").asText();
+        String currentAccessToken = currentSession.path("accessToken").asText();
+
+        JsonNode sessionManagementProof = responseData(mockMvc.perform(
+                        post("/api/v1/auth/reauthentications/password")
+                                .header("Authorization", "Bearer " + currentAccessToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(Map.of(
+                                        "password", syntheticPassword
+                                ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.purpose").value("SESSION_MANAGEMENT"))
+                .andReturn().getResponse().getContentAsString());
+        mockMvc.perform(post("/api/v1/auth/google-account-links")
+                        .header("Authorization", "Bearer " + currentAccessToken)
+                        .header(
+                                "X-Reauthentication-Credential",
+                                sessionManagementProof.path("credential").asText()
+                        )
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "idToken", syntheticGoogleToken,
+                                "confirmed", true
+                        ))))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("SESSION_REAUTHENTICATION_REQUIRED"));
+
+        JsonNode linkProof = responseData(mockMvc.perform(
+                        post("/api/v1/auth/reauthentications/password")
+                                .header("Authorization", "Bearer " + currentAccessToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(Map.of(
+                                        "password", syntheticPassword,
+                                        "purpose", "LOGIN_METHOD_LINK"
+                                ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.purpose").value("LOGIN_METHOD_LINK"))
+                .andExpect(jsonPath("$.data.expiresIn").value(300))
+                .andReturn().getResponse().getContentAsString());
+
+        mockMvc.perform(post("/api/v1/auth/google-account-links")
+                        .header("Authorization", "Bearer " + currentAccessToken)
+                        .header(
+                                "X-Reauthentication-Credential",
+                                linkProof.path("credential").asText()
+                        )
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "idToken", syntheticGoogleToken,
+                                "confirmed", true
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("GOOGLE_ACCOUNT_LINKED"))
+                .andExpect(jsonPath("$.data.linked").value(true))
+                .andExpect(jsonPath("$.data.currentSessionPreserved").value(true))
+                .andExpect(jsonPath("$.data.otherSessionsRevoked").value(true));
+
+        mockMvc.perform(get("/api/v1/auth/sessions")
+                        .header("Authorization", "Bearer " + currentAccessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.totalItems").value(1))
+                .andExpect(jsonPath("$.data.items[0].current").value(true));
+        mockMvc.perform(get("/api/v1/auth/sessions")
+                        .header("Authorization", "Bearer " + otherAccessToken))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(post("/api/v1/auth/google-logins")
+                        .header("X-Client-Platform", "IOS")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "idToken", syntheticGoogleToken
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("AUTHENTICATED"))
+                .andExpect(jsonPath("$.data.accessToken").isString())
+                .andExpect(jsonPath("$.data.refreshToken").isString());
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM session_security_audits WHERE event_type = 'LOGIN_METHOD_LINKED'",
+                Integer.class
+        )).isEqualTo(1);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT payload FROM outbox_events WHERE event_type = 'LOGIN_METHOD_LINKED'",
+                String.class
+        )).isEqualTo("{}");
+        assertThat(output.getAll()).doesNotContain(syntheticGoogleToken, syntheticEmail);
+    }
+
+    @Test
     void clockAndGoogleIdentityShouldBeControllable(CapturedOutput output) throws Exception {
         String syntheticGoogleToken = "synthetic-google-token";
         String syntheticGoogleEmail = "google.member@example.test";

@@ -87,6 +87,17 @@ public class User extends BaseEntity {
         return user;
     }
 
+    public static User pendingEligibilityFromVerifiedEmail(String email) {
+        User user = new User();
+        user.publicId = UUID.randomUUID().toString();
+        user.email = email;
+        user.deleted = false;
+        user.memberState = MemberState.PENDING_ELIGIBILITY;
+        user.eligibilityStatus = EligibilityStatus.PENDING_PROFILE;
+        user.communityEligibilityStatus = CommunityEligibilityStatus.INELIGIBLE;
+        return user;
+    }
+
     public void updateProfile(String userName, LocalDate birthday) {
         this.userName = userName;
         this.birthday = birthday;

@@ -48,9 +48,26 @@ public record VerifiedEmailLoginResponse(
         );
     }
 
+    public static VerifiedEmailLoginResponse googleAccountLinkRequired() {
+        return new VerifiedEmailLoginResponse(
+                null,
+                null,
+                null,
+                0,
+                null,
+                ContinuationNextAction.LINK_GOOGLE_ACCOUNT,
+                null
+        );
+    }
+
     @JsonIgnore
     public boolean requiresContinuation() {
         return continuationCredential != null;
+    }
+
+    @JsonIgnore
+    public boolean requiresGoogleAccountLink() {
+        return nextAction == ContinuationNextAction.LINK_GOOGLE_ACCOUNT;
     }
 
     public VerifiedEmailLoginResponse withoutRefreshCredential() {

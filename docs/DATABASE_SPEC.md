@@ -266,7 +266,7 @@ Index：
 
 ### 3.2.8 session_security_audits
 
-只保存`SESSION_CREATED`、`SESSION_REFRESH_ROTATED`、`SESSION_REFRESH_REUSE_DETECTED`、`SESSION_REAUTHENTICATED`與`SESSION_REVOKED`安全事件、Session FK、opaque event UUID及發生時間；不得保存Token、hash、Email、裝置摘要或會員私人資料。相同event UUID同時作為Outbox防重鍵。
+只保存`SESSION_CREATED`、`SESSION_REFRESH_ROTATED`、`SESSION_REFRESH_REUSE_DETECTED`、`SESSION_REAUTHENTICATED`、`SESSION_REVOKED`與`LOGIN_METHOD_LINKED`安全事件、Session FK、opaque event UUID及發生時間；不得保存Token、hash、Email、Google `sub`、裝置摘要或會員私人資料。相同event UUID同時作為Outbox防重鍵；`LOGIN_METHOD_LINKED`的Outbox payload固定為空物件。
 
 ### 3.2.9 session_reauthentication_credentials
 
@@ -274,12 +274,12 @@ Index：
 |---|---|---|---|
 | session_id | BIGINT | FK NOT NULL | 綁定發起驗證的目前Session |
 | token_hash | VARCHAR(64) | UNIQUE NOT NULL | 32-byte opaque credential的SHA-256 hex；唯一保存形式 |
-| purpose | VARCHAR(40) | NOT NULL | Task 09固定`SESSION_MANAGEMENT` |
+| purpose | VARCHAR(40) | NOT NULL | `SESSION_MANAGEMENT`或`LOGIN_METHOD_LINK`用途白名單 |
 | issued_at | DATETIME | NOT NULL | 核發時間 |
 | expires_at | DATETIME | NOT NULL | 核發後300秒 |
 | revoked_at | DATETIME | NULL | 預留提早失效時間 |
 
-規則：原始credential只在成功response傳輸一次，不寫入Database、Log、Audit或Outbox；使用時必須同時核對hash、用途、目前Session、owner、Session有效性與期限。
+規則：原始credential只在成功response傳輸一次，不寫入Database、Log、Audit或Outbox；使用時必須同時核對hash、用途、目前Session、owner、Session有效性與期限。Task 09裝置管理預設`SESSION_MANAGEMENT`；Task 10登入方式連結使用`LOGIN_METHOD_LINK`且成功Command會將該credential標記撤銷，不得跨用途重用。
 
 ### 3.2.3 member_continuation_credentials
 
@@ -372,6 +372,8 @@ Google 登入目標規則：
 - Google email 與既有會員相同時不得自動連結；需先重新驗證既有登入方式並明確建立 OAuth 關聯。
 - 已連結的 Google 帳號登入時，需透過 `provider + provider_user_id` 查詢使用者。
 - 已刪除使用者不得透過既有 OAuth 帳號登入。
+- 明確連結時verified Email必須等於目前會員Email；`sub`已屬其他會員或同會員已有不同Google關聯時回通用衝突，既有資料不變。
+- 連結成功保留目前`user_sessions`，同一交易撤銷其他未撤銷Session並寫`LOGIN_METHOD_LINKED`安全事件與空payload Outbox；不得將ID Token、Email、`sub`或reauth資料複製至Audit／Outbox。
 
 ### 3.4 user_password_locks（目標移除）
 

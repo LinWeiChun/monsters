@@ -42,11 +42,12 @@ public class DeviceSessionCommandController {
         requireTrustedCookieRequest(httpRequest);
         return ApiResponse.success(
                 "SESSION_REAUTHENTICATED",
-                "Session management reauthentication succeeded",
+                "Purpose-limited password reauthentication succeeded",
                 commandService.reauthenticate(
                         currentUser.userId(),
                         currentUser.sessionId(),
-                        request.password()
+                        request.password(),
+                        request.effectivePurpose()
                 )
         );
     }
