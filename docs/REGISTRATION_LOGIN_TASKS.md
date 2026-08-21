@@ -211,7 +211,7 @@
 
 **Blocked by:** 07 — 建立 Opaque Refresh Session Family；08 — 遷移三平台 Credential Store與Single-flight Refresh。
 
-**Status:** REVIEW
+**Status:** DONE
 
 - [x] 裝置清單只顯示安全的裝置類型、約略資訊、最後活動與目前裝置標記。
 - [x] 一般登出只撤銷目前Session Family。
@@ -221,7 +221,7 @@
 - [x] 被撤銷裝置的Access與Refresh後續請求皆被拒絕。
 - [x] Flutter完整處理成功、重複操作、網路失敗及目前Session被撤銷。
 
-Review證據：方案1採分離清單／reauth／撤銷API；同意的測試接縫已由真實MySQL驗證owner範圍、Access／Refresh撤銷、重複登出其他裝置與Web Cookie清除。Flutter以Repository／Provider／Widget接縫驗證無Refresh值、網路失敗不清本地Session、操作去重、全域401導向登入，以及390／600／1199／1200／1440寬度無主畫面捲動或overflow。Penpot Web／Mobile預設與reauth共四個畫板已完成並驗證containment。Draft PR #100指向`feature/phase4.5`；Task依流程轉`REVIEW`，等待CI與使用者審查後才可轉`DONE`。
+DONE證據：方案1採分離清單／reauth／撤銷API；同意的測試接縫已由真實MySQL驗證owner範圍、Access／Refresh撤銷、重複登出其他裝置與Web Cookie清除。Flutter以Repository／Provider／Widget接縫驗證無Refresh值、網路失敗不清本地Session、操作去重、全域401導向登入，以及390／600／1199／1200／1440寬度無主畫面捲動或overflow。Penpot Web／Mobile預設與reauth共四個畫板已完成並驗證containment。PR #100已於2026-08-16合併至`feature/phase4.5`，Backend unit、Backend Auth／Member integration、Flutter及OpenAPI四項CI全部通過，Task由`REVIEW`轉`DONE`。
 
 ---
 
@@ -231,15 +231,17 @@ Review證據：方案1採分離清單／reauth／撤銷API；同意的測試接�
 
 **Blocked by:** 05 — 改為 Verified Email 登入並展開 Account Migration；07 — 建立 Opaque Refresh Session Family。
 
-**Status:** ready-for-agent
+**Status:** REVIEW
 
-- [ ] Google ID Token由Backend驗證issuer、audience、expiration、signature及verified Email。
-- [ ] 已連結Google帳號以provider與`sub`精確登入。
-- [ ] 相同Email但尚未連結時不得自動合併或核發一般Session。
-- [ ] 會員需先reauth既有登入方式，再明確確認連結。
-- [ ] 連結成功留下安全Audit並依敏感登入方式變更規則處理Session。
-- [ ] Google ID Token、Email及驗證細節不得進入Log。
-- [ ] Flutter呈現已連結、需驗證既有方式、衝突及取消流程。
+- [x] Google ID Token由Backend驗證issuer、audience、expiration、signature及verified Email。
+- [x] 已連結Google帳號以provider與`sub`精確登入。
+- [x] 相同Email但尚未連結時不得自動合併或核發一般Session。
+- [x] 會員需先reauth既有登入方式，再明確確認連結。
+- [x] 連結成功留下安全Audit並依敏感登入方式變更規則處理Session。
+- [x] Google ID Token、Email及驗證細節不得進入Log。
+- [x] Flutter呈現已連結、需驗證既有方式、衝突及取消流程。
+
+Review證據：採方案1 Session-first明確連結；匿名Google登入只有已連結`provider + sub`可取得Session，相同Email只回`GOOGLE_ACCOUNT_LINK_REQUIRED`。既有會員以Email／密碼登入後取得綁定目前Session、`LOGIN_METHOD_LINK`用途及300秒期限的reauth credential，再以新ID Token及`confirmed: true`建立關聯；成功保留目前Session、撤銷其他Session並寫不含PII的`LOGIN_METHOD_LINKED` Audit／Outbox。Flutter完成需連結、重新驗證、確認、成功、衝突及取消，Web／Mobile共10個Penpot畫板通過containment。Backend完整321項單元／契約與39項真實MySQL 8.4整合測試、Flutter完整209項測試、Analyze、Web release build及Android debug APK build均通過；等待PR CI與使用者審查，因此維持`REVIEW`。
 
 ---
 

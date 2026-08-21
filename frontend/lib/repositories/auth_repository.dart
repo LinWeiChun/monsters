@@ -5,6 +5,7 @@ import '../core/network/api_client.dart';
 import '../core/network/api_error_type.dart';
 import '../core/network/api_exception.dart';
 import '../models/login_result.dart';
+import '../models/device_session.dart';
 import '../models/registration_policy.dart';
 import 'auth_session_store.dart';
 
@@ -42,8 +43,9 @@ class AuthRepository {
 
   Future<LoginResult> googleLogin({required String idToken}) async {
     final response = await _apiClient.post<LoginResult>(
-      '/auth/google-login',
+      '/v1/auth/google-logins',
       data: {'idToken': idToken},
+      options: _loginOptions,
       fromJsonT: (json) => LoginResult.fromJson(json! as Map<String, dynamic>),
       retryOnUnauthorized: false,
     );
@@ -54,6 +56,36 @@ class AuthRepository {
 
     await _applyLoginResult(response.data);
     return response.data;
+  }
+
+  Future<SessionReauthentication> reauthenticateForGoogleLink({
+    required String password,
+  }) async {
+    final response = await _apiClient.post<SessionReauthentication>(
+      '/v1/auth/reauthentications/password',
+      data: {'password': password, 'purpose': 'LOGIN_METHOD_LINK'},
+      options: _sessionTransportOptions,
+      fromJsonT:
+          (json) =>
+              SessionReauthentication.fromJson(json! as Map<String, dynamic>),
+      retryOnUnauthorized: false,
+    );
+    _requireSuccess(response.success, response.message, response.code);
+    return response.data;
+  }
+
+  Future<void> linkGoogleAccount({
+    required String idToken,
+    required String reauthenticationCredential,
+  }) async {
+    final response = await _apiClient.post<void>(
+      '/v1/auth/google-account-links',
+      data: {'idToken': idToken, 'confirmed': true},
+      options: _googleLinkOptions(reauthenticationCredential),
+      fromJsonT: (_) {},
+      retryOnUnauthorized: false,
+    );
+    _requireSuccess(response.success, response.message, response.code);
   }
 
   Future<LoginResult?> restoreSession({DateTime? now}) async {
@@ -274,5 +306,30 @@ class AuthRepository {
       extra['withCredentials'] = true;
     }
     return Options(headers: headers, extra: extra);
+  }
+
+  Options _googleLinkOptions(String reauthenticationCredential) {
+    final headers = <String, Object?>{
+      'X-Reauthentication-Credential': reauthenticationCredential,
+    };
+    final extra = <String, Object?>{};
+    if (_sessionStore.usesCookieTransport) {
+      headers.addAll(const {
+        'X-Session-Transport': 'COOKIE',
+        'X-CSRF-Protection': '1',
+      });
+      extra['withCredentials'] = true;
+    }
+    return Options(headers: headers, extra: extra);
+  }
+
+  void _requireSuccess(bool success, String message, String code) {
+    if (!success) {
+      throw ApiException(
+        type: ApiErrorType.unknown,
+        message: message,
+        code: code,
+      );
+    }
   }
 }

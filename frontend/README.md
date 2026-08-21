@@ -92,7 +92,7 @@ UI 不得直接呼叫 Dio，後續功能需透過 Provider / Repository 使用 `
 
 受保護 API 若回傳 401，`ApiClient` 會共用單一 refresh request 換發 Token，成功後只重試原 request 一次，避免並行 API 觸發多次 rotation。Refresh API 本身、登入、Google 登入、註冊與登出不得啟動 401 refresh retry。Refresh token 驗證失敗、超過 30 天、session 格式無效或使用者登出時，必須清除 Authorization header 與本地 session，並回到登入頁；暫時性網路錯誤保留 session 供下次重試。
 
-Google 登入流程使用 `GoogleSignInService` 透過 `google_sign_in` / `google_sign_in_web` 取得 Google ID Token，再由 `AuthRepository` 呼叫 `POST /api/auth/google-login` 交給後端驗證並換發本系統 JWT。Web 版使用 Google Identity Services 官方按鈕，Android / iOS 使用共用 Flutter 登入按鈕；成功後同樣由 `AuthSessionStore` 保存 30 天登入狀態。
+Google登入流程使用`GoogleSignInService`透過`google_sign_in`／`google_sign_in_web`取得Google ID Token，再由`AuthRepository`呼叫`POST /api/v1/auth/google-logins`交給Backend驗證。已連結`provider + sub`才建立本系統Session；相同Email既有會員導向`/link-google-account`，依序完成既有Email／密碼登入、`LOGIN_METHOD_LINK`用途reauth、重新取得Google ID Token與明確確認。Web使用Google Identity Services官方按鈕，Android／iOS使用共用Flutter按鈕；取消不呼叫連結API，成功保留目前Session並由Backend撤銷其他Session。
 
 註冊流程先由 `AuthRepository` 呼叫 `GET /api/v1/auth/registration-policy` 取得目前 Terms／Privacy version 與 URL，再以 Email、密碼和兩個接受版本呼叫 `POST /api/v1/auth/register`。初始註冊不顯示或傳送 `account`、暱稱、生日、地區、Guardian Email 或頭貼；安全受理後進入等待頁，不自動登入，也不保存密碼、Email Token 或 Continuation Credential。
 

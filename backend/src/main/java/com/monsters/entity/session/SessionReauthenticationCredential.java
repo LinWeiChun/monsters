@@ -53,6 +53,12 @@ public class SessionReauthenticationCredential extends BaseEntity {
         return session;
     }
 
+    public void revoke(LocalDateTime now) {
+        if (revokedAt == null) {
+            revokedAt = now;
+        }
+    }
+
     public boolean isUsableAt(LocalDateTime now) {
         return revokedAt == null && expiresAt.isAfter(now);
     }

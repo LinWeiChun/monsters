@@ -71,6 +71,8 @@ Docker Compose 會使用 `mysql` 作為 MySQL service hostname。
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 - `POST /api/v1/auth/login`
+- `POST /api/v1/auth/google-logins`
+- `POST /api/v1/auth/google-account-links`
 - `POST /api/v1/auth/session-refreshes`
 - `POST /api/auth/google-login`
 - `POST /api/auth/refresh`
@@ -218,7 +220,11 @@ Login trims and lowercases Email before an exact lookup, verifies Argon2id or hi
 
 Deprecated `POST /api/auth/login` remains temporarily available for existing Email／legacy account clients during expand migration. New clients must not use it; Task 18 removes it only after migration observation and contract cleanup.
 
-### Google Login
+### Google Login 與明確連結
+
+新Client使用`POST /api/v1/auth/google-logins`。Backend完整驗證Google ID Token後，只有已連結的`provider = google`與`sub`可登入；相同Email既有會員只回`GOOGLE_ACCOUNT_LINK_REQUIRED`，不建立OAuth關聯或一般Session。會員需先以Email／密碼登入，再呼叫`POST /api/v1/auth/reauthentications/password`取得`LOGIN_METHOD_LINK`用途、300秒且綁定目前Session的credential，最後以新ID Token、`confirmed: true`及`X-Reauthentication-Credential`呼叫`POST /api/v1/auth/google-account-links`。成功保留目前Session並撤銷其他Session。
+
+Deprecated Migration endpoint：
 
 `POST /api/auth/google-login`
 
@@ -251,7 +257,7 @@ Response:
 }
 ```
 
-Google login verifies the ID token on the backend with Google's signing keys, checks issuer, audience, expiration, and verified email, then links or creates a local user through `user_oauth_accounts`. `JWT_SECRET` and `GOOGLE_CLIENT_IDS` must be configured before Google login can issue tokens.
+Google login verifies the ID token on the backend with Google's signing keys, checks issuer, audience, expiration, signature, and verified email. Deprecated endpoint不再對相同Email自動連結；新Flutter不得呼叫。`JWT_SECRET` and `GOOGLE_CLIENT_IDS` must be configured before Google login can issue tokens.
 
 ### Forgot Password
 

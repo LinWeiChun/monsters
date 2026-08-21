@@ -14,6 +14,7 @@ import '../pages/register_page.dart';
 import '../pages/splash_page.dart';
 import '../pages/eligibility_page.dart';
 import '../pages/guardian_consent_page.dart';
+import '../pages/google_account_link_page.dart';
 import '../pages/session_management_page.dart';
 import '../models/eligibility_policy.dart';
 import 'app_routes.dart';
@@ -95,6 +96,12 @@ GoRouter createAppRouter({String initialLocation = AppPath.splash}) {
                 token: state.uri.queryParameters['token'] ?? '',
               ),
             ),
+      ),
+      GoRoute(
+        path: AppPath.googleAccountLink,
+        name: AppRoute.googleAccountLink,
+        pageBuilder:
+            (context, state) => _appPage(state, const GoogleAccountLinkPage()),
       ),
       GoRoute(
         path: AppPath.profile,

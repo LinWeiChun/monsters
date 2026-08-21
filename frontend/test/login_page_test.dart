@@ -156,6 +156,28 @@ void main() {
     await googleSignInService.dispose();
   });
 
+  testWidgets('routes unlinked Google email to explicit linking', (
+    tester,
+  ) async {
+    await _setMobileSurface(tester);
+    final repository = _FakeAuthRepository(
+      loginResult: _googleLinkRequiredResult,
+    );
+    final googleSignInService = _FakeGoogleSignInService();
+    await tester.pumpWidget(
+      _loginApp(repository, googleSignInService: googleSignInService),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('loginGoogleButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('googleLinkRequiredStage')), findsOneWidget);
+    expect(find.textContaining('不會自動合併'), findsOneWidget);
+
+    await googleSignInService.dispose();
+  });
+
   testWidgets('handles Google web authentication event', (tester) async {
     await _setMobileSurface(tester);
     final repository = _FakeAuthRepository();
@@ -465,6 +487,11 @@ const _continuationLoginResult = LoginResult(
   expiresIn: 600,
   nextAction: 'COMPLETE_ELIGIBILITY',
   continuationCredential: 'synthetic-continuation-credential',
+);
+
+const _googleLinkRequiredResult = LoginResult(
+  expiresIn: 0,
+  nextAction: 'LINK_GOOGLE_ACCOUNT',
 );
 
 const _testConfig = AppConfig(
