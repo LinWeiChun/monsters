@@ -147,6 +147,22 @@ Web 使用 Cookie 的 Auth endpoint 必須驗證可信任 Origin／CSRF 防護�
 - 連結成功保留目前Session、撤銷其他Session Family，寫入`LOGIN_METHOD_LINKED` Audit與Transactional Outbox；事件payload固定空物件，不包含Token、hash、Email、`sub`或驗證細節。
 - 取消流程不呼叫link Command；不得建立OAuth關聯或意外Session。Flutter與Backend Log不得記錄Google ID Token、Email、JWT、reauth credential、hash或Google公鑰response。
 
+#### 0.2.6 正式 Forgot／Reset Password
+
+| Method | Path | Auth／Header | 成功結果 |
+|---|---|---|---|
+| `POST` | `/api/v1/auth/password-reset-requests` | 匿名；body只含Email | 已知與未知Email都回`202 PASSWORD_RESET_REQUEST_ACCEPTED`，response不含reset Token或會員狀態 |
+| `POST` | `/api/v1/auth/password-resets` | 匿名；body含`token`與`newPassword` | `200 PASSWORD_RESET_COMPLETED`，更新Argon2id密碼並撤銷會員全部Session Family |
+
+- Email先trim並轉小寫；Email／IP使用部署Secret HMAC後共用Database限流桶，冷卻或上限回`429 RATE_LIMITED`與`Retry-After`。
+- 對不存在、已刪除或不可處理的Email不得建立Token或寄信，但公開response的status、code、message與資料形狀必須與可處理會員一致。
+- Reset Token使用32-byte CSPRNG，固定15分鐘、單次使用；明文只存在Worker寄信路徑與會員收到的HTTPS連結，Database只保存SHA-256 hash。
+- 新請求與寄送前都撤銷同一會員尚未使用的舊Token；舊Token一律回`400 PASSWORD_RESET_TOKEN_INVALID`，不得揭露其撤銷原因。
+- 無法查得或已撤銷的Token回`400 PASSWORD_RESET_TOKEN_INVALID`；已使用回`400 PASSWORD_RESET_TOKEN_USED`；已過期回`400 PASSWORD_RESET_TOKEN_EXPIRED`。
+- 新密碼沿用Task 04的NFC、15–128 Unicode code points、本機blocklist與Argon2id；成功後將Token標為已使用，撤銷全部`user_sessions`並要求所有裝置重新登入。
+- 寄送使用Transactional Outbox與Worker；失敗採退避重試，達上限標記`FAILED`並輸出不含Email、Token、hash或會員識別的告警。
+- deprecated `/api/auth/forgot-password`與`/api/auth/reset-password`暫時提供相同安全契約，不再回reset Token；Task 18移除相容別名。
+
 ### 0.3 核心資源契約
 
 | 資源 | v1 行為 |
@@ -374,8 +390,10 @@ com.monsters.security.common.SecurityConfig
 | /api/v1/auth/login | POST | 允許匿名 |
 | /api/v1/auth/session-refreshes | POST | 允許匿名 |
 | /api/v1/auth/google-logins | POST | 允許匿名 |
-| /api/v1/auth/forgot-password | POST | 允許匿名 |
-| /api/v1/auth/reset-password | POST | 允許匿名 |
+| /api/v1/auth/password-reset-requests | POST | 允許匿名 |
+| /api/v1/auth/password-resets | POST | 允許匿名 |
+| /api/auth/forgot-password | POST | 允許匿名；deprecated安全相容別名 |
+| /api/auth/reset-password | POST | 允許匿名；deprecated安全相容別名 |
 | /api/v1/auth/logout | POST | 需驗證 |
 | /api/v1/** | ALL | 需驗證 |
 | 其他路徑 | ALL | 拒絕 |
@@ -687,7 +705,7 @@ Response：
 - Response 與登入 API 使用相同 `LoginResponse` contract，前端成功後必須以新資料覆蓋本地 session。
 - 不得記錄 refresh token 明文或 token hash。
 
-### 2.5 忘記密碼
+### 2.5 忘記密碼（deprecated相容別名）
 
 `POST /api/auth/forgot-password`
 
@@ -704,26 +722,20 @@ Response：
 ```json
 {
   "success": true,
-  "message": "Password reset token issued",
-  "data": {
-    "resetToken": "password_reset_token",
-    "expiresIn": 900
-  }
+  "code": "PASSWORD_RESET_REQUEST_ACCEPTED",
+  "message": "Password reset request accepted",
+  "fieldErrors": {},
+  "requestId": "opaque-request-id"
 }
 ```
 
 規則：
 
-- `email` 必須轉為小寫並去除前後空白後查詢。
-- 若 email 對應未刪除使用者，後端產生一次性 reset token。
-- reset token 明文只回傳一次；資料庫僅保存 token hash。
-- reset token 有效時間為 900 秒。
-- 同一使用者重新申請時，未使用的舊 reset token 需失效。
-- 若 email 不存在或使用者已刪除，仍回傳 200，`resetToken` 為 `null`，避免暴露帳號是否存在。
-- 不得將 email 對應結果、reset token 明文或 token hash 寫入 log。
-- 目前 response 回傳 `resetToken` 供開發與前端串接；正式寄信服務定案後，應改為由後端寄送 reset link 或驗證碼。
+- 本Path只供舊Client短期相容，行為與`POST /api/v1/auth/password-reset-requests`相同並回`202`。
+- Response不得包含`resetToken`、`expiresIn`、Email是否存在或任何會員狀態。
+- 新Client不得呼叫此Path；Task 18移除。
 
-### 2.6 重設密碼
+### 2.6 重設密碼（deprecated相容別名）
 
 `POST /api/auth/reset-password`
 
@@ -731,8 +743,8 @@ Request：
 
 ```json
 {
-  "resetToken": "password_reset_token",
-  "newPassword": "password123"
+  "token": "password_reset_token",
+  "newPassword": "correct horse battery staple"
 }
 ```
 
@@ -741,22 +753,18 @@ Response：
 ```json
 {
   "success": true,
-  "message": "Password reset success",
-  "data": null
+  "code": "PASSWORD_RESET_COMPLETED",
+  "message": "Password reset completed",
+  "fieldErrors": {},
+  "requestId": "opaque-request-id"
 }
 ```
 
 規則：
 
-- `resetToken` 必填。
-- `newPassword` 必填，NFC 後長度為 15 到 128 Unicode code points，不 trim，並套用版本化本機弱密碼 blocklist。
-- 後端必須先 hash `resetToken` 後查詢，不得以明文 token 查詢資料庫。
-- reset token 不存在、已使用、已過期或對應使用者已刪除時，回傳 401。
-- 新密碼需套用正式密碼政策並使用 Argon2id 重新雜湊。
-- 使用者已有 Email / Password 憑證時，更新既有 `user_credentials.password_hash`。
-- 僅有 Google 登入的使用者若完成 reset token 驗證，可建立新的 `user_credentials`。
-- 密碼重設成功後，reset token 必須標記為已使用。
-- 不得將新密碼、reset token 明文或 token hash 寫入 log。
+- 本Path只供舊Client短期相容，request與`POST /api/v1/auth/password-resets`相同，欄位使用`token`，不再接受`resetToken`。
+- 密碼政策、Token錯誤碼、Argon2id與全Session撤銷依0.2.6。
+- 新Client不得呼叫此Path；Task 18移除。
 
 ### 2.7 登出
 

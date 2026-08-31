@@ -1,4 +1,15 @@
 日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
+2026-08-31,15:00,REGISTRATION-LOGIN-11,Review,PasswordReset三個共用元件/測試/UI規格,視覺校正,Logo依Penpot固定150×47與160×50，補Mobile/Desktop尺寸斷言,Codex,否,否,是,否,PR102；27項專項測試通過；Web重建通過；最新CI於Push後重跑，仍為REVIEW
+2026-08-31,14:48,REGISTRATION-LOGIN-11,Git,Task11功能與三份Log,提交紀錄,功能提交0829f5d；Log同步提交後一併推送Task分支,Codex,否,否,否,否,feature/phase4.5-password-reset → feature/phase4.5；Draft PR送審，不自動合併
+2026-08-31,14:40,REGISTRATION-LOGIN-11,Backend,PasswordReset controller/service/worker與session,新增與修改,通用202受理與可靠寄信；15分鐘單次Token只存hash；成功撤銷全部Session,Codex,是,是,否,是,採方案1；不回傳reset Token；失敗重試與無PII告警
+2026-08-31,14:40,REGISTRATION-LOGIN-11,Database,V9__formalize_password_reset.sql,新增,token_hash上限64；新增revoked_at與active查詢索引,Codex,否,是,否,是,沿用既有表；舊Migration不改寫；Registration升級斷言由V8校正為V9
+2026-08-31,14:40,REGISTRATION-LOGIN-11,API,API_SPEC與registration-login.yaml,新增與修改,新增password-reset-requests與password-resets兩組v1契約,Codex,是,否,否,否,舊路徑暫留安全deprecated別名，Task18驗收後移除
+2026-08-31,14:40,REGISTRATION-LOGIN-11,Frontend,PasswordReset頁面/provider/repository/router,新增與修改,完成申請、受理、Token失效與成功頁；修正鍵盤避讓及舊回應隔離,Codex,是,否,是,否,390至1920 RWD；矮視窗收合；NFC長度交Backend判定；換Token清空舊狀態
+2026-08-31,14:40,REGISTRATION-LOGIN-11,Penpot,WEB與APP主畫板及Password Reset狀態,新增與整理,新增Web/Mobile共16狀態；35主畫板分區且無重疊；466元件位置尺寸不變,Codex,否,否,是,否,180個descendant containment通過；Chrome截圖已檢視；未刪舊畫板及素材
+2026-08-31,14:40,REGISTRATION-LOGIN-11,Test,Backend與Flutter測試及建置,驗證,Backend單元324通過4跳過；MySQL42通過；Flutter236通過且Analyze無問題,Codex,是,是,是,是,Web release與Android debug成功；本機Flutter3.44.6；CI3.29.2待PR觸發
+2026-08-31,14:40,REGISTRATION-LOGIN-11,Cleanup,PASSWORD_RESET_LEGACY_CLEANUP與舊DTO,刪除與文件化,移除raw Token response、舊AuthService方法及3個DTO；列出後續刪除條件,Codex,是,否,是,否,system_data與其他legacy登入流程未刪除；可由Git取回本次移除檔案
+2026-08-31,14:40,REGISTRATION-LOGIN-11,Documentation,Task與Project/API/Database/UI/README/DECISIONS,同步,Task10依PR101合併證據標DONE；Task11由IN PROGRESS轉REVIEW,Codex,是,是,是,是,待提交Draft PR/CI/使用者Review與合併；不宣告DONE
+2026-08-31,14:40,REGISTRATION-LOGIN-11,Log,CHANGE_LOG與CHANGE_HISTORY,保存期限清理,保留2026-07-31起紀錄；移除20段Markdown及124筆CSV過期紀錄,Codex,否,否,否,否,XLSX無過期列；保留既有表格樣式；已刪Log可由Git歷史取回
 2026-08-21,11:54,REGISTRATION-LOGIN-10,Backend,GoogleAccount controller/service與session reauth,新增與修改,建立provider與sub精確Google登入及既有會員明確連結,Codex,是,是,否,是,同Email未連結只回需連結狀態且不核發Session
 2026-08-21,11:54,REGISTRATION-LOGIN-10,Database,V8__add_google_account_linking.sql,新增,加入LOGIN_METHOD_LINK用途與LOGIN_METHOD_LINKED安全事件,Codex,否,是,否,是,只擴充約束且舊Migration維持不可變
 2026-08-21,11:54,REGISTRATION-LOGIN-10,API,registration-login.yaml與API_SPEC,新增與修改,新增Google登入與明確連結兩組v1契約,Codex,是,否,否,否,Token Email與驗證細節不進Log Audit或Outbox
@@ -67,127 +78,3 @@
 2026-07-31,14:40,REGISTRATION-LOGIN-04-REVIEW,Test,AuthMemberHttpIntegrationTest與register_page_test.dart,修改,補齊HTTP與Flutter的14 15 128 129 Unicode邊界驗收,Codex,是,是,是,否,Backend與Flutter共用相同code point邊界
 2026-07-31,14:40,REGISTRATION-LOGIN-04-REVIEW,Frontend,register_page.dart與Widget tests,修改,移除Client raw runes政策判定並補齊responsive及無障礙條款操作,Codex,是,否,是,否,NFC長度blocklist由Backend唯一判定且Flutter映射穩定錯誤鍵
 2026-07-31,14:40,REGISTRATION-LOGIN-04-REVIEW,Documentation,API Database與blocklist NOTICE,修改,清除8至72與BCrypt only舊敘述並新增產物checksum,Codex,是,否,否,否,正式文件與實作一致
-2026-07-29,12:32,REGISTRATION-LOGIN-02,Backend,backend/src/main/java/com/monsters/entity 與 service/member,新增與修改,建立七態會員狀態安全優先序與專用資格完成交易,Codex,是,是,否,是,狀態 version credential撤銷 Audit Outbox同交易
-2026-07-29,12:32,REGISTRATION-LOGIN-02,API,backend/src/main/java/com/monsters/controller/auth 與 dto/auth,修改,登入依會員狀態回完整Session或用途受限Continuation,Codex,是,否,否,否,不合法狀態與version使用穩定409錯誤碼
-2026-07-29,12:32,REGISTRATION-LOGIN-02,Database,backend/src/main/resources/db/migration 與 database/init/README.md,新增與修改,建立Flyway V1 baseline與V2會員狀態UUID Credential Audit Outbox,Codex,否,是,否,是,Docker init保持V1避免baseline後重複執行V2
-2026-07-29,12:32,REGISTRATION-LOGIN-02,Frontend,frontend/lib/models pages providers repositories,修改,Continuation回應不建立Session不導向首頁並顯示下一步,Codex,是,否,是,否,Credential不進Authorization或SharedPreferences
-2026-07-29,12:32,REGISTRATION-LOGIN-02,Test,backend/src/test backend/src/integrationTest frontend/test,新增與修改,以TDD驗證Security Filter交易Flyway錯誤碼OpenAPI與Flutter行為,Codex,是,是,是,否,Backend完整測試與Flutter 168項通過
-2026-07-29,12:32,REGISTRATION-LOGIN-02,Documentation,CONTEXT.md docs規格ADR OpenAPI與REGISTRATION_LOGIN_TASKS.md,修改,同步會員狀態Continuation契約Migration UI決策與Task REVIEW,Codex,是,是,是,是,docs TASKS.md未修改
-2026-07-29,12:32,REGISTRATION-LOGIN-02,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增Task02工作報告與一個月保存期限檢查,Codex,否,否,否,否,最早紀錄2026-06-29無過期Log
-2026-07-29,09:26,DOC-016,Documentation,docs/REGISTRATION_LOGIN_TASKS.md,新增,將registration_login規格拆為18張垂直Task與依賴圖,Codex,是,是,是,是,管理者相關Task安排於最後階段
-2026-07-29,09:26,DOC-016,Documentation,log/CHANGE_LOG.md,修改,新增DOC-016工作紀錄與驗證結果,Codex,否,否,否,否,docs TASKS.md未修改
-2026-07-29,10:10,REGISTRATION-LOGIN-01,Backend,backend/build.gradle 與 backend/src/integrationTest,新增,建立Testcontainers MySQL 8.4及真實Security Filter整合測試層,Codex,否,否,否,否,測試限定相依
-2026-07-29,10:10,REGISTRATION-LOGIN-01,Backend,backend/src/main/java/com/monsters/config/common/TimeConfig.java 與 AuthService.java,修改,以可替換Clock Bean控制時間,Codex,否,否,否,否,正式環境使用UTC
-2026-07-29,10:10,REGISTRATION-LOGIN-01,Backend,backend/src/main/java/com/monsters/job 與 notification/email,新增,建立可替換Email Delivery與Async Job正式port,Codex,否,否,否,否,供應商Adapter與Outbox留待後續Task
-2026-07-29,10:10,REGISTRATION-LOGIN-01,API,ApiResponse GlobalExceptionHandler SecurityExceptionHandler,修改,新增穩定code安全fieldErrors與opaque requestId,Codex,是,否,否,否,既有Endpoint不變
-2026-07-29,10:10,REGISTRATION-LOGIN-01,CI,.github/workflows/registration-login-ci.yml,新增,分層執行Backend unit integration Flutter及OpenAPI檢查,Codex,否,否,否,否,PR與手動觸發
-2026-07-29,10:10,REGISTRATION-LOGIN-01,Documentation,docs/API_SPEC.md docs/REGISTRATION_LOGIN_TASKS.md docs/openapi/registration-login.yaml,修改,同步API envelope與Task 01 REVIEW狀態,Codex,是,否,否,否,docs TASKS.md未修改
-2026-07-29,10:54,FLUTTER-CI-GOOGLE-SIGN-IN,Frontend,frontend/pubspec.yaml 與 frontend/pubspec.lock,修改,固定 google_sign_in_web 1.1.0 並以 Flutter 3.29.2 重新解析相依,Codex,否,否,否,否,Dart 3.7.2 可解析且維持既有 Google Web 登入
-2026-07-29,10:54,FLUTTER-CI-GOOGLE-SIGN-IN,Test,Flutter 3.29.2,驗證,執行 pub get 完整測試與 Web 建置,Codex,否,否,否,否,166 項測試通過且 Web 建置成功
-2026-07-29,10:54,FLUTTER-CI-GOOGLE-SIGN-IN,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,記錄 CI 相依修正及 Log 保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
-2026-07-29,09:26,DOC-016,Documentation,log/CHANGE_HISTORY.csv,修改,新增DOC-016文件異動歷程,Codex,否,否,否,否,已檢查一個月保存期限無過期Log
-2026-07-28,17:36,DOC-015,Documentation,docs/REGISTRATION_LOGIN_MEMBER_MANAGEMENT_SPEC.md,新增,建立註冊登入會員管理完整需求驗收測試差距與實作順序,Codex,是,是,是,是,文件 only 不執行程式或 Migration
-2026-07-28,17:36,DOC-015,Documentation,CONTEXT.md and docs/adr,修改,公開暱稱社群取代跨貼文匿名身分並新增 ADR-0009,Codex,是,是,是,是,仍維持封閉成人資格與治理 Gate
-2026-07-28,17:36,DOC-015,Documentation,AGENTS.md README.md and formal specs,修改,同步公開暱稱註冊登入會員管理與資料權利契約,Codex,是,是,是,是,AGENTS version v3.5
-2026-07-28,17:36,DOC-015,Documentation,docs/TASKS.md,修改,新增 DOC-015 REVIEW 狀態與工作限制,Codex,否,否,否,否,待文件 Review 與 Git PR
-2026-07-28,17:36,DOC-015,Documentation,log/CHANGE_LOG.md and log/CHANGE_HISTORY.csv,修改,新增 DOC-015 文件異動紀錄,Codex,否,否,否,否,已檢查一個月保存期限無過期 Log
-2026-07-28,15:32,DOC-014,Documentation,docs/PHASE4_5_FOUNDATION_SPEC.md,新增,建立 Phase 4.5 to-spec 完整規格與跨平台 E2E 驗收接縫,Codex,是,是,是,是,文件 only 不執行實作或 Issue 發布
-2026-07-28,15:32,DOC-014,Documentation,docs formal specs,修改,同步 Project Database API UI Coding Standard Decisions 規格索引,Codex,是,是,是,是,正式契約仍以各 Spec 與 ADR 為準
-2026-07-28,15:32,DOC-014,Documentation,docs/TASKS.md,修改,新增 DOC-014 REVIEW 狀態與工作限制,Codex,否,否,否,否,待文件 Review 與 Git PR
-2026-07-28,15:32,DOC-014,Documentation,log/CHANGE_LOG.md,修改,新增 to-spec 文件化工作紀錄,Codex,否,否,否,否,已檢查一個月保存期限無過期 Log
-2026-07-28,15:32,DOC-014,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-014 文件異動歷程,Codex,否,否,否,否,共五筆現行 13 欄紀錄
-2026-07-28,16:09,PHASE4-PR,Git,GitHub PR #83,新增,建立 feature phase4 至 develop 正式整合 PR,Codex,否,否,否,否,OPEN 非 Draft 且 merge state CLEAN
-2026-07-28,15:58,PHASE4-DEVELOP-SYNC,Integration,feature/phase4,合併,同步 develop 四個文件契約 Commit 並解決五個文件衝突,Codex,是,是,是,是,本次只合併文件且不修改程式或 Schema
-2026-07-28,15:58,PHASE4-DEVELOP-SYNC,Documentation,docs/TASKS.md,修改,依 GitHub PR 與完整測試證據更新 Phase 4 任務狀態,Codex,否,否,否,否,PR 66 至 78 與 81 已合併且 Phase 4 維持 REVIEW
-2026-07-28,15:58,PHASE4-DEVELOP-SYNC,Documentation,log/CHANGE_LOG.md,修改,記錄 develop 同步衝突處理整合測試與待辦,Codex,否,否,否,否,Log 保存期限檢查通過
-2026-07-28,15:58,PHASE4-DEVELOP-SYNC,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Phase 4 develop 同步歷程,Codex,否,否,否,否,Backend 275 Flutter 166 Analyze 與 Web build 通過
-2026-07-26,10:57,DOC-013,Documentation,CONTEXT.md,新增,建立 grilling 核准領域共同語言,Codex,否,否,否,否,Member Entry Emotional Load Community Post 等 canonical terms
-2026-07-26,10:57,DOC-013,Documentation,docs/adr/*.md,新增,建立八份難以逆轉的架構決策紀錄,Codex,是,是,是,是,不執行程式或 Phase 4 整合
-2026-07-26,10:57,DOC-013,Documentation,AGENTS.md,修改,升級 v3.4 並加入產品資料邊界與文件閱讀規則,Codex,是,是,是,是,最高層級規範同步
-2026-07-26,10:57,DOC-013,Documentation,README.md,修改,更新產品定位專案狀態與文件閱讀順序,Codex,否,否,否,否,Phase 4 candidate 未整合
-2026-07-26,10:57,DOC-013,Documentation,docs/PROJECT_SPEC.md,修改,同步非醫療年齡隱私社群內容資料權利與發布規格,Codex,是,是,是,是,Phase 4.5 前不得開始 Phase 5
-2026-07-26,10:57,DOC-013,Documentation,docs/DATABASE_SPEC.md,修改,新增 Flyway target schema 資料生命週期與 historical baseline 標示,Codex,否,是,否,是,本次未執行 Migration
-2026-07-26,10:57,DOC-013,Documentation,docs/API_SPEC.md,修改,新增 api v1 auth session entry community export delete target contract,Codex,是,是,是,是,本次未修改 Backend endpoint
-2026-07-26,10:57,DOC-013,Documentation,docs/UI_SPEC.md,修改,同步 Email login guardian local lock optional score trace community accessibility,Codex,是,否,是,是,本次未修改 Flutter
-2026-07-26,10:57,DOC-013,Documentation,docs/CODING_STANDARD.md,修改,加入 credential media migration logging outbox 與 privacy coding rules,Codex,是,是,是,是,版本更新 v3.2
-2026-07-26,10:57,DOC-013,Documentation,docs/DECISIONS.md,修改,記錄 2026-07-26 grilling 全部核准基線,Codex,是,是,是,是,舊衝突決策保留為 historical
-2026-07-26,10:57,DOC-013,Documentation,docs/TASKS.md,修改,新增 DOC-013 與 Phase 4.5 及重排後續執行順序,Codex,是,是,是,是,不整合 feature phase4
-2026-07-26,10:57,DOC-013,Documentation,docs historical references,修改,標示 Phase2 Phase3 與 system_data 為 historical reference,Codex,否,否,否,否,避免舊規格反向覆蓋
-2026-07-26,10:57,DOC-013,Documentation,log/CHANGE_LOG.md,修改,新增 grilling 文件化工作紀錄,Codex,是,是,是,是,已檢查一個月保存期限無過期 log
-2026-07-26,10:57,DOC-013,Documentation,log/CHANGE_HISTORY.csv,修改,新增 DOC-013 文件異動歷程,Codex,是,是,是,是,文件 only 無 code test
-2026-07-22,09:05,PHASE4-DIARY-UPDATE,Backend,backend/src/main/java/com/monsters/controller/diary/DiaryController.java,修改,實作 PUT api diaries multipart 更新 endpoint,Codex,是,否,否,否,成功回傳 HTTP 200
-2026-07-22,09:05,PHASE4-DIARY-UPDATE,Backend,backend/src/main/java/com/monsters/dto/diary/UpdateDiaryRequest.java,新增,建立 Diary 完整修改 request 與既有媒體 ID 欄位,Codex,是,否,否,否,score 1 至 5
-2026-07-22,09:05,PHASE4-DIARY-UPDATE,Backend,backend/src/main/java/com/monsters/service/diary,新增與修改,建立 Diary 媒體保留替換軟刪除與 R2 清理流程,Codex,是,否,否,否,交易成功後才清理舊物件
-2026-07-22,09:05,PHASE4-DIARY-UPDATE,Test,backend/src/test/java/com/monsters,新增與修改,驗證 update request controller service transaction 與媒體清理,Codex,是,否,否,否,targeted 與完整 Backend tests 通過
-2026-07-22,09:05,PHASE4-DIARY-UPDATE,Documentation,docs/TASKS.md,修改,記錄修改日記 API TODO 至 REVIEW 狀態,Codex,否,否,否,否,等待 Task PR review
-2026-07-22,09:05,PHASE4-DIARY-UPDATE,Documentation,log/CHANGE_LOG.md,修改,新增 Diary update 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
-2026-07-22,09:05,PHASE4-DIARY-UPDATE,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Diary update 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改
-2026-07-22,09:29,PHASE4-DIARY-SHARING,Backend,backend/src/main/java/com/monsters/controller/diary/DiaryController.java,修改,實作 PATCH api diaries id share endpoint,Codex,是,否,否,否,成功回傳 HTTP 200
-2026-07-22,09:29,PHASE4-DIARY-SHARING,Backend,backend/src/main/java/com/monsters/dto/diary/ShareDiaryRequest.java,新增,建立明確分享目標狀態 request 與必填驗證,Codex,是,否,否,否,isShared true 或 false
-2026-07-22,09:29,PHASE4-DIARY-SHARING,Backend,backend/src/main/java/com/monsters/service/diary/DiaryService.java,修改,建立 owner scoped 冪等分享狀態更新流程,Codex,是,否,否,否,狀態改變時才寫入
-2026-07-22,09:29,PHASE4-DIARY-SHARING,Test,backend/src/test/java/com/monsters,新增與修改,驗證 request controller service owner 與冪等行為,Codex,是,否,否,否,targeted 與完整 Backend tests 通過
-2026-07-22,09:29,PHASE4-DIARY-SHARING,Documentation,docs/TASKS.md,修改,標記 Diary update DONE 並記錄分享 API TODO 至 REVIEW,Codex,否,否,否,否,等待 Task PR review
-2026-07-22,09:29,PHASE4-DIARY-SHARING,Documentation,log/CHANGE_LOG.md,修改,新增 Diary sharing 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
-2026-07-22,09:29,PHASE4-DIARY-SHARING,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Diary sharing 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改
-2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Backend,backend/src/main/java/com/monsters/controller/entry/EntryMediaController.java,新增,建立 Annoyance 與 Diary binary media download endpoints,Codex,是,否,否,否,完整 200 與 Range 206
-2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Backend,backend/src/main/java/com/monsters/service/entry,新增,建立共用 owner 或分享授權與 private R2 下載流程,Codex,是,否,否,否,未授權與 media relation 不符統一 404
-2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Backend,backend/src/main/java/com/monsters/repository/entry/EntryRepository.java,修改,新增 entry type 與 soft delete scoped 查詢,Codex,是,否,否,否,支援共用媒體授權
-2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Configuration,backend/src/main/resources/application.yml,修改,允許 Range 並公開媒體 response headers,Codex,是,否,是,否,支援 Flutter Web 跨網域播放
-2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Test,backend/src/test/java/com/monsters,新增與修改,驗證 owner 分享 404 200 206 416 500 CORS 與 R2,Codex,是,否,否,否,Backend 259 tests passed
-2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Documentation,README.md 與 backend/README.md,修改,同步 Range CORS 環境變數預設值,Codex,否,否,否,否,無部署值硬編碼
-2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Documentation,docs/API_SPEC.md,修改,同步媒體下載所需 CORS headers,Codex,是,否,否,否,既有 endpoint contract 不變
-2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Documentation,docs/TASKS.md,修改,標記 Diary sharing DONE 並記錄雙媒體下載 API 至 REVIEW,Codex,否,否,否,否,等待 Task PR review
-2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Documentation,log/CHANGE_LOG.md,修改,新增 Entry media download 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
-2026-07-22,10:04,PHASE4-ENTRY-MEDIA-DOWNLOAD,Documentation,log/CHANGE_HISTORY.csv,修改,新增 Entry media download 異動歷史,Codex,否,否,否,否,CHANGE_HISTORY xlsx 未修改
-2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Frontend,frontend/lib/models/entry_*.dart,新增,建立 Entry 共用記錄方式媒體與心情繪圖型別,Codex,否,否,是,否,Annoyance 保留相容別名
-2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Frontend,frontend/lib/services/entry_media_*.dart,新增,建立 Entry 共用媒體服務驗證與跨平台 Adapter,Codex,否,否,是,否,recordingFilePrefix 區分 flow
-2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Frontend,frontend/lib/widgets/entry,新增與移轉,抽出內容輸入媒體預覽繪圖分數分享與 Responsive shell,Codex,否,否,是,否,keyPrefix 保留 Annoyance 測試契約
-2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Frontend,frontend/lib/pages/annoyance_chat_page.dart,修改,Annoyance 改用 Entry 共用元件與媒體層,Codex,否,否,是,否,既有流程行為不變
-2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Test,frontend/test,新增與修改,驗證 Entry 共用元件 Adapter 與 Annoyance regression,Codex,否,否,是,否,Analyze 通過且 136 tests passed 與 Web build 成功
-2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Documentation,docs/UI_SPEC.md 與 docs/TASKS.md,修改,同步 Entry 共用路徑與 6 項 DONE 及 1 項 REVIEW,Codex,否,否,是,否,本 Task 維持 REVIEW 待 PR 合併
-2026-07-22,11:04,PHASE4-ENTRY-FRONTEND-FOUNDATION,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增 Entry frontend foundation 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
-2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Frontend,frontend/lib/models 與 frontend/lib/providers,新增,建立 Diary 獨立 draft response 與 Riverpod 狀態流程,Codex,否,否,是,否,不依賴 Annoyance 專屬型別
-2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Frontend,frontend/lib/repositories/diary_repository.dart,新增,串接 POST diaries multipart 建立日記,Codex,是,否,是,否,沿用既有 API contract
-2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Frontend,frontend/lib/pages/diary_chat_page.dart 與 frontend/lib/widgets/diary,新增,依 Penpot 建立 Diary Web 九個狀態與專屬確認完成畫面,Codex,否,否,是,否,1200 至 1920px RWD
-2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Frontend,frontend/lib/widgets/entry 與 frontend/lib/routes,修改,參數化共用內容繪圖文案並新增 diaries new 路由,Codex,否,否,是,否,首頁入口仍待 Phase 4 完成
-2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Test,frontend/test,新增與修改,驗證 Diary 狀態 API Web RWD 完成頁與路由,Codex,否,否,是,否,Analyze 通過 148 tests passed 與 Web build 成功
-2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Documentation,docs/UI_SPEC.md 與 docs/TASKS.md,修改,同步 Diary Web 實作並將 PR 73 共用 Task 轉為 DONE,Codex,否,否,是,否,本 Task 維持 REVIEW 待 PR 合併
-2026-07-22,11:47,PHASE4-DIARY-WEB-CHAT,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增 Diary Web 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
-2026-07-22,14:49,PHASE4-DIARY-MOBILE-CHAT,Design,Penpot Diary Flow Mobile,修改,校正記錄方式文案為單一主要記錄方式與 optional 心情圖,Codex,否,否,是,否,與正式 Project Database API 規格一致
-2026-07-22,14:49,PHASE4-DIARY-MOBILE-CHAT,Frontend,frontend/lib/widgets/diary/diary_mobile_flow.dart,新增,建立 Penpot 390x844 Diary Mobile 九狀態畫布,Codex,否,否,是,否,320 至 599px 等比例填滿 viewport
-2026-07-22,14:49,PHASE4-DIARY-MOBILE-CHAT,Frontend,frontend/lib/pages/diary_chat_page.dart 與 frontend/lib/providers/diary_chat_provider.dart,修改,沿用共用狀態 API 並加入 Mobile 選擇後確認流程,Codex,否,否,是,否,Web Tablet 快速選擇行為保持相容
-2026-07-22,14:49,PHASE4-DIARY-MOBILE-CHAT,Test,frontend/test/diary_chat_page_test.dart 與 frontend/test/providers/diary_chat_provider_test.dart,修改,驗證 Mobile RWD 九狀態逐步確認畫布完成頁與 Web 回歸,Codex,否,否,是,否,Analyze 通過 18 項定向與 156 項完整測試 Web build 成功
-2026-07-22,14:49,PHASE4-DIARY-MOBILE-CHAT,Documentation,docs/UI_SPEC.md 與 docs/TASKS.md,修改,同步 Diary Mobile 規格並將 PR 74 Web Task 轉為 DONE,Codex,否,否,是,否,PR #75 已建立且本 Task 維持 REVIEW 待合併
-2026-07-22,14:49,PHASE4-DIARY-MOBILE-CHAT,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增 Diary Mobile 工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
-2026-07-24,09:13,PHASE4-DIARY-SCORE,Test,frontend/test/widgets/mood_score_selector_test.dart 與 providers repositories 測試,修改,驗證五個圖片選項語意標籤非法值拒絕與 1 5 邊界 multipart 原值,Codex,否,否,否,否,12 項定向與 159 項完整測試通過 Analyze 與 Web build 成功
-2026-07-24,09:13,PHASE4-DIARY-SCORE,Documentation,docs/UI_SPEC.md 與 docs/TASKS.md,修改,同步 1-based 分數互動 contract 並將 PR 75 Mobile Task 轉為 DONE,Codex,否,否,否,否,PR #76 已建立且本 Task 維持 REVIEW 待合併
-2026-07-24,09:13,PHASE4-DIARY-SCORE,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增日記分數驗收工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log
-2026-07-24,10:08,PHASE4-ENTRY-REWARD-NULL,Backend,backend/src/main/java/com/monsters/dto/annoyance/AnnoyanceResponse.java 與 diary/DiaryResponse.java,修改,明確序列化 reward null 並拒絕 Phase 6 前非 null Reward,Codex,是,否,否,否,修正 Jackson 忽略 Void 欄位造成 reward key 缺失
-2026-07-24,10:08,PHASE4-ENTRY-REWARD-NULL,Test,backend/src/test/java/com/monsters/dto/entry/EntryRewardContractTest.java,新增,驗證 Annoyance Diary JSON 明確包含 reward null 並拒絕提早發放,Codex,是,否,否,否,3 項定向與 262 項 Backend 完整測試通過
-2026-07-24,10:08,PHASE4-ENTRY-REWARD-NULL,Test,frontend/test/annoyance_chat_page_test.dart 與 Diary Reward 相關測試,修改,驗證 Repository Provider 與 Web Mobile 完成頁不顯示舊獎勵,Codex,否,否,否,否,44 項定向與 159 項完整測試通過 Analyze 及 Web build 成功
-2026-07-24,10:08,PHASE4-ENTRY-REWARD-NULL,Documentation,docs/API_SPEC.md docs/UI_SPEC.md docs/TASKS.md,修改,同步 reward null key 與禁止舊獎勵完成頁規格,Codex,是,否,是,否,將 PR #76 日記分數 Task 轉為 DONE
-2026-07-24,10:08,PHASE4-ENTRY-REWARD-NULL,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增 Reward 修正工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log；Draft PR #77 已建立且 Task 維持 REVIEW
-2026-07-24,10:48,PHASE4-HOME-DIARY-ENTRY,Frontend,frontend/lib/pages/home_page.dart,修改,啟用 Desktop Tablet Mobile 首頁日記行動並導向 AppRoute diaryChat,Codex,否,否,是,否,Mobile 文案由即將開放改為開始記錄
-2026-07-24,10:48,PHASE4-HOME-DIARY-ENTRY,Test,frontend/test/home_page_test.dart,修改,驗證 390px 900px 1440px 首頁日記入口與既有首頁回歸,Codex,否,否,否,否,17 項定向與 162 項完整測試通過 Analyze 及 Web build 成功
-2026-07-24,10:48,PHASE4-HOME-DIARY-ENTRY,Documentation,docs/UI_SPEC.md docs/TASKS.md,修改,同步首頁日記 named route contract 並將 PR 77 Reward Task 轉為 DONE,Codex,否,否,是,否,本 Task 維持 REVIEW 待 task PR 合併
-2026-07-24,10:48,PHASE4-HOME-DIARY-ENTRY,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增首頁日記入口工作報告與保存期限檢查,Codex,否,否,否,否,最早紀錄 2026-06-29 無過期 Log；Draft PR #78 已建立且 Task 維持 REVIEW
-2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Backend,backend/src/main/java/com/monsters/service/entry 與 dto/entity/repository,新增,建立日記煩惱持久草稿服務 row lock 送出與逾期清理,Codex,是,是,否,是,30 天 owner-only 草稿與 R2 刪除失敗重試
-2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Backend,backend/src/main/java/com/monsters/controller,修改,新增 Diary Annoyance draft CRUD submit 與 owner-only 媒體下載 endpoint,Codex,是,否,否,否,無草稿 GET 回傳 draft null
-2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Database,database/init/01_schema.sql 與 database/migrations/20260724_01_add_entry_drafts.sql,新增與修改,建立 entry_drafts 與 entry_draft_media schema,Codex,否,是,否,是,每位使用者每種類型一份草稿
-2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Frontend,frontend/lib/providers 與 repositories,修改,串接自動暫存還原捨棄送出與序列化 queue,Codex,是,否,是,否,文字 debounce 且送出前 flush
-2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Frontend,frontend/lib/models pages widgets,新增與修改,還原 private 暫存媒體並更新暫存狀態與重新開始確認,Codex,否,否,是,否,離開頁面不刪除草稿
-2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Test,backend/src/test 與 frontend/test,新增與修改,驗證恢復續存 endpoint owner 清理競爭送出與既有回歸,Codex,是,是,是,否,Backend 275 tests 與 Flutter 166 tests 通過
-2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Documentation,docs/PROJECT_SPEC.md docs/API_SPEC.md docs/DATABASE_SPEC.md docs/UI_SPEC.md docs/DECISIONS.md docs/TASKS.md,修改,同步持久草稿 API Database UI Decision 與 Task 狀態,Codex,是,是,是,是,PR 78 首頁 Task 已轉 DONE
-2026-07-28,15:01,PHASE4-ENTRY-DURABLE-DRAFTS,Documentation,log/CHANGE_LOG.md 與 log/CHANGE_HISTORY.csv,修改,新增持久草稿工作報告與保存期限檢查,Codex,否,否,否,否,三種 Log 最早 2026-06-29 無過期紀錄；Draft PR #81 已建立
-2026-07-29,16:14,REGISTRATION-LOGIN-03,Backend,backend/src/main/java/com/monsters/registration 與 auth,新增與修改,建立不可列舉註冊 Email驗證 Outbox寄信 限流與空會員清理,Codex,是,是,否,是,Token只保存hash且驗證前不建立一般Session
-2026-07-29,16:14,REGISTRATION-LOGIN-03,API,backend/src/main/java/com/monsters/controller/auth 與 dto,新增與修改,新增註冊政策註冊重寄與Email驗證四個v1 endpoint,Codex,是,否,否,否,穩定錯誤碼與Retry-After已同步OpenAPI
-2026-07-29,16:14,REGISTRATION-LOGIN-03,Database,backend/src/main/resources/db/migration/V3__add_registration_and_email_verification.sql,新增,建立條款接受驗證Token與註冊限流資料結構,Codex,否,是,否,是,空庫與V2升級測試通過
-2026-07-29,16:14,REGISTRATION-LOGIN-03,Frontend,frontend/lib/models pages providers repositories routes,新增與修改,完成Email註冊待驗證重寄冷卻驗證結果與重新開始流程,Codex,是,否,是,否,初始註冊不收account或暱稱
-2026-07-29,16:14,REGISTRATION-LOGIN-03,Test,backend/src/test backend/src/integrationTest frontend/test,新增與修改,以TDD驗證註冊驗證限流清理SMTP契約Migration與Flutter流程,Codex,是,是,是,否,Backend單元與MySQL整合 Flutter169項 Analyze Web build皆通過
-2026-07-29,16:14,REGISTRATION-LOGIN-03,Documentation,README與docs規格OpenAPI及REGISTRATION_LOGIN_TASKS.md,修改,同步Task03契約資料庫UI決策部署設定並轉REVIEW,Codex,是,是,是,是,docs TASKS.md與system_data未修改
-2026-07-29,16:14,REGISTRATION-LOGIN-03,Deployment,frontend/README.md與docs/API_SPEC.md,修改,記錄Railway develop與main公開Backend URL及Flutter build define,Codex,是,否,是,否,URL由環境注入未寫死於應用程式碼
-2026-07-29,16:14,REGISTRATION-LOGIN-03,Documentation,log/CHANGE_LOG.md與log/CHANGE_HISTORY.csv,修改,新增Task03工作報告與一個月保存期限檢查,Codex,否,否,否,否,CSV與XLSX最早2026-06-29無過期Log且XLSX未修改
-2026-07-30,09:41,REGISTRATION-LOGIN-03-REVIEW,Backend,service registration與repository registration,修改與新增,補上安全操作Log並將空會員資料存取移至Repository,Codex,否,否,否,否,Log不含Email Token密碼或hash
-2026-07-30,09:41,REGISTRATION-LOGIN-03-REVIEW,Frontend,email_verification_page.dart與register_page.dart,修改,移除尚未可用Eligibility流程前返回登入迴圈並修正Widget長度,Codex,否,否,是,否,Continuation結果保留記憶體供Task06接手
-2026-07-30,09:41,REGISTRATION-LOGIN-03-REVIEW,Test,backend與frontend測試,修改,驗證操作Log隱私清理流程與Email驗證安全提示,Codex,否,是,是,否,Backend282項 MySQL整合 Flutter169項與Analyze通過
-2026-07-30,09:41,REGISTRATION-LOGIN-03-REVIEW,Documentation,REGISTRATION_LOGIN_TASKS.md與Log,修改,同步Task03審查修正Frontier與保存期限,Codex,否,否,否,否,Task03維持REVIEW且未開始Task04

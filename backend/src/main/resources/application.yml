@@ -75,6 +75,18 @@ app:
         subject: ${REGISTRATION_SMTP_SUBJECT:Verify your Monsters email}
         guardian-grant-subject: ${GUARDIAN_GRANT_SMTP_SUBJECT:貘nsters 監護人同意確認}
         guardian-withdraw-subject: ${GUARDIAN_WITHDRAW_SMTP_SUBJECT:貘nsters 監護人同意撤回確認}
+        password-reset-subject: ${PASSWORD_RESET_SMTP_SUBJECT:貘nsters 密碼重設}
+  password-reset:
+    public-url: ${PASSWORD_RESET_PUBLIC_URL:}
+    token-ttl-minutes: ${PASSWORD_RESET_TOKEN_TTL_MINUTES:15}
+    max-delivery-attempts: ${PASSWORD_RESET_MAX_DELIVERY_ATTEMPTS:5}
+    worker-enabled: ${PASSWORD_RESET_WORKER_ENABLED:false}
+    worker-delay-ms: ${PASSWORD_RESET_WORKER_DELAY_MS:5000}
+    rate-limit-hash-key: ${PASSWORD_RESET_RATE_LIMIT_HASH_KEY:${REGISTRATION_RATE_LIMIT_HASH_KEY:}}
+    rate-limit-email-cooldown-seconds: ${PASSWORD_RESET_EMAIL_COOLDOWN_SECONDS:60}
+    rate-limit-email-max-attempts: ${PASSWORD_RESET_EMAIL_MAX_ATTEMPTS:5}
+    rate-limit-ip-max-attempts: ${PASSWORD_RESET_IP_MAX_ATTEMPTS:20}
+    rate-limit-window-minutes: ${PASSWORD_RESET_RATE_LIMIT_WINDOW_MINUTES:15}
   entry-draft:
     retention-days: ${ENTRY_DRAFT_RETENTION_DAYS:30}
     cleanup-cron: "${ENTRY_DRAFT_CLEANUP_CRON:0 30 3 * * *}"

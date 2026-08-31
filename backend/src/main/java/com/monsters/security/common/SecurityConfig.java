@@ -48,6 +48,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/google-logins").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/session-refreshes").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/password-reset-requests").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/password-resets").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/eligibility-policy").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/eligibility-completions")
                                 .hasAuthority("CONTINUATION_COMPLETE_ELIGIBILITY")

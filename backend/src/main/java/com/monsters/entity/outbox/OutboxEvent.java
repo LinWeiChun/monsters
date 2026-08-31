@@ -66,6 +66,10 @@ public class OutboxEvent extends BaseEntity {
         return eventType;
     }
 
+    public String getPayload() {
+        return payload;
+    }
+
     public OutboxStatus getStatus() {
         return status;
     }

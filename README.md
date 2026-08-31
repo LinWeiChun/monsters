@@ -434,6 +434,11 @@ docker compose down
 | `REGISTRATION_SMTP_FROM` | 已在 Resend 驗證網域的 Email 寄件者 | 空字串 |
 | `REGISTRATION_SMTP_ENABLED` | 啟用 SMTP Adapter | `false` |
 | `EMAIL_VERIFICATION_WORKER_ENABLED` | 啟用 Email Outbox Worker | `false` |
+| `PASSWORD_RESET_PUBLIC_URL` | Flutter Web `/reset-password`完整HTTPS URL | 空字串，密碼重設寄信前必須提供 |
+| `PASSWORD_RESET_RATE_LIMIT_HASH_KEY` | 密碼重設Email／IP限流獨立HMAC secret | 未設定時沿用`REGISTRATION_RATE_LIMIT_HASH_KEY`；正式環境建議獨立Secret |
+| `PASSWORD_RESET_WORKER_ENABLED` | 啟用Password Reset Outbox Worker | `false` |
+| `PASSWORD_RESET_MAX_DELIVERY_ATTEMPTS` | 寄送失敗前最大嘗試次數 | `5` |
+| `PASSWORD_RESET_SMTP_SUBJECT` | 密碼重設信主旨 | `貘nsters 密碼重設` |
 | `UNVERIFIED_MEMBER_CLEANUP_ENABLED` | 啟用七日空會員清理 | `false` |
 | `MINOR_NOTICE_VERSION`、`MINOR_NOTICE_URL` | 未成年人說明版本與 HTTPS URL | 空字串 |
 | `GUARDIAN_CONSENT_VERSION`、`GUARDIAN_CONSENT_URL` | 監護人同意文件版本與 HTTPS URL | 空字串 |

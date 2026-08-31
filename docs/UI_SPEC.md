@@ -435,7 +435,7 @@ AI 或開發者參考 `system_data/` 舊 UI 時，應檢查以下項目：
 - API 錯誤訊息呈現
 - 登入成功後導向 `home` route
 - 前往註冊頁
-- 忘記密碼入口提示
+- 忘記密碼入口連至`/forgot-password`正式申請頁
 - Google 登入：Android / iOS 由 `google_sign_in` 觸發登入，Web 使用 `google_sign_in_web` 官方按鈕
 
 登入頁 Penpot 對齊規格：
@@ -510,6 +510,49 @@ Google既有會員明確連結流程：
 - RWD使用單欄、最大寬度560px；390、600、1199與1440寬度必須無overflow。小高度可由頁面安全捲動承載表單，表單與按鈕最小高度54px。
 - Penpot Web畫板：`Account / Web / 13 Google Link Required / 需連結`（`e1ebae12-46fb-80ec-8008-83cfeaadd62b`）、14 Reauth（`e1ebae12-46fb-80ec-8008-83d05bae1967`）、15 Confirm（`e1ebae12-46fb-80ec-8008-83d05c0ccbce`）、16 Success（`e1ebae12-46fb-80ec-8008-83d05c7d113c`）、17 Conflict（`e1ebae12-46fb-80ec-8008-83d05cca393c`）。
 - Penpot Mobile畫板：`Account / Mobile / 13 Google Link Required / 需連結`（`e1ebae12-46fb-80ec-8008-83d100ff4cf8`）、14 Reauth（`e1ebae12-46fb-80ec-8008-83d101253e62`）、15 Confirm（`e1ebae12-46fb-80ec-8008-83d1014399f7`）、16 Success（`e1ebae12-46fb-80ec-8008-83d10167f41d`）、17 Conflict（`e1ebae12-46fb-80ec-8008-83d1018bf9d2`）；10個畫板均已通過parent與visible descendant containment檢查。
+
+## Flutter Forgot／Reset Password 實作規範
+
+Task 11設計檢查（2026-08-31）：Penpot重連後新增的Web／Mobile各8個狀態畫板均已保留，完成containment及Chrome實際畫面檢視後校正Flutter草稿。圖片匯出曾回HTTP 504，改以瀏覽器截圖檢查總覽與表單細節；不將單純編譯成功視為視覺驗收。
+
+| Target | Parent Board ID | 子畫板基準尺寸 | 狀態 |
+|---|---|---|---|
+| `WEB / Password Reset / Web` | `2072cc29-a2cc-805c-8008-90dda535e796` | 1440×900 | 01 Request、02 Accepted、03 New Password、04 Invalid、05 Expired、06 Used、07 Success、08 Rate Limited |
+| `APP / Password Reset / Mobile` | `2072cc29-a2cc-805c-8008-90deeb90c5eb` | 390×844 | 同Web八個狀態 |
+
+- Web／Mobile分別檢查110／70個descendant，均未超出父層；Web 58個及Mobile 41個狀態文字的實際render bounds亦無溢出。
+- 沿用Account & Access暖色、既有Logo與怪獸素材：表單背景`registerFormBackground`、品牌背景`registerBrandBackground`、主按鈕`registerPrimary`；主按鈕高54、圓角12，Mobile水平留白36、Web表單最大寬520。表單／狀態Logo固定150×47，Desktop品牌Logo固定160×50，使用`BoxFit.fill`對齊Penpot image fill；不得沿600×300原始檔比例推導Logo高度。
+
+### 2026-08-31 Penpot畫板整理
+
+- WEB 18個、APP 17個主畫板依「啟動／帳號」、「私人記錄」、「收藏／社群／通知／互動」、「設定／隱私／支援／系統」、「覆蓋補充」分列，每列最多4個。
+- WEB欄距400、APP欄距320；每列以該列最高畫板計算下一列起點，解決Account與Diary、Session Management與Help等原有重疊。
+- 整理後35個主畫板無重疊；242個Web及224個APP直屬元件的相對座標與尺寸保持不變。未刪除舊畫板，未修改`Assets / Monsters`素材頁。
+
+流程固定為「登入頁忘記密碼連結 → 輸入Email → 通用受理畫面 → Email HTTPS連結 → 設定新密碼 → 成功並重新登入」。
+
+實作檔案：
+
+| 類型 | 檔案 |
+|---|---|
+| 申請頁 | `frontend/lib/pages/password_reset_request_page.dart` |
+| 重設頁 | `frontend/lib/pages/password_reset_page.dart` |
+| Provider | `frontend/lib/providers/password_reset_provider.dart` |
+| 共用RWD容器 | `frontend/lib/widgets/auth/password_reset_shell.dart` |
+| 品牌與表單標題 | `frontend/lib/widgets/auth/password_reset_brand_panel.dart`、`password_reset_intro.dart` |
+| Repository | `frontend/lib/repositories/auth_repository.dart` |
+
+規則：
+
+- 申請頁呼叫`POST /api/v1/auth/password-reset-requests`；成功畫面只顯示「若此Email可使用，將寄出重設信」，不得回顯Email或指出會員是否存在。
+- 重設頁只從`/reset-password?token=...`取得Token，呼叫`POST /api/v1/auth/password-resets`；Token不得寫入Log、SharedPreferences、畫面文字或其他持久狀態。
+- Client僅驗證必填及新密碼與確認值一致，並提示15–128個Unicode字元；NFC後長度與blocklist由Backend判定，避免將正規化前超過128個code points的有效密碼誤拒。
+- `PASSWORD_RESET_TOKEN_INVALID`、`PASSWORD_RESET_TOKEN_EXPIRED`、`PASSWORD_RESET_TOKEN_USED`分別顯示無效、過期與已使用的安全復原狀態；都只提供重新申請與返回登入，不揭露會員狀態。
+- 成功畫面必須明示所有既有登入裝置已失效，主要按鈕只導向重新登入；Repository成功後清除本地Access與Refresh Session狀態。
+- RWD沿用Account & Access視覺語彙：1200px以上使用左品牌／右表單雙欄，其餘採單欄；390、599、600、900、1024、1199、1200、1440、1920寬度須無overflow且不使用主畫面`SingleChildScrollView`。
+- 鍵盤彈出時Scaffold須避開bottom inset；可用高度不足600時收合表單Logo並縮小標題，品牌區低於650時收合說明與多餘留白。只在局部表單高度仍不足時scaleDown，不縮放整張Web畫布。
+- 同一頁換入新Token須清空欄位、驗證訊息及完成狀態；舊非同步請求不得覆蓋新流程，已dispose的Provider不得再寫狀態。
+- 忘記密碼按鈕、重新申請與重新登入按鈕都必須使用`go_router`有效連結，不保留placeholder Snackbar。
 
 ## Flutter Register Page 實作規範
 
@@ -699,6 +742,8 @@ Platform Secure Storage Adapter
 | `/home` | `home` | `HomePage` | 首頁容器 |
 | `/login` | `login` | `LoginPage` | 登入頁容器 |
 | `/register` | `register` | `RegisterPage` | 註冊頁容器 |
+| `/forgot-password` | `passwordResetRequest` | `PasswordResetRequestPage` | 忘記密碼申請與通用受理狀態 |
+| `/reset-password` | `passwordReset` | `PasswordResetPage` | Token無效／過期／已使用、設定新密碼與成功狀態 |
 | `/profile` | `profile` | `ProfilePage` | 個人資料頁容器 |
 | `/password-lock` | `passwordLock` | `PasswordLockPage` | 密碼鎖頁容器 |
 

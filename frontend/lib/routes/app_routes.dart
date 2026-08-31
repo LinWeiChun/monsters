@@ -15,6 +15,8 @@ class AppRoute {
   static const guardianConsent = 'guardianConsent';
   static const sessions = 'sessions';
   static const googleAccountLink = 'googleAccountLink';
+  static const passwordResetRequest = 'passwordResetRequest';
+  static const passwordReset = 'passwordReset';
 }
 
 class AppPath {
@@ -34,4 +36,6 @@ class AppPath {
   static const guardianConsent = '/guardian-consent';
   static const sessions = '/profile/sessions';
   static const googleAccountLink = '/link-google-account';
+  static const passwordResetRequest = '/forgot-password';
+  static const passwordReset = '/reset-password';
 }

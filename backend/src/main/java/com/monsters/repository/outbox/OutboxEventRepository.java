@@ -16,4 +16,10 @@ public interface OutboxEventRepository extends JpaRepository<OutboxEvent, Long> 
             OutboxStatus status,
             LocalDateTime availableAt
     );
+
+    boolean existsByEventTypeAndAggregateIdAndIdGreaterThan(
+            String eventType,
+            String aggregateId,
+            Long id
+    );
 }

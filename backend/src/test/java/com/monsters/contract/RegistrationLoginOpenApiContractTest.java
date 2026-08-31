@@ -217,6 +217,61 @@ class RegistrationLoginOpenApiContractTest {
     }
 
     @Test
+    void passwordResetContractShouldBeUniversalTokenlessAndSingleUse() throws IOException {
+        Map<String, Object> document;
+        try (var reader = Files.newBufferedReader(CONTRACT_PATH)) {
+            document = new Yaml().load(reader);
+        }
+
+        Map<String, Object> paths = mapAt(document, "paths");
+        assertThat(paths.keySet()).contains(
+                "/api/v1/auth/password-reset-requests",
+                "/api/v1/auth/password-resets"
+        );
+        assertThat(mapAt(
+                document,
+                "paths",
+                "/api/v1/auth/password-reset-requests",
+                "post",
+                "responses"
+        )).containsKeys("202", "400", "429", "503");
+        Map<String, Object> acceptedEnvelope = mapAt(
+                document,
+                "components",
+                "schemas",
+                "PasswordResetRequestAcceptedEnvelope"
+        );
+        assertThat(acceptedEnvelope.toString()).doesNotContain("token", "resetToken");
+
+        Map<String, Object> completionRequest = mapAt(
+                document,
+                "components",
+                "schemas",
+                "PasswordResetCompletionRequest"
+        );
+        assertThat(completionRequest).containsEntry("additionalProperties", false);
+        assertThat(listAt(completionRequest, "required"))
+                .containsExactlyInAnyOrder("token", "newPassword");
+        assertThat(mapAt(completionRequest, "properties", "token"))
+                .containsEntry("writeOnly", true)
+                .containsEntry("maxLength", 512);
+        assertThat(mapAt(completionRequest, "properties", "newPassword"))
+                .containsEntry("minLength", 15)
+                .containsEntry("maxLength", 128)
+                .containsEntry("writeOnly", true);
+        assertThat(listAt(mapAt(
+                document,
+                "components",
+                "schemas",
+                "PasswordResetTokenErrorCode"
+        ), "enum")).containsExactlyInAnyOrder(
+                "PASSWORD_RESET_TOKEN_INVALID",
+                "PASSWORD_RESET_TOKEN_USED",
+                "PASSWORD_RESET_TOKEN_EXPIRED"
+        );
+    }
+
+    @Test
     void googleContractShouldRequireExplicitLinkingAndPurposeBoundReauthentication()
             throws IOException {
         Map<String, Object> document;

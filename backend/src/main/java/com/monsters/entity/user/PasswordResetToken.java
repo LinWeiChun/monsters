@@ -17,7 +17,7 @@ public class PasswordResetToken extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "token_hash", nullable = false, length = 255, unique = true)
+    @Column(name = "token_hash", nullable = false, length = 64, unique = true)
     private String tokenHash;
 
     @Column(name = "expires_at", nullable = false)
@@ -25,6 +25,9 @@ public class PasswordResetToken extends BaseEntity {
 
     @Column(name = "used_at")
     private LocalDateTime usedAt;
+
+    @Column(name = "revoked_at")
+    private LocalDateTime revokedAt;
 
     protected PasswordResetToken() {
     }
@@ -51,11 +54,29 @@ public class PasswordResetToken extends BaseEntity {
         return usedAt;
     }
 
+    public LocalDateTime getRevokedAt() {
+        return revokedAt;
+    }
+
     public boolean isExpired(LocalDateTime now) {
         return !expiresAt.isAfter(now);
     }
 
     public void markUsed(LocalDateTime usedAt) {
         this.usedAt = usedAt;
+    }
+
+    public boolean isUsed() {
+        return usedAt != null;
+    }
+
+    public boolean isRevoked() {
+        return revokedAt != null;
+    }
+
+    public void revoke(LocalDateTime revokedAt) {
+        if (usedAt == null && this.revokedAt == null) {
+            this.revokedAt = revokedAt;
+        }
     }
 }

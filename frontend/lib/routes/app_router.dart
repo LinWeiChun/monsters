@@ -16,6 +16,8 @@ import '../pages/eligibility_page.dart';
 import '../pages/guardian_consent_page.dart';
 import '../pages/google_account_link_page.dart';
 import '../pages/session_management_page.dart';
+import '../pages/password_reset_request_page.dart';
+import '../pages/password_reset_page.dart';
 import '../models/eligibility_policy.dart';
 import 'app_routes.dart';
 
@@ -102,6 +104,24 @@ GoRouter createAppRouter({String initialLocation = AppPath.splash}) {
         name: AppRoute.googleAccountLink,
         pageBuilder:
             (context, state) => _appPage(state, const GoogleAccountLinkPage()),
+      ),
+      GoRoute(
+        path: AppPath.passwordResetRequest,
+        name: AppRoute.passwordResetRequest,
+        pageBuilder:
+            (context, state) =>
+                _appPage(state, const PasswordResetRequestPage()),
+      ),
+      GoRoute(
+        path: AppPath.passwordReset,
+        name: AppRoute.passwordReset,
+        pageBuilder:
+            (context, state) => _appPage(
+              state,
+              PasswordResetPage(
+                token: state.uri.queryParameters['token'] ?? '',
+              ),
+            ),
       ),
       GoRoute(
         path: AppPath.profile,

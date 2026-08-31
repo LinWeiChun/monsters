@@ -33,6 +33,7 @@ class MemberStateFlywayIntegrationTest {
                 .migrate();
 
         assertMemberStateTablesExist();
+        assertPasswordResetSchemaExists();
 
         Flyway.configure()
                 .dataSource(mysql.getJdbcUrl(), mysql.getUsername(), mysql.getPassword())
@@ -77,6 +78,7 @@ class MemberStateFlywayIntegrationTest {
         }
 
         assertMemberStateTablesExist();
+        assertPasswordResetSchemaExists();
     }
 
     private void assertMemberStateTablesExist() throws Exception {
@@ -94,6 +96,45 @@ class MemberStateFlywayIntegrationTest {
              ResultSet result = statement.executeQuery()) {
             assertThat(result.next()).isTrue();
             assertThat(result.getInt(1)).isEqualTo(3);
+        }
+    }
+
+    private void assertPasswordResetSchemaExists() throws Exception {
+        try (Connection connection = mysql.createConnection("");
+             PreparedStatement columnStatement = connection.prepareStatement("""
+                     SELECT character_maximum_length
+                     FROM information_schema.columns
+                     WHERE table_schema = DATABASE()
+                       AND table_name = 'password_reset_tokens'
+                       AND column_name = 'token_hash'
+                     """);
+             ResultSet columnResult = columnStatement.executeQuery()) {
+            assertThat(columnResult.next()).isTrue();
+            assertThat(columnResult.getInt(1)).isEqualTo(64);
+        }
+        try (Connection connection = mysql.createConnection("");
+             PreparedStatement revokedStatement = connection.prepareStatement("""
+                     SELECT COUNT(*)
+                     FROM information_schema.columns
+                     WHERE table_schema = DATABASE()
+                       AND table_name = 'password_reset_tokens'
+                       AND column_name = 'revoked_at'
+                     """);
+             ResultSet revokedResult = revokedStatement.executeQuery()) {
+            assertThat(revokedResult.next()).isTrue();
+            assertThat(revokedResult.getInt(1)).isEqualTo(1);
+        }
+        try (Connection connection = mysql.createConnection("");
+             PreparedStatement indexStatement = connection.prepareStatement("""
+                     SELECT COUNT(*)
+                     FROM information_schema.statistics
+                     WHERE table_schema = DATABASE()
+                       AND table_name = 'password_reset_tokens'
+                       AND index_name = 'idx_password_reset_tokens_user_active'
+                     """);
+             ResultSet indexResult = indexStatement.executeQuery()) {
+            assertThat(indexResult.next()).isTrue();
+            assertThat(indexResult.getInt(1)).isEqualTo(4);
         }
     }
 }
