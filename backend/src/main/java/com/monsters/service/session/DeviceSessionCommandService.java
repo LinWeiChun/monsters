@@ -208,6 +208,14 @@ public class DeviceSessionCommandService {
         return !sessions.isEmpty();
     }
 
+    @Transactional
+    public int revokeAllAfterPasswordReset(Long userId) {
+        List<UserSession> sessions = sessionRepository
+                .findAllByUser_IdAndRevokedAtIsNull(userId);
+        revokeAll(sessions, "PASSWORD_RESET");
+        return sessions.size();
+    }
+
     private void requireReauthentication(
             Long userId,
             String currentSessionId,

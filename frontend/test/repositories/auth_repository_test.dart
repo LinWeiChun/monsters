@@ -18,6 +18,69 @@ void main() {
   });
 
   test(
+    'password reset request uses formal resource endpoint without token data',
+    () async {
+      final dio = Dio();
+      RequestOptions? request;
+      dio.httpClientAdapter = _CallbackAdapter((options) {
+        request = options;
+        return _jsonResponse({
+          'success': true,
+          'code': 'PASSWORD_RESET_REQUEST_ACCEPTED',
+          'message': 'Password reset request accepted',
+          'data': null,
+        }, statusCode: 202);
+      });
+      final repository = AuthRepository(
+        ApiClient(config: _config, dio: dio),
+        sessionStore: const WebCookieSessionCredentialStore(),
+      );
+
+      await repository.requestPasswordReset(email: 'member@example.test');
+
+      expect(request?.uri.path, '/api/v1/auth/password-reset-requests');
+      expect(request?.data, {'email': 'member@example.test'});
+    },
+  );
+
+  test('password reset completion clears current local session', () async {
+    final store = _MemorySessionCredentialStore('old-refresh-token');
+    final dio = Dio();
+    RequestOptions? request;
+    dio.httpClientAdapter = _CallbackAdapter((options) {
+      request = options;
+      return _jsonResponse({
+        'success': true,
+        'code': 'PASSWORD_RESET_COMPLETED',
+        'message': 'Password reset completed',
+        'data': null,
+      });
+    });
+    final client = ApiClient(config: _config, dio: dio);
+    client.setAccessToken('old-access-token');
+    final authStates = <bool>[];
+    final repository = AuthRepository(
+      client,
+      sessionStore: store,
+      onAuthenticationChanged: authStates.add,
+    );
+
+    await repository.resetPassword(
+      token: 'synthetic-token',
+      newPassword: 'correct horse battery staple',
+    );
+
+    expect(request?.uri.path, '/api/v1/auth/password-resets');
+    expect(request?.data, {
+      'token': 'synthetic-token',
+      'newPassword': 'correct horse battery staple',
+    });
+    expect(await store.readRefreshCredential(), isNull);
+    expect(client.dio.options.headers.containsKey('Authorization'), isFalse);
+    expect(authStates, [false]);
+  });
+
+  test(
     'restore session rotates saved refresh token before returning',
     () async {
       final store = _MemorySessionCredentialStore('old-refresh-token');

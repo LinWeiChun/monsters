@@ -19,6 +19,7 @@ public class SmtpEmailDeliveryAdapter implements EmailDeliveryPort {
     private static final String VERIFICATION_TEMPLATE = "verify-email";
     private static final String GUARDIAN_GRANT_TEMPLATE = "guardian-consent-grant";
     private static final String GUARDIAN_WITHDRAW_TEMPLATE = "guardian-consent-withdraw";
+    private static final String PASSWORD_RESET_TEMPLATE = "password-reset";
 
     private final JavaMailSender mailSender;
     private final RegistrationSmtpProperties properties;
@@ -35,20 +36,25 @@ public class SmtpEmailDeliveryAdapter implements EmailDeliveryPort {
     public void deliver(EmailDeliveryRequest request) {
         if (!VERIFICATION_TEMPLATE.equals(request.templateId())
                 && !GUARDIAN_GRANT_TEMPLATE.equals(request.templateId())
-                && !GUARDIAN_WITHDRAW_TEMPLATE.equals(request.templateId())) {
+                && !GUARDIAN_WITHDRAW_TEMPLATE.equals(request.templateId())
+                && !PASSWORD_RESET_TEMPLATE.equals(request.templateId())) {
             throw new IllegalArgumentException("Unsupported email template");
         }
-        String actionUrl = requiredVariable(request.variables(),
-                VERIFICATION_TEMPLATE.equals(request.templateId()) ? "verificationUrl" : "actionUrl");
+        String actionUrl = requiredVariable(request.variables(), switch (request.templateId()) {
+            case VERIFICATION_TEMPLATE -> "verificationUrl";
+            case PASSWORD_RESET_TEMPLATE -> "resetUrl";
+            default -> "actionUrl";
+        });
+        String subject = subject(request.templateId());
         if (!StringUtils.hasText(properties.getFrom())
-                || !StringUtils.hasText(properties.getSubject())) {
+                || !StringUtils.hasText(subject)) {
             throw new IllegalStateException("Registration SMTP sender is unavailable");
         }
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(properties.getFrom());
         message.setTo(request.recipient());
-        message.setSubject(subject(request.templateId()));
+        message.setSubject(subject);
         message.setText(body(request.templateId(), actionUrl, request.variables().get("consentReference")));
         mailSender.send(message);
     }
@@ -57,6 +63,7 @@ public class SmtpEmailDeliveryAdapter implements EmailDeliveryPort {
         return switch (template) {
             case GUARDIAN_GRANT_TEMPLATE -> properties.getGuardianGrantSubject();
             case GUARDIAN_WITHDRAW_TEMPLATE -> properties.getGuardianWithdrawSubject();
+            case PASSWORD_RESET_TEMPLATE -> properties.getPasswordResetSubject();
             default -> properties.getSubject();
         };
     }
@@ -77,6 +84,13 @@ public class SmtpEmailDeliveryAdapter implements EmailDeliveryPort {
                     %s
 
                     完成撤回後，會員將立即無法使用一般功能。
+                    """.formatted(url);
+            case PASSWORD_RESET_TEMPLATE -> """
+                    請使用以下單次連結重設貘nsters密碼。連結將於 15 分鐘後失效：
+
+                    %s
+
+                    完成重設後，所有已登入裝置都會失效。若您未提出此要求，請忽略這封信。
                     """.formatted(url);
             default -> """
                     請使用以下連結完成 Email 驗證。連結將於 24 小時後失效：

@@ -98,6 +98,16 @@ class SecurityConfigTest {
     }
 
     @Test
+    void passwordResetEndpointsShouldPermitAnonymousRequest() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/password-reset-requests"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("password-reset-request"));
+        mockMvc.perform(post("/api/v1/auth/password-resets"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("password-reset-completion"));
+    }
+
+    @Test
     void protectedApiShouldReturnUnauthorizedApiResponse() throws Exception {
         mockMvc.perform(get("/api/protected"))
                 .andExpect(status().isUnauthorized())
@@ -149,6 +159,16 @@ class SecurityConfigTest {
         @PostMapping("/api/auth/refresh")
         public ApiResponse<Map<String, String>> refresh() {
             return ApiResponse.success(Map.of("status", "refresh"));
+        }
+
+        @PostMapping("/api/v1/auth/password-reset-requests")
+        public ApiResponse<Map<String, String>> passwordResetRequest() {
+            return ApiResponse.success(Map.of("status", "password-reset-request"));
+        }
+
+        @PostMapping("/api/v1/auth/password-resets")
+        public ApiResponse<Map<String, String>> passwordResetCompletion() {
+            return ApiResponse.success(Map.of("status", "password-reset-completion"));
         }
 
         @GetMapping("/api/protected")

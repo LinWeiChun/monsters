@@ -37,4 +37,29 @@ class SmtpEmailDeliveryAdapterTest {
                 .contains("https://example.test/verify-email?token=synthetic")
                 .doesNotContain("member@example.test");
     }
+
+    @Test
+    void shouldRenderPasswordResetLinkAndSecurityNotice() {
+        JavaMailSender mailSender = mock(JavaMailSender.class);
+        RegistrationSmtpProperties properties = new RegistrationSmtpProperties();
+        properties.setFrom("no-reply@example.test");
+        properties.setPasswordResetSubject("Reset your Monsters password");
+        SmtpEmailDeliveryAdapter adapter = new SmtpEmailDeliveryAdapter(mailSender, properties);
+
+        adapter.deliver(new EmailDeliveryRequest(
+                "member@example.test",
+                "password-reset",
+                Map.of("resetUrl", "https://example.test/reset-password?token=synthetic")
+        ));
+
+        ArgumentCaptor<SimpleMailMessage> captor =
+                ArgumentCaptor.forClass(SimpleMailMessage.class);
+        verify(mailSender).send(captor.capture());
+        assertThat(captor.getValue().getSubject()).isEqualTo("Reset your Monsters password");
+        assertThat(captor.getValue().getText())
+                .contains("https://example.test/reset-password?token=synthetic")
+                .contains("15 分鐘")
+                .contains("所有已登入裝置都會失效")
+                .doesNotContain("member@example.test");
+    }
 }

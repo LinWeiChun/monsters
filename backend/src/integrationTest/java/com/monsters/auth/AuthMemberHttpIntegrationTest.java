@@ -20,6 +20,7 @@ import com.monsters.exception.member.VersionConflictException;
 import com.monsters.security.common.GoogleIdTokenVerifier;
 import com.monsters.security.common.GoogleUserInfo;
 import com.monsters.service.member.MemberLifecycleService;
+import com.monsters.service.auth.PasswordResetOutboxWorker;
 import com.monsters.service.registration.EmailVerificationOutboxWorker;
 import com.monsters.service.registration.UnverifiedMemberCleanupService;
 import com.monsters.support.AuthMemberControlledDependencies;
@@ -98,6 +99,14 @@ class AuthMemberHttpIntegrationTest {
                 "app.registration.rate-limit.hash-key",
                 () -> "synthetic-registration-rate-limit-key"
         );
+        registry.add(
+                "app.password-reset.public-url",
+                () -> "https://example.test/reset-password"
+        );
+        registry.add(
+                "app.password-reset.rate-limit-hash-key",
+                () -> "synthetic-password-reset-rate-limit-key"
+        );
         registry.add("app.registration.eligibility.minor-notice-version", () -> "minor-v1");
         registry.add("app.registration.eligibility.minor-notice-url", () -> "https://example.test/minor-v1");
         registry.add("app.registration.eligibility.guardian-consent-version", () -> "guardian-v1");
@@ -116,6 +125,7 @@ class AuthMemberHttpIntegrationTest {
     private final JdbcTemplate jdbcTemplate;
     private final MemberLifecycleService memberLifecycleService;
     private final EmailVerificationOutboxWorker emailVerificationOutboxWorker;
+    private final PasswordResetOutboxWorker passwordResetOutboxWorker;
     private final UnverifiedMemberCleanupService unverifiedMemberCleanupService;
 
     @Autowired
@@ -129,6 +139,7 @@ class AuthMemberHttpIntegrationTest {
             JdbcTemplate jdbcTemplate,
             MemberLifecycleService memberLifecycleService,
             EmailVerificationOutboxWorker emailVerificationOutboxWorker,
+            PasswordResetOutboxWorker passwordResetOutboxWorker,
             UnverifiedMemberCleanupService unverifiedMemberCleanupService
     ) {
         this.mockMvc = mockMvc;
@@ -140,6 +151,7 @@ class AuthMemberHttpIntegrationTest {
         this.jdbcTemplate = jdbcTemplate;
         this.memberLifecycleService = memberLifecycleService;
         this.emailVerificationOutboxWorker = emailVerificationOutboxWorker;
+        this.passwordResetOutboxWorker = passwordResetOutboxWorker;
         this.unverifiedMemberCleanupService = unverifiedMemberCleanupService;
     }
 
@@ -151,7 +163,7 @@ class AuthMemberHttpIntegrationTest {
                 """
                 UPDATE outbox_events
                 SET status = 'FAILED', attempts = 5
-                WHERE event_type = 'EMAIL_VERIFICATION_REQUESTED'
+                WHERE event_type IN ('EMAIL_VERIFICATION_REQUESTED', 'PASSWORD_RESET_REQUESTED')
                   AND status IN ('PENDING', 'PROCESSING')
                 """
         );
@@ -1986,6 +1998,282 @@ class AuthMemberHttpIntegrationTest {
         )).isZero();
     }
 
+    @Test
+    void passwordResetRequestShouldBeUniversalAndStoreOnlyAHashedFifteenMinuteToken()
+            throws Exception {
+        String email = "password.reset.request@example.test";
+        String password = "synthetic-password";
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "account", "password_reset_request_member",
+                                "email", email,
+                                "password", password,
+                                "userName", "Password Reset Request Member"
+                        ))))
+                .andExpect(status().isCreated());
+
+        String unknownResponse = mockMvc.perform(post("/api/v1/auth/password-reset-requests")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", "missing.password.reset@example.test"
+                        ))))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.code").value("PASSWORD_RESET_REQUEST_ACCEPTED"))
+                .andExpect(jsonPath("$.data").doesNotExist())
+                .andExpect(jsonPath("$.resetToken").doesNotExist())
+                .andReturn().getResponse().getContentAsString();
+        String existingResponse = mockMvc.perform(post("/api/v1/auth/password-reset-requests")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("email", email))))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.code").value("PASSWORD_RESET_REQUEST_ACCEPTED"))
+                .andExpect(jsonPath("$.data").doesNotExist())
+                .andExpect(jsonPath("$.resetToken").doesNotExist())
+                .andReturn().getResponse().getContentAsString();
+        assertThat(objectMapper.readTree(existingResponse).path("message"))
+                .isEqualTo(objectMapper.readTree(unknownResponse).path("message"));
+        mockMvc.perform(post("/api/v1/auth/password-reset-requests")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("email", email))))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().string("Retry-After", "60"))
+                .andExpect(jsonPath("$.code").value("RATE_LIMITED"))
+                .andExpect(jsonPath("$.data.retryAfter").value(60));
+
+        assertThat(passwordResetOutboxWorker.processPending()).isEqualTo(1);
+        String firstToken = passwordResetTokenFor(email);
+        Map<String, Object> storedToken = jdbcTemplate.queryForMap(
+                """
+                SELECT token_hash, expires_at, used_at, revoked_at
+                FROM password_reset_tokens
+                WHERE user_id = (SELECT id FROM users WHERE email = ?)
+                """,
+                email
+        );
+        assertThat(storedToken.get("token_hash")).isNotEqualTo(firstToken);
+        assertThat(storedToken.get("expires_at")).isEqualTo(
+                LocalDateTime.ofInstant(AuthMemberControlledDependencies.TEST_NOW, ZoneOffset.UTC)
+                        .plusMinutes(15)
+        );
+        assertThat(storedToken.get("used_at")).isNull();
+        assertThat(storedToken.get("revoked_at")).isNull();
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM password_reset_tokens WHERE token_hash = ?",
+                Integer.class,
+                firstToken
+        )).isZero();
+
+        jdbcTemplate.update("DELETE FROM registration_rate_limit_buckets");
+        mockMvc.perform(post("/api/v1/auth/password-reset-requests")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("email", email))))
+                .andExpect(status().isAccepted());
+        assertThat(passwordResetOutboxWorker.processPending()).isEqualTo(1);
+        String secondToken = passwordResetTokenFor(email);
+        assertThat(secondToken).isNotEqualTo(firstToken);
+        assertThat(jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM password_reset_tokens
+                WHERE user_id = (SELECT id FROM users WHERE email = ?)
+                  AND revoked_at IS NOT NULL
+                """,
+                Integer.class,
+                email
+        )).isEqualTo(1);
+        mockMvc.perform(post("/api/v1/auth/password-resets")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "token", firstToken,
+                                "newPassword", "new-reset-password-2026"
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("PASSWORD_RESET_TOKEN_INVALID"));
+    }
+
+    @Test
+    void passwordResetCompletionShouldUseStableErrorsAndRevokeEverySession()
+            throws Exception {
+        String email = "password.reset.complete@example.test";
+        String oldPassword = "synthetic-password";
+        String newPassword = "new-reset-password-2026";
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "account", "password_reset_complete_member",
+                                "email", email,
+                                "password", oldPassword,
+                                "userName", "Password Reset Complete Member"
+                        ))))
+                .andExpect(status().isCreated());
+        JsonNode firstSession = loginV1(email, oldPassword);
+        loginV1(email, oldPassword);
+
+        mockMvc.perform(post("/api/v1/auth/password-reset-requests")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("email", email))))
+                .andExpect(status().isAccepted());
+        assertThat(passwordResetOutboxWorker.processPending()).isEqualTo(1);
+        String token = passwordResetTokenFor(email);
+
+        mockMvc.perform(post("/api/v1/auth/password-resets")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "token", token,
+                                "newPassword", newPassword
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("PASSWORD_RESET_COMPLETED"));
+        assertThat(passwordHashFor(email)).startsWith("$argon2id$");
+        assertThat(jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM password_reset_tokens
+                WHERE user_id = (SELECT id FROM users WHERE email = ?)
+                  AND used_at IS NOT NULL
+                """,
+                Integer.class,
+                email
+        )).isEqualTo(1);
+        assertThat(jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM user_sessions
+                WHERE user_id = (SELECT id FROM users WHERE email = ?)
+                  AND revoked_at IS NOT NULL
+                  AND revocation_reason = 'PASSWORD_RESET'
+                """,
+                Integer.class,
+                email
+        )).isEqualTo(2);
+        refresh(firstSession.path("refreshToken").asText(), 401, "AUTH_SESSION_INVALID");
+        loginV1(email, newPassword);
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", email,
+                                "password", oldPassword
+                        ))))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTH_INVALID_CREDENTIALS"));
+
+        mockMvc.perform(post("/api/v1/auth/password-resets")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "token", token,
+                                "newPassword", "another-reset-password-2026"
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("PASSWORD_RESET_TOKEN_USED"));
+        mockMvc.perform(post("/api/v1/auth/password-resets")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "token", "unknown-password-reset-token",
+                                "newPassword", "another-reset-password-2026"
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("PASSWORD_RESET_TOKEN_INVALID"));
+
+        jdbcTemplate.update("DELETE FROM registration_rate_limit_buckets");
+        mockMvc.perform(post("/api/v1/auth/password-reset-requests")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("email", email))))
+                .andExpect(status().isAccepted());
+        assertThat(passwordResetOutboxWorker.processPending()).isEqualTo(1);
+        String expiredToken = passwordResetTokenFor(email);
+        jdbcTemplate.update(
+                """
+                UPDATE password_reset_tokens
+                SET expires_at = ?
+                WHERE user_id = (SELECT id FROM users WHERE email = ?)
+                  AND used_at IS NULL
+                  AND revoked_at IS NULL
+                """,
+                LocalDateTime.ofInstant(AuthMemberControlledDependencies.TEST_NOW, ZoneOffset.UTC),
+                email
+        );
+        mockMvc.perform(post("/api/v1/auth/password-resets")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "token", expiredToken,
+                                "newPassword", "another-reset-password-2026"
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("PASSWORD_RESET_TOKEN_EXPIRED"));
+    }
+
+    @Test
+    void passwordResetDeliveryFailureShouldRetryThenAlertWithoutAnActiveToken(
+            CapturedOutput output
+    ) throws Exception {
+        String email = "password.reset.failure@example.test";
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "account", "password_reset_failure_member",
+                                "email", email,
+                                "password", "synthetic-password",
+                                "userName", "Password Reset Failure Member"
+                        ))))
+                .andExpect(status().isCreated());
+        mockMvc.perform(post("/api/v1/auth/password-reset-requests")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("email", email))))
+                .andExpect(status().isAccepted());
+        ((RecordingEmailDelivery) emailDeliveryPort).failNext(5);
+
+        for (int attempt = 1; attempt <= 5; attempt++) {
+            assertThat(passwordResetOutboxWorker.processPending()).isZero();
+            if (attempt < 5) {
+                jdbcTemplate.update(
+                        """
+                        UPDATE outbox_events
+                        SET available_at = ?
+                        WHERE aggregate_id = (
+                            SELECT public_id FROM users WHERE email = ?
+                        )
+                          AND event_type = 'PASSWORD_RESET_REQUESTED'
+                        """,
+                        LocalDateTime.ofInstant(clock.instant(), ZoneOffset.UTC),
+                        email
+                );
+            }
+        }
+
+        assertThat(jdbcTemplate.queryForMap(
+                """
+                SELECT status, attempts
+                FROM outbox_events
+                WHERE aggregate_id = (
+                    SELECT public_id FROM users WHERE email = ?
+                )
+                  AND event_type = 'PASSWORD_RESET_REQUESTED'
+                """,
+                email
+        )).containsEntry("status", "FAILED")
+                .containsEntry("attempts", 5);
+        assertThat(jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM password_reset_tokens
+                WHERE user_id = (SELECT id FROM users WHERE email = ?)
+                  AND used_at IS NULL
+                  AND revoked_at IS NULL
+                """,
+                Integer.class,
+                email
+        )).isZero();
+        assertThat(output.getAll())
+                .contains(
+                        "Password reset delivery failed",
+                        "PASSWORD_RESET_DELIVERY_FAILED",
+                        "PASSWORD_RESET_DELIVERY_ALERT status=FAILED",
+                        "at com.monsters"
+                )
+                .doesNotContain("Synthetic email delivery failure", email);
+    }
+
     private String verificationTokenFor(String recipient) {
         String verificationUrl = ((RecordingEmailDelivery) emailDeliveryPort)
                 .requests()
@@ -1997,6 +2285,22 @@ class AuthMemberHttpIntegrationTest {
                 .get("verificationUrl");
         return URLDecoder.decode(
                 URI.create(verificationUrl).getRawQuery().substring("token=".length()),
+                StandardCharsets.UTF_8
+        );
+    }
+
+    private String passwordResetTokenFor(String recipient) {
+        String resetUrl = ((RecordingEmailDelivery) emailDeliveryPort)
+                .requests()
+                .stream()
+                .filter(request -> request.recipient().equals(recipient))
+                .filter(request -> request.templateId().equals("password-reset"))
+                .reduce((first, second) -> second)
+                .orElseThrow()
+                .variables()
+                .get("resetUrl");
+        return URLDecoder.decode(
+                URI.create(resetUrl).getRawQuery().substring("token=".length()),
                 StandardCharsets.UTF_8
         );
     }

@@ -13,18 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.monsters.dto.auth.AuthUserResponse;
 import com.monsters.dto.auth.AuthenticatedMemberResponse;
-import com.monsters.dto.auth.ForgotPasswordRequest;
-import com.monsters.dto.auth.ForgotPasswordResponse;
 import com.monsters.dto.auth.GoogleLoginRequest;
 import com.monsters.dto.auth.LoginRequest;
 import com.monsters.dto.auth.LoginResponse;
 import com.monsters.dto.auth.RegisterRequest;
 import com.monsters.dto.auth.RegisterResponse;
 import com.monsters.dto.auth.RefreshTokenRequest;
-import com.monsters.dto.auth.ResetPasswordRequest;
 import com.monsters.dto.auth.VerifiedEmailLoginRequest;
 import com.monsters.dto.auth.VerifiedEmailLoginResponse;
-import com.monsters.entity.user.PasswordResetToken;
 import com.monsters.entity.user.MemberState;
 import com.monsters.entity.user.User;
 import com.monsters.entity.user.UserCredential;
@@ -32,7 +28,6 @@ import com.monsters.entity.user.UserOAuthAccount;
 import com.monsters.exception.common.ConflictException;
 import com.monsters.exception.common.BusinessException;
 import com.monsters.exception.common.UnauthorizedException;
-import com.monsters.repository.user.PasswordResetTokenRepository;
 import com.monsters.repository.user.UserCredentialRepository;
 import com.monsters.repository.user.UserOAuthAccountRepository;
 import com.monsters.repository.user.UserRepository;
@@ -41,7 +36,6 @@ import com.monsters.security.common.GoogleUserInfo;
 import com.monsters.security.common.JwtProperties;
 import com.monsters.security.common.JwtTokenPayload;
 import com.monsters.security.common.JwtTokenService;
-import com.monsters.security.common.PasswordResetTokenService;
 import com.monsters.security.password.PasswordHashService;
 import com.monsters.security.password.PasswordPolicy;
 import com.monsters.service.session.SessionAuthenticationResult;
@@ -51,20 +45,17 @@ import com.monsters.security.session.SessionDeviceContext;
 @Service
 public class AuthService {
 
-	private static final long PASSWORD_RESET_TOKEN_EXPIRATION_SECONDS = 900;
 	private static final int ACCOUNT_MAX_LENGTH = 50;
 	private static final Pattern INVALID_ACCOUNT_CHARACTER_PATTERN = Pattern.compile("[^a-z0-9_]");
 
 	private final UserRepository userRepository;
 	private final UserCredentialRepository userCredentialRepository;
 	private final UserOAuthAccountRepository userOAuthAccountRepository;
-	private final PasswordResetTokenRepository passwordResetTokenRepository;
 	private final PasswordPolicy passwordPolicy;
 	private final PasswordHashService passwordHashService;
 	private final JwtTokenService jwtTokenService;
 	private final JwtProperties jwtProperties;
 	private final GoogleIdTokenVerifier googleIdTokenVerifier;
-	private final PasswordResetTokenService passwordResetTokenService;
 	private final TokenRevocationService tokenRevocationService;
 	private final ContinuationCredentialService continuationCredentialService;
 	private final SessionFamilyService sessionFamilyService;
@@ -73,22 +64,20 @@ public class AuthService {
 	@Autowired
 	public AuthService(UserRepository userRepository, UserCredentialRepository userCredentialRepository,
 			UserOAuthAccountRepository userOAuthAccountRepository,
-			PasswordResetTokenRepository passwordResetTokenRepository, PasswordPolicy passwordPolicy,
+			PasswordPolicy passwordPolicy,
 			PasswordHashService passwordHashService,
 			JwtTokenService jwtTokenService, JwtProperties jwtProperties, GoogleIdTokenVerifier googleIdTokenVerifier,
-			PasswordResetTokenService passwordResetTokenService, TokenRevocationService tokenRevocationService,
+			TokenRevocationService tokenRevocationService,
 			ContinuationCredentialService continuationCredentialService,
 			SessionFamilyService sessionFamilyService, Clock clock) {
 		this.userRepository = userRepository;
 		this.userCredentialRepository = userCredentialRepository;
 		this.userOAuthAccountRepository = userOAuthAccountRepository;
-		this.passwordResetTokenRepository = passwordResetTokenRepository;
 		this.passwordPolicy = passwordPolicy;
 		this.passwordHashService = passwordHashService;
 		this.jwtTokenService = jwtTokenService;
 		this.jwtProperties = jwtProperties;
 		this.googleIdTokenVerifier = googleIdTokenVerifier;
-		this.passwordResetTokenService = passwordResetTokenService;
 		this.tokenRevocationService = tokenRevocationService;
 		this.continuationCredentialService = continuationCredentialService;
 		this.sessionFamilyService = sessionFamilyService;
@@ -175,42 +164,6 @@ public class AuthService {
 			throw new UnauthorizedException("Invalid refresh token");
 		}
 		return createAuthenticatedResponse(user);
-	}
-
-	@Transactional
-	public ForgotPasswordResponse forgotPassword(ForgotPasswordRequest request) {
-		String email = normalizeEmail(request.email());
-		Optional<User> user = userRepository.findByEmailAndDeletedFalse(email);
-		if (user.isEmpty()) {
-			return new ForgotPasswordResponse(null, PASSWORD_RESET_TOKEN_EXPIRATION_SECONDS);
-		}
-
-		passwordResetTokenRepository.deleteByUserAndUsedAtIsNull(user.get());
-		String resetToken = passwordResetTokenService.createToken();
-		String tokenHash = passwordResetTokenService.hashToken(resetToken);
-		LocalDateTime expiresAt = now().plusSeconds(PASSWORD_RESET_TOKEN_EXPIRATION_SECONDS);
-		passwordResetTokenRepository.save(new PasswordResetToken(user.get(), tokenHash, expiresAt));
-
-		return new ForgotPasswordResponse(resetToken, PASSWORD_RESET_TOKEN_EXPIRATION_SECONDS);
-	}
-
-	@Transactional
-	public void resetPassword(ResetPasswordRequest request) {
-		String tokenHash = passwordResetTokenService.hashToken(request.resetToken());
-		PasswordResetToken resetToken = passwordResetTokenRepository.findByTokenHashAndUsedAtIsNull(tokenHash)
-				.orElseThrow(() -> new UnauthorizedException("Invalid password reset token"));
-		LocalDateTime now = now();
-		if (resetToken.isExpired(now) || resetToken.getUser().isDeleted()) {
-			throw new UnauthorizedException("Invalid password reset token");
-		}
-
-		String passwordHash = passwordHashService.encode(
-				passwordPolicy.normalizeAndValidate(request.newPassword()));
-		User user = resetToken.getUser();
-		userCredentialRepository.findByUser(user).ifPresentOrElse(
-				credential -> credential.updatePasswordHash(passwordHash),
-				() -> userCredentialRepository.save(new UserCredential(user, passwordHash)));
-		resetToken.markUsed(now);
 	}
 
 	private User findOrCreateGoogleUser(GoogleUserInfo googleUser) {

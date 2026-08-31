@@ -40,7 +40,7 @@ Phase 4.5 已核准決策的可交付規格與測試接縫整理於 [`PHASE4_5_F
 | State Command | 不提供泛用 `targetState` API；Email 驗證、資格、停用、停權與刪除由分離 Command 經內部狀態機處理 |
 | Continuation Credential | 32-byte 隨機不透明值、10 分鐘、只回傳一次、Server 只存 SHA-256 hash；狀態或 version 改變即撤銷，不能存取一般 API |
 | Google Linking | 採方案1 Session-first明確連結：相同Email不自動合併或核發Session；會員先以Email／密碼建立目前Session，再取得綁定Session、`LOGIN_METHOD_LINK`用途及300秒期限的reauth credential，以新Google ID Token及`confirmed: true`連結。成功保留目前Session、撤銷其他Session並寫無PII的`LOGIN_METHOD_LINKED` Audit／Outbox；衝突回通用409，取消不建立關聯 |
-| 忘記密碼 | 正式 Email reset link，15 分鐘單次 hash Token、統一對外回應、成功後撤銷全部工作階段 |
+| 忘記密碼 | 採方案1資源式API：`POST /api/v1/auth/password-reset-requests`統一回`202`且不回Token，`POST /api/v1/auth/password-resets`消耗15分鐘單次hash Token；Outbox／Worker寄送與重試，成功後套用Argon2id並撤銷全部工作階段。舊`/api/auth`別名只保留相同安全契約至Task 18 |
 | Email 變更 | reauth、新 Email 驗證、新舊 Email 通知、撤銷其他工作階段 |
 | Password Policy | 15–128 Unicode、弱密碼 blocklist、無固定 composition、無定期強制更換；參考 [NIST SP 800-63B](https://pages.nist.gov/800-63-4/sp800-63b.html) |
 | Password Hash | 新密碼使用 Argon2id PHC hash（m=19456 KiB、t=2、p=1，Bouncy Castle 1.84）；既有 BCrypt 只在成功登入後於同一交易漸進 rehash；參考 [OWASP Password Storage](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html) |
@@ -166,7 +166,7 @@ Phase 4.5 已核准決策的可交付規格與測試接縫整理於 [`PHASE4_5_F
 | 規格衝突處理 | 當 `system_data/` 與正式文件衝突時，以正式文件為準 |
 | AI 回報要求 | AI 若參考 `system_data/`，需於工作報告中說明參考內容與轉換方式 |
 | Google 登入 Client ID | 後端透過 `GOOGLE_CLIENT_IDS` 設定允許的 Google Client ID，可用逗號支援 Web / App 多組 Client ID |
-| 忘記密碼流程 | 歷史基線；開發 API 回傳 resetToken 的方式已由 0.2 正式 Email reset link 決策取代 |
+| 忘記密碼流程 | 歷史基線；開發API回傳resetToken的response與舊DTO／Service方法已於Task 11移除；deprecated `/api/auth/forgot-password`、`/api/auth/reset-password`僅作相同安全契約的短期Path相容並於Task 18移除 |
 | 登出流程 | 歷史基線；JWT Refresh revocation 已由 0.2 不透明 Token family 與 session 撤銷模型取代 |
 | Token Refresh | 歷史基線；30 天 JWT rotation 已由 0.2 的 10 分鐘 Access、30 天 idle、90 天 absolute 與 opaque Refresh 模型取代 |
 | Profile 生日選擇器 | 採方案 A：使用 Flutter 內建 `showDatePicker`，不新增第三方套件；選擇範圍為 1900-01-01 至當日，送出格式維持 `yyyy-MM-dd` |

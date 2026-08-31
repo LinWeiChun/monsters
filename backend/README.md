@@ -110,7 +110,7 @@ Google 登入環境變數：
 
 `GOOGLE_CLIENT_IDS` 可用逗號設定多組 Web / Android / iOS Client ID。後端會以此檢查 Google ID Token 的 `aud`。
 
-## Registration / Email 驗證設定
+## Registration / Email 驗證／密碼重設設定
 
 Task 03 不提供程式內正式預設值；Railway `develop` 與 `main` service 必須分別設定：
 
@@ -130,6 +130,11 @@ Task 03 不提供程式內正式預設值；Railway `develop` 與 `main` service
 | `REGISTRATION_SMTP_FROM` | 已在 Resend 驗證網域的寄件者 |
 | `REGISTRATION_SMTP_ENABLED` | 完成上述設定後才設為 `true` |
 | `EMAIL_VERIFICATION_WORKER_ENABLED` | SMTP 可用後設為 `true` |
+| `PASSWORD_RESET_PUBLIC_URL` | 對應環境Flutter Web `/reset-password`完整HTTPS URL |
+| `PASSWORD_RESET_RATE_LIMIT_HASH_KEY` | Password Reset Email／IP限流HMAC secret；正式環境建議與註冊分離 |
+| `PASSWORD_RESET_WORKER_ENABLED` | SMTP與公開URL可用後設為`true` |
+| `PASSWORD_RESET_MAX_DELIVERY_ATTEMPTS` | 最大寄送嘗試次數，預設`5` |
+| `PASSWORD_RESET_SMTP_SUBJECT` | 密碼重設信主旨 |
 | `UNVERIFIED_MEMBER_CLEANUP_ENABLED` | 確認 V3 migration 後設為 `true` |
 | `MINOR_NOTICE_VERSION`、`MINOR_NOTICE_URL` | 未成年人說明版本與 HTTPS URL |
 | `GUARDIAN_CONSENT_VERSION`、`GUARDIAN_CONSENT_URL` | 監護人同意文件版本與 HTTPS URL |
@@ -138,7 +143,7 @@ Task 03 不提供程式內正式預設值；Railway `develop` 與 `main` service
 | `GUARDIAN_GRANT_TOKEN_TTL_HOURS` | 同意連結有效小時，預設 `24` |
 | `GUARDIAN_WITHDRAW_TOKEN_TTL_MINUTES` | 撤回連結有效分鐘，預設 `15` |
 
-SMTP 寄送最多重試五次；七日空會員清理預設每日 03:45 執行。正式環境不得把 Email、IP、密碼或 Token 寫入設定、Log 或 Outbox payload。
+SMTP寄送最多重試五次；Password Reset Token固定15分鐘、單次使用且只保存hash；七日空會員清理預設每日03:45執行。正式環境不得把Email、IP、密碼或Token寫入設定、Log或Outbox payload。
 
 SMTP 供應商固定為 Resend。啟用前須在 Resend 完成寄件網域驗證並建立權限最小化的 API Key；正式環境以 Secret 管理 `RESEND_API_KEY`，不得使用 `onboarding@resend.dev` 作為正式寄件者。
 

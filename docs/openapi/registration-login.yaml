@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Monsters Registration and Login Contract
-  version: 0.7.0
+  version: 0.8.0
 paths:
   /api/v1/auth/registration-policy:
     get:
@@ -125,6 +125,69 @@ paths:
                 $ref: "#/components/schemas/EmailVerifiedEnvelope"
         "400":
           description: Token is invalid, used, revoked, or expired
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+  /api/v1/auth/password-reset-requests:
+    post:
+      summary: Safely request a password reset message without disclosing membership
+      operationId: requestPasswordReset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordResetEmailRequest"
+      responses:
+        "202":
+          description: Request accepted for known and unknown email alike; no reset token is returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PasswordResetRequestAcceptedEnvelope"
+        "400":
+          description: Request validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+        "429":
+          description: Cooldown or multidimensional rate limit reached
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RateLimitEnvelope"
+        "503":
+          description: Password reset or delivery configuration is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnvelope"
+  /api/v1/auth/password-resets:
+    post:
+      summary: Consume a 15-minute single-use password reset token
+      operationId: completePasswordReset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordResetCompletionRequest"
+      responses:
+        "200":
+          description: Password changed with Argon2id and every existing session revoked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PasswordResetCompletedEnvelope"
+        "400":
+          description: Validation failed or token is invalid, used, revoked, or expired
           content:
             application/json:
               schema:
@@ -657,6 +720,62 @@ components:
               const: EMAIL_VERIFIED
             data:
               $ref: "#/components/schemas/ContinuationLoginData"
+    PasswordResetEmailRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+    PasswordResetCompletionRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - token
+        - newPassword
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 512
+          writeOnly: true
+          description: Raw 15-minute single-use token; the server stores only its SHA-256 hash.
+        newPassword:
+          type: string
+          format: password
+          minLength: 15
+          maxLength: 128
+          writeOnly: true
+          description: >-
+            Counted as Unicode code points after NFC normalization. The value is
+            not trimmed and exact whole-password blocklist matches are rejected.
+    PasswordResetRequestAcceptedEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            code:
+              const: PASSWORD_RESET_REQUEST_ACCEPTED
+            data:
+              type: "null"
+    PasswordResetCompletedEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            code:
+              const: PASSWORD_RESET_COMPLETED
+            data:
+              type: "null"
+    PasswordResetTokenErrorCode:
+      type: string
+      enum:
+        - PASSWORD_RESET_TOKEN_INVALID
+        - PASSWORD_RESET_TOKEN_USED
+        - PASSWORD_RESET_TOKEN_EXPIRED
     RateLimitData:
       type: object
       additionalProperties: false

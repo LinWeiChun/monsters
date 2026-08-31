@@ -11,6 +11,7 @@ public class RegistrationSmtpProperties {
     private String subject = "Verify your Monsters email";
     private String guardianGrantSubject = "貘nsters 監護人同意確認";
     private String guardianWithdrawSubject = "貘nsters 監護人同意撤回確認";
+    private String passwordResetSubject = "貘nsters 密碼重設";
 
     public String getFrom() {
         return from;
@@ -31,4 +32,6 @@ public class RegistrationSmtpProperties {
     public void setGuardianGrantSubject(String value) { guardianGrantSubject = value; }
     public String getGuardianWithdrawSubject() { return guardianWithdrawSubject; }
     public void setGuardianWithdrawSubject(String value) { guardianWithdrawSubject = value; }
+    public String getPasswordResetSubject() { return passwordResetSubject; }
+    public void setPasswordResetSubject(String value) { passwordResetSubject = value; }
 }

@@ -231,7 +231,7 @@ DONE證據：方案1採分離清單／reauth／撤銷API；同意的測試接縫
 
 **Blocked by:** 05 — 改為 Verified Email 登入並展開 Account Migration；07 — 建立 Opaque Refresh Session Family。
 
-**Status:** REVIEW
+**Status:** DONE
 
 - [x] Google ID Token由Backend驗證issuer、audience、expiration、signature及verified Email。
 - [x] 已連結Google帳號以provider與`sub`精確登入。
@@ -241,7 +241,7 @@ DONE證據：方案1採分離清單／reauth／撤銷API；同意的測試接縫
 - [x] Google ID Token、Email及驗證細節不得進入Log。
 - [x] Flutter呈現已連結、需驗證既有方式、衝突及取消流程。
 
-Review證據：採方案1 Session-first明確連結；匿名Google登入只有已連結`provider + sub`可取得Session，相同Email只回`GOOGLE_ACCOUNT_LINK_REQUIRED`。既有會員以Email／密碼登入後取得綁定目前Session、`LOGIN_METHOD_LINK`用途及300秒期限的reauth credential，再以新ID Token及`confirmed: true`建立關聯；成功保留目前Session、撤銷其他Session並寫不含PII的`LOGIN_METHOD_LINKED` Audit／Outbox。Flutter完成需連結、重新驗證、確認、成功、衝突及取消，Web／Mobile共10個Penpot畫板通過containment。Backend完整321項單元／契約與39項真實MySQL 8.4整合測試、Flutter完整209項測試、Analyze、Web release build及Android debug APK build均通過；Draft PR #101的Backend unit、MySQL integration、Flutter及OpenAPI四項CI全綠，等待使用者審查，因此維持`REVIEW`。
+DONE證據：採方案1 Session-first明確連結；匿名Google登入只有已連結`provider + sub`可取得Session，相同Email只回`GOOGLE_ACCOUNT_LINK_REQUIRED`。既有會員以Email／密碼登入後取得綁定目前Session、`LOGIN_METHOD_LINK`用途及300秒期限的reauth credential，再以新ID Token及`confirmed: true`建立關聯；成功保留目前Session、撤銷其他Session並寫不含PII的`LOGIN_METHOD_LINKED` Audit／Outbox。Flutter完成需連結、重新驗證、確認、成功、衝突及取消，Web／Mobile共10個Penpot畫板通過containment。Backend完整321項單元／契約與39項真實MySQL 8.4整合測試、Flutter完整209項測試、Analyze、Web release build及Android debug APK build均通過；PR #101四項CI全綠，已於2026-08-21合併至`feature/phase4.5`，Task由`REVIEW`轉`DONE`。
 
 ---
 
@@ -251,16 +251,18 @@ Review證據：採方案1 Session-first明確連結；匿名Google登入只有�
 
 **Blocked by:** 04 — 導入新密碼政策與 BCrypt 漸進遷移；07 — 建立 Opaque Refresh Session Family。
 
-**Status:** ready-for-agent
+**Status:** REVIEW
 
-- [ ] Forgot Password對所有Email統一回`202`，API不得回reset Token。
-- [ ] Reset Token有效15分鐘、單次使用且Server只保存hash。
-- [ ] 新請求使同一會員舊的未使用Token失效。
-- [ ] 重設密碼套用Task 04密碼政策與Argon2id。
-- [ ] 重設成功撤銷會員全部Session Family。
-- [ ] 無效、過期及已使用Token使用穩定錯誤碼且不洩漏會員狀態。
-- [ ] Email寄送透過可靠Outbox／Worker並具重試、failed狀態及告警。
-- [ ] Flutter涵蓋已受理、連結無效、過期、成功及重新登入流程。
+- [x] Forgot Password對所有Email統一回`202`，API不得回reset Token。
+- [x] Reset Token有效15分鐘、單次使用且Server只保存hash。
+- [x] 新請求使同一會員舊的未使用Token失效。
+- [x] 重設密碼套用Task 04密碼政策與Argon2id。
+- [x] 重設成功撤銷會員全部Session Family。
+- [x] 無效、過期及已使用Token使用穩定錯誤碼且不洩漏會員狀態。
+- [x] Email寄送透過可靠Outbox／Worker並具重試、failed狀態及告警。
+- [x] Flutter涵蓋已受理、連結無效、過期、成功及重新登入流程。
+
+REVIEW證據：採方案1資源式API，`POST /api/v1/auth/password-reset-requests`對已知與未知Email都回`202 PASSWORD_RESET_REQUEST_ACCEPTED`且不含Token；`POST /api/v1/auth/password-resets`以15分鐘單次Token完成重設。Backend只保存SHA-256 hash，新請求撤銷舊Token，Outbox／Worker於寄送時才產生明文並具重試、FAILED與無PII告警；成功套用Task 04密碼政策與Argon2id，並撤銷全部Session。Penpot Web／Mobile各8個狀態已建立，180個descendant containment通過，並以Chrome實際檢視；另依使用者要求整理35個主畫板，無重疊且466個直屬元件相對位置與尺寸不變。Flutter完成申請受理、無效／過期／已使用、成功、重新登入、鍵盤避讓及舊請求隔離；涵蓋390至1920寬度與矮視窗，不使用主畫面捲動。Backend單元324通過／4個既有OS條件跳過、MySQL 8.4整合42通過、Flutter完整236項通過、Analyze與Web release／Android debug build通過。RegistrationMigrationIntegrationTest的兩項版本斷言已由V8校正至V9。舊`/api/auth/forgot-password`與`/api/auth/reset-password`暫留相同安全契約的deprecated別名，Task 18驗收後移除；完整判定見`PASSWORD_RESET_LEGACY_CLEANUP.md`。Task由`IN PROGRESS`轉`REVIEW`，待Draft PR、CI、使用者Review與合併；不宣告DONE。
 
 ---
 
@@ -394,7 +396,7 @@ Review證據：採方案1 Session-first明確連結；匿名Google登入只有�
 - [ ] 移除JWT Refresh、`revoked_tokens`舊用途及Client明文Refresh response契約。
 - [ ] 移除SharedPreferences Credential與完整Login Result。
 - [ ] 移除Google相同Email自動連結。
-- [ ] 移除開發Forgot Password reset Token response。
+- [ ] 移除deprecated `/api/auth/forgot-password`、`/api/auth/reset-password`相容別名；開發reset Token response已於Task 11移除。
 - [ ] 移除Backend server PIN與public avatar upload契約。
 - [ ] Flyway空資料庫建立及上一版本升級測試通過，舊資料遷移具可驗證結果。
 - [ ] 啟用Security Filter的Auth、Member、Admin及Data Rights HTTP矩陣全部通過。
@@ -407,7 +409,8 @@ Review證據：採方案1 Session-first明確連結；匿名Google登入只有�
 
 目前接續點：
 
-- 03 — PR #90 已合併；雙軸審查發現的標準缺口正在修正，維持 `REVIEW`。
-- 04 — 前置 Task 01 已完成；Task 03 審查修正整合後開始。
+- 01–10 — 已完成；Task 03修正由PR #91整合，Task 10由PR #101於2026-08-21合併。
+- 11 — `REVIEW`；Backend、Flutter、Penpot及本機測試／建置已完成。Task分支`feature/phase4.5-password-reset`以`feature/phase4.5`為PR目標；CI、使用者Review及合併為獨立完成門檻。
+- 12 — 前置Task 06、07已完成；目前先收尾Task 11，再依使用者指示接續。
 
 後續只處理所有阻擋均已完成的Task，不得為了平行開發跳過狀態機、Migration或安全驗收前置條件。

@@ -170,9 +170,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   void _showForgotPassword() {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('忘記密碼流程將於後續 Task 開放')));
+    context.goNamed(AppRoute.passwordResetRequest);
   }
 }
 

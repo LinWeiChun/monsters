@@ -191,23 +191,26 @@ Email / Password 登入憑證。
 |---|---|---|---|
 | id | BIGINT | PK | ID |
 | user_id | BIGINT | FK NOT NULL | 使用者 ID |
-| token_hash | VARCHAR(255) | UNIQUE NOT NULL | reset token hash |
+| token_hash | VARCHAR(64) | UNIQUE NOT NULL | reset token的SHA-256 URL-safe Base64 hash；不得保存明文 |
 | expires_at | DATETIME | NOT NULL | 過期時間 |
 | used_at | DATETIME | NULL | 使用時間，NULL 表示尚未使用 |
+| revoked_at | DATETIME | NULL | 被新申請、寄送失敗或其他安全流程撤銷的時間 |
 | created_at | DATETIME | NOT NULL | 建立時間 |
 | updated_at | DATETIME | NOT NULL | 更新時間 |
 
 Index：
 
-- `user_id, used_at`
+- `user_id, used_at, revoked_at, expires_at`
 - `expires_at`
 
 規則：
 
 - 不得保存 reset token 明文。
-- 同一使用者重新申請忘記密碼時，未使用的舊 token 需失效。
+- 同一使用者重新申請或Worker準備寄送新連結時，未使用且未撤銷的舊Token必須寫入`revoked_at`。
 - token 使用後必須寫入 `used_at`。
-- 過期、已使用或對應已刪除使用者的 token 不得重設密碼。
+- 過期、已使用、已撤銷或對應已刪除使用者的Token不得重設密碼。
+- Raw Token只在Password Reset Worker中產生並放入HTTPS Email連結；不得寫入`outbox_events.payload`、Log、Audit或API Response。
+- Forgot Password Email／IP限流沿用`registration_rate_limit_buckets`，但`key_hash`輸入加入`PASSWORD_RESET_EMAIL:`或`PASSWORD_RESET_IP:`用途前綴，避免跨用途碰撞或保存Email／IP原文。部署可設定獨立`PASSWORD_RESET_RATE_LIMIT_HASH_KEY`，未設定時沿用`REGISTRATION_RATE_LIMIT_HASH_KEY`；正式環境建議分開管理Secret。
 
 ### 3.2.5 revoked_tokens（舊基線）
 

@@ -1,14 +1,11 @@
 package com.monsters.controller.auth;
 
 import com.monsters.dto.auth.GoogleLoginRequest;
-import com.monsters.dto.auth.ForgotPasswordRequest;
-import com.monsters.dto.auth.ForgotPasswordResponse;
 import com.monsters.dto.auth.LoginRequest;
 import com.monsters.dto.auth.LoginResponse;
 import com.monsters.dto.auth.RegisterRequest;
 import com.monsters.dto.auth.RegisterResponse;
 import com.monsters.dto.auth.RefreshTokenRequest;
-import com.monsters.dto.auth.ResetPasswordRequest;
 import com.monsters.service.auth.AuthService;
 import com.monsters.service.auth.TokenRevocationService;
 import com.monsters.dto.common.ApiResponse;
@@ -70,22 +67,6 @@ public class AuthController {
                 "Token refresh success",
                 response
         ));
-    }
-
-    @PostMapping("/forgot-password")
-    public ResponseEntity<ApiResponse<ForgotPasswordResponse>> forgotPassword(
-            @Valid @RequestBody ForgotPasswordRequest request
-    ) {
-        ForgotPasswordResponse response = authService.forgotPassword(request);
-        return ResponseEntity.ok(ApiResponse.success("Password reset token issued", response));
-    }
-
-    @PostMapping("/reset-password")
-    public ResponseEntity<ApiResponse<Void>> resetPassword(
-            @Valid @RequestBody ResetPasswordRequest request
-    ) {
-        authService.resetPassword(request);
-        return ResponseEntity.ok(ApiResponse.success("Password reset success", null));
     }
 
     @PostMapping("/logout")

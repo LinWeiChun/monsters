@@ -192,6 +192,30 @@ class AuthRepository {
     }
   }
 
+  Future<void> requestPasswordReset({required String email}) async {
+    final response = await _apiClient.post<void>(
+      '/v1/auth/password-reset-requests',
+      data: {'email': email},
+      fromJsonT: (_) {},
+      retryOnUnauthorized: false,
+    );
+    _requireSuccess(response.success, response.message, response.code);
+  }
+
+  Future<void> resetPassword({
+    required String token,
+    required String newPassword,
+  }) async {
+    final response = await _apiClient.post<void>(
+      '/v1/auth/password-resets',
+      data: {'token': token, 'newPassword': newPassword},
+      fromJsonT: (_) {},
+      retryOnUnauthorized: false,
+    );
+    _requireSuccess(response.success, response.message, response.code);
+    await _invalidateSession();
+  }
+
   Future<LoginResult> verifyEmail({required String token}) async {
     final response = await _apiClient.post<LoginResult>(
       '/v1/auth/email-verifications',

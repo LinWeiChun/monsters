@@ -160,7 +160,8 @@ Continuation credential：
 - Forgot Password 永遠回通用 `202`，API 不回 reset Token。
 - 對既存且可處理的會員，內部寄送 15 分鐘、單次、只存 hash 的重設連結。
 - 重設成功後撤銷該會員全部 Session。
-- 無效、過期、已使用 Token 使用穩定錯誤碼。
+- 無效／已撤銷、過期、已使用Token分別使用`PASSWORD_RESET_TOKEN_INVALID`、`PASSWORD_RESET_TOKEN_EXPIRED`、`PASSWORD_RESET_TOKEN_USED`。
+- Email寄送使用Transactional Outbox／Worker、退避重試、FAILED狀態與無PII告警；Raw Token不得寫入Outbox payload、Log、Audit或API Response。
 - 停用、停權或刪除等待會員依狀態執行安全流程，不以公開回應揭露。
 
 ## 六、Session、Refresh 與登出
@@ -508,7 +509,7 @@ Flutter 依穩定 `code` 本地化，不解析自由文字決定流程。
 | 登入識別 | 仍保留使用者可見 `account` 與 Account／Email相容登入 | v1 只接受 verified Email，account只作 Migration |
 | 密碼 | BCrypt、8–72 字元基線 | 需 15–128 Unicode、NFC、blocklist、Argon2id與漸進 rehash |
 | Email 驗證 | 無正式狀態與 Token工作流 | 需 24 小時單次 hash Token、重寄淘汰、冷卻與七天空會員清除 |
-| Forgot Password | 現有開發回應可帶 reset Token | 正式回應不得回 Token，需 Email outbox與統一 `202` |
+| Forgot Password | Task 11已完成正式資源式API、Email Outbox／Worker、15分鐘單次hash Token與全Session撤銷 | deprecated `/api/auth/forgot-password`、`/api/auth/reset-password`安全相容別名待Task 18移除；開發reset Token response已刪除 |
 | Google | 相同 Email 可自動連結或建立本地會員 | 需既有登入方式 reauth與明確 linking |
 | Session | JWT Refresh、rolling 30天、`revoked_tokens` | 需 opaque family、device session、10秒容忍、reuse detection、idle／absolute期限 |
 | Client Credential | SharedPreferences保存完整 Login Result與Refresh Token | Web Cookie、App Keychain／Keystore、Access只存記憶體 |
@@ -591,7 +592,7 @@ Flutter 依穩定 `code` 本地化，不解析自由文字決定流程。
 
 1. 執行完整Auth／Eligibility／Session／Admin／Data Rights矩陣。
 2. 執行Web、Android、iOS核心E2E。
-3. 移除舊account、JWT Refresh、SharedPreferences Credential、Google自動連結、server PIN、public avatar及開發reset Token契約。
+3. 移除舊account、JWT Refresh、SharedPreferences Credential、Google自動連結、server PIN、public avatar及Task 11保留的deprecated Forgot／Reset Password Path別名。
 4. 同步所有Spec、Task、Log、Migration runbook與rollback／forward-fix證據。
 
 完成條件：第十四章完成門檻全部具備，才可將相關Task標記`DONE`。
