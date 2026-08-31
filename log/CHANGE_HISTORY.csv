@@ -1,4 +1,5 @@
 日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
+2026-08-31,15:00,REGISTRATION-LOGIN-11,Review,PasswordReset三個共用元件/測試/UI規格,視覺校正,Logo依Penpot固定150×47與160×50，補Mobile/Desktop尺寸斷言,Codex,否,否,是,否,PR102；27項專項測試通過；Web重建通過；最新CI於Push後重跑，仍為REVIEW
 2026-08-31,14:48,REGISTRATION-LOGIN-11,Git,Task11功能與三份Log,提交紀錄,功能提交0829f5d；Log同步提交後一併推送Task分支,Codex,否,否,否,否,feature/phase4.5-password-reset → feature/phase4.5；Draft PR送審，不自動合併
 2026-08-31,14:40,REGISTRATION-LOGIN-11,Backend,PasswordReset controller/service/worker與session,新增與修改,通用202受理與可靠寄信；15分鐘單次Token只存hash；成功撤銷全部Session,Codex,是,是,否,是,採方案1；不回傳reset Token；失敗重試與無PII告警
 2026-08-31,14:40,REGISTRATION-LOGIN-11,Database,V9__formalize_password_reset.sql,新增,token_hash上限64；新增revoked_at與active查詢索引,Codex,否,是,否,是,沿用既有表；舊Migration不改寫；Registration升級斷言由V8校正為V9

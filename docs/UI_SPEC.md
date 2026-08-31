@@ -521,7 +521,7 @@ Task 11設計檢查（2026-08-31）：Penpot重連後新增的Web／Mobile各8�
 | `APP / Password Reset / Mobile` | `2072cc29-a2cc-805c-8008-90deeb90c5eb` | 390×844 | 同Web八個狀態 |
 
 - Web／Mobile分別檢查110／70個descendant，均未超出父層；Web 58個及Mobile 41個狀態文字的實際render bounds亦無溢出。
-- 沿用Account & Access暖色、既有Logo與怪獸素材：表單背景`registerFormBackground`、品牌背景`registerBrandBackground`、主按鈕`registerPrimary`；主按鈕高54、圓角12，Mobile水平留白36、Web表單最大寬520。
+- 沿用Account & Access暖色、既有Logo與怪獸素材：表單背景`registerFormBackground`、品牌背景`registerBrandBackground`、主按鈕`registerPrimary`；主按鈕高54、圓角12，Mobile水平留白36、Web表單最大寬520。表單／狀態Logo固定150×47，Desktop品牌Logo固定160×50，使用`BoxFit.fill`對齊Penpot image fill；不得沿600×300原始檔比例推導Logo高度。
 
 ### 2026-08-31 Penpot畫板整理
 

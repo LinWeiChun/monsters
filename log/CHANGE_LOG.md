@@ -8,6 +8,28 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-08-31 15:00
+
+Task
+Registration Login 11 Penpot Logo驗收校正（REVIEW）
+
+Agent
+Codex
+
+### Implementation / Verification
+
+- 三個PasswordReset共用元件將表單／狀態Logo固定為150×47、品牌Logo固定為160×50並使用BoxFit.fill，對齊Penpot；未修改既有600×300素材檔。
+- 新增Mobile／Desktop Logo尺寸斷言；27項PasswordReset專項測試全部通過，Web release重新建置通過。前輪完整236項Flutter、Analyze、Android debug、Backend單元與42項MySQL整合驗證保留。
+- 更新UI_SPEC與REGISTRATION_LOGIN_TASKS；沒有API／Database或system_data異動。
+
+### Git / Log
+
+- 功能與首輪Log提交`0829f5d`／`e65ab29`已Push；[Draft PR #102](https://github.com/LinWeiChun/monsters/pull/102)已建立，目標feature/phase4.5，未合併。
+- 本次視覺校正另提交至相同PR；CI以最新head為準，先前提交通過的檢查不得代替新提交。Task維持REVIEW。
+- 三份Log再次檢查，沒有新增過期紀錄；新增1筆Review紀錄後，XLSX共48筆、CSV共79筆資料列。既有樣式保留，完成影像與公式錯誤檢查。
+
+---
+
 ## 2026-08-31 14:40
 
 Task

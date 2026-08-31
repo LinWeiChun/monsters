@@ -140,6 +140,36 @@ void main() {
     });
   }
 
+  for (final width in [390.0, 1440.0]) {
+    testWidgets('reset logos match Penpot dimensions at $width', (
+      tester,
+    ) async {
+      await _setSurface(tester, Size(width, 900));
+      await tester.pumpWidget(
+        _app(_FakeAuthRepository(), AppPath.passwordResetRequest),
+      );
+      await tester.pumpAndSettle();
+      final logos =
+          tester
+              .widgetList<Image>(find.byType(Image))
+              .where((image) => image.semanticLabel == '貘nsters')
+              .toList();
+      expect(
+        logos.where((image) => image.width == 150 && image.height == 47).length,
+        1,
+      );
+      expect(logos.every((image) => image.fit == BoxFit.fill), isTrue);
+      if (width >= 1200) {
+        expect(
+          logos
+              .where((image) => image.width == 160 && image.height == 50)
+              .length,
+          1,
+        );
+      }
+    });
+  }
+
   for (final size in [
     const Size(390, 844),
     const Size(600, 900),

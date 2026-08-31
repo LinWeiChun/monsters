@@ -120,6 +120,8 @@ class PasswordResetStatus extends StatelessWidget {
           child: Image.asset(
             'assets/images/title.png',
             width: 150,
+            height: 47,
+            fit: BoxFit.fill,
             semanticLabel: '貘nsters',
           ),
         ),

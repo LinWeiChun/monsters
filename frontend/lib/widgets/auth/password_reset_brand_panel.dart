@@ -25,6 +25,8 @@ class PasswordResetBrandPanel extends StatelessWidget {
                   Image.asset(
                     'assets/images/title.png',
                     width: 160,
+                    height: 50,
+                    fit: BoxFit.fill,
                     semanticLabel: '貘nsters',
                   ),
                 if (!compact) const Spacer(),
