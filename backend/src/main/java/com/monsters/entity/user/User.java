@@ -10,6 +10,7 @@ import jakarta.persistence.Version;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import com.monsters.service.eligibility.EligibilityAgeBand;
 
 @Entity
 @Table(name = "users")
@@ -103,6 +104,48 @@ public class User extends BaseEntity {
         this.birthday = birthday;
     }
 
+    public void updatePublicNickname(String publicNickname) {
+        this.userName = publicNickname;
+    }
+
+    public void changeEmail(String email) {
+        this.email = email;
+    }
+
+    public void correctBirthday(LocalDate correctedBirthday) {
+        this.birthday = correctedBirthday;
+    }
+
+    public void restrictForBirthdayCorrection(EligibilityAgeBand requestedAgeBand) {
+        if (requestedAgeBand == EligibilityAgeBand.ADULT) {
+            return;
+        }
+        this.communityEligibilityStatus = CommunityEligibilityStatus.INELIGIBLE;
+        this.eligibilityStatus = requestedAgeBand == EligibilityAgeBand.UNDERAGE
+                ? EligibilityStatus.INELIGIBLE_UNDERAGE
+                : EligibilityStatus.GUARDIAN_CONSENT_PENDING;
+        this.memberState = MemberState.PENDING_ELIGIBILITY;
+    }
+
+    public void deactivate() {
+        if (memberState != MemberState.ACTIVE) {
+            throw new IllegalStateException("Only an active member can self-deactivate");
+        }
+        memberState = MemberState.USER_DEACTIVATED;
+        communityEligibilityStatus = CommunityEligibilityStatus.INELIGIBLE;
+    }
+
+    public void reactivate() {
+        if (memberState != MemberState.USER_DEACTIVATED) {
+            throw new IllegalStateException("Only a self-deactivated member can be restored");
+        }
+        memberState = MemberState.ACTIVE;
+        communityEligibilityStatus = eligibilityStatus == EligibilityStatus.ELIGIBLE_ADULT
+                && nicknameDisclosureConfirmedAt != null
+                ? CommunityEligibilityStatus.ELIGIBLE
+                : CommunityEligibilityStatus.INELIGIBLE;
+    }
+
     public void updateAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
     }
@@ -184,6 +227,8 @@ public class User extends BaseEntity {
     public String getServiceRegion() { return serviceRegion; }
     public EligibilityStatus getEligibilityStatus() { return eligibilityStatus; }
     public CommunityEligibilityStatus getCommunityEligibilityStatus() { return communityEligibilityStatus; }
+    public String getNicknameDisclosureVersion() { return nicknameDisclosureVersion; }
+    public LocalDateTime getNicknameDisclosureConfirmedAt() { return nicknameDisclosureConfirmedAt; }
 
     public String getAvatarUrl() {
         return avatarUrl;

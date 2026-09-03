@@ -1,6 +1,7 @@
 package com.monsters.service.user;
 
 import com.monsters.exception.common.ResourceNotFoundException;
+import com.monsters.exception.common.BusinessException;
 import com.monsters.storage.common.AvatarStorageService;
 import com.monsters.dto.user.PasswordLockRequest;
 import com.monsters.dto.user.PasswordLockStatusResponse;
@@ -12,6 +13,7 @@ import com.monsters.entity.user.UserPasswordLock;
 import com.monsters.repository.user.UserPasswordLockRepository;
 import com.monsters.repository.user.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,12 +45,15 @@ public class UserService {
         return toProfileResponse(user);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public UserProfileResponse updateProfile(Long userId, UpdateUserProfileRequest request) {
-        User user = userRepository.findByIdAndDeletedFalse(userId)
+        userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        user.updateProfile(request.userName().trim(), request.birthday());
-        return toProfileResponse(user);
+        throw new BusinessException(
+                HttpStatus.CONFLICT,
+                "CLIENT_UPGRADE_REQUIRED",
+                "請更新版本後，使用會員資料的獨立修改流程"
+        );
     }
 
     @Transactional

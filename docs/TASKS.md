@@ -384,8 +384,8 @@ Phase 編號為歷史 Roadmap 識別，不代表社群可早於私人核心封�
 - [ ] 建立 Web Cookie／CSRF 與 App Keychain／Keystore `SessionCredentialStore`
 - [ ] 移除 SharedPreferences 中 Token 與完整 Login Result
 - [ ] 建立 device session list、單一／全部撤銷、reuse detection 與敏感操作 reauth
-- [ ] 正式 Email forgot password、rate limit 與全Session撤銷（REVIEW：Registration Login Task 11；Penpot／Flutter與本機驗證完成，待PR／CI、使用者Review與合併）
-- [ ] Email change、驗證、通知與其他Session撤銷
+- [x] 正式 Email forgot password、rate limit 與全Session撤銷（DONE：Registration Login Task 11；PR #102四項CI通過並於2026-08-31合併）
+- [x] Email change、驗證、通知與其他Session撤銷（REVIEW：Registration Login Task 12；方案1資源式API、V10、Penpot、Flutter與完整本機測試已完成，待PR CI與合併）
 - [ ] 導入 Argon2id、弱密碼 blocklist 與 BCrypt 漸進 rehash
 - [ ] 建立 MEMBER／MODERATOR／ADMIN／CONTENT_REVIEWER 與獨立 Community Eligibility
 - [ ] 建立 privileged TOTP MFA、backup codes 與受控初始 Admin provisioning

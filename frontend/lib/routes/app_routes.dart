@@ -17,6 +17,9 @@ class AppRoute {
   static const googleAccountLink = 'googleAccountLink';
   static const passwordResetRequest = 'passwordResetRequest';
   static const passwordReset = 'passwordReset';
+  static const emailChange = 'emailChange';
+  static const memberRestoration = 'memberRestoration';
+  static const memberDeactivated = 'memberDeactivated';
 }
 
 class AppPath {
@@ -38,4 +41,7 @@ class AppPath {
   static const googleAccountLink = '/link-google-account';
   static const passwordResetRequest = '/forgot-password';
   static const passwordReset = '/reset-password';
+  static const emailChange = '/change-email';
+  static const memberRestoration = '/restore-account';
+  static const memberDeactivated = '/account-deactivated';
 }

@@ -136,6 +136,32 @@ void main() {
     expect(find.text('無法繼續'), findsOneWidget);
   });
 
+  testWidgets('deactivated login routes to explicit restoration confirmation', (
+    tester,
+  ) async {
+    await _setMobileSurface(tester);
+    final repository = _FakeAuthRepository(
+      loginResult: _restorationLoginResult,
+    );
+    await tester.pumpWidget(_loginApp(repository));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('loginEmailField')),
+      'deactivated.member@example.test',
+    );
+    await tester.enterText(find.byKey(const Key('loginPasswordField')), 'p');
+    await tester.tap(find.byKey(const Key('loginSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('恢復你的帳號'), findsOneWidget);
+    expect(
+      find.byKey(const Key('memberRestorationConfirmation')),
+      findsOneWidget,
+    );
+    expect(find.text('首頁'), findsNothing);
+  });
+
   testWidgets('submits Google ID token and navigates to home on success', (
     tester,
   ) async {
@@ -296,6 +322,23 @@ void main() {
     expect(find.byKey(const Key('loginPasswordField')), findsOneWidget);
     expect(find.text('建立新帳號'), findsOneWidget);
   });
+
+  test(
+    'Google reauthentication event cannot replace an authenticated session',
+    () async {
+      final repository = _FakeAuthRepository(restoredSession: _loginResult);
+      final google = _FakeGoogleSignInService();
+      final controller = AuthController(repository, google);
+      addTearDown(controller.dispose);
+      await controller.restoreSession();
+      await controller.initializeGoogleSignIn();
+      google.emitIdToken('reauthentication-only');
+      await Future<void>.delayed(Duration.zero);
+      expect(repository.googleIdToken, isNull);
+      expect(controller.state.loginResult, same(_loginResult));
+      await google.dispose();
+    },
+  );
 
   test('logout clears repository and Google session', () async {
     final repository = _FakeAuthRepository();
@@ -487,6 +530,12 @@ const _continuationLoginResult = LoginResult(
   expiresIn: 600,
   nextAction: 'COMPLETE_ELIGIBILITY',
   continuationCredential: 'synthetic-continuation-credential',
+);
+
+const _restorationLoginResult = LoginResult(
+  expiresIn: 600,
+  nextAction: 'REACTIVATE_ACCOUNT',
+  continuationCredential: 'restoration-continuation-credential',
 );
 
 const _googleLinkRequiredResult = LoginResult(
