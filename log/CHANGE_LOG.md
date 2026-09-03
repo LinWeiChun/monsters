@@ -48,6 +48,10 @@ Codex
 - 補齊共用導覽、生日日期選擇器、Google Web官方按鈕及事件隔離、取消後忽略回應與Email連結切換隔離測試。
 - 本機Flutter版本較CI 3.29.2新；新Dropdown已依現有相容模式使用`value`並附限定ignore，尚待PR上CI確認。
 
+### Git
+
+- 功能提交：`528c262`；本次Log同步提交後推送Task分支並建立Draft PR，不自動合併。
+
 ### Log Retention / Pending
 
 - 依2026-09-03一個月保存政策，保留2026-08-03起紀錄；已移除Markdown 6段、CSV 39筆與XLSX 8筆過期紀錄，可由Git歷史取回。

@@ -6,7 +6,7 @@
 2026-09-03,09:15,REGISTRATION-LOGIN-12,Design,Penpot Member Data Web與Mobile,新增與驗證,建立Web與Mobile各8個會員資料及帳號狀態畫板,Codex,否,否,是,否,共520個visible descendants containment為0且已匯出檢視
 2026-09-03,09:15,REGISTRATION-LOGIN-12,Test,Backend Flutter OpenAPI與Build,新增與驗證,驗證版本衝突 Token生命週期 Session撤銷 owner範圍 RWD與恢復安全分流,Codex,是,是,是,是,Backend343含4跳過；MySQL44；Flutter262；Analyze Web release Android debug通過
 2026-09-03,09:15,REGISTRATION-LOGIN-12,Cleanup,MEMBER_DATA_LEGACY_CLEANUP與舊Profile,文件化保留,舊PUT保留路徑但拒絕寫入回409 CLIENT_UPGRADE_REQUIRED；列出Profile及server PIN刪除條件,Codex,是,否,是,否,舊Profile技術上無route但依Task18三平台E2E與contract migration前不刪除
-2026-09-03,09:15,REGISTRATION-LOGIN-12,Documentation,正式規格 Task與三種Log,修改,同步方案1 Penpot IDs 測試證據 Task12 REVIEW及一個月Log保存期限,Codex,是,是,是,是,移除2026-08-03前Markdown6段 CSV39筆 XLSX8筆；PR與CI完成前不轉DONE
+2026-09-03,09:15,REGISTRATION-LOGIN-12,Documentation,正式規格 Task與三種Log,修改,同步方案1 Penpot IDs 測試證據 Task12 REVIEW及一個月Log保存期限,Codex,是,是,是,是,功能提交528c262；Task12 REVIEW；推送feature/phase4.5-member-data-modification並建立至feature/phase4.5的Draft PR；不自動合併
 2026-08-31,15:00,REGISTRATION-LOGIN-11,Review,PasswordReset三個共用元件/測試/UI規格,視覺校正,Logo依Penpot固定150×47與160×50，補Mobile/Desktop尺寸斷言,Codex,否,否,是,否,PR102；27項專項測試通過；Web重建通過；最新CI於Push後重跑，仍為REVIEW
 2026-08-31,14:48,REGISTRATION-LOGIN-11,Git,Task11功能與三份Log,提交紀錄,功能提交0829f5d；Log同步提交後一併推送Task分支,Codex,否,否,否,否,feature/phase4.5-password-reset → feature/phase4.5；Draft PR送審，不自動合併
 2026-08-31,14:40,REGISTRATION-LOGIN-11,Backend,PasswordReset controller/service/worker與session,新增與修改,通用202受理與可靠寄信；15分鐘單次Token只存hash；成功撤銷全部Session,Codex,是,是,否,是,採方案1；不回傳reset Token；失敗重試與無PII告警
