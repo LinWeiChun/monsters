@@ -47,13 +47,14 @@ public class MemberContinuationCredential extends BaseEntity {
             User user,
             String tokenHash,
             ContinuationNextAction nextAction,
+            long issuedForVersion,
             LocalDateTime expiresAt
     ) {
         this.user = user;
         this.tokenHash = tokenHash;
         this.nextAction = nextAction;
         this.issuedForState = user.getMemberState();
-        this.issuedForVersion = user.getVersion();
+        this.issuedForVersion = issuedForVersion;
         this.expiresAt = expiresAt;
     }
 
@@ -87,7 +88,8 @@ public class MemberContinuationCredential extends BaseEntity {
 
     public boolean isUsableAt(LocalDateTime now) {
         return revokedAt == null && expiresAt.isAfter(now)
-                && user.getMemberState() == issuedForState;
+                && user.getMemberState() == issuedForState
+                && user.getVersion() == issuedForVersion;
     }
 
     public void consume(LocalDateTime now) {

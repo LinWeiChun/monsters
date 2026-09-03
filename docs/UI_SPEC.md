@@ -123,6 +123,19 @@
 
 登入裝置管理 route 固定為`/profile/sessions`，由個人資料頁「登入裝置」入口進入。Web／Tablet／Mobile主畫面不得出現捲動容器或Scrollbar；每頁最多3台裝置並以分頁切換，直接顯示裝置類型、約略摘要、最後活動、目前裝置標記與可用操作。密碼reauth與確認內容使用彈跳視窗；只有彈窗內容確實超出viewport時才可在彈窗內捲動。
 
+#### 2.6.1 Task 12會員資料與帳號狀態
+
+- Profile改用`GET /api/v1/members/me` read model；一般資料不提供可混寫Email、生日或會員狀態的「全部儲存」按鈕。
+- 公開暱稱使用獨立編輯區，送出前顯示「既有社群內容會立即顯示新暱稱」並要求明確確認；成功只更新暱稱區塊，`409 VERSION_CONFLICT`顯示資料已在其他裝置更新並提供重新載入。
+- Email變更依序呈現：輸入新Email、以目前登入方式重新驗證、驗證信已寄出、驗證成功、連結無效／過期／已使用。驗證完成前Profile仍顯示目前Email，另以狀態卡顯示待驗證新Email。
+- 生日欄位改為唯讀摘要；「申請更正」使用獨立流程，要求新生日、原因代碼與五分鐘reauth。同資格區間自動核准；跨13／18歲時顯示待審與立即生效的保守限制，不暗示已核准。
+- 本人停用使用高風險確認畫面，說明所有裝置會登出、公開內容會立即取消且恢復後不會自動重新分享。成功後清除本地Session並導向停用完成頁。
+- 停用會員完整登入後只進入恢復帳號頁；確認恢復成功後仍需重新登入，不得從Continuation Credential直接進入私人頁面。
+- Web／Tablet／Mobile必須呈現預設、儲存中、衝突、驗證中、受限、停用及恢復狀態；Mobile `<600px`、Tablet `600–1199px`、Desktop `>=1200px`，主畫面不得以整頁捲動規避RWD。
+- Task 12 Penpot design-first已完成：Mobile容器`Member Data / Mobile`（`e1bb4d30-0072-8099-8008-933794e127d8`）含8個390×844狀態畫板、224個visible descendants；Web容器`Member Data / Web`（`e1bb4d30-0072-8099-8008-933870eaec30`）含8個狀態畫板、296個visible descendants。兩組均已實際匯出檢視，且containment為0個超出parent。
+- Mobile畫板依序為：會員資料（`e1bb4d30-0072-8099-8008-93379619835d`）、公開暱稱（`e1bb4d30-0072-8099-8008-93379e37fc15`）、變更Email（`e1bb4d30-0072-8099-8008-9337a652f6d1`）、Email驗證中（`e1bb4d30-0072-8099-8008-9337adc8759a`）、生日更正待審（`e1bb4d30-0072-8099-8008-9337b4f59d00`）、停用確認（`e1bb4d30-0072-8099-8008-9337bcad8dfc`）、已停用（`e1bb4d30-0072-8099-8008-9337c448ec17`）、恢復帳號（`e1bb4d30-0072-8099-8008-9337cc30b61b`）。
+- Web畫板依序為：會員資料（`e1bb4d30-0072-8099-8008-933871ecda44`）、公開暱稱（`e1bb4d30-0072-8099-8008-933880db704b`）、變更Email（`e1bb4d30-0072-8099-8008-9338939f03bc`）、Email驗證中（`e1bb4d30-0072-8099-8008-9338a70d49ae`）、生日更正待審（`e1bb4d30-0072-8099-8008-9338baaaa9df`）、停用確認（`e1bb4d30-0072-8099-8008-9338c986a418`）、已停用（`e1bb4d30-0072-8099-8008-9338d8fc214e`）、恢復帳號（`e1bb4d30-0072-8099-8008-9338ec9791d6`）。
+
 Task 09 Penpot設計來源：
 
 - Web預設：`Session Management / Web / 01 登入裝置`（`f7ed8c2b-0377-802d-8008-7d4714428f8c`）
@@ -632,18 +645,22 @@ REST API
 
 個人資料頁位置：
 
-- `frontend/lib/pages/profile_page.dart`
+- `frontend/lib/pages/member_data_page.dart`
+- `frontend/lib/pages/email_change_page.dart`
+- `frontend/lib/pages/member_deactivated_page.dart`
+- `frontend/lib/pages/member_restoration_page.dart`
 
 個人資料頁支援：
 
-- 呼叫 `GET /api/users/me` 查詢目前登入使用者個人資料
-- 顯示已取得貘怪頭貼、公開暱稱、Email、服務地區、生日與資格狀態，不顯示 `account`
-- 修改公開暱稱；Email 使用獨立 reauth＋驗證流程。首次社群公開前需預覽並確認暱稱，修改後既有社群內容顯示新暱稱
-- 從已取得圖鑑選擇頭貼，不提供圖片上傳
+- 呼叫`GET /api/v1/members/me`讀取owner-only會員read model、pending workflow與optimistic `version`
+- 顯示公開UUID、公開暱稱、目前Email、服務地區、生日、資格與會員狀態，不顯示`account`
+- 公開暱稱、Email變更、生日更正、本人停用與恢復各自使用獨立Command；不提供可混寫敏感欄位的「全部儲存」
+- Email與生日依目前已連結的密碼或Google方式取得5分鐘用途限定reauth credential，credential只保留在本次記憶體與request header；Web使用Google官方按鈕與scoped event，不能觸發新的登入或切換會員。取消或離頁後忽略晚到回應，生日由內建日期選擇器輸入。
+- Mobile保留390×844等比例畫布與共用`MobileAppBottomNavigation`，不以主畫面捲動解決overflow；Tablet採單欄flow，Desktop採側欄與`AppTopNavigation`共用導覽，可捲動內容但不縮放整頁。599／600／1199／1200px可即時切換。Mobile顯示一般欄位、地區與帳號狀態，完整會員識別碼在Tablet／Desktop唯讀顯示。
+- 頭貼選擇不屬於Task 12；後續只能從已取得貘怪圖鑑選擇，不得恢復圖片上傳
 - 生日完成資格確認後鎖定；更正需走 reauth 與人工申請
-- 生日欄位為唯讀文字輸入外觀，點擊後開啟 Flutter 內建日曆；不得要求使用者手動輸入日期格式
-- 呼叫 `PUT /api/users/me` 儲存個人資料
-- 顯示可見的登出按鈕；點擊後先顯示確認對話框，再由 `AuthController.logout()` 完成登出並導向登入頁
+- 跨13／18歲資格邊界的生日申請顯示待審與保守限制，並完成本地登出；不顯示為已核准
+- 停用成功導向已停用頁；停用會員登入只導向恢復確認，恢復成功仍必須重新登入
 - Loading 狀態
 - API 錯誤訊息與重試
 - 儲存成功提示
@@ -652,11 +669,11 @@ REST API
 個人資料頁資料流程：
 
 ```text
-ProfilePage
+MemberDataPage
 ↓
-UserProfileController
+MemberDataController
 ↓
-UserRepository
+MemberDataRepository
 ↓
 ApiClient
 ↓
@@ -667,17 +684,17 @@ REST API
 
 | 類型 | 檔案 |
 |---|---|
-| Page | `frontend/lib/pages/profile_page.dart` |
-| Provider | `frontend/lib/providers/user_profile_provider.dart` |
-| Repository | `frontend/lib/repositories/user_repository.dart` |
-| Model | `frontend/lib/models/user_profile.dart`、`frontend/lib/models/user_profile.g.dart` |
+| Page | `frontend/lib/pages/member_data_page.dart`、`email_change_page.dart`、`member_deactivated_page.dart`、`member_restoration_page.dart` |
+| Provider | `frontend/lib/providers/member_data_provider.dart` |
+| Repository | `frontend/lib/repositories/member_data_repository.dart` |
+| Model | `frontend/lib/models/member_profile.dart`、`frontend/lib/models/member_data_result.dart` |
 
 規則：
 
 - 個人資料頁不得直接呼叫 Dio。
 - 個人資料頁不得由前端傳入 user id、account 或 owner 進行查詢或修改。
-- `userName` 必填，最大長度 80。
-- 完成年齡資格後 `birthday` 不可為空，API 格式為 `yyyy-MM-dd`。
+- 公開暱稱更新必須同時送出社群影響確認與`expectedVersion`。
+- Email與生日異動不得透過deprecated `PUT /api/users/me`；舊`ProfilePage`、`UserProfileController`與`UserRepository`Profile methods只為Task 18 contract migration前的相容基線，不再由`/profile`route使用。
 - 頭貼只能傳已取得的 monster public ID；不得啟動相機、相簿或上傳流程。
 ## Flutter Password Lock Page 實作規範
 
@@ -744,7 +761,10 @@ Platform Secure Storage Adapter
 | `/register` | `register` | `RegisterPage` | 註冊頁容器 |
 | `/forgot-password` | `passwordResetRequest` | `PasswordResetRequestPage` | 忘記密碼申請與通用受理狀態 |
 | `/reset-password` | `passwordReset` | `PasswordResetPage` | Token無效／過期／已使用、設定新密碼與成功狀態 |
-| `/profile` | `profile` | `ProfilePage` | 個人資料頁容器 |
+| `/profile` | `profile` | `MemberDataPage` | 會員資料、公開暱稱、Email、生日與帳號狀態 |
+| `/change-email` | `emailChange` | `EmailChangePage` | Email單次驗證連結完成狀態 |
+| `/restore-account` | `memberRestoration` | `MemberRestorationPage` | 用途限定Continuation恢復確認 |
+| `/account-deactivated` | `memberDeactivated` | `MemberDeactivatedPage` | 本人停用成功狀態 |
 | `/password-lock` | `passwordLock` | `PasswordLockPage` | 密碼鎖頁容器 |
 
 頁面不得直接使用 `Navigator.push`。頁面切換應使用 go_router 的 `context.goNamed()` 或集中路由設定。
@@ -966,9 +986,9 @@ Logo 規範：
 - `homeAnimatedMonster`、`homeAnimatedMonsterIdle`、`homeAnimatedMonsterReacting` 測試 key 保留，降低既有測試與互動行為破壞。
 ---
 
-## 2026-07-16 Penpot ProfilePage Web / App Alignment
+## 2026-07-16 Penpot ProfilePage Web / App Alignment（歷史相容基線）
 
-本次依 Penpot `Account / Web / 06 Profile / 個人資料` 與 `Account / Mobile / 06 Profile / 個人資料` 調整 Flutter `ProfilePage`，並保留既有 `UserProfileController -> UserRepository -> ApiClient -> REST API` 流程。
+本節記錄2026-07-16舊版實作，已由Task 12 `MemberDataPage`及資源式API規格取代。舊`ProfilePage -> UserProfileController -> UserRepository`檔案在Task 18三平台contract migration前保留，不得當作新功能依據。
 
 ### Penpot Boards
 

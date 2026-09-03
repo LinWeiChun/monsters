@@ -163,6 +163,33 @@ Web 使用 Cookie 的 Auth endpoint 必須驗證可信任 Origin／CSRF 防護�
 - 寄送使用Transactional Outbox與Worker；失敗採退避重試，達上限標記`FAILED`並輸出不含Email、Token、hash或會員識別的告警。
 - deprecated `/api/auth/forgot-password`與`/api/auth/reset-password`暫時提供相同安全契約，不再回reset Token；Task 18移除相容別名。
 
+#### 0.2.7 會員資料、Email、生日、停用與恢復
+
+Task 12採資源式API；一般Profile只作read model，不存在可同時修改公開暱稱、Email或生日的通用DTO。
+
+| Method | Path | Auth／Header | 成功結果 |
+|---|---|---|---|
+| `GET` | `/api/v1/members/me` | Bearer Access | `200 MEMBER_PROFILE_RETRIEVED`，回公開UUID、公開暱稱、目前Email、生日、資格／會員狀態、pending workflow與`version` |
+| `PUT` | `/api/v1/members/me/public-nickname` | Bearer Access | `200 PUBLIC_NICKNAME_UPDATED`；body含`publicNickname`、公開顯示確認及`expectedVersion` |
+| `POST` | `/api/v1/auth/reauthentications/password` | Bearer Access | body使用`purpose: EMAIL_CHANGE`或`BIRTHDAY_CORRECTION`，回300秒用途受限credential |
+| `POST` | `/api/v1/auth/reauthentications/google` | Bearer Access | body含Google ID Token與上述purpose；只接受已連結同一`provider + sub`的會員 |
+| `POST` | `/api/v1/members/me/email-change-requests` | Bearer Access＋`X-Reauthentication-Credential` | `202 EMAIL_CHANGE_VERIFICATION_PENDING`，body含`newEmail`與`expectedVersion` |
+| `POST` | `/api/v1/auth/email-changes` | Public token body | `200 EMAIL_CHANGE_COMPLETED`，原子切換Email並撤銷申請Session以外的Session |
+| `POST` | `/api/v1/members/me/birthday-correction-requests` | Bearer Access＋`X-Reauthentication-Credential` | 同資格區間回`200 BIRTHDAY_CORRECTION_APPROVED`；跨界回`202 BIRTHDAY_CORRECTION_REVIEW_PENDING` |
+| `POST` | `/api/v1/members/me/deactivations` | Bearer Access | `200 MEMBER_DEACTIVATED`並清除Web Cookie；body含`confirmed: true`與`expectedVersion` |
+| `POST` | `/api/v1/auth/member-restorations` | `Authorization: Continuation <credential>` | `200 MEMBER_RESTORED`；body只含`confirmed: true`，不核發一般Session；optimistic version由版本綁定credential強制 |
+
+- `PUT /public-nickname`只接受2–30 Unicode code points且沿用NFC、不可見字元與官方冒充檢查；已有公開確認的會員仍須在修改畫面明確確認既有社群內容會立即顯示新暱稱。Community Post顯示時依owner目前暱稱解析，不保存歷史暱稱快照。
+- Email變更申請先驗證五分鐘、綁定目前Session與`EMAIL_CHANGE`用途的reauth credential；新Email完成24小時單次hash Token驗證前，`users.email`維持舊值。重複申請使舊申請失效。
+- Email衝突一律回`409 EMAIL_CHANGE_CONFLICT`，不得透露衝突會員；無效、過期與已使用連結分別回`EMAIL_CHANGE_TOKEN_INVALID`、`EMAIL_CHANGE_TOKEN_EXPIRED`與`EMAIL_CHANGE_TOKEN_USED`。
+- Email切換、member version更新、申請完成及Session撤銷在同一交易完成；通知新舊Email使用Transactional Outbox，payload不得包含Email或Token。
+- `GET /api/v1/members/me`的pending workflow只對owner回request ID、status與待處理target，供畫面顯示待驗證Email或待審生日；target不得進入Log、Audit或Outbox payload。
+- 生日更正需五分鐘`BIRTHDAY_CORRECTION` reauth、原因代碼及`expectedVersion`。同一資格區間經日期及風險規則後可自動核准；跨13／18歲邊界只保存待審申請，不直接擴張資格。
+- 申報生日導致較低資格時立即套用保守限制、撤銷全部Session及公開可見性；在Task 15／16的特權權限、MFA及稽核完成前，不提供無保護的生日人工核准endpoint。
+- 本人停用把Member State轉為`USER_DEACTIVATED`、撤銷全部Session、取消既有`isShared`相容資料及未來Community Post可見性；恢復只將符合資格的會員狀態改回可登入狀態，不恢復任何分享。
+- 所有已登入會員Aggregate修改帶`expectedVersion`；舊值回`409 VERSION_CONFLICT`。Email驗證與恢復Credential綁定核發時version；恢復流程無一般Session可讀Profile，因此以Credential內的核發version作optimistic guard，其他修改發生後不得繼續套用舊流程。
+- Deprecated `PUT /api/users/me`保留路徑但停止寫入，對有效舊request回`409 CLIENT_UPGRADE_REQUIRED`及升級提示，任何暱稱／生日皆不得由此路徑修改。使用者於2026-09-03核准此防繞過方案；Task 18完成三平台contract migration後才移除Controller與DTO，詳見`MEMBER_DATA_LEGACY_CLEANUP.md`。
+
 ### 0.3 核心資源契約
 
 | 資源 | v1 行為 |
@@ -846,6 +873,8 @@ Response：
 - 回傳欄位以新版 `users` 表為準；舊系統 `lock`、`dailyTest` 不放入本 API。
 
 ### 3.2 修改個人資料
+
+> 以下Request／成功Response僅供historical baseline對照。Task 12起此路徑對有效request固定回`409 CLIENT_UPGRADE_REQUIRED`，不更動資料；舊Client必須升級使用分離Command，不能繼續直接修改生日或暱稱。
 
 `PUT /api/users/me`
 

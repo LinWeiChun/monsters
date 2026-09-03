@@ -34,6 +34,7 @@ class MemberStateFlywayIntegrationTest {
 
         assertMemberStateTablesExist();
         assertPasswordResetSchemaExists();
+        assertMemberDataWorkflowSchemaExists();
 
         Flyway.configure()
                 .dataSource(mysql.getJdbcUrl(), mysql.getUsername(), mysql.getPassword())
@@ -79,6 +80,7 @@ class MemberStateFlywayIntegrationTest {
 
         assertMemberStateTablesExist();
         assertPasswordResetSchemaExists();
+        assertMemberDataWorkflowSchemaExists();
     }
 
     private void assertMemberStateTablesExist() throws Exception {
@@ -135,6 +137,36 @@ class MemberStateFlywayIntegrationTest {
              ResultSet indexResult = indexStatement.executeQuery()) {
             assertThat(indexResult.next()).isTrue();
             assertThat(indexResult.getInt(1)).isEqualTo(4);
+        }
+    }
+
+    private void assertMemberDataWorkflowSchemaExists() throws Exception {
+        try (Connection connection = mysql.createConnection("");
+             PreparedStatement statement = connection.prepareStatement("""
+                     SELECT COUNT(*)
+                     FROM information_schema.tables
+                     WHERE table_schema = DATABASE()
+                       AND table_name IN (
+                         'member_email_change_requests',
+                         'birthday_correction_requests'
+                       )
+                     """);
+             ResultSet result = statement.executeQuery()) {
+            assertThat(result.next()).isTrue();
+            assertThat(result.getInt(1)).isEqualTo(2);
+        }
+        try (Connection connection = mysql.createConnection("");
+             PreparedStatement statement = connection.prepareStatement("""
+                     SELECT check_clause
+                     FROM information_schema.check_constraints
+                     WHERE constraint_schema = DATABASE()
+                       AND constraint_name = 'chk_session_reauthentication_purpose'
+                     """);
+             ResultSet result = statement.executeQuery()) {
+            assertThat(result.next()).isTrue();
+            assertThat(result.getString(1))
+                    .contains("EMAIL_CHANGE")
+                    .contains("BIRTHDAY_CORRECTION");
         }
     }
 }

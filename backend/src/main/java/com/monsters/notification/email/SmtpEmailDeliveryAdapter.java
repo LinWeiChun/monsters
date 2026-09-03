@@ -20,6 +20,9 @@ public class SmtpEmailDeliveryAdapter implements EmailDeliveryPort {
     private static final String GUARDIAN_GRANT_TEMPLATE = "guardian-consent-grant";
     private static final String GUARDIAN_WITHDRAW_TEMPLATE = "guardian-consent-withdraw";
     private static final String PASSWORD_RESET_TEMPLATE = "password-reset";
+    private static final String EMAIL_CHANGE_VERIFICATION_TEMPLATE = "email-change-verification";
+    private static final String EMAIL_CHANGED_OLD_TEMPLATE = "email-changed-old";
+    private static final String EMAIL_CHANGED_NEW_TEMPLATE = "email-changed-new";
 
     private final JavaMailSender mailSender;
     private final RegistrationSmtpProperties properties;
@@ -37,14 +40,13 @@ public class SmtpEmailDeliveryAdapter implements EmailDeliveryPort {
         if (!VERIFICATION_TEMPLATE.equals(request.templateId())
                 && !GUARDIAN_GRANT_TEMPLATE.equals(request.templateId())
                 && !GUARDIAN_WITHDRAW_TEMPLATE.equals(request.templateId())
-                && !PASSWORD_RESET_TEMPLATE.equals(request.templateId())) {
+                && !PASSWORD_RESET_TEMPLATE.equals(request.templateId())
+                && !EMAIL_CHANGE_VERIFICATION_TEMPLATE.equals(request.templateId())
+                && !EMAIL_CHANGED_OLD_TEMPLATE.equals(request.templateId())
+                && !EMAIL_CHANGED_NEW_TEMPLATE.equals(request.templateId())) {
             throw new IllegalArgumentException("Unsupported email template");
         }
-        String actionUrl = requiredVariable(request.variables(), switch (request.templateId()) {
-            case VERIFICATION_TEMPLATE -> "verificationUrl";
-            case PASSWORD_RESET_TEMPLATE -> "resetUrl";
-            default -> "actionUrl";
-        });
+        String actionUrl = actionUrl(request);
         String subject = subject(request.templateId());
         if (!StringUtils.hasText(properties.getFrom())
                 || !StringUtils.hasText(subject)) {
@@ -64,6 +66,9 @@ public class SmtpEmailDeliveryAdapter implements EmailDeliveryPort {
             case GUARDIAN_GRANT_TEMPLATE -> properties.getGuardianGrantSubject();
             case GUARDIAN_WITHDRAW_TEMPLATE -> properties.getGuardianWithdrawSubject();
             case PASSWORD_RESET_TEMPLATE -> properties.getPasswordResetSubject();
+            case EMAIL_CHANGE_VERIFICATION_TEMPLATE -> properties.getEmailChangeVerificationSubject();
+            case EMAIL_CHANGED_OLD_TEMPLATE -> properties.getEmailChangedOldSubject();
+            case EMAIL_CHANGED_NEW_TEMPLATE -> properties.getEmailChangedNewSubject();
             default -> properties.getSubject();
         };
     }
@@ -92,6 +97,23 @@ public class SmtpEmailDeliveryAdapter implements EmailDeliveryPort {
 
                     完成重設後，所有已登入裝置都會失效。若您未提出此要求，請忽略這封信。
                     """.formatted(url);
+            case EMAIL_CHANGE_VERIFICATION_TEMPLATE -> """
+                    請使用以下單次連結驗證新的 Email。連結將於 24 小時後失效：
+
+                    %s
+
+                    驗證完成前，目前的 Email 仍可正常使用。若您未提出此要求，請忽略這封信。
+                    """.formatted(url);
+            case EMAIL_CHANGED_OLD_TEMPLATE -> """
+                    您的貘nsters登入 Email 已完成變更。
+
+                    若這不是您執行的操作，請立即使用帳號復原流程並檢查登入裝置。
+                    """;
+            case EMAIL_CHANGED_NEW_TEMPLATE -> """
+                    您的貘nsters登入 Email 已完成驗證與切換。
+
+                    其他登入裝置已登出；目前申請變更的裝置可繼續使用。
+                    """;
             default -> """
                     請使用以下連結完成 Email 驗證。連結將於 24 小時後失效：
 
@@ -99,6 +121,22 @@ public class SmtpEmailDeliveryAdapter implements EmailDeliveryPort {
 
                     若您未提出此要求，請忽略這封信。
                     """.formatted(url);
+        };
+    }
+
+    private String actionUrl(EmailDeliveryRequest request) {
+        return switch (request.templateId()) {
+            case VERIFICATION_TEMPLATE -> requiredVariable(request.variables(), "verificationUrl");
+            case PASSWORD_RESET_TEMPLATE -> requiredVariable(request.variables(), "resetUrl");
+            case EMAIL_CHANGE_VERIFICATION_TEMPLATE -> requiredVariable(
+                    request.variables(),
+                    "verificationUrl"
+            );
+            case GUARDIAN_GRANT_TEMPLATE, GUARDIAN_WITHDRAW_TEMPLATE -> requiredVariable(
+                    request.variables(),
+                    "actionUrl"
+            );
+            default -> "";
         };
     }
 

@@ -301,7 +301,12 @@ class RegistrationLoginOpenApiContractTest {
                 "SessionReauthenticationRequest"
         );
         assertThat(listAt(mapAt(reauthenticationRequest, "properties", "purpose"), "enum"))
-                .containsExactlyInAnyOrder("SESSION_MANAGEMENT", "LOGIN_METHOD_LINK");
+                .containsExactlyInAnyOrder(
+                        "SESSION_MANAGEMENT",
+                        "LOGIN_METHOD_LINK",
+                        "EMAIL_CHANGE",
+                        "BIRTHDAY_CORRECTION"
+                );
         assertThat(mapAt(
                 document,
                 "components",
@@ -310,6 +315,77 @@ class RegistrationLoginOpenApiContractTest {
                 "properties",
                 "nextAction"
         )).containsEntry("const", "LINK_GOOGLE_ACCOUNT");
+    }
+
+    @Test
+    void memberDataModificationContractShouldExposeResourceWorkflows() throws IOException {
+        Map<String, Object> document;
+        try (var reader = Files.newBufferedReader(CONTRACT_PATH)) {
+            document = new Yaml().load(reader);
+        }
+
+        Map<String, Object> paths = mapAt(document, "paths");
+        assertThat(paths.keySet()).contains(
+                "/api/v1/members/me",
+                "/api/v1/members/me/public-nickname",
+                "/api/v1/auth/reauthentications/password",
+                "/api/v1/auth/reauthentications/google",
+                "/api/v1/members/me/email-change-requests",
+                "/api/v1/auth/email-changes",
+                "/api/v1/members/me/birthday-correction-requests",
+                "/api/v1/members/me/deactivations",
+                "/api/v1/auth/member-restorations"
+        );
+
+        Map<String, Object> nicknameRequest = mapAt(
+                document,
+                "components",
+                "schemas",
+                "PublicNicknameUpdateRequest"
+        );
+        assertThat(listAt(nicknameRequest, "required")).containsExactlyInAnyOrder(
+                "publicNickname",
+                "confirmExistingCommunityUpdate",
+                "expectedVersion"
+        );
+        assertThat(mapAt(nicknameRequest, "properties", "confirmExistingCommunityUpdate"))
+                .containsEntry("const", true);
+
+        Map<String, Object> googleReauthentication = mapAt(
+                document,
+                "components",
+                "schemas",
+                "GoogleReauthenticationRequest"
+        );
+        assertThat(listAt(googleReauthentication, "required"))
+                .containsExactlyInAnyOrder("idToken", "purpose");
+        assertThat(listAt(mapAt(googleReauthentication, "properties", "purpose"), "enum"))
+                .containsExactlyInAnyOrder("EMAIL_CHANGE", "BIRTHDAY_CORRECTION");
+
+        assertThat(listAt(mapAt(
+                document,
+                "components",
+                "schemas",
+                "ContinuationNextAction"
+        ), "enum")).contains("REVIEW_BIRTHDAY_CORRECTION", "REACTIVATE_ACCOUNT");
+
+        Map<String, Object> restorationRequest = mapAt(
+                document,
+                "components",
+                "schemas",
+                "MemberRestorationRequest"
+        );
+        assertThat(listAt(restorationRequest, "required")).containsExactly("confirmed");
+        assertThat(mapAt(restorationRequest, "properties")).containsOnlyKeys("confirmed");
+        assertThat(restorationRequest).containsEntry("additionalProperties", false);
+
+        assertThat(mapAt(
+                document,
+                "components",
+                "schemas",
+                "PendingMemberWorkflow",
+                "properties"
+        )).containsKeys("requestId", "status", "target");
     }
 
     @SuppressWarnings("unchecked")

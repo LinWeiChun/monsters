@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -20,6 +21,7 @@ import com.monsters.exception.member.VersionConflictException;
 import com.monsters.security.common.GoogleIdTokenVerifier;
 import com.monsters.security.common.GoogleUserInfo;
 import com.monsters.service.member.MemberLifecycleService;
+import com.monsters.service.member.MemberEmailChangeOutboxWorker;
 import com.monsters.service.auth.PasswordResetOutboxWorker;
 import com.monsters.service.registration.EmailVerificationOutboxWorker;
 import com.monsters.service.registration.UnverifiedMemberCleanupService;
@@ -104,6 +106,10 @@ class AuthMemberHttpIntegrationTest {
                 () -> "https://example.test/reset-password"
         );
         registry.add(
+                "app.member.email-change.public-url",
+                () -> "https://example.test/change-email"
+        );
+        registry.add(
                 "app.password-reset.rate-limit-hash-key",
                 () -> "synthetic-password-reset-rate-limit-key"
         );
@@ -126,6 +132,7 @@ class AuthMemberHttpIntegrationTest {
     private final MemberLifecycleService memberLifecycleService;
     private final EmailVerificationOutboxWorker emailVerificationOutboxWorker;
     private final PasswordResetOutboxWorker passwordResetOutboxWorker;
+    private final MemberEmailChangeOutboxWorker memberEmailChangeOutboxWorker;
     private final UnverifiedMemberCleanupService unverifiedMemberCleanupService;
 
     @Autowired
@@ -140,6 +147,7 @@ class AuthMemberHttpIntegrationTest {
             MemberLifecycleService memberLifecycleService,
             EmailVerificationOutboxWorker emailVerificationOutboxWorker,
             PasswordResetOutboxWorker passwordResetOutboxWorker,
+            MemberEmailChangeOutboxWorker memberEmailChangeOutboxWorker,
             UnverifiedMemberCleanupService unverifiedMemberCleanupService
     ) {
         this.mockMvc = mockMvc;
@@ -152,6 +160,7 @@ class AuthMemberHttpIntegrationTest {
         this.memberLifecycleService = memberLifecycleService;
         this.emailVerificationOutboxWorker = emailVerificationOutboxWorker;
         this.passwordResetOutboxWorker = passwordResetOutboxWorker;
+        this.memberEmailChangeOutboxWorker = memberEmailChangeOutboxWorker;
         this.unverifiedMemberCleanupService = unverifiedMemberCleanupService;
     }
 
@@ -163,7 +172,13 @@ class AuthMemberHttpIntegrationTest {
                 """
                 UPDATE outbox_events
                 SET status = 'FAILED', attempts = 5
-                WHERE event_type IN ('EMAIL_VERIFICATION_REQUESTED', 'PASSWORD_RESET_REQUESTED')
+                WHERE event_type IN (
+                    'EMAIL_VERIFICATION_REQUESTED',
+                    'PASSWORD_RESET_REQUESTED',
+                    'MEMBER_EMAIL_CHANGE_REQUESTED',
+                    'MEMBER_EMAIL_CHANGED_OLD_NOTIFICATION',
+                    'MEMBER_EMAIL_CHANGED_NEW_NOTIFICATION'
+                )
                   AND status IN ('PENDING', 'PROCESSING')
                 """
         );
@@ -1138,6 +1153,23 @@ class AuthMemberHttpIntegrationTest {
                 .andReturn().getResponse().getContentAsString();
         String continuation = objectMapper.readTree(verificationResponse)
                 .path("data").path("continuationCredential").asText();
+
+        assertThat(jdbcTemplate.queryForMap(
+                """
+                SELECT credential.next_action, credential.issued_for_state,
+                       credential.issued_for_version, credential.revoked_at,
+                       member.member_state, member.version
+                FROM member_continuation_credentials credential
+                JOIN users member ON member.id = credential.user_id
+                WHERE member.email = ?
+                """,
+                syntheticEmail
+        )).containsEntry("next_action", "COMPLETE_ELIGIBILITY")
+                .containsEntry("issued_for_state", "PENDING_ELIGIBILITY")
+                .containsEntry("issued_for_version", 1L)
+                .containsEntry("member_state", "PENDING_ELIGIBILITY")
+                .containsEntry("version", 1L)
+                .containsEntry("revoked_at", null);
 
         mockMvc.perform(post("/api/v1/auth/eligibility-completions")
                         .header("Authorization", "Continuation " + continuation)
@@ -2274,6 +2306,196 @@ class AuthMemberHttpIntegrationTest {
                 .doesNotContain("Synthetic email delivery failure", email);
     }
 
+    @Test
+    void memberProfileAndEmailChangeShouldUseVersionedResourceWorkflow() throws Exception {
+        String oldEmail = "member.data.old@example.test";
+        String newEmail = "member.data.new@example.test";
+        String password = "synthetic-password";
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "account", "member_data_workflow",
+                                "email", oldEmail,
+                                "password", password,
+                                "userName", "Old Nickname"
+                        ))))
+                .andExpect(status().isCreated());
+        jdbcTemplate.update(
+                """
+                UPDATE users
+                SET birthday = '1995-09-01', service_region = 'TW',
+                    eligibility_status = 'ELIGIBLE_ADULT',
+                    community_eligibility_status = 'ELIGIBLE',
+                    nickname_disclosure_version = 'nickname-v1',
+                    nickname_disclosure_confirmed_at = ?
+                WHERE email = ?
+                """,
+                LocalDateTime.ofInstant(clock.instant(), ZoneOffset.UTC),
+                oldEmail
+        );
+        JsonNode login = loginV1(oldEmail, password);
+        String accessToken = login.path("accessToken").asText();
+
+        JsonNode profile = responseData(mockMvc.perform(get("/api/v1/members/me")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("MEMBER_PROFILE_RETRIEVED"))
+                .andExpect(jsonPath("$.data.email").value(oldEmail))
+                .andExpect(jsonPath("$.data.password").doesNotExist())
+                .andReturn().getResponse().getContentAsString());
+
+        mockMvc.perform(put("/api/users/me")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "userName", "Legacy Bypass",
+                                "birthday", "2020-01-01"
+                        ))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("CLIENT_UPGRADE_REQUIRED"));
+        mockMvc.perform(get("/api/v1/members/me")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.birthday").value("1995-09-01"))
+                .andExpect(jsonPath("$.data.publicNickname").value(profile.path("publicNickname").asText()))
+                .andExpect(jsonPath("$.data.version").value(profile.path("version").asInt()));
+
+        JsonNode renamed = responseData(mockMvc.perform(put("/api/v1/members/me/public-nickname")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "publicNickname", "New Nickname",
+                                "confirmExistingCommunityUpdate", true,
+                                "expectedVersion", profile.path("version").asLong()
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("PUBLIC_NICKNAME_UPDATED"))
+                .andExpect(jsonPath("$.data.publicNickname").value("New Nickname"))
+                .andReturn().getResponse().getContentAsString());
+
+        JsonNode reauthentication = responseData(mockMvc.perform(
+                        post("/api/v1/auth/reauthentications/password")
+                                .header("Authorization", "Bearer " + accessToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(Map.of(
+                                        "password", password,
+                                        "purpose", "EMAIL_CHANGE"
+                                ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.purpose").value("EMAIL_CHANGE"))
+                .andReturn().getResponse().getContentAsString());
+        mockMvc.perform(post("/api/v1/members/me/email-change-requests")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .header(
+                                "X-Reauthentication-Credential",
+                                reauthentication.path("credential").asText()
+                        )
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "newEmail", newEmail,
+                                "expectedVersion", renamed.path("version").asLong()
+                        ))))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.code").value("EMAIL_CHANGE_VERIFICATION_PENDING"));
+
+        assertThat(memberEmailChangeOutboxWorker.processPending()).isEqualTo(1);
+        String token = emailChangeTokenFor(newEmail);
+        mockMvc.perform(post("/api/v1/auth/email-changes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("token", token))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("EMAIL_CHANGE_COMPLETED"));
+        assertThat(memberEmailChangeOutboxWorker.processPending()).isEqualTo(2);
+
+        mockMvc.perform(get("/api/v1/members/me")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.email").value(newEmail))
+                .andExpect(jsonPath("$.data.publicNickname").value("New Nickname"));
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM users WHERE email = ?",
+                Integer.class,
+                oldEmail
+        )).isZero();
+        assertThat(jdbcTemplate.queryForList(
+                """
+                SELECT payload
+                FROM outbox_events
+                WHERE aggregate_type = 'MEMBER_EMAIL_CHANGE'
+                  AND aggregate_id = (
+                      SELECT public_id
+                      FROM member_email_change_requests
+                      WHERE new_email = ?
+                  )
+                """,
+                newEmail
+        )).allSatisfy(row -> assertThat(row.get("payload").toString())
+                .doesNotContain(oldEmail, newEmail, token));
+    }
+
+    @Test
+    void selfDeactivatedMemberShouldRestoreOnlyWithVersionBoundContinuation() throws Exception {
+        String email = "member.restore@example.test";
+        String password = "synthetic-password";
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "account", "member_restore_workflow",
+                                "email", email,
+                                "password", password,
+                                "userName", "Restore Member"
+                        ))))
+                .andExpect(status().isCreated());
+        JsonNode login = loginV1(email, password);
+        String accessToken = login.path("accessToken").asText();
+        JsonNode profile = responseData(mockMvc.perform(get("/api/v1/members/me")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString());
+
+        JsonNode deactivated = responseData(mockMvc.perform(post("/api/v1/members/me/deactivations")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "confirmed", true,
+                                "expectedVersion", profile.path("version").asLong()
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("MEMBER_DEACTIVATED"))
+                .andExpect(jsonPath("$.data.memberState").value("USER_DEACTIVATED"))
+                .andReturn().getResponse().getContentAsString());
+        mockMvc.perform(get("/api/v1/members/me")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isUnauthorized());
+
+        JsonNode continuation = responseData(mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", email,
+                                "password", password
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("AUTH_CONTINUATION_REQUIRED"))
+                .andExpect(jsonPath("$.data.nextAction").value("REACTIVATE_ACCOUNT"))
+                .andExpect(jsonPath("$.data.accessToken").doesNotExist())
+                .andReturn().getResponse().getContentAsString());
+
+        mockMvc.perform(post("/api/v1/auth/member-restorations")
+                        .header(
+                                "Authorization",
+                                "Continuation " + continuation.path("continuationCredential").asText()
+                        )
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "confirmed", true
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("MEMBER_RESTORED"))
+                .andExpect(jsonPath("$.data.memberState").value("ACTIVE"))
+                .andExpect(jsonPath("$.data.nextAction").value("SIGN_IN"));
+        loginV1(email, password);
+    }
+
     private String verificationTokenFor(String recipient) {
         String verificationUrl = ((RecordingEmailDelivery) emailDeliveryPort)
                 .requests()
@@ -2301,6 +2523,22 @@ class AuthMemberHttpIntegrationTest {
                 .get("resetUrl");
         return URLDecoder.decode(
                 URI.create(resetUrl).getRawQuery().substring("token=".length()),
+                StandardCharsets.UTF_8
+        );
+    }
+
+    private String emailChangeTokenFor(String recipient) {
+        String verificationUrl = ((RecordingEmailDelivery) emailDeliveryPort)
+                .requests()
+                .stream()
+                .filter(request -> request.recipient().equals(recipient))
+                .filter(request -> request.templateId().equals("email-change-verification"))
+                .reduce((first, second) -> second)
+                .orElseThrow()
+                .variables()
+                .get("verificationUrl");
+        return URLDecoder.decode(
+                URI.create(verificationUrl).getRawQuery().substring("token=".length()),
                 StandardCharsets.UTF_8
         );
     }

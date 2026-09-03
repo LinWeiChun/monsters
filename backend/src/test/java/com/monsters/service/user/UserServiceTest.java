@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.monsters.exception.common.ResourceNotFoundException;
+import com.monsters.exception.common.BusinessException;
 import com.monsters.storage.common.AvatarStorageService;
 import com.monsters.dto.user.PasswordLockRequest;
 import com.monsters.dto.user.PasswordLockStatusResponse;
@@ -73,7 +74,7 @@ class UserServiceTest {
     }
 
     @Test
-    void updateProfileShouldUpdateCurrentUserProfile() {
+    void updateProfileShouldRejectLegacyWritesWithoutChangingNicknameOrBirthday() {
         UserService userService = userService();
         User user = new User("wei_account", "user@example.com", "Wei");
         ReflectionTestUtils.setField(user, "id", 1L);
@@ -82,19 +83,15 @@ class UserServiceTest {
         ReflectionTestUtils.setField(user, "avatarUrl", "https://example.com/avatar.png");
         when(userRepository.findByIdAndDeletedFalse(1L)).thenReturn(Optional.of(user));
 
-        UserProfileResponse response = userService.updateProfile(
+        assertThatThrownBy(() -> userService.updateProfile(
                 1L,
                 new UpdateUserProfileRequest("  Lin  ", LocalDate.of(2001, 3, 4))
-        );
-
-        assertThat(response.userId()).isEqualTo(1L);
-        assertThat(response.account()).isEqualTo("old-account");
-        assertThat(response.email()).isEqualTo("user@example.com");
-        assertThat(response.userName()).isEqualTo("Lin");
-        assertThat(response.birthday()).isEqualTo(LocalDate.of(2001, 3, 4));
-        assertThat(response.avatarUrl()).isEqualTo("https://example.com/avatar.png");
-        assertThat(user.getUserName()).isEqualTo("Lin");
-        assertThat(user.getBirthday()).isEqualTo(LocalDate.of(2001, 3, 4));
+        )).isInstanceOfSatisfying(BusinessException.class, exception -> {
+            assertThat(exception.getCode()).isEqualTo("CLIENT_UPGRADE_REQUIRED");
+            assertThat(exception.getStatus().value()).isEqualTo(409);
+        });
+        assertThat(user.getUserName()).isEqualTo("Wei");
+        assertThat(user.getBirthday()).isEqualTo(LocalDate.of(2000, 1, 2));
     }
 
     @Test

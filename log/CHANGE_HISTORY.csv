@@ -1,4 +1,12 @@
 日期,時間,Task,類型,檔案,動作,說明,作者,是否影響 API,是否影響 Database,是否影響 UI,是否需要 Migration,備註
+2026-09-03,09:15,REGISTRATION-LOGIN-12,Backend,Member Data controllers/services/security/session,新增與修改,建立owner限定Profile、公開暱稱、Email、生日更正、停用與版本綁定恢復流程,Codex,是,是,否,是,方案1資源式API；用途限定reauth；不將Email生日Token寫入Log Audit或Outbox
+2026-09-03,09:15,REGISTRATION-LOGIN-12,Database,V10__add_member_data_modification_workflows.sql,新增,擴充reauth用途並建立Email變更及生日更正workflow與索引約束,Codex,否,是,否,是,空庫與上一版升級至V10及真實MySQL流程通過
+2026-09-03,09:15,REGISTRATION-LOGIN-12,API,API_SPEC與registration-login.yaml,新增與修改,新增會員read model及暱稱 Email 生日 停用 恢復分離資源契約,Codex,是,否,否,否,恢復body只含confirmed；optimistic guard由版本綁定Continuation Credential強制
+2026-09-03,09:15,REGISTRATION-LOGIN-12,Frontend,MemberData pages/provider/repository/router,新增與修改,完成新Profile route 敏感reauth Email連結 受限登出 停用與恢復狀態,Codex,是,否,是,否,390 599 600 1199 1200 1440 RWD Mobile無主畫面捲動 Web共用導覽與flow layout；Flutter 3.29.2相容
+2026-09-03,09:15,REGISTRATION-LOGIN-12,Design,Penpot Member Data Web與Mobile,新增與驗證,建立Web與Mobile各8個會員資料及帳號狀態畫板,Codex,否,否,是,否,共520個visible descendants containment為0且已匯出檢視
+2026-09-03,09:15,REGISTRATION-LOGIN-12,Test,Backend Flutter OpenAPI與Build,新增與驗證,驗證版本衝突 Token生命週期 Session撤銷 owner範圍 RWD與恢復安全分流,Codex,是,是,是,是,Backend343含4跳過；MySQL44；Flutter262；Analyze Web release Android debug通過
+2026-09-03,09:15,REGISTRATION-LOGIN-12,Cleanup,MEMBER_DATA_LEGACY_CLEANUP與舊Profile,文件化保留,舊PUT保留路徑但拒絕寫入回409 CLIENT_UPGRADE_REQUIRED；列出Profile及server PIN刪除條件,Codex,是,否,是,否,舊Profile技術上無route但依Task18三平台E2E與contract migration前不刪除
+2026-09-03,09:15,REGISTRATION-LOGIN-12,Documentation,正式規格 Task與三種Log,修改,同步方案1 Penpot IDs 測試證據 Task12 REVIEW及一個月Log保存期限,Codex,是,是,是,是,移除2026-08-03前Markdown6段 CSV39筆 XLSX8筆；PR與CI完成前不轉DONE
 2026-08-31,15:00,REGISTRATION-LOGIN-11,Review,PasswordReset三個共用元件/測試/UI規格,視覺校正,Logo依Penpot固定150×47與160×50，補Mobile/Desktop尺寸斷言,Codex,否,否,是,否,PR102；27項專項測試通過；Web重建通過；最新CI於Push後重跑，仍為REVIEW
 2026-08-31,14:48,REGISTRATION-LOGIN-11,Git,Task11功能與三份Log,提交紀錄,功能提交0829f5d；Log同步提交後一併推送Task分支,Codex,否,否,否,否,feature/phase4.5-password-reset → feature/phase4.5；Draft PR送審，不自動合併
 2026-08-31,14:40,REGISTRATION-LOGIN-11,Backend,PasswordReset controller/service/worker與session,新增與修改,通用202受理與可靠寄信；15分鐘單次Token只存hash；成功撤銷全部Session,Codex,是,是,否,是,採方案1；不回傳reset Token；失敗重試與無PII告警
@@ -39,42 +47,3 @@
 2026-08-03,16:57,REGISTRATION-LOGIN-08,Build,Flutter Web與Android,驗證,完成Web release與Android debug APK build,Codex,否,否,是,否,Android損壞增量cache清理後以非增量fallback成功
 2026-08-03,16:57,REGISTRATION-LOGIN-08,Documentation,README規格OpenAPI與Task,修改,同步三平台Session契約設定決策並將Task08轉REVIEW,Codex,是,否,是,否,Database無異動且Task07依PR96證據轉DONE
 2026-08-03,16:57,REGISTRATION-LOGIN-08,Documentation,log CHANGE_LOG與CHANGE_HISTORY,修改,新增Task08工作報告並清除一個月前Log,Codex,否,否,否,否,移除Jul1至Jul2共13區段與99筆CSV紀錄並正規化41筆舊9欄紀錄
-2026-08-01,20:31,REGISTRATION-LOGIN-07,Backend,backend/src/main/java/com/monsters/service/session與security/session,新增與修改,建立每次登入獨立Opaque Refresh Session Family及10秒相同結果輪替,Codex,是,是,否,是,Credential只保存SHA-256且後續值以獨立HMAC Secret推導
-2026-08-01,20:31,REGISTRATION-LOGIN-07,Security,JwtTokenService與JwtAuthenticationFilter,修改,核發10分鐘最小claims Access JWT並以sid即時檢查Session,Codex,是,是,否,否,JWT不含Email且reuse撤銷後舊Access立即失效
-2026-08-01,20:31,REGISTRATION-LOGIN-07,Database,backend/src/main/resources/db/migration/V5__add_refresh_session_families.sql,新增,建立user_sessions refresh_session_credentials及session_security_audits,Codex,否,是,否,是,空庫與V2升級至V5測試通過
-2026-08-01,20:31,REGISTRATION-LOGIN-07,API,SessionRefreshController與registration-login.yaml,新增與修改,新增POST api v1 auth session-refreshes及穩定401錯誤碼,Codex,是,否,否,否,無效過期撤銷為AUTH_SESSION_INVALID且reuse為AUTH_REFRESH_REUSE_DETECTED
-2026-08-01,20:31,REGISTRATION-LOGIN-07,Frontend,frontend/lib/repositories/auth_repository.dart,修改,將暫時Credential換發切換至v1 Session Refresh API,Codex,是,否,否,否,安全Credential Store留待Task08
-2026-08-01,20:31,REGISTRATION-LOGIN-07,Test,backend與frontend測試,新增與修改,TDD驗證rotation grace reuse containment期限Security Filter Migration OpenAPI及Repository,Codex,是,是,否,是,Backend單元316與MySQL31及Flutter185項 Analyze Web Build通過且PR96四項CI全綠
-2026-08-01,20:31,REGISTRATION-LOGIN-07,Dependency,backend/build.gradle與SmtpEmailDeliveryAdapter,驗證,確認Spring Mail starter及SimpleMailMessage與JavaMailSender imports可乾淨編譯,Codex,否,否,否,否,無需加入重複dependency且應由IDE重新載入backend Gradle
-2026-08-01,20:31,REGISTRATION-LOGIN-07,Documentation,README docs Task與Log,修改,同步Session Family契約環境設定Task07 REVIEW及一個月保存期限,Codex,是,是,否,是,Draft PR #96四項CI全綠且截止2026-07-01無過期紀錄
-2026-08-01,19:48,REGISTRATION-LOGIN-06-CI,Frontend,frontend/lib/pages/eligibility_page.dart,修改,改用Flutter 3.29.2支援的DropdownButtonFormField value,Codex,否,否,否,否,行為不變且新版Analyze使用範圍化棄用說明
-2026-08-01,19:48,REGISTRATION-LOGIN-06-CI,Test,frontend test與analyze,驗證,Eligibility targeted與Flutter完整回歸測試及Analyze,Codex,否,否,是,否,本機185項通過且Draft PR #95四個CI全綠
-2026-08-01,19:48,REGISTRATION-LOGIN-06-CI,Documentation,REGISTRATION_LOGIN_TASKS.md與Log,修改,記錄PR94 Flutter 3.29.2失敗根因與相容修正,Codex,否,否,否,否,Draft PR #95已建立且Task06維持REVIEW待合併
-2026-08-01,18:19,REGISTRATION-LOGIN-06,Backend,backend/src/main/java/com/monsters/service/eligibility與security,新增與修改,建立Eligibility Guardian單次連結與即時會員狀態限制,Codex,是,是,否,是,Token只存SHA-256且Outbox不含PII
-2026-08-01,18:19,REGISTRATION-LOGIN-06,Database,backend/src/main/resources/db/migration/V4__add_eligibility_and_guardian_consent.sql,新增,建立資格社群資格Guardian同意與Token資料結構,Codex,否,是,否,是,既有ACTIVE安全回填且社群維持INELIGIBLE
-2026-08-01,18:19,REGISTRATION-LOGIN-06,Email,application.yml與SmtpEmailDeliveryAdapter,修改,指定Resend SMTP並加入Guardian同意撤回信件,Codex,否,否,否,否,587 STARTTLS且API Key僅由Secret注入
-2026-08-01,18:19,REGISTRATION-LOGIN-06,Frontend,frontend/lib/pages與repositories routes,新增與修改,完成Eligibility Guardian同意撤回與無主畫面捲動導流,Codex,是,否,是,否,文件只在彈窗內容區捲動
-2026-08-01,18:19,REGISTRATION-LOGIN-06,Test,backend與frontend測試,新增與修改,驗證年齡暱稱Security Filter MySQL交易Guardian與三平台畫面,Codex,是,是,是,否,Backend311加29且Flutter185與雙平台build通過
-2026-08-01,18:19,REGISTRATION-LOGIN-06,Documentation,README docs與OpenAPI,修改,同步Eligibility Guardian Resend契約與Task狀態,Codex,是,是,是,是,Draft PR #94且Task06進入REVIEW
-2026-08-01,18:19,REGISTRATION-LOGIN-06,Documentation,log/CHANGE_LOG.md與log/CHANGE_HISTORY.csv,修改,新增工作報告並清除一個月前紀錄,Codex,否,否,否,否,刪除9個Markdown區段與65筆CSV且XLSX無資料
-2026-07-31,16:32,REGISTRATION-LOGIN-05-CI,Frontend,frontend/lib/pages/login_page.dart,修改,縮減平板viewport垂直留白以保留Linux CI下48px按鈕高度,Codex,否,否,是,否,主畫面維持無捲動且完整直接顯示
-2026-07-31,16:32,REGISTRATION-LOGIN-05-CI,Test,frontend/test/login_page_test.dart,驗證,登入頁20項responsive與靜態檢查通過,Codex,否,否,是,否,涵蓋CI失敗的900x700尺寸
-2026-07-31,16:32,REGISTRATION-LOGIN-05-CI,Documentation,log/CHANGE_LOG.md與log/CHANGE_HISTORY.csv,修改,記錄CI審查修正與保存期限結果,Codex,否,否,否,否,截止2026-06-30無過期Log且XLSX未修改
-2026-07-31,16:22,REGISTRATION-LOGIN-05,Backend,controller dto AuthService SecurityConfig,新增與修改,建立v1 Verified Email登入並保留legacy account migration endpoint,Codex,是,否,否,否,新舊endpoint共用密碼驗證與會員狀態continuation
-2026-07-31,16:22,REGISTRATION-LOGIN-05,API,docs/openapi/registration-login.yaml與API_SPEC,修改,正式v1只收Email且authenticated member不含account與內部userId,Codex,是,否,否,否,無效憑證與不可揭露狀態統一AUTH_INVALID_CREDENTIALS
-2026-07-31,16:22,REGISTRATION-LOGIN-05,Migration,AuthService與DATABASE_SPEC,修改,expand期間保留舊Email或account端點且新註冊account維持NULL,Codex,是,否,否,否,Task18觀測完成後才contract移除
-2026-07-31,16:22,REGISTRATION-LOGIN-05,Frontend,models auth provider repository login_page,修改,改走v1 Email-only並移除登入主畫面捲動與account資料模型,Codex,是,否,是,否,AUTH_INVALID_CREDENTIALS映射繁體中文
-2026-07-31,16:22,REGISTRATION-LOGIN-05,Design,Penpot APP與WEB登入畫板,修改,同步Email欄位範例並確認390x844與1440x900完整顯示,Codex,否,否,是,否,主畫面無捲動
-2026-07-31,16:22,REGISTRATION-LOGIN-05,Test,backend與frontend測試,新增與修改,TDD驗證精確Email狀態分流舊account共存無捲動與responsive,Codex,是,是,是,否,Backend301 MySQL28 Flutter184 Analyze Web與Android build通過
-2026-07-31,16:22,REGISTRATION-LOGIN-05,Documentation,README正式規格Task與Log,修改,同步API Database UI account expand與一個月Log保存期限,Codex,是,是,是,否,最早2026-06-30無過期Log且XLSX未修改
-2026-07-31,14:40,REGISTRATION-LOGIN-04,Backend,backend/src/main/java/com/monsters/security/password 與 auth,新增與修改,建立Unicode密碼政策Argon2id雜湊與成功登入BCrypt漸進遷移,Codex,是,否,否,否,Argon2id m19456 t2 p1且失敗登入不改hash
-2026-07-31,14:40,REGISTRATION-LOGIN-04,Security,backend/src/main/resources/security 與 backend/build.gradle,新增與修改,加入Bouncy Castle 1.84及SecLists 2026.1版本化本機SHA256 blocklist,Codex,否,否,否,否,保存來源授權checksum且不保存命中內容至Log
-2026-07-31,14:40,REGISTRATION-LOGIN-04,API,DTO GlobalExceptionHandler OpenAPI,修改,同步15至128 Unicode NFC不trim與穩定password field error key,Codex,是,否,否,否,Endpoint與成功response不變
-2026-07-31,14:40,REGISTRATION-LOGIN-04,Frontend,frontend/lib core network providers register_page,修改,同步Unicode長度錯誤並移除註冊主畫面捲動及新增政策彈窗,Codex,是,否,是,否,只有Terms與Privacy彈窗內容區顯示scrollbar
-2026-07-31,14:40,REGISTRATION-LOGIN-04,Test,backend/src/test backend/src/integrationTest frontend/test,新增與修改,TDD驗證邊界Emoji空白弱密碼Argon2idBCrypt遷移與無捲動版面,Codex,是,是,是,否,Backend294 MySQL27 Flutter181與Analyze通過
-2026-07-31,14:40,REGISTRATION-LOGIN-04,Documentation,docs正式規格Decision Task與OpenAPI,修改,同步密碼契約blocklist來源Argon參數與全域主畫面不捲動規則,Codex,是,是,是,否,Task03轉DONE且Task04轉REVIEW
-2026-07-31,14:40,REGISTRATION-LOGIN-04,Documentation,log/CHANGE_LOG.md與log/CHANGE_HISTORY.csv,修改,新增Task04工作報告與一個月保存期限檢查,Codex,否,否,否,否,最早紀錄2026-06-30無過期Log且XLSX未修改
-2026-07-31,14:40,REGISTRATION-LOGIN-04-REVIEW,Backend,PasswordHashService與PasswordHashServiceTest,修改,登入雜湊前拒絕超過128 Unicode code points並保留128 Emoji邊界,Codex,否,否,否,否,避免超大輸入進入高成本Argon2id或BCrypt比對
-2026-07-31,14:40,REGISTRATION-LOGIN-04-REVIEW,Test,AuthMemberHttpIntegrationTest與register_page_test.dart,修改,補齊HTTP與Flutter的14 15 128 129 Unicode邊界驗收,Codex,是,是,是,否,Backend與Flutter共用相同code point邊界
-2026-07-31,14:40,REGISTRATION-LOGIN-04-REVIEW,Frontend,register_page.dart與Widget tests,修改,移除Client raw runes政策判定並補齊responsive及無障礙條款操作,Codex,是,否,是,否,NFC長度blocklist由Backend唯一判定且Flutter映射穩定錯誤鍵
-2026-07-31,14:40,REGISTRATION-LOGIN-04-REVIEW,Documentation,API Database與blocklist NOTICE,修改,清除8至72與BCrypt only舊敘述並新增產物checksum,Codex,是,否,否,否,正式文件與實作一致

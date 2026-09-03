@@ -10,6 +10,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/auth/google_sign_in_web_button.dart';
 import '../models/eligibility_policy.dart';
+import 'member_restoration_page.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -57,6 +58,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         context.goNamed(
           AppRoute.eligibility,
           extra: EligibilityRouteData(nextResult!.continuationCredential!),
+        );
+      } else if (nextResult?.nextAction == 'REACTIVATE_ACCOUNT' &&
+          nextResult?.continuationCredential != null &&
+          previousResult != nextResult) {
+        context.goNamed(
+          AppRoute.memberRestoration,
+          extra: MemberRestorationRouteData(
+            nextResult!.continuationCredential!,
+          ),
         );
       }
     });

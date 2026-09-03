@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -64,4 +65,9 @@ public interface EntryRepository extends JpaRepository<Entry, Long> {
             @Param("sortDirection") String sortDirection,
             Pageable pageable
     );
+
+    @Modifying
+    @Query("UPDATE Entry entry SET entry.shared = false "
+            + "WHERE entry.userId = :userId AND entry.shared = true")
+    int unshareAllByUserId(@Param("userId") Long userId);
 }

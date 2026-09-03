@@ -37,6 +37,23 @@ dev
 
 可用 `SPRING_PROFILES_ACTIVE` 切換。
 
+## 會員 Email 變更寄信
+
+Task 12沿用既有SMTP寄送設定，新增以下環境變數。正式環境啟用Worker前，必須先設定可信HTTPS前端驗證頁與SMTP；不可將Token、Email或生日寫入Log。
+
+| 環境變數 | 預設值／用途 |
+|---|---|
+| `EMAIL_CHANGE_PUBLIC_URL` | 無；前端`/change-email`頁面完整URL，不含Token |
+| `EMAIL_CHANGE_WORKER_ENABLED` | `false`；準備好寄信設定後才啟用 |
+| `EMAIL_CHANGE_TOKEN_TTL_HOURS` | `24`；正式契約固定24小時 |
+| `EMAIL_CHANGE_MAX_DELIVERY_ATTEMPTS` | `5` |
+| `EMAIL_CHANGE_WORKER_DELAY_MS` | `5000` |
+| `EMAIL_CHANGE_VERIFICATION_SMTP_SUBJECT` | 新Email驗證信主旨 |
+| `EMAIL_CHANGED_OLD_SMTP_SUBJECT` | 舊Email通知主旨 |
+| `EMAIL_CHANGED_NEW_SMTP_SUBJECT` | 新Email完成通知主旨 |
+
+驗證完成前保留目前Email；完成後保留申請裝置Session、撤銷其他Session。V10新增workflow資料表，部署需先由Flyway執行，不能以手動改表取代。
+
 ## MySQL 連線設定
 
 後端透過環境變數讀取 MySQL 連線資訊：
