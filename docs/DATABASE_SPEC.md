@@ -122,7 +122,7 @@ Spring Boot 只能透過 JPA / Repository 存取資料庫；Flutter 不得直接
 
 ## 三、目前 `develop` 資料表設計（Phase 4.5 逐步 Flyway Migration）
 
-本章描述現有基線與已完成的 expand 欄位，供 Migration 與相容測試使用。Task 02 已導入 Flyway V1 baseline 與 V2 會員狀態結構；Task 03以V3導入Email-only註冊、文件同意、Email Token與限流桶；Task 06以V4加入Eligibility／Guardian Consent；Task 07以V5加入Opaque Refresh Session Family；Task 09以V6加入安全裝置摘要、以V7加入五分鐘用途限定reauth credential及撤銷安全事件。凡與第二章衝突者仍以第二章為目標規格，不得再新增對 `account`、公開 `avatar_url`、JWT Refresh Token、伺服器 PIN、`entries.is_shared`、`entry_likes` 或 `entry_comments` 的新依賴。
+本章描述現有基線與已完成的 expand 欄位，供 Migration 與相容測試使用。Task 02 已導入 Flyway V1 baseline 與 V2 會員狀態結構；Task 03以V3導入Email-only註冊、文件同意、Email Token與限流桶；Task 06以V4加入Eligibility／Guardian Consent；Task 07以V5加入Opaque Refresh Session Family；Task 09以V6加入安全裝置摘要、以V7加入五分鐘用途限定reauth credential及撤銷安全事件；Task 10以V8擴充登入方式連結用途；Task 11以V9正式化Password Reset；Task 12以V10加入Email變更及生日更正workflow。凡與第二章衝突者仍以第二章為目標規格，不得再新增對 `account`、公開 `avatar_url`、JWT Refresh Token、伺服器 PIN、`entries.is_shared`、`entry_likes` 或 `entry_comments` 的新依賴。
 
 ### 3.1 users
 
@@ -277,12 +277,49 @@ Index：
 |---|---|---|---|
 | session_id | BIGINT | FK NOT NULL | 綁定發起驗證的目前Session |
 | token_hash | VARCHAR(64) | UNIQUE NOT NULL | 32-byte opaque credential的SHA-256 hex；唯一保存形式 |
-| purpose | VARCHAR(40) | NOT NULL | `SESSION_MANAGEMENT`或`LOGIN_METHOD_LINK`用途白名單 |
+| purpose | VARCHAR(40) | NOT NULL | `SESSION_MANAGEMENT`、`LOGIN_METHOD_LINK`、`EMAIL_CHANGE`或`BIRTHDAY_CORRECTION`用途白名單 |
 | issued_at | DATETIME | NOT NULL | 核發時間 |
 | expires_at | DATETIME | NOT NULL | 核發後300秒 |
 | revoked_at | DATETIME | NULL | 預留提早失效時間 |
 
-規則：原始credential只在成功response傳輸一次，不寫入Database、Log、Audit或Outbox；使用時必須同時核對hash、用途、目前Session、owner、Session有效性與期限。Task 09裝置管理預設`SESSION_MANAGEMENT`；Task 10登入方式連結使用`LOGIN_METHOD_LINK`且成功Command會將該credential標記撤銷，不得跨用途重用。
+規則：原始credential只在成功response傳輸一次，不寫入Database、Log、Audit或Outbox；使用時必須同時核對hash、用途、目前Session、owner、Session有效性與期限。Task 09裝置管理預設`SESSION_MANAGEMENT`；Task 10登入方式連結使用`LOGIN_METHOD_LINK`；Task 12 Email與生日更正分別使用`EMAIL_CHANGE`與`BIRTHDAY_CORRECTION`。成功Command會將credential標記撤銷，不得跨用途重用。
+
+### 3.2.10 member_email_change_requests
+
+每次Email變更建立獨立workflow資料列；`users.email`在驗證完成前保持不變。
+
+| 欄位 | 型別 | 約束 | 說明 |
+|---|---|---|---|
+| `public_id` | VARCHAR(36) | UNIQUE NOT NULL | 對Client回傳的opaque request UUID |
+| `user_id` | BIGINT | FK NOT NULL | 申請會員 |
+| `initiating_session_id` | BIGINT | FK NOT NULL | 成功切換後唯一保留的申請Session |
+| `original_email` | VARCHAR(255) | NOT NULL | 切換後通知舊Email所需；不得進Log／Audit／Outbox payload |
+| `new_email` | VARCHAR(255) | NOT NULL | 待驗證Email；不得進Log／Audit／Outbox payload |
+| `requested_for_version` | BIGINT | NOT NULL | 申請綁定的member optimistic version |
+| `token_hash` | VARCHAR(64) | UNIQUE NULL | Worker寄送時建立的SHA-256 hash；不保存raw Token |
+| `expires_at` | DATETIME | NULL | Token核發後24小時 |
+| `status` | VARCHAR(30) | NOT NULL | `PENDING_DELIVERY`、`PENDING_VERIFICATION`、`COMPLETED`、`SUPERSEDED`、`EXPIRED` |
+| `verified_at` | DATETIME | NULL | 原子切換完成時間 |
+
+同一會員新申請會把未完成舊申請標記`SUPERSEDED`。驗證時以row lock鎖定request及member，核對狀態、期限與`requested_for_version`後才切換；切換、Session撤銷、Outbox及request完成狀態在同一交易提交。
+
+### 3.2.11 birthday_correction_requests
+
+Eligibility完成後生日不得直接由Profile覆寫；每次更正保存獨立申請歷程。
+
+| 欄位 | 型別 | 約束 | 說明 |
+|---|---|---|---|
+| `public_id` | VARCHAR(36) | UNIQUE NOT NULL | opaque request UUID |
+| `user_id` | BIGINT | FK NOT NULL | 申請會員 |
+| `current_birthday` | DATE | NOT NULL | 申請時正式生日；不得進Log／Audit／Outbox payload |
+| `requested_birthday` | DATE | NOT NULL | 更正值；不得進Log／Audit／Outbox payload |
+| `reason_code` | VARCHAR(40) | NOT NULL | `DATA_ENTRY_ERROR`、`LEGAL_RECORD_CORRECTION`或`OTHER` |
+| `requested_for_version` | BIGINT | NOT NULL | 申請時member optimistic version |
+| `from_age_band`、`to_age_band` | VARCHAR(20) | NOT NULL | `UNDERAGE`、`MINOR`、`ADULT`安全分類，不保存計算年齡 |
+| `status` | VARCHAR(30) | NOT NULL | `AUTO_APPROVED`、`PENDING_REVIEW`、`APPROVED`、`REJECTED`、`APPEALED` |
+| `restricted_at`、`decided_at` | DATETIME | NULL | 保守限制與決定時間 |
+
+同一13／18歲資格區間且通過日期規則時可在同一交易更新`users.birthday`並標記`AUTO_APPROVED`。跨界申請不得直接擴張資格；若申報值降低資格，立即更新Eligibility／Community Eligibility、撤銷Session並取消公開可見性。特權審核endpoint延後至Task 15／16具備Permission、MFA與Audit後開放。
 
 ### 3.2.3 member_continuation_credentials
 

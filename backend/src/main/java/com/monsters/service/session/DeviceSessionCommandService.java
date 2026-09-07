@@ -91,6 +91,18 @@ public class DeviceSessionCommandService {
         if (!passwordHashService.matches(password, passwordCredential.getPasswordHash())) {
             throw invalidReauthentication();
         }
+        return issueVerifiedReauthentication(userId, currentSessionId, purpose);
+    }
+
+    @Transactional
+    public SessionReauthenticationResponse issueVerifiedReauthentication(
+            Long userId,
+            String currentSessionId,
+            ReauthenticationPurpose purpose
+    ) {
+        if (purpose == null) {
+            throw invalidReauthentication();
+        }
         UserSession session = activeOwnedSession(userId, currentSessionId);
         LocalDateTime now = now();
         String credential = credentialGenerator.initialCredential();
@@ -206,6 +218,22 @@ public class DeviceSessionCommandService {
                 .findAllByUser_IdAndRevokedAtIsNullAndPublicIdNot(userId, currentSessionId);
         revokeAll(sessions, "LOGIN_METHOD_CHANGED");
         return !sessions.isEmpty();
+    }
+
+    @Transactional
+    public int revokeOthersAfterEmailChange(Long userId, String preservedSessionId) {
+        List<UserSession> sessions = sessionRepository
+                .findAllByUser_IdAndRevokedAtIsNullAndPublicIdNot(userId, preservedSessionId);
+        revokeAll(sessions, "EMAIL_CHANGED");
+        return sessions.size();
+    }
+
+    @Transactional
+    public int revokeAllForMember(Long userId, String reason) {
+        List<UserSession> sessions = sessionRepository
+                .findAllByUser_IdAndRevokedAtIsNull(userId);
+        revokeAll(sessions, reason);
+        return sessions.size();
     }
 
     @Transactional

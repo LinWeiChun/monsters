@@ -251,7 +251,7 @@ DONE證據：採方案1 Session-first明確連結；匿名Google登入只有已�
 
 **Blocked by:** 04 — 導入新密碼政策與 BCrypt 漸進遷移；07 — 建立 Opaque Refresh Session Family。
 
-**Status:** REVIEW
+**Status:** DONE
 
 - [x] Forgot Password對所有Email統一回`202`，API不得回reset Token。
 - [x] Reset Token有效15分鐘、單次使用且Server只保存hash。
@@ -262,7 +262,7 @@ DONE證據：採方案1 Session-first明確連結；匿名Google登入只有已�
 - [x] Email寄送透過可靠Outbox／Worker並具重試、failed狀態及告警。
 - [x] Flutter涵蓋已受理、連結無效、過期、成功及重新登入流程。
 
-REVIEW證據：採方案1資源式API，`POST /api/v1/auth/password-reset-requests`對已知與未知Email都回`202 PASSWORD_RESET_REQUEST_ACCEPTED`且不含Token；`POST /api/v1/auth/password-resets`以15分鐘單次Token完成重設。Backend只保存SHA-256 hash，新請求撤銷舊Token，Outbox／Worker於寄送時才產生明文並具重試、FAILED與無PII告警；成功套用Task 04密碼政策與Argon2id，並撤銷全部Session。Penpot Web／Mobile各8個狀態已建立，180個descendant containment通過，並以Chrome實際檢視；另依使用者要求整理35個主畫板，無重疊且466個直屬元件相對位置與尺寸不變。Flutter完成申請受理、無效／過期／已使用、成功、重新登入、鍵盤避讓及舊請求隔離；涵蓋390至1920寬度與矮視窗，不使用主畫面捲動。Backend單元324通過／4個既有OS條件跳過、MySQL 8.4整合42通過、Flutter完整236項通過、Analyze與Web release／Android debug build通過。RegistrationMigrationIntegrationTest的兩項版本斷言已由V8校正至V9。舊`/api/auth/forgot-password`與`/api/auth/reset-password`暫留相同安全契約的deprecated別名，Task 18驗收後移除；完整判定見`PASSWORD_RESET_LEGACY_CLEANUP.md`。Logo依Penpot校正為150×47／160×50，補充Mobile／Desktop尺寸斷言後27項專項測試通過。Task由`IN PROGRESS`轉`REVIEW`；[Draft PR #102](https://github.com/LinWeiChun/monsters/pull/102)已建立，CI以PR最新提交為準，待使用者Review及合併，不宣告DONE。
+DONE證據：採方案1資源式API，`POST /api/v1/auth/password-reset-requests`對已知與未知Email都回`202 PASSWORD_RESET_REQUEST_ACCEPTED`且不含Token；`POST /api/v1/auth/password-resets`以15分鐘單次Token完成重設。Backend只保存SHA-256 hash，新請求撤銷舊Token，Outbox／Worker於寄送時才產生明文並具重試、FAILED與無PII告警；成功套用Task 04密碼政策與Argon2id，並撤銷全部Session。Penpot Web／Mobile各8個狀態已建立，180個descendant containment通過，並以Chrome實際檢視；另依使用者要求整理35個主畫板，無重疊且466個直屬元件相對位置與尺寸不變。Flutter完成申請受理、無效／過期／已使用、成功、重新登入、鍵盤避讓及舊請求隔離；涵蓋390至1920寬度與矮視窗，不使用主畫面捲動。Backend單元324通過／4個既有OS條件跳過、MySQL 8.4整合42通過、Flutter完整236項通過、Analyze與Web release／Android debug build通過。RegistrationMigrationIntegrationTest的兩項版本斷言已由V8校正至V9。舊`/api/auth/forgot-password`與`/api/auth/reset-password`暫留相同安全契約的deprecated別名，Task 18驗收後移除；完整判定見`PASSWORD_RESET_LEGACY_CLEANUP.md`。Logo依Penpot校正為150×47／160×50，補充Mobile／Desktop尺寸斷言後27項專項測試通過。PR #102四項CI通過並已於2026-08-31合併至`feature/phase4.5`，Task由`REVIEW`轉`DONE`。
 
 ---
 
@@ -272,16 +272,18 @@ REVIEW證據：採方案1資源式API，`POST /api/v1/auth/password-reset-reques
 
 **Blocked by:** 06 — 完成 Eligibility、Guardian Consent與公開暱稱 Onboarding；07 — 建立 Opaque Refresh Session Family。
 
-**Status:** ready-for-agent
+**Status:** REVIEW
 
-- [ ] 一般Profile、公開暱稱、Email變更、生日更正、停用及恢復使用分離Command與欄位白名單。
-- [ ] 所有修改使用optimistic version，舊版本回`409 VERSION_CONFLICT`。
-- [ ] Email變更需五分鐘reauth，新Email驗證前保留舊Email。
-- [ ] Email切換原子完成、撤銷其他Session並通知新舊Email。
-- [ ] 生日更正跨13／18歲邊界時立即採保守資格限制，並進入必要審核／申訴。
-- [ ] 本人停用立即撤銷全部Session及公開可見性；恢復後不自動恢復分享。
-- [ ] 公開暱稱變更後既有社群內容顯示新暱稱。
-- [ ] Flutter呈現修改衝突、驗證中、受限、停用及恢復狀態。
+- [x] 一般Profile、公開暱稱、Email變更、生日更正、停用及恢復使用分離Command與欄位白名單。
+- [x] 所有修改使用optimistic version，舊版本回`409 VERSION_CONFLICT`。
+- [x] Email變更需五分鐘reauth，新Email驗證前保留舊Email。
+- [x] Email切換原子完成、撤銷其他Session並通知新舊Email。
+- [x] 生日更正跨13／18歲邊界時立即採保守資格限制，並進入必要審核／申訴。
+- [x] 本人停用立即撤銷全部Session及公開可見性；恢復後不自動恢復分享。
+- [x] 公開暱稱變更後既有社群內容顯示新暱稱。
+- [x] Flutter呈現修改衝突、驗證中、受限、停用及恢復狀態。
+
+REVIEW證據：採方案1完成v1資源式API、V10 workflow與新Flutter資料流；恢復Command只接受`confirmed`，optimistic guard由版本綁定Continuation Credential強制。Penpot Web／Mobile各8個狀態畫板已匯出檢視，520個visible descendants均在parent內。Backend單元／契約共343項（339項通過、4項既有OS條件跳過）；真實MySQL 8.4整合44項、Flutter完整262項均通過，Analyze、Web release及Android debug APK通過。RWD沿用共用導覽，Web使用Google官方按鈕並隔離重新驗證事件。依2026-09-03使用者核准，舊PUT只回409 CLIENT_UPGRADE_REQUIRED；舊Profile程式與server PIN契約保留至Task 18，刪除條件見`MEMBER_DATA_LEGACY_CLEANUP.md`。待PR CI、使用者Review與合併後才能轉`DONE`。
 
 ---
 
@@ -409,8 +411,7 @@ REVIEW證據：採方案1資源式API，`POST /api/v1/auth/password-reset-reques
 
 目前接續點：
 
-- 01–10 — 已完成；Task 03修正由PR #91整合，Task 10由PR #101於2026-08-21合併。
-- 11 — `REVIEW`；Backend、Flutter、Penpot及本機測試／建置已完成。Task分支`feature/phase4.5-password-reset`以`feature/phase4.5`為PR目標；CI、使用者Review及合併為獨立完成門檻。
-- 12 — 前置Task 06、07已完成；目前先收尾Task 11，再依使用者指示接續。
+- 01–11 — 已完成；Task 11 PR #102四項CI通過並於2026-08-31合併。
+- 12 — `REVIEW`；方案1資源式API、V10、Penpot Web／Mobile各8畫板、Flutter及完整本機驗證已完成；Task分支為`feature/phase4.5-member-data-modification`，等待PR CI、使用者Review與合併。
 
 後續只處理所有阻擋均已完成的Task，不得為了平行開發跳過狀態機、Migration或安全驗收前置條件。

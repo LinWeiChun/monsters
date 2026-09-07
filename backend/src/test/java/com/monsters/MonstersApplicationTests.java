@@ -16,6 +16,8 @@ import com.monsters.repository.audit.SessionSecurityAuditRepository;
 import com.monsters.repository.user.EmailVerificationTokenRepository;
 import com.monsters.repository.user.MemberDocumentAcceptanceRepository;
 import com.monsters.repository.user.MemberContinuationCredentialRepository;
+import com.monsters.repository.user.MemberEmailChangeRequestRepository;
+import com.monsters.repository.user.BirthdayCorrectionRequestRepository;
 import com.monsters.repository.user.PasswordResetTokenRepository;
 import com.monsters.repository.user.RevokedTokenRepository;
 import com.monsters.repository.user.UserCredentialRepository;
@@ -61,6 +63,12 @@ class MonstersApplicationTests {
 
     @MockBean
     private MemberContinuationCredentialRepository memberContinuationCredentialRepository;
+
+    @MockBean
+    private MemberEmailChangeRequestRepository memberEmailChangeRequestRepository;
+
+    @MockBean
+    private BirthdayCorrectionRequestRepository birthdayCorrectionRequestRepository;
 
     @MockBean
     private MemberStateAuditRepository memberStateAuditRepository;

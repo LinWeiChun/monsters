@@ -74,6 +74,7 @@ class AuthState {
       'VERIFY_EMAIL' => '請完成 Email 驗證後再繼續',
       'COMPLETE_ELIGIBILITY' => '請完成會員資格資料後再繼續',
       'REACTIVATE_ACCOUNT' => '請先恢復帳號後再繼續',
+      'REVIEW_BIRTHDAY_CORRECTION' => '生日更正尚在審查，帳號目前維持保守限制',
       'REVIEW_SUSPENSION' => '此帳號目前受到限制，請依指示處理',
       'REVIEW_DELETION' => '此帳號正在刪除流程中，請依指示處理',
       _ => '請完成必要步驟後再繼續',
@@ -141,9 +142,13 @@ class AuthController extends StateNotifier<AuthState> {
             }
             return;
           }
+          // Reauthentication events must never create a new login session or
+          // switch the identity of an already authenticated member.
+          if (state.loginResult?.isAuthenticated == true) return;
           unawaited(_loginWithGoogleIdToken(idToken));
         },
         onError: (_) {
+          if (state.loginResult?.isAuthenticated == true) return;
           state = const AuthState(errorMessage: 'Google 登入失敗，請稍後再試');
         },
       );

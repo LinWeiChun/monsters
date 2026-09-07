@@ -42,6 +42,11 @@ Phase 4.5 已核准決策的可交付規格與測試接縫整理於 [`PHASE4_5_F
 | Google Linking | 採方案1 Session-first明確連結：相同Email不自動合併或核發Session；會員先以Email／密碼建立目前Session，再取得綁定Session、`LOGIN_METHOD_LINK`用途及300秒期限的reauth credential，以新Google ID Token及`confirmed: true`連結。成功保留目前Session、撤銷其他Session並寫無PII的`LOGIN_METHOD_LINKED` Audit／Outbox；衝突回通用409，取消不建立關聯 |
 | 忘記密碼 | 採方案1資源式API：`POST /api/v1/auth/password-reset-requests`統一回`202`且不回Token，`POST /api/v1/auth/password-resets`消耗15分鐘單次hash Token；Outbox／Worker寄送與重試，成功後套用Argon2id並撤銷全部工作階段。舊`/api/auth`別名只保留相同安全契約至Task 18 |
 | Email 變更 | reauth、新 Email 驗證、新舊 Email 通知、撤銷其他工作階段 |
+| 會員資料修改 | Task 12採方案1資源式API：`GET /api/v1/members/me`為read model；公開暱稱、Email變更申請／驗證、生日更正申請、本人停用與恢復各自使用獨立資源及DTO，不提供可混寫敏感欄位的通用Profile Update。一般Profile在目前v1沒有可變欄位，選定貘怪頭貼由獨立Monster資源處理 |
+| Email 變更Token | 新Email驗證連結固定24小時、單次使用且Server只存SHA-256 hash；申請以五分鐘`EMAIL_CHANGE` reauth及member version綁定，切換時保留申請Session、撤銷其他Session，並以Outbox通知新舊Email |
+| Legacy Profile寫入 | 2026-09-03使用者核准方案1：保留`PUT /api/users/me`路徑但拒絕寫入，回`409 CLIENT_UPGRADE_REQUIRED`，防止舊版繞過生日資格、reauth、暱稱確認及optimistic version；Task 18才刪除路徑 |
+| 生日更正 | 完成Eligibility後使用獨立更正申請與`BIRTHDAY_CORRECTION` reauth；同一13／18歲資格區間可經規則檢查自動核准，跨界只建立待審申請並立即採較保守資格，不在特權角色完成前建立無保護Admin審核API |
+| 本人停用與恢復 | 停用使用明確確認及optimistic version，立即撤銷全部Session並永久取消當時分享；完整登入後只取得`REACTIVATE_ACCOUNT` Continuation Credential，再由專用恢復資源消耗，恢復不復活分享 |
 | Password Policy | 15–128 Unicode、弱密碼 blocklist、無固定 composition、無定期強制更換；參考 [NIST SP 800-63B](https://pages.nist.gov/800-63-4/sp800-63b.html) |
 | Password Hash | 新密碼使用 Argon2id PHC hash（m=19456 KiB、t=2、p=1，Bouncy Castle 1.84）；既有 BCrypt 只在成功登入後於同一交易漸進 rehash；參考 [OWASP Password Storage](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html) |
 | Access Token | 10 分鐘 JWT，只放記憶體 |

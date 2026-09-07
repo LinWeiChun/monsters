@@ -6,10 +6,13 @@ import '../pages/annoyance_chat_page.dart';
 import '../pages/diary_chat_page.dart';
 import '../pages/email_verification_page.dart';
 import '../pages/email_verification_pending_page.dart';
+import '../pages/email_change_page.dart';
 import '../pages/home_page.dart';
 import '../pages/login_page.dart';
 import '../pages/password_lock_page.dart';
-import '../pages/profile_page.dart';
+import '../pages/member_data_page.dart';
+import '../pages/member_deactivated_page.dart';
+import '../pages/member_restoration_page.dart';
 import '../pages/register_page.dart';
 import '../pages/splash_page.dart';
 import '../pages/eligibility_page.dart';
@@ -126,7 +129,39 @@ GoRouter createAppRouter({String initialLocation = AppPath.splash}) {
       GoRoute(
         path: AppPath.profile,
         name: AppRoute.profile,
-        pageBuilder: (context, state) => _appPage(state, const ProfilePage()),
+        pageBuilder:
+            (context, state) => _appPage(state, const MemberDataPage()),
+      ),
+      GoRoute(
+        path: AppPath.emailChange,
+        name: AppRoute.emailChange,
+        pageBuilder:
+            (context, state) => _appPage(
+              state,
+              EmailChangePage(token: state.uri.queryParameters['token'] ?? ''),
+            ),
+      ),
+      GoRoute(
+        path: AppPath.memberRestoration,
+        name: AppRoute.memberRestoration,
+        pageBuilder: (context, state) {
+          final data = state.extra;
+          return _appPage(
+            state,
+            MemberRestorationPage(
+              continuationCredential:
+                  data is MemberRestorationRouteData
+                      ? data.continuationCredential
+                      : '',
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: AppPath.memberDeactivated,
+        name: AppRoute.memberDeactivated,
+        pageBuilder:
+            (context, state) => _appPage(state, const MemberDeactivatedPage()),
       ),
       GoRoute(
         path: AppPath.sessions,

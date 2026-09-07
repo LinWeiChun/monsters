@@ -10,8 +10,6 @@ import 'package:monsters/models/user_profile.dart';
 import 'package:monsters/pages/profile_page.dart';
 import 'package:monsters/providers/user_profile_provider.dart';
 import 'package:monsters/repositories/user_repository.dart';
-import 'package:monsters/routes/app_router.dart';
-import 'package:monsters/routes/app_routes.dart';
 import 'package:monsters/theme/app_colors.dart';
 
 void main() {
@@ -172,67 +170,12 @@ void main() {
     expect(find.text('尚未登入或 Token 無效'), findsOneWidget);
     expect(find.text('重試'), findsOneWidget);
   });
-
-  testWidgets('home profile action navigates to profile route', (tester) async {
-    await _setSurface(tester, const Size(390, 844));
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          userRepositoryProvider.overrideWithValue(_FakeUserRepository()),
-        ],
-        child: MaterialApp.router(
-          routerConfig: createAppRouter(initialLocation: AppPath.home),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byKey(const Key('mobileNavProfile')));
-    await tester.pumpAndSettle();
-
-    expect(find.byKey(const Key('profileUserNameField')), findsOneWidget);
-  });
-
-  testWidgets('forward navigation is immediate and back exits to the right', (
-    tester,
-  ) async {
-    await _setSurface(tester, const Size(390, 844));
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          userRepositoryProvider.overrideWithValue(_FakeUserRepository()),
-        ],
-        child: MaterialApp.router(
-          routerConfig: createAppRouter(initialLocation: AppPath.home),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byKey(const Key('mobileNavProfile')));
-    await tester.pump();
-    expect(find.byType(ProfilePage), findsOneWidget);
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byKey(const Key('profileBackButton')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(
-      tester.getTopLeft(find.byKey(const Key('profileMobileViewport'))).dx,
-      greaterThan(0),
-    );
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('mobileCompanionHero')), findsOneWidget);
-  });
 }
 
 Widget _profileApp(UserRepository userRepository) {
   return ProviderScope(
     overrides: [userRepositoryProvider.overrideWithValue(userRepository)],
-    child: MaterialApp.router(
-      routerConfig: createAppRouter(initialLocation: AppPath.profile),
-    ),
+    child: const MaterialApp(home: ProfilePage()),
   );
 }
 

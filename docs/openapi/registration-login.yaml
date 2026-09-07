@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Monsters Registration and Login Contract
-  version: 0.8.0
+  version: 0.9.0
 paths:
   /api/v1/auth/registration-policy:
     get:
@@ -347,6 +347,27 @@ paths:
               schema: {$ref: "#/components/schemas/SessionReauthenticationEnvelope"}
         "401": {description: Password verification failed}
         "403": {description: Web Cookie transport Origin or CSRF proof was rejected}
+  /api/v1/auth/reauthentications/google:
+    post:
+      summary: Reauthenticate a linked Google member for a sensitive member-data purpose
+      operationId: reauthenticateMemberWithGoogle
+      security: [{bearerAuth: []}]
+      parameters:
+        - {$ref: "#/components/parameters/SessionTransportHeader"}
+        - {$ref: "#/components/parameters/CsrfProtectionHeader"}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/GoogleReauthenticationRequest"}
+      responses:
+        "200":
+          description: Five-minute purpose-limited credential issued once
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/SessionReauthenticationEnvelope"}
+        "401": {description: Google identity is invalid or not linked to this member}
+        "403": {description: Web Cookie transport Origin or CSRF proof was rejected}
   /api/v1/auth/google-account-links:
     post:
       summary: Explicitly link Google after purpose-bound existing-method reauthentication
@@ -515,6 +536,143 @@ paths:
       responses:
         "200": {description: Consent withdrawn and existing member access blocked}
         "400": {description: Link invalid, used, revoked, or expired}
+  /api/v1/members/me:
+    get:
+      summary: Read the authenticated member profile and pending member-data workflows
+      operationId: getMemberProfile
+      security: [{bearerAuth: []}]
+      responses:
+        "200":
+          description: Current owner-scoped member read model
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/MemberProfileEnvelope"}
+        "401": {description: Access session invalid or revoked}
+  /api/v1/members/me/public-nickname:
+    put:
+      summary: Replace only the public nickname using optimistic concurrency
+      operationId: updatePublicNickname
+      security: [{bearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/PublicNicknameUpdateRequest"}
+      responses:
+        "200":
+          description: Public nickname updated for private and existing community views
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/MemberProfileEnvelope"}
+        "400": {description: Nickname validation or explicit disclosure confirmation failed}
+        "409": {description: VERSION_CONFLICT or MEMBER_STATE_CONFLICT}
+  /api/v1/members/me/email-change-requests:
+    post:
+      summary: Start a 24-hour new-email verification workflow
+      operationId: requestMemberEmailChange
+      security: [{bearerAuth: []}]
+      parameters:
+        - {$ref: "#/components/parameters/ReauthenticationCredentialHeader"}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/EmailChangeRequest"}
+      responses:
+        "202":
+          description: Verification delivery accepted; current Email remains active
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/EmailChangePendingEnvelope"}
+        "400": {description: Request validation failed}
+        "401": {description: EMAIL_CHANGE reauthentication invalid or expired}
+        "409": {description: VERSION_CONFLICT, MEMBER_STATE_CONFLICT, or non-disclosable Email conflict}
+  /api/v1/auth/email-changes:
+    post:
+      summary: Consume a 24-hour single-use new-email verification token
+      operationId: completeMemberEmailChange
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/EmailChangeCompletionRequest"}
+      responses:
+        "200":
+          description: Email atomically switched and every other session revoked
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/EmailChangeCompletedEnvelope"}
+        "400": {description: Token invalid, used, superseded, or expired}
+        "409": {description: VERSION_CONFLICT or EMAIL_CHANGE_CONFLICT}
+  /api/v1/members/me/birthday-correction-requests:
+    post:
+      summary: Submit a reasoned birthday correction without using generic profile update
+      operationId: requestBirthdayCorrection
+      security: [{bearerAuth: []}]
+      parameters:
+        - {$ref: "#/components/parameters/ReauthenticationCredentialHeader"}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/BirthdayCorrectionRequest"}
+      responses:
+        "200":
+          description: Same-band correction passed risk rules and was automatically approved
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/BirthdayCorrectionEnvelope"}
+        "202":
+          description: Boundary-crossing correction awaits protected review; conservative restriction may already apply
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/BirthdayCorrectionEnvelope"}
+        "400": {description: Date or reason validation failed}
+        "401": {description: BIRTHDAY_CORRECTION reauthentication invalid or expired}
+        "409": {description: VERSION_CONFLICT, MEMBER_STATE_CONFLICT, or another correction is pending}
+  /api/v1/members/me/deactivations:
+    post:
+      summary: Self-deactivate, revoke every session, and permanently unshare existing public content
+      operationId: deactivateMember
+      security: [{bearerAuth: []}]
+      parameters:
+        - {$ref: "#/components/parameters/SessionTransportHeader"}
+        - {$ref: "#/components/parameters/CsrfProtectionHeader"}
+      requestBody:
+        required: true
+        content:
+          application/json:
+              schema: {$ref: "#/components/schemas/MemberRestorationRequest"}
+      responses:
+        "200":
+          description: Member deactivated; all sessions revoked and Web refresh cookie cleared
+          headers:
+            Set-Cookie:
+              schema: {type: string}
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/MemberStateEnvelope"}
+        "400": {description: Explicit confirmation missing}
+        "409": {description: VERSION_CONFLICT or MEMBER_STATE_CONFLICT}
+  /api/v1/auth/member-restorations:
+    post:
+      summary: Restore a self-deactivated member after full credential login
+      operationId: restoreMember
+      security: [{continuationCredential: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/MemberStateConfirmationRequest"}
+      responses:
+        "200":
+          description: Member restored without restoring any previous shares or issuing a normal session
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/MemberStateEnvelope"}
+        "400": {description: Explicit confirmation missing}
+        "401": {description: REACTIVATE_ACCOUNT continuation invalid or expired}
+        "409": {description: VERSION_CONFLICT or MEMBER_STATE_CONFLICT}
   /api/auth/login:
     post:
       deprecated: true
@@ -579,7 +737,7 @@ components:
       name: X-Reauthentication-Credential
       in: header
       required: true
-      description: Five-minute opaque proof bound to the current session and SESSION_MANAGEMENT purpose.
+      description: Five-minute opaque proof bound to the current session and the exact command purpose.
       schema:
         type: string
         minLength: 1
@@ -967,7 +1125,7 @@ components:
         password: {type: string, format: password, writeOnly: true, maxLength: 1024}
         purpose:
           type: string
-          enum: [SESSION_MANAGEMENT, LOGIN_METHOD_LINK]
+          enum: [SESSION_MANAGEMENT, LOGIN_METHOD_LINK, EMAIL_CHANGE, BIRTHDAY_CORRECTION]
           default: SESSION_MANAGEMENT
     SessionReauthenticationData:
       type: object
@@ -975,7 +1133,7 @@ components:
       required: [credential, purpose, expiresIn]
       properties:
         credential: {type: string, readOnly: true}
-        purpose: {type: string, enum: [SESSION_MANAGEMENT, LOGIN_METHOD_LINK]}
+        purpose: {type: string, enum: [SESSION_MANAGEMENT, LOGIN_METHOD_LINK, EMAIL_CHANGE, BIRTHDAY_CORRECTION]}
         expiresIn: {type: integer, const: 300}
     SessionReauthenticationEnvelope:
       allOf:
@@ -984,6 +1142,155 @@ components:
           properties:
             code: {const: SESSION_REAUTHENTICATED}
             data: {$ref: "#/components/schemas/SessionReauthenticationData"}
+    GoogleReauthenticationRequest:
+      type: object
+      additionalProperties: false
+      required: [idToken, purpose]
+      properties:
+        idToken: {type: string, minLength: 1, maxLength: 8192, writeOnly: true}
+        purpose: {type: string, enum: [EMAIL_CHANGE, BIRTHDAY_CORRECTION]}
+    PendingMemberWorkflow:
+      type: object
+      additionalProperties: false
+      required: [requestId, status]
+      properties:
+        requestId: {type: string, format: uuid}
+        status: {type: string}
+        target:
+          type: string
+          description: Owner-only pending target; never written to logs or outbox payloads.
+    MemberProfile:
+      type: object
+      additionalProperties: false
+      required: [publicId, email, publicNickname, birthday, serviceRegion, eligibilityStatus, communityEligibilityStatus, memberState, version]
+      properties:
+        publicId: {type: string, format: uuid}
+        email: {type: string, format: email}
+        publicNickname: {type: string, minLength: 2, maxLength: 120}
+        birthday: {type: string, format: date}
+        serviceRegion: {type: string, minLength: 2, maxLength: 2}
+        eligibilityStatus: {type: string}
+        communityEligibilityStatus: {type: string}
+        memberState: {type: string}
+        version: {type: integer, format: int64, minimum: 0}
+        pendingEmailChange:
+          oneOf:
+            - {$ref: "#/components/schemas/PendingMemberWorkflow"}
+            - {type: "null"}
+        pendingBirthdayCorrection:
+          oneOf:
+            - {$ref: "#/components/schemas/PendingMemberWorkflow"}
+            - {type: "null"}
+    MemberProfileEnvelope:
+      allOf:
+        - {$ref: "#/components/schemas/ApiEnvelope"}
+        - type: object
+          properties:
+            data: {$ref: "#/components/schemas/MemberProfile"}
+    PublicNicknameUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [publicNickname, confirmExistingCommunityUpdate, expectedVersion]
+      properties:
+        publicNickname: {type: string, minLength: 2, maxLength: 120}
+        confirmExistingCommunityUpdate: {type: boolean, const: true}
+        expectedVersion: {type: integer, format: int64, minimum: 0}
+    EmailChangeRequest:
+      type: object
+      additionalProperties: false
+      required: [newEmail, expectedVersion]
+      properties:
+        newEmail: {type: string, format: email, maxLength: 255}
+        expectedVersion: {type: integer, format: int64, minimum: 0}
+    EmailChangeCompletionRequest:
+      type: object
+      additionalProperties: false
+      required: [token]
+      properties:
+        token: {type: string, minLength: 1, maxLength: 512, writeOnly: true}
+    EmailChangePendingData:
+      type: object
+      additionalProperties: false
+      required: [requestId, status]
+      properties:
+        requestId: {type: string, format: uuid}
+        status: {type: string, const: PENDING_DELIVERY}
+    EmailChangePendingEnvelope:
+      allOf:
+        - {$ref: "#/components/schemas/ApiEnvelope"}
+        - type: object
+          properties:
+            code: {const: EMAIL_CHANGE_VERIFICATION_PENDING}
+            data: {$ref: "#/components/schemas/EmailChangePendingData"}
+    EmailChangeCompletedData:
+      type: object
+      additionalProperties: false
+      required: [status, version]
+      properties:
+        status: {type: string, const: COMPLETED}
+        version: {type: integer, format: int64, minimum: 1}
+    EmailChangeCompletedEnvelope:
+      allOf:
+        - {$ref: "#/components/schemas/ApiEnvelope"}
+        - type: object
+          properties:
+            code: {const: EMAIL_CHANGE_COMPLETED}
+            data: {$ref: "#/components/schemas/EmailChangeCompletedData"}
+    BirthdayCorrectionReason:
+      type: string
+      enum: [DATA_ENTRY_ERROR, LEGAL_RECORD_CORRECTION, OTHER]
+    BirthdayCorrectionRequest:
+      type: object
+      additionalProperties: false
+      required: [birthday, reason, expectedVersion]
+      properties:
+        birthday: {type: string, format: date}
+        reason: {$ref: "#/components/schemas/BirthdayCorrectionReason"}
+        expectedVersion: {type: integer, format: int64, minimum: 0}
+    BirthdayCorrectionData:
+      type: object
+      additionalProperties: false
+      required: [requestId, status, restricted, memberState, version]
+      properties:
+        requestId: {type: string, format: uuid}
+        status: {type: string, enum: [AUTO_APPROVED, PENDING_REVIEW]}
+        restricted: {type: boolean}
+        memberState: {type: string}
+        version: {type: integer, format: int64, minimum: 0}
+    BirthdayCorrectionEnvelope:
+      allOf:
+        - {$ref: "#/components/schemas/ApiEnvelope"}
+        - type: object
+          properties:
+            data: {$ref: "#/components/schemas/BirthdayCorrectionData"}
+    MemberStateConfirmationRequest:
+      type: object
+      additionalProperties: false
+      required: [confirmed, expectedVersion]
+      properties:
+        confirmed: {type: boolean, const: true}
+        expectedVersion: {type: integer, format: int64, minimum: 0}
+    MemberRestorationRequest:
+      type: object
+      additionalProperties: false
+      required: [confirmed]
+      properties:
+        confirmed: {type: boolean, const: true}
+    MemberStateData:
+      type: object
+      additionalProperties: false
+      required: [memberState, version]
+      properties:
+        memberState: {type: string, enum: [ACTIVE, USER_DEACTIVATED]}
+        version: {type: integer, format: int64, minimum: 0}
+        nextAction:
+          type: [string, "null"]
+    MemberStateEnvelope:
+      allOf:
+        - {$ref: "#/components/schemas/ApiEnvelope"}
+        - type: object
+          properties:
+            data: {$ref: "#/components/schemas/MemberStateData"}
     AuthSessionErrorCode:
       type: string
       enum:
@@ -1019,6 +1326,7 @@ components:
       enum:
         - VERIFY_EMAIL
         - COMPLETE_ELIGIBILITY
+        - REVIEW_BIRTHDAY_CORRECTION
         - REACTIVATE_ACCOUNT
         - REVIEW_SUSPENSION
         - REVIEW_DELETION

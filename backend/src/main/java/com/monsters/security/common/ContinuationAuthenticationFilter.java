@@ -25,18 +25,29 @@ public class ContinuationAuthenticationFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith(PREFIX)
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
+            boolean restoration = "/api/v1/auth/member-restorations".equals(request.getRequestURI());
             try {
                 ContinuationCredentialService credentials = credentialsProvider.getIfAvailable();
                 if (credentials == null) { chain.doFilter(request, response); return; }
-                var user = credentials.authenticateEligibility(header.substring(PREFIX.length()).trim());
+                String rawCredential = header.substring(PREFIX.length()).trim();
+                var user = restoration
+                        ? credentials.authenticateReactivation(rawCredential)
+                        : credentials.authenticateEligibility(rawCredential);
                 var auth = new UsernamePasswordAuthenticationToken(
                         new ContinuationAuthenticatedMember(user.getId()), null,
-                        List.of(new SimpleGrantedAuthority("CONTINUATION_COMPLETE_ELIGIBILITY")));
-                auth.setDetails(header.substring(PREFIX.length()).trim());
+                        List.of(new SimpleGrantedAuthority(restoration
+                                ? "CONTINUATION_REACTIVATE_ACCOUNT"
+                                : "CONTINUATION_COMPLETE_ELIGIBILITY")));
+                auth.setDetails(rawCredential);
                 SecurityContextHolder.getContext().setAuthentication(auth);
             } catch (RuntimeException ignored) {
                 SecurityContextHolder.clearContext();
-                request.setAttribute(ERROR_CODE_ATTRIBUTE, "ELIGIBILITY_CONTINUATION_INVALID");
+                request.setAttribute(
+                        ERROR_CODE_ATTRIBUTE,
+                        restoration
+                                ? "MEMBER_RESTORATION_CONTINUATION_INVALID"
+                                : "ELIGIBILITY_CONTINUATION_INVALID"
+                );
             }
         }
         chain.doFilter(request, response);

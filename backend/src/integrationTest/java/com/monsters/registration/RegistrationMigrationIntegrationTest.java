@@ -24,12 +24,12 @@ class RegistrationMigrationIntegrationTest {
             .withPassword("synthetic-password");
 
     @Test
-    void emptySchemaShouldMigrateDirectlyToPasswordResetVersion() throws Exception {
+    void emptySchemaShouldMigrateDirectlyToMemberDataModificationVersion() throws Exception {
         Flyway flyway = flyway(null);
         flyway.clean();
 
         assertThat(flyway.migrate().success).isTrue();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("9");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("10");
         assertRegistrationTablesAndNullableOnboardingColumns();
     }
 
@@ -68,7 +68,7 @@ class RegistrationMigrationIntegrationTest {
 
         Flyway latest = flyway(null);
         assertThat(latest.migrate().success).isTrue();
-        assertThat(latest.info().current().getVersion().getVersion()).isEqualTo("9");
+        assertThat(latest.info().current().getVersion().getVersion()).isEqualTo("10");
         assertRegistrationTablesAndNullableOnboardingColumns();
         try (Connection connection = connection();
                 Statement statement = connection.createStatement();

@@ -1,6 +1,7 @@
 package com.monsters.controller.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import com.monsters.dto.common.ApiResponse;
@@ -11,6 +12,8 @@ import com.monsters.dto.user.PasswordLockVerificationResponse;
 import com.monsters.dto.user.UpdateUserProfileRequest;
 import com.monsters.dto.user.UserProfileResponse;
 import com.monsters.service.user.UserService;
+import com.monsters.exception.common.BusinessException;
+import org.springframework.http.HttpStatus;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,32 +53,21 @@ class UserControllerTest {
     }
 
     @Test
-    void updateMeShouldReturnUpdatedProfile() {
+    void updateMeShouldPropagateClientUpgradeRequirement() {
         UserController controller = new UserController(userService);
         UpdateUserProfileRequest request = new UpdateUserProfileRequest(
                 "Lin",
                 LocalDate.of(2001, 3, 4)
         );
-        UserProfileResponse profile = new UserProfileResponse(
-                1L,
-                "old-account",
-                "user@example.com",
-                "Lin",
-                LocalDate.of(2001, 3, 4),
-                "https://example.com/avatar.png"
-        );
-        when(userService.updateProfile(1L, request)).thenReturn(profile);
+        when(userService.updateProfile(1L, request)).thenThrow(new BusinessException(
+                HttpStatus.CONFLICT, "CLIENT_UPGRADE_REQUIRED", "請更新版本"
+        ));
 
-        ResponseEntity<ApiResponse<UserProfileResponse>> response = controller.updateMe(
+        assertThatThrownBy(() -> controller.updateMe(
                 new AuthenticatedUser(1L, "user@example.com"),
                 request
-        );
-
-        assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().success()).isTrue();
-        assertThat(response.getBody().message()).isEqualTo("Profile update success");
-        assertThat(response.getBody().data()).isEqualTo(profile);
+        )).isInstanceOfSatisfying(BusinessException.class, exception ->
+                assertThat(exception.getCode()).isEqualTo("CLIENT_UPGRADE_REQUIRED"));
     }
 
     @Test

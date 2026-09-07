@@ -30,6 +30,7 @@ import com.monsters.entity.user.User;
 import com.monsters.entity.user.UserCredential;
 import com.monsters.entity.user.UserOAuthAccount;
 import com.monsters.repository.user.MemberContinuationCredentialRepository;
+import com.monsters.repository.user.BirthdayCorrectionRequestRepository;
 import com.monsters.repository.user.UserCredentialRepository;
 import com.monsters.repository.user.UserOAuthAccountRepository;
 import com.monsters.repository.user.UserRepository;
@@ -78,6 +79,9 @@ class AuthServiceTest {
     private MemberContinuationCredentialRepository memberContinuationCredentialRepository;
 
     @Mock
+    private BirthdayCorrectionRequestRepository birthdayCorrectionRequestRepository;
+
+    @Mock
     private SessionFamilyService sessionFamilyService;
 
     private AuthService authService;
@@ -96,6 +100,8 @@ class AuthServiceTest {
                 tokenRevocationService,
                 new ContinuationCredentialService(
                         memberContinuationCredentialRepository,
+                        birthdayCorrectionRequestRepository,
+                        userRepository,
                         Clock.systemDefaultZone()
                 ),
                 sessionFamilyService,

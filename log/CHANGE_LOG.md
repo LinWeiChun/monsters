@@ -8,6 +8,58 @@ AI 每次完成任務後，必須新增一筆紀錄，並同步更新 `CHANGE_HI
 
 ---
 
+## 2026-09-03 09:15
+
+Task
+Registration Login 12 會員資料分離修改、停用與恢復（REVIEW）
+
+Agent
+Codex
+
+### Completed
+
+- 採方案1完成owner限定會員read model，公開暱稱、Email變更、生日更正、本人停用與恢復各自使用獨立Command，新Flutter不再呼叫deprecated `PUT /api/users/me`；依2026-09-03使用者核准，舊PUT保留路徑但回409 CLIENT_UPGRADE_REQUIRED，不能寫入。
+- Email與生日使用5分鐘、綁定Session與用途的密碼／Google reauth credential；Email驗證前保留舊Email，完成後原子切換、撤銷其他Session並通知新舊Email。
+- 生日跨13／18歲邊界只進入待審；若降低資格立即套用保守限制、取消公開及登出全部裝置。本人恢復只使用版本綁定Continuation Credential，成功後仍需重新登入且不恢復分享。
+- Penpot Web／Mobile各完成8個狀態畫板與匯出檢視，520個visible descendants均在parent內；Flutter依畫板完成Profile、Email連結、受限、已停用與恢復狀態。
+
+### Modified / Added / Deleted
+
+- Backend新增Member Data Controller／DTO／Entity／Repository／Service／Token／Outbox Worker，修改Session、Security、User、SMTP與測試。
+- Database新增Flyway V10，不改寫舊Migration。
+- Flutter新增Member Data models／repository／provider、4個畫面與測試，修改Login分流與Router；舊Profile檔案保留但已不由正式route使用。
+- 新增舊寫法清理清單並同步API／Database／UI／Decision／Task／OpenAPI及Log。未刪除產品檔案；Flutter migrator自動加入的Android設定已排除。
+
+### system_data Reference
+
+- 舊Flutter以同一Member model同時承載account、password、birthday、mail、nickname與photo，並以account path直接modify個人資料；舊Backend也缺少欄位白名單、reauth、optimistic version與資格workflow。
+- 只參考「查看與修改個人資料」的流程意圖；未沿用account owner、敏感欄位混寫、前端儲存生日或直接HTTP寫法，且`system_data/`全程唯讀。
+
+### API / Database
+
+- 涵蓋9組v1資源端點：Profile read、公開暱稱、密碼／Google reauth、Email申請／完成、生日更正、停用與恢復。恢復request只含`confirmed: true`，不依賴無法在停用畫面讀取的Client version。
+- V10建立`member_email_change_requests`、`birthday_correction_requests`並擴充reauth用途約束；Token只存SHA-256 hash，Outbox payload不含Email、生日或Token。
+
+### Verification
+
+- Backend單元／契約共343項，339項通過、4項既有ffprobe OS條件在Windows跳過，0失敗。
+- 真實MySQL 8.4整合44項全部通過，包含Security Filter、owner、Session撤銷、Token、版本綁定、空庫與上版升級至V10。
+- Flutter完整262項測試通過，Analyze無問題；Web release與Android debug APK建置成功。RWD專項覆蓋390／599／600／1199／1200／1440px；Mobile無主畫面捲動，Tablet／Desktop為flow layout且無overflow。
+- 補齊共用導覽、生日日期選擇器、Google Web官方按鈕及事件隔離、取消後忽略回應與Email連結切換隔離測試。
+- 本機Flutter版本較CI 3.29.2新；新Dropdown已依現有相容模式使用`value`並附限定ignore，尚待PR上CI確認。
+
+### Git
+
+- 功能提交：`528c262`；本次Log同步提交後推送Task分支並建立Draft PR，不自動合併。
+
+### Log Retention / Pending
+
+- 依2026-09-03一個月保存政策，保留2026-08-03起紀錄；已移除Markdown 6段、CSV 39筆與XLSX 8筆過期紀錄，可由Git歷史取回。
+- CSV／XLSX各保留40筆歷史紀錄並新增8筆；既有10筆歷史文字差異原樣保留，本次新增8筆逐欄一致。Excel保留欄寬與表格配色，重新調整列高避免文字裁切。
+- Task由IN PROGRESS轉REVIEW；本Task分支將推送並建立目標`feature/phase4.5`的PR。CI、使用者Review與合併前不轉DONE，不自動合併。
+
+---
+
 ## 2026-08-31 15:00
 
 Task
@@ -459,364 +511,5 @@ Codex
 - Task08維持`REVIEW`，待Push、Pull Request、GitHub CI及使用者審查；完成合併前不得轉`DONE`或開始Task09。
 - PR CI必須以釘選Flutter 3.29.2確認Android最低API 23設定可建置。
 - iOS原生Keychain Build／實機驗證需在macOS Review環境執行。
-
----
-
-## 2026-08-01 20:31
-
-Task
-Registration Login 07 Opaque Refresh Session Family（REVIEW）
-
-Agent
-Codex
-
-### Completed
-
-- 依使用者核准的方案1，以32-byte初始CSPRNG Credential及獨立HMAC Secret推導後續Credential；Backend只保存SHA-256 hash。
-- v1完整登入為每次登入建立獨立`user_sessions` family，保存建立、最後活動、30天idle、90天absolute與撤銷狀態。
-- 新增`POST /api/v1/auth/session-refreshes`；每次成功輪替Credential，同一舊Credential在10秒內回傳完全相同的Access／Refresh結果。
-- 逾期reuse於同一交易撤銷被影響family並寫入不含Token、hash或Email的Audit／Outbox；其他登入family維持可用。
-- Access JWT改為10分鐘並只包含`iss`、`sub`、`sid`、`iat`、`exp`；Security Filter以`sid`即時檢查Session與會員狀態。
-- Flutter暫時換發路徑切至v1 endpoint；Web Cookie、App Keychain／Keystore及SharedPreferences移除明確留待Task08。
-- 使用者回報Spring Mail import提示後，以重新整理dependencies的乾淨編譯確認既有`spring-boot-starter-mail`、`SimpleMailMessage`及`JavaMailSender`均可解析，未加入重複套件。
-
-### Modified / Added / Deleted
-
-- 新增Session Family Controller、DTO、Service、Properties、Credential Generator、Entity、Repository、Audit及穩定例外。
-- 新增`backend/src/main/resources/db/migration/V5__add_refresh_session_families.sql`。
-- 修改JWT核發／驗證、Security Filter、v1登入Session核發、Security Config及Flutter Auth Repository。
-- 新增或修改Backend unit、OpenAPI、真實Security Filter／MySQL、Flyway及Flutter Repository測試。
-- 更新`README.md`、Backend／Frontend README、正式API／Database／Project／UI規格、OpenAPI、Task與Log。
-- 未刪除檔案，未修改`system_data/`。
-
-### system_data Reference
-
-- 舊系統手冊與程式只有單一登入Token及本機清除登出，沒有opaque family、rotation、reuse detection、裝置隔離或Server Session期限可沿用。
-- 未沿用舊系統記錄帳密、完整會員資料或本機SharedPreferences Token的不安全模式；`system_data/`保持唯讀。
-
-### API
-
-- 新增`POST /api/v1/auth/session-refreshes`，request為`refreshCredential`。
-- 成功回`200 AUTHENTICATED`；無效、過期或撤銷回`401 AUTH_SESSION_INVALID`；逾期reuse回`401 AUTH_REFRESH_REUSE_DETECTED`。
-- 既有legacy JWT Refresh API只保留Migration相容，不作為v1 Client新依賴。
-
-### Database
-
-- Flyway V5新增`user_sessions`、`refresh_session_credentials`、`session_security_audits`。
-- Credential表只保存64字元SHA-256 hex、sequence、rotation／grace／reuse時間，不保存明文或可還原密文。
-
-### Tests
-
-- TDD先確認新HTTP／MySQL與OpenAPI契約為Red，再完成實作轉Green。
-- 已通過Task07 targeted Backend、真實MySQL、Migration、OpenAPI、Credential Generator、JWT及Flutter Repository測試。
-- 已以`./gradlew clean compileJava --refresh-dependencies`確認Spring Mail imports乾淨編譯成功。
-- Backend 316項單元／契約測試與31項真實MySQL整合測試、Flutter Analyze、185項完整測試及Web Build全部通過。
-- Draft PR #96 的 Backend unit、MySQL integration、Flutter 與 OpenAPI 四個GitHub CI job全部通過。
-
-### Log Retention
-
-- 保存期限截止日為2026-07-01；Markdown與CSV最早紀錄為2026-07-01，沒有超過一個月的紀錄，不需刪除。
-- XLSX原本只有13欄表頭；本次依相同表格格式同步Task07紀錄並進行值、錯誤及視覺檢查。
-
-### Pending
-
-- Draft PR #96 已建立且四個CI job全綠；Task07維持`REVIEW`，待使用者審查並合併後才能轉`DONE`。
-- Task08才處理Web HttpOnly Cookie、App Keychain／Keystore、Credential Store與移除SharedPreferences Token。
-
----
-
-## 2026-08-01 19:48
-
-Task
-Registration Login 06 Flutter 3.29.2 Eligibility CI 相容修正（REVIEW）
-
-Agent
-Codex
-
-### Completed
-
-- 確認 PR #94 的 Backend unit、MySQL integration 與 OpenAPI CI 通過，只有 Flutter job 失敗。
-- 根因為 CI 固定 Flutter 3.29.2，而 `DropdownButtonFormField.initialValue` 尚未存在；失敗造成 9 個測試檔無法編譯載入。
-- 依使用者核准的方案 1 改用 Flutter 3.29.2 支援的 `value`，並以範圍化棄用說明保持本機 Flutter 3.35.5 Analyze 無警告。
-- UI、預設台灣地區、選擇行為與無主畫面捲動規則皆未改變。
-
-### Modified
-
-- 修改 `frontend/lib/pages/eligibility_page.dart`。
-- 更新 `docs/REGISTRATION_LOGIN_TASKS.md`、`log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv`。
-
-### system_data Reference
-
-- 本次為新版 Flutter SDK 相容性修正，舊系統未使用相同 Widget API，沒有可直接採用的參考實作。
-- 未修改 `system_data/`。
-
-### API
-
-- 無異動。
-
-### Database
-
-- 無異動，無 Migration。
-
-### Tests
-
-- Eligibility targeted test 1 項通過。
-- Flutter 完整 185 項測試通過。
-- Flutter 3.35.5 Analyze 無問題；Draft PR #95 的 Flutter 3.29.2、Backend、MySQL integration 與 OpenAPI 四個 CI job 全部通過。
-- `git diff --check` 通過。
-
-### Log Retention
-
-- 保存期限截止日為 2026-07-01；Markdown 與 CSV 均無 2026-06 或更早紀錄，不需刪除。
-- XLSX 經試算表工具讀取與視覺檢查，仍只有 13 欄表頭且無資料，本次未修改。
-
-### Pending
-
-- Draft PR #95 已建立且四個 CI job 全綠；Task 06 維持 `REVIEW`，待修復 PR 合併後才能轉 `DONE`。
-
----
-
-## 2026-08-01 18:19
-
-Task
-Registration Login 06 Eligibility、Guardian Consent、公開暱稱 Onboarding 與 Resend SMTP（REVIEW）
-
-Agent
-Codex
-
-### Completed
-
-- 完成台灣服務地區與 12／13／17／18 歲 Asia/Taipei 日期邊界分類；非台灣與未滿 13 歲只保存資格必要資料，不保存公開暱稱或 Guardian Email。
-- 完成 2–30 Unicode code points、NFC、strip、控制字元／雙向控制／不可見字元／純空白與官方冒充名稱阻擋；暱稱非唯一且不作登入或 owner 判斷。
-- Email 驗證後以 10 分鐘 purpose-limited continuation Security Filter 進入 Eligibility；成人完成後回登入，未確認暱稱揭露者維持 Community pending。
-- 13–17 歲建立版本化 Guardian Consent；同意 24 小時、撤回 15 分鐘，皆採 32-byte 單次 Token 且只存 SHA-256 hash，新要求撤銷舊 Token。
-- Guardian Email 不授予私人內容權限；撤回後會員立即回 `PENDING_ELIGIBILITY`，現有 JWT 也會經即時會員狀態檢查拒絕一般 API，並可重新取得同意。
-- SMTP 供應商固定為 Resend；沿用 Spring Boot Mail，不新增 SDK，預設 `smtp.resend.com:587` STARTTLS、帳號 `resend`、密碼由 `RESEND_API_KEY` Secret 注入。
-- Flutter 完成 Eligibility、等待／受限結果、Guardian 同意與撤回要求路由；主畫面使用固定畫布縮放、無 scrollbar，長文件只在彈窗內容區捲動。
-- Penpot APP／WEB Account 09–12 八個畫板完成並確認 390×844、1440×900 直接顯示。
-
-### Modified
-
-- Backend 新增 Eligibility／Guardian Controller、Service、Security Filter、DTO、Entity、Repository、V4 Flyway migration、Outbox worker 與測試。
-- Frontend 新增 Eligibility／Guardian Page、Repository、Provider、Model、Router 與測試；更新 Login、Email Verification 導流。
-- Documentation 更新 README、API／Database／UI／Decision、OpenAPI 與 Registration Login Task。
-- Log 更新 Markdown／CSV；XLSX 仍只有 13 欄表頭，唯讀檢查後未修改。
-
-### system_data Reference
-
-- 已檢查舊系統手冊、系統簡介、Spring／Flutter 參考程式與舊 users schema；只參考欄位與畫面流程意圖。
-- 舊系統沒有 Eligibility、Guardian Consent、撤回或公開暱稱資格模型，未複製舊 account／生日自由修改流程。
-- 未修改 `system_data/`。
-
-### API
-
-- 新增 Eligibility Policy／Completion 與 Guardian action／grant／withdrawal request／withdrawal 六個 v1 endpoint。
-- continuation 使用獨立 Authorization scheme，不能存取一般 API；Guardian 公開要求維持不可列舉回應。
-- Guardian Email、生日與 Token 不寫入 Log、Audit 或 Outbox payload。
-
-### Database
-
-- 新增 V4：users 資格／社群資格／暱稱揭露欄位、`guardian_consents`、`guardian_consent_tokens` 與狀態約束。
-- 既有 ACTIVE 會員安全回填 `ELIGIBLE_ADULT`，Community 維持 `INELIGIBLE`，避免未確認即公開。
-
-### Tests
-
-- Backend `check` 通過：311 項 unit／OpenAPI 與 29 項 MySQL 8.4 integration，含真實 Security Filter、V4 migration 與 Eligibility 原子交易。
-- Flutter Analyze 無問題，完整 185 項測試通過；Web release 與 Android debug APK build 通過。
-- `git diff --check` 通過。
-
-### Log Retention
-
-- 保存期限截止日為 2026-07-01；已刪除 9 個 2026-06 Markdown 區段與 65 筆 2026-06 CSV 紀錄。
-- XLSX 經試算表工具讀取與視覺檢查，只有 13 欄表頭且無過期資料，本次未修改。
-
-### Pending
-
-- Draft PR #94 已建立；Task 06 維持 `REVIEW`，待 CI 通過並合併至 `feature/phase4.5` 後轉 `DONE`。
-- Resend 正式啟用前，Railway 各環境仍需設定 `RESEND_API_KEY`、已驗證寄件者、文件版本／URL與 Guardian action URL。
-
----
-
-## 2026-07-31 16:32
-
-Task
-Registration Login 05 CI Review 修正（REVIEW）
-
-Agent
-Codex
-
-### Completed
-
-- 修正 Flutter Linux 字型度量下，900×700 平板版登入按鈕被縮放至 46.14px 的問題。
-- 僅將平板 viewport 的垂直留白由 `lg` 縮為 `xs`，保留主畫面無捲動、完整直接顯示及按鈕至少 48px 的規則。
-- 登入頁 20 項 targeted tests 全數通過，包含 600×700 至 1920×1080 的 responsive／overflow／點擊高度檢查。
-- `flutter analyze --no-pub` 無問題。
-
-### Modified
-
-- 修改 `frontend/lib/pages/login_page.dart`。
-- 修改 `log/CHANGE_LOG.md` 與 `log/CHANGE_HISTORY.csv`。
-- 無 API、Database、Migration 或 `system_data/` 異動。
-
-### CI
-
-- Flutter CI 原失敗已在本機以同一測試案例重現範圍並修正。
-- Backend unit 原失敗發生於 `actions/setup-java@v4`、尚未執行專案測試；同次 MySQL integration 與 OpenAPI 工作均已通過，推送後重跑確認。
-
-### Log Retention
-
-- 沿用本 Task 16:22 新增紀錄前的完整檢查：截止日 2026-06-30，未發現早於截止日的過期紀錄，未刪除 Log，XLSX 未修改。
-
-### Pending
-
-- Task 05 維持 `REVIEW`；待 PR CI 通過並合併至 `feature/phase4.5` 後轉 `DONE`。
-
----
-
-## 2026-07-31 16:22
-
-Task
-Registration Login 05 Verified Email 登入與 Account expand migration（REVIEW）
-
-Agent
-Codex
-
-### Completed
-
-- 新增正式 `POST /api/v1/auth/login`，只接受 Email 格式與 password；未知欄位（含 `account`）直接拒絕。
-- v1 只以 trim＋lowercase 後的完整 Email 精確查詢，不套用 Gmail 點號消除或 `+tag` 合併。
-- v1 登入成功只回 public UUID、Email 與顯示名稱，不回 legacy `account` 或內部 `userId`。
-- 不存在 Email、密碼錯誤、缺少憑證與不可揭露狀態統一使用 `401 AUTH_INVALID_CREDENTIALS`；未完成流程依會員狀態回用途受限 continuation。
-- Deprecated `POST /api/auth/login` 保留既有 Email／account 查詢，讓新舊 Client 與資料在 expand 階段安全共存；新註冊維持 `account = NULL`。
-- Flutter 改呼叫 v1，只顯示與驗證 Email；穩定錯誤碼映射為「Email 或密碼不正確」。
-- Penpot Web 1440×900 與 Mobile 390×844 登入畫板已改為 Email-only，並匯出確認所有內容直接位於 viewport 內。
-- Flutter 登入頁移除三種 window class 的整頁 `SingleChildScrollView`，使用 responsive viewport fit 直接呈現全部必要內容。
-
-### Modified
-
-- Backend 新增：Verified Email Login Controller、Request／Response DTO 與公開 Member response。
-- Backend 修改：`AuthService`、Security allowlist、單元／Controller／Security／OpenAPI／MySQL HTTP integration tests。
-- Frontend 修改：Auth Repository／Provider、Login Page、AuthUser migration model 與相關測試。
-- Documentation：Backend／Frontend README、API／Database／UI、OpenAPI 與 Registration Login Task。
-- 外部設計：Penpot APP／WEB 登入畫板文案與 Email 範例。
-
-### system_data Reference
-
-- 已檢查舊系統手冊、系統簡介，以及 Spring／Flutter account＋password 登入流程；只參考登入導向、欄位與分層意圖。
-- 舊 account 主登入、直接 HTTP、SharedPreferences account 與敏感登入 Log 不符合正式 v1 契約，未沿用。
-- 未修改 `system_data/`。
-
-### API
-
-- 新增正式 `POST /api/v1/auth/login`；Request 只允許 `email`、`password`。
-- v1 authenticated user response 為 `publicId`、`email`、`userName`，不含 `account`、`userId`。
-- `/api/auth/login` 標記為 deprecated migration endpoint，暫時維持 legacy account 相容。
-- 成功、continuation 與 `AUTH_INVALID_CREDENTIALS` 皆維持統一 ApiResponse envelope。
-
-### Database
-
-- 無 schema 或 Flyway Migration 異動。
-- V3 已是 expand schema：新註冊不建立 account，既有 account column 暫留至 Task 18 contract migration。
-- 真實 MySQL 驗證新 Email 與舊 account 登入可同時運作。
-
-### UI
-
-- 登入欄位與驗證訊息改為 Email-only，不再顯示或送出 account。
-- 390×844、600×700、900×700、1024×768、1199×800、1440×900、1920×1080 皆無整頁捲動或 overflow。
-- 同步全域文件：主畫面不得改成垂直捲動；長篇條款／隱私等只允許在彈跳視窗內容區捲動。
-
-### Tests
-
-- Backend 完整單元測試：301 項通過，0 failure／error。
-- Backend MySQL 8.4 完整整合測試：28 項通過，包含真實 Security Filter 與新舊登入共存。
-- Flutter 完整測試：184 項通過；`flutter analyze --no-pub` 無問題。
-- Flutter Web release build 與 Android debug APK build通過。
-- `git diff --check` 通過。
-
-### Log Retention
-
-- 以試算表工具唯讀檢查 `CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`，並檢查 `CHANGE_LOG.md`。
-- 保存期限截止日為 2026-06-30；CSV 與 Markdown 最早紀錄為 2026-06-30，XLSX 只含 13 欄表頭，未發現早於截止日的過期紀錄。
-- 本次未刪除過期 Log，未修改 XLSX。
-
-### Pending
-
-- Task 05 已進入 `REVIEW`；待 PR 合併至 `feature/phase4.5` 後轉 `DONE`。
-- Task 07 將以 opaque Refresh Session 取代目前 historical JWT Refresh；Task 18 才移除 legacy endpoint 與 `users.account`。
-
----
-
-## 2026-07-31 14:40
-
-Task
-Registration Login 04 新密碼政策與 BCrypt 漸進遷移（REVIEW）
-
-Agent
-Codex
-
-### Completed
-
-- 導入 15–128 Unicode code points、NFC、不 trim 與完整值弱密碼 blocklist；不要求固定大小寫、數字或特殊字元組合。
-- 新密碼使用 Argon2id PHC hash，固定核准參數 `m=19456 KiB`、`t=2`、`p=1`，並加入 Bouncy Castle 1.84。
-- 版本化本機 blocklist 由 SecLists 2026.1 的 10,000 筆常見密碼加一筆產品回歸值產生；Repository 只保存 SHA-256，來源、授權、checksum 與轉換方式保存在 NOTICE。
-- 登入依 hash 前綴相容既有 BCrypt；錯誤密碼不修改憑證，正確登入才在同一資料庫交易升級為 Argon2id。
-- 登入端在進入高成本雜湊比對前以 Unicode code point 拒絕超過 128 的輸入，並保留 128 個 Emoji 的合法邊界。
-- Flutter 與 Backend 共用 `VALIDATION_FAILED` 及穩定 password field error key；NFC／長度／blocklist 由 Backend 唯一判定，Flutter 顯示對應繁體中文訊息。
-- 依使用者新增的全域 UI 規則，註冊主畫面移除整頁捲動，矮視窗／鍵盤狀態收合非必要說明；Terms／Privacy 改由有獨立 scrollbar 的彈跳視窗呈現。
-
-### Modified
-
-- Backend：Auth／Registration Service、登入／註冊／重設密碼 DTO、Global Exception Handler 與 Bouncy Castle build dependency。
-- Backend 新增：`security/password` 政策與雜湊模組、版本化 blocklist resource／NOTICE、單元與 MySQL HTTP 整合測試。
-- Frontend：API field error parsing、Auth error localization、無主畫面捲動的註冊頁與文件彈窗、Widget tests。
-- Documentation：API／Database／UI／Coding Standard／Decision／Registration Login 規格、Task 與 OpenAPI。
-
-### system_data Reference
-
-- 已檢查舊 Spring Member registration/login 與 Flutter login/signup/repository 流程；只參考分層與登入流程。
-- 舊 SHA-256／BCrypt 基線、account 登入、8–72 長度與 Server PIN 不符合正式規格，未沿用至新會員密碼模組。
-- 未修改 `system_data/`。
-
-### API
-
-- Endpoint 路徑與成功 response 不變。
-- 新密碼契約改為 NFC 後 15–128 Unicode code points、不 trim、完整值 blocklist；違反時回 `400 VALIDATION_FAILED` 與安全 password field error key。
-- 登入支援 Argon2id 與歷史 BCrypt；成功 BCrypt 登入後透明升級。
-
-### Database
-
-- 無 schema 或 Flyway Migration 異動；`user_credentials.password_hash VARCHAR(255)` 已可保存 Argon2id PHC 參數。
-- 真實 MySQL 測試確認成功登入的 rehash 與 Session 核發在同一交易完成，失敗登入保持原 hash。
-
-### UI
-
-- 註冊頁不再使用主畫面 `SingleChildScrollView`，390、600、900、1024、1200、1440、1920 寬度皆直接呈現且無 overflow。
-- 主畫面無 scrollbar；服務條款與隱私權政策由彈跳視窗呈現，只有彈窗內容區有 scrollbar。
-- 弱密碼及長度錯誤使用穩定錯誤鍵映射繁體中文，不顯示 Backend 內部訊息。
-
-### Tests
-
-- Backend unit／OpenAPI：294 項通過，0 failure／error。
-- MySQL 8.4 integration：27 項通過，包含 24 項真實 Security Filter Auth／Member HTTP、Flyway 與註冊 Migration。
-- Flutter：`flutter analyze --no-pub` 無問題；完整 181 項測試通過；14／15／128／129 Emoji、NFC 與保留前後空白由 Widget／HTTP integration test 驗證。
-- Flutter Web release build 與 Android debug APK build 通過；APK 壓縮結構檢查無錯誤。
-- `git diff --check` 通過。
-
-### Review
-
-- Backend 審查缺口已修正：登入在高成本 hash 比對前拒絕超長輸入、NFC 正規化只執行一次，且不重複執行同一個 BCrypt 比對。
-- API／Database／NOTICE 審查缺口已修正：移除過期的 8–72 與 BCrypt-only 敘述，補上產出 blocklist 的 checksum。
-- Flutter 審查缺口已修正：Backend 成為 Unicode 政策唯一判定者，補齊 390–1920 寬度驗收、48px 操作高度、具體條款按鈕名稱與主畫面無捲動測試。
-
-### Log Retention
-
-- 已檢查 `CHANGE_LOG.md`、`CHANGE_HISTORY.csv` 與 `CHANGE_HISTORY.xlsx`；保存期限截止日為 2026-06-30。
-- 最早正式紀錄為 2026-06-30，未發現早於截止日的過期紀錄，本次未刪除 Log。
-- 本次使用 CSV；XLSX 僅檢查且未修改。
-
-### Pending
-
-- Task 04 已進入 `REVIEW`；待本 Task PR 合併至 `feature/phase4.5` 後才可轉 `DONE`。
-- 目前公開 Registration Policy API 只提供文件名稱、版本與正式 URL，彈窗先呈現這些正式參照；若要在彈窗內顯示完整法律本文，需由後續 Task 提供已核准的本文內容契約或可信來源。
 
 ---
