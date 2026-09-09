@@ -20,7 +20,7 @@
 - `feature/phase4` 保留日記功能候選成果，但尚未整合至 `develop`。
 - Phase 4 整合完成後，必須先執行「基礎安全與領域模型」階段；完成前暫停 Phase 5 以後功能。
 - 第一個對真實使用者開放的版本是台灣限定、正式資料等級的私人核心封閉測試。
-- 匿名社群必須等檢舉、封鎖、人工審核、申訴、稽核及特權帳號 MFA 完成後才可開啟。
+- 公開暱稱社群必須等檢舉、封鎖、人工審核、申訴、稽核及特權帳號 MFA 完成後才可開啟；暱稱非唯一且不得用於登入或 owner 判斷。
 
 本專案不是醫療、診斷或治療服務。私人日記、煩惱、媒體、情緒負荷與自我探索結果不會被 AI、關鍵字或人工後台自動分析。第一版不採端對端加密，詳細邊界以 [PROJECT_SPEC](docs/PROJECT_SPEC.md)、[CONTEXT](CONTEXT.md) 與 [ADR](docs/adr/) 為準。
 
@@ -407,14 +407,43 @@ docker compose down
 | `BACKEND_PORT` | 對外 Backend port | `8080` |
 | `CORS_ALLOWED_ORIGIN_PATTERNS` | 後端允許的前端來源 pattern | `http://localhost:*,http://127.0.0.1:*` |
 | `CORS_ALLOWED_METHODS` | 後端允許的 HTTP method | `GET,POST,PUT,PATCH,DELETE,OPTIONS` |
-| `CORS_ALLOWED_HEADERS` | 後端允許的 request header | `Authorization,Content-Type` |
-| `CORS_EXPOSED_HEADERS` | 後端回傳可被前端讀取的 header | `Authorization` |
+| `CORS_ALLOWED_HEADERS` | 後端允許的 request header | `Authorization,Content-Type,Range,X-Session-Transport,X-CSRF-Protection` |
+| `CORS_EXPOSED_HEADERS` | 後端回傳可被前端讀取的 header | `Authorization,Accept-Ranges,Content-Length,Content-Range` |
 | `CORS_ALLOW_CREDENTIALS` | 是否允許 credentials | `true` |
 | `CORS_MAX_AGE` | preflight cache 秒數 | `3600` |
 | `JWT_ISSUER` | JWT issuer | `monsters` |
 | `JWT_SECRET` | JWT 簽章密鑰 | 空字串，正式環境必須提供 |
-| `JWT_ACCESS_TOKEN_EXPIRATION_SECONDS` | 現行 Access token 有效秒數；Phase 4.5 目標改為 600 秒 | `3600` |
+| `JWT_ACCESS_TOKEN_EXPIRATION_SECONDS` | v1 Access token 有效秒數 | `600` |
 | `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS` | 待淘汰 JWT Refresh token 有效秒數；目標改為 opaque session | `2592000`（30 天，rotation） |
+| `SESSION_IDLE_EXPIRATION_SECONDS` | 一般Session閒置期限 | `2592000`（30天） |
+| `SESSION_ABSOLUTE_EXPIRATION_SECONDS` | 一般Session絕對期限 | `7776000`（90天） |
+| `SESSION_REFRESH_CONCURRENCY_GRACE_SECONDS` | 相同輪替結果並行容忍 | `10` |
+| `SESSION_REFRESH_DERIVATION_KEY` | opaque Refresh輪替獨立Secret | 空字串；正式環境至少32-byte |
+| `WEB_SESSION_TRUSTED_ORIGIN_PATTERNS` | Web Cookie Session可信Origin pattern | `http://localhost:*,http://127.0.0.1:*`；正式環境只列前端網域 |
+| `WEB_SESSION_COOKIE_MAX_AGE_SECONDS` | Web `__Host-monsters-refresh`最長保存秒數 | `7776000`（90天） |
+| `REGISTRATION_TERMS_VERSION` | 目前服務條款版本 | 空字串，註冊前必須提供 |
+| `REGISTRATION_TERMS_URL` | 目前服務條款 HTTPS URL | 空字串，註冊前必須提供 |
+| `REGISTRATION_PRIVACY_VERSION` | 目前隱私權政策版本 | 空字串，註冊前必須提供 |
+| `REGISTRATION_PRIVACY_URL` | 目前隱私權政策 HTTPS URL | 空字串，註冊前必須提供 |
+| `REGISTRATION_RATE_LIMIT_HASH_KEY` | 註冊／重寄 HMAC 限流 secret | 空字串，註冊前必須提供 |
+| `EMAIL_VERIFICATION_PUBLIC_URL` | Flutter Web `/verify-email` 完整 HTTPS URL | 空字串，寄信前必須提供 |
+| `SMTP_HOST`、`SMTP_PORT` | Resend SMTP STARTTLS 連線 | `smtp.resend.com`、`587` |
+| `SMTP_USERNAME` | Resend SMTP 帳號 | `resend` |
+| `RESEND_API_KEY` | Resend API Key，作為 SMTP password | 空字串，僅由環境 Secret 提供 |
+| `SMTP_PASSWORD` | 舊版 SMTP password 相容備援 | 空字串 |
+| `REGISTRATION_SMTP_FROM` | 已在 Resend 驗證網域的 Email 寄件者 | 空字串 |
+| `REGISTRATION_SMTP_ENABLED` | 啟用 SMTP Adapter | `false` |
+| `EMAIL_VERIFICATION_WORKER_ENABLED` | 啟用 Email Outbox Worker | `false` |
+| `PASSWORD_RESET_PUBLIC_URL` | Flutter Web `/reset-password`完整HTTPS URL | 空字串，密碼重設寄信前必須提供 |
+| `PASSWORD_RESET_RATE_LIMIT_HASH_KEY` | 密碼重設Email／IP限流獨立HMAC secret | 未設定時沿用`REGISTRATION_RATE_LIMIT_HASH_KEY`；正式環境建議獨立Secret |
+| `PASSWORD_RESET_WORKER_ENABLED` | 啟用Password Reset Outbox Worker | `false` |
+| `PASSWORD_RESET_MAX_DELIVERY_ATTEMPTS` | 寄送失敗前最大嘗試次數 | `5` |
+| `PASSWORD_RESET_SMTP_SUBJECT` | 密碼重設信主旨 | `貘nsters 密碼重設` |
+| `UNVERIFIED_MEMBER_CLEANUP_ENABLED` | 啟用七日空會員清理 | `false` |
+| `MINOR_NOTICE_VERSION`、`MINOR_NOTICE_URL` | 未成年人說明版本與 HTTPS URL | 空字串 |
+| `GUARDIAN_CONSENT_VERSION`、`GUARDIAN_CONSENT_URL` | 監護人同意文件版本與 HTTPS URL | 空字串 |
+| `PUBLIC_NICKNAME_DISCLOSURE_VERSION`、`PUBLIC_NICKNAME_DISCLOSURE_URL` | 公開暱稱揭露版本與 HTTPS URL | 空字串 |
+| `GUARDIAN_ACTION_PUBLIC_URL` | 監護人短效單次連結頁 HTTPS URL | 空字串 |
 | `R2_ACCOUNT_ID` | Cloudflare R2 Account ID | 空字串，使用 R2 前必須提供 |
 | `R2_ACCESS_KEY_ID` | R2 S3 Access Key ID | 空字串，使用 R2 前必須提供 |
 | `R2_SECRET_ACCESS_KEY` | R2 S3 Secret Access Key | 空字串，使用 R2 前必須提供 |
